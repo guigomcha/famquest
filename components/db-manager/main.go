@@ -1,22 +1,26 @@
 package main
 
 import (
-	"db-manager/pkg/connection"
-	"db-manager/pkg/models"
+	"famquest/components/db-manager/pkg/connection"
+	"famquest/components/db-manager/pkg/models"
 	"log"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
 	db, err := connection.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
+	defer db.Close()
 
-	// Perform database migration
-	err = db.AutoMigrate(&models.Spot{})
-	if err != nil {
-		log.Fatal(err)
+	if _, err := db.Exec(models.Schema); err != nil {
+		log.Fatalln(err)
 	}
+	// Populate the database with sample data
+	connection.PopulateDatabase(db)
 
-	// Your CRUD operations go here
+	// Print the contents of the database
+	connection.PrintDatabaseContents(db)
 }
