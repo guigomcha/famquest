@@ -15,12 +15,12 @@ type Spots struct {
 	ID          int       `db:"id" json:"id"` // Auto-incremented integer ID
 	Name        string    `db:"name" json:"name"`
 	Description string    `db:"description" json:"description"`
-	CreatedAt   time.Time `db:"created_at" json:"created_at"` // Automatically generated
-	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"` // Automatically managed by trigger
+	CreatedAt   time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
+	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 	// only json -> Need to create the parse the json  to and from db
 	Location    KnownLocations `json:"location"`
-	Attachments []Attachments          `json:"attachments"`
-	Tasks       []Tasks          `json:"tasks"`
+	Attachments []Attachments  `json:"attachments"`
+	Tasks       []Tasks        `json:"tasks"`
 }
 
 // `db:"known_locations"`
@@ -28,12 +28,12 @@ type KnownLocations struct {
 	// Only db
 	UUID uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
 	// Db + json
-	ID        int       `db:"id" json:"id"` // Auto-incremented integer ID
+	ID        int       `db:"id" json:"id,omitempty"` // Auto-incremented integer ID
 	Name      string    `db:"name" json:"name"`
-	Longitude float64   `db:"longitude" json:"longitude"`   // Longitude as signed float
-	Latitude  float64   `db:"latitude" json:"latitude"`     // Latitude as signed float
-	CreatedAt time.Time `db:"created_at" json:"created_at"` // Automatically generated
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at"` // Automatically managed by trigger
+	Longitude float64   `db:"longitude" json:"longitude"`            // Longitude as signed float
+	Latitude  float64   `db:"latitude" json:"latitude"`              // Latitude as signed float
+	CreatedAt time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
+	UpdatedAt time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 }
 
 // `db:"tasks"`
@@ -46,8 +46,8 @@ type Tasks struct {
 	ID          int       `db:"id" json:"id"` // Auto-incremented integer ID
 	Name        string    `db:"name" json:"name"`
 	Description string    `db:"description" json:"description"`
-	CreatedAt   time.Time `db:"created_at" json:"created_at"` // Automatically generated
-	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"` // Automatically managed by trigger
+	CreatedAt   time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
+	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 }
 
 // `db:"attachments"`
@@ -61,8 +61,8 @@ type Attachments struct {
 	Name        string    `db:"name" json:"name"`
 	Description string    `db:"description" json:"description"`
 	URL         string    `db:"url" json:"url"`
-	CreatedAt   time.Time `db:"created_at" json:"created_at"` // Automatically generated
-	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"` // Automatically managed by trigger
+	CreatedAt   time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
+	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 }
 
 // Baseline for a Many to Many relationship. Right now everything is 1toMany.
@@ -75,6 +75,6 @@ type Attachments struct {
 // 	KnownLocationRef   int       `db:"known_location_ref" json:"known_location_ref"` // Reference to Known Location
 // 	RefType            string    `db:"ref_type" json:"ref_type"`
 // 	Ref                int       `db:"ref" json:"ref"`
-// 	CreatedAt          time.Time `db:"created_at" json:"created_at"` // Automatically generated
-// 	UpdatedAt          time.Time `db:"updated_at" json:"updated_at"` // Automatically managed by trigger
+// 	CreatedAt          time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
+// 	UpdatedAt          time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 // }

@@ -1,0 +1,220 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Handles the connection to the DBs in DB Manager. PostgreSQL and MINIO",
+        "title": "FamQuest DB Manager API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Guillermo Gomez",
+            "url": "https://github.com/guigomcha/famquest/",
+            "email": "guillermo.gc1994@gmail.com"
+        },
+        "license": {
+            "name": "Guillermo Gomez GPL V3"
+        },
+        "version": "1.0"
+    },
+    "paths": {
+        "/health": {
+            "get": {
+                "description": "Check the health of the service",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/location": {
+            "get": {
+                "description": "Get a list of all locations",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "location"
+                ],
+                "summary": "Retrieve all locations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.KnownLocations"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new location",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "location"
+                ],
+                "summary": "Create a location",
+                "parameters": [
+                    {
+                        "description": "Location data",
+                        "name": "location",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.KnownLocations"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.KnownLocations"
+                        }
+                    }
+                }
+            }
+        },
+        "/location/{id}": {
+            "get": {
+                "description": "Get location details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "location"
+                ],
+                "summary": "Retrieve a location by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Location ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.KnownLocations"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update location details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "location"
+                ],
+                "summary": "Update a location by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Location ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Location data",
+                        "name": "location",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.KnownLocations"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.KnownLocations"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a location and nullify its references in spots",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "location"
+                ],
+                "summary": "Delete a location by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Location ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.KnownLocations": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "Automatically generated",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Db + json",
+                    "type": "integer"
+                },
+                "latitude": {
+                    "description": "Latitude as signed float",
+                    "type": "number"
+                },
+                "longitude": {
+                    "description": "Longitude as signed float",
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "description": "Automatically managed by trigger",
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

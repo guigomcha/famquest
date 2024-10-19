@@ -13,7 +13,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; -- Enable UUID generation
 
 CREATE TABLE IF NOT EXISTS known_locations (
     uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
-    id SERIAL UNIQUE, -- Auto-incremented integer ID
+    id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
     name TEXT NOT NULL,
     longitude FLOAT NOT NULL, -- Longitude as signed float
     latitude FLOAT NOT NULL, -- Latitude as signed float
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS known_locations (
 
 CREATE TABLE IF NOT EXISTS spots (
     uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
-    id SERIAL UNIQUE, -- Auto-incremented integer ID
+    id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
     location_ref INT REFERENCES known_locations(id), -- Foreign key
     name TEXT NOT NULL,
     description TEXT,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS spots (
 
 CREATE TABLE IF NOT EXISTS tasks (
     uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
-    id SERIAL UNIQUE, -- Auto-incremented integer ID
+    id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
     ref_type TEXT,
     ref INT,
     name TEXT NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 
 CREATE TABLE IF NOT EXISTS attachments (
     uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
-    id SERIAL UNIQUE, -- Auto-incremented integer ID
+    id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
     ref_type TEXT,
     ref INT,
     name TEXT NOT NULL,

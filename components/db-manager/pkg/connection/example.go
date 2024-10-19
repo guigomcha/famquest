@@ -34,7 +34,7 @@ func PopulateDatabase(db *sqlx.DB) {
 	// Insert spots
 	for i := 1; i <= 2; i++ {
 		spot := models.Spots{
-			LocationRef: i, // Assuming valid location ids (1 and 2)
+			// LocationRef: i, // Assuming valid location ids (1 and 2)
 			Name:        fmt.Sprintf("Spot %d", i),
 			Description: fmt.Sprintf("Description for Spot %d", i),
 		}
@@ -47,8 +47,8 @@ func PopulateDatabase(db *sqlx.DB) {
 	// Insert tasks
 	for i := 1; i <= 2; i++ {
 		task := models.Tasks{
-			RefType:     "SpotType",
-			Ref:         i, // Reference to other entities
+			RefType: "SpotType",
+			// Ref:         i, // Reference to other entities
 			Name:        fmt.Sprintf("Task %d", i),
 			Description: fmt.Sprintf("Description for Task %d", i),
 		}
@@ -61,8 +61,8 @@ func PopulateDatabase(db *sqlx.DB) {
 	// Insert attachments
 	for i := 1; i <= 2; i++ {
 		attachment := models.Attachments{
-			RefType:     "SpotType",
-			Ref:         i, // Reference to other entities
+			RefType: "SpotType",
+			// Ref:         i, // Reference to other entities
 			Name:        fmt.Sprintf("Attachment %d", i),
 			Description: fmt.Sprintf("Description for Attachment %d", i),
 			URL:         fmt.Sprintf("http://example.com/attachment%d", i),
