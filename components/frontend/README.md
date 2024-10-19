@@ -21,7 +21,24 @@ There are several pages that need to be shown floating on top of the main webpag
 ### Prerequisites
 
 React JS
+- node -v v18.20.4
+- npm -v 10.7.0
 
+```bash
+sudo apt install npm
+sudo apt install nodejs
+
+# if error ->  trying to overwrite '/usr/include/node/common.gypi', which is also in package libnode-dev 12.22.9~dfsg-1ubuntu3.6
+sudo apt remove nodejs
+sudo dpkg --remove --force-remove-reinstreq libnode-dev
+sudo dpkg --remove --force-remove-reinstreq libnode72:amd64
+sudo apt install nodejs
+```
+
+```bash
+npx create-react-app famquest-ui
+npm install @react-google-maps/api
+```
 
 ### Installation
 
