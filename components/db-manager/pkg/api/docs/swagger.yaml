@@ -1,0 +1,147 @@
+definitions:
+  models.KnownLocations:
+    properties:
+      created_at:
+        description: Automatically generated
+        type: string
+      id:
+        description: Db + json
+        type: integer
+      latitude:
+        description: Latitude as signed float
+        type: number
+      longitude:
+        description: Longitude as signed float
+        type: number
+      name:
+        type: string
+      updated_at:
+        description: Automatically managed by trigger
+        type: string
+    type: object
+info:
+  contact:
+    email: guillermo.gc1994@gmail.com
+    name: Guillermo Gomez
+    url: https://github.com/guigomcha/famquest/
+  description: Handles the connection to the DBs in DB Manager. PostgreSQL and MINIO
+  license:
+    name: Guillermo Gomez GPL V3
+  termsOfService: http://swagger.io/terms/
+  title: FamQuest DB Manager API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: Check the health of the service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /location:
+    get:
+      description: Get a list of all locations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.KnownLocations'
+            type: array
+      summary: Retrieve all locations
+      tags:
+      - location
+    post:
+      consumes:
+      - application/json
+      description: Create a new location
+      parameters:
+      - description: Location data
+        in: body
+        name: location
+        required: true
+        schema:
+          $ref: '#/definitions/models.KnownLocations'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.KnownLocations'
+      summary: Create a location
+      tags:
+      - location
+  /location/{id}:
+    delete:
+      description: Delete a location and nullify its references in spots
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+      summary: Delete a location by ID
+      tags:
+      - location
+    get:
+      description: Get location details by ID
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.KnownLocations'
+      summary: Retrieve a location by ID
+      tags:
+      - location
+    put:
+      consumes:
+      - application/json
+      description: Update location details by ID
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Location data
+        in: body
+        name: location
+        required: true
+        schema:
+          $ref: '#/definitions/models.KnownLocations'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.KnownLocations'
+      summary: Update a location by ID
+      tags:
+      - location
+swagger: "2.0"
