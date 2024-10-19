@@ -11,7 +11,7 @@ const defaultCenter = {
   lng: -6.0678988062297465,
 };
 
-const revealRadius = 500; // Radius for map reveal in pixels
+const revealRadius = 100; // Radius for map reveal in pixels
 
 const Map = ({ coordinates }) => {
   const [selectedMarker, setSelectedMarker] = useState(null); // Track selected marker for InfoWindow
@@ -58,21 +58,11 @@ const Map = ({ coordinates }) => {
     ctx.beginPath();
     ctx.arc(offsetX, offsetY, revealRadius, 0, Math.PI * 2, true);
     ctx.fill();
+
   };
 
   return (
     <div style={{ position: "relative" }}>
-      {/* Blurred Google Map Background */}
-      <div className="map-blur" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 1 }}>
-        <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
-          <GoogleMap
-            mapContainerStyle={mapStyles}
-            zoom={14}
-            center={defaultCenter}
-            onLoad={(map) => (mapRef.current = map)} // Store the map reference
-          />
-        </LoadScript>
-      </div>
 
       {/* Canvas for revealing part of the map */}
       <canvas ref={canvasRef} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 2, pointerEvents: "none"}} />
@@ -92,6 +82,7 @@ const Map = ({ coordinates }) => {
               onClick={() => setSelectedMarker(coordinate)} // Set selected marker when clicked
             />
           ))}
+
           {/* InfoWindow for the selected marker */}
           {selectedMarker && (
             <InfoWindow
