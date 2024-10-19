@@ -10,7 +10,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 export const fetchCoordinates = async () => {
   try {
-    const response = await fetch(`${API_URL}/location/5`, {
+    const response = await fetch(`${API_URL}/location`, {
       headers: {
         'accept': 'application/json',
       },
@@ -24,7 +24,7 @@ export const fetchCoordinates = async () => {
 
     // Assuming the API returns { coordinates: [{ lat: ..., lng: ... }] }
     console.info(coordinates)
-    return [coordinates];  // Returning the coordinates array
+    return coordinates;  // Returning the coordinates array
   } catch (error) {
     console.error("Error fetching coordinates: ", error);
     return [];
