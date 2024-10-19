@@ -37,6 +37,7 @@ export $(grep -v '^#' .env | xargs)
 
 ## Documentation
 
+- https://www.alexedwards.net/blog/using-postgresql-jsonb
 
 ## API documentation
 
