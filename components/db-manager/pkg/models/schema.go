@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS known_locations (
     name TEXT NOT NULL,
     longitude FLOAT NOT NULL, -- Longitude as signed float
     latitude FLOAT NOT NULL, -- Latitude as signed float
+    ref_type TEXT CHECK (ref_type IN ('spot')), -- Constraint for ref_type
+    ref INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
 );
@@ -24,7 +26,6 @@ CREATE TABLE IF NOT EXISTS known_locations (
 CREATE TABLE IF NOT EXISTS spots (
     uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
     id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
-    location_ref INT REFERENCES known_locations(id), -- Foreign key
     name TEXT NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
@@ -34,7 +35,7 @@ CREATE TABLE IF NOT EXISTS spots (
 CREATE TABLE IF NOT EXISTS tasks (
     uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
     id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
-    ref_type TEXT,
+    ref_type TEXT CHECK (ref_type IN ('spot')), -- Constraint for ref_type
     ref INT,
     name TEXT NOT NULL,
     description TEXT,
@@ -45,7 +46,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 CREATE TABLE IF NOT EXISTS attachments (
     uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
     id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
-    ref_type TEXT,
+    ref_type TEXT CHECK (ref_type IN ('spot', 'task')), -- Constraint for ref_type
     ref INT,
     name TEXT NOT NULL,
     description TEXT,

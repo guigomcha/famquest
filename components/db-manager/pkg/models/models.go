@@ -9,8 +9,7 @@ import (
 // `db:"spots"`
 type Spots struct {
 	// Only DB
-	UUID        uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
-	LocationRef int       `db:"location_ref" json:"-"`
+	UUID uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
 	// db + json
 	ID          int       `db:"id" json:"id"` // Auto-incremented integer ID
 	Name        string    `db:"name" json:"name"`
@@ -18,15 +17,17 @@ type Spots struct {
 	CreatedAt   time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
 	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 	// only json -> Need to create the parse the json  to and from db
-	Location    KnownLocations `json:"location"`
-	Attachments []Attachments  `json:"attachments"`
-	Tasks       []Tasks        `json:"tasks"`
+	Location    int   `json:"location"`
+	Attachments []int `json:"attachments"`
+	Tasks       []int `json:"tasks"`
 }
 
 // `db:"known_locations"`
 type KnownLocations struct {
 	// Only db
-	UUID uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
+	UUID    uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
+	RefType string    `db:"ref_type" json:"-"`
+	Ref     int       `db:"ref" json:"-"`
 	// Db + json
 	ID        int       `db:"id" json:"id,omitempty"` // Auto-incremented integer ID
 	Name      string    `db:"name" json:"name"`

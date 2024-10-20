@@ -92,13 +92,13 @@ func LocationDelete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
-	// Now Nullify location_ref in spots. Custom to the endpoint
+	// Now Nullify location ref in spots. Custom to the endpoint
 	db, err := connection.ConnectToPostgreSQL()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	_, err = db.Exec("UPDATE spots SET location_ref = NULL WHERE location_ref = $1", mux.Vars(r)["id"])
+	_, err = db.Exec("UPDATE spots SET location = NULL WHERE location = $1", mux.Vars(r)["id"])
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

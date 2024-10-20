@@ -38,8 +38,8 @@ func Insert(db *sqlx.DB, model interface{}) (int, error) {
 			VALUES (:name, :description, :url, :ref_type, :ref) RETURNING id`
 	case *models.Spots:
 		query = `
-			INSERT INTO spots (name, location_ref, description, attachment_refs, task_refs)
-			VALUES (:name, :location_ref, :description, :attachment_refs, :task_refs) RETURNING id`
+			INSERT INTO spots (name, locationºº, description, attachment_refs, task_refs)
+			VALUES (:name, :locationºº, :description, :attachment_refs, :task_refs) RETURNING id`
 	case *models.KnownLocations:
 		query = `
 			INSERT INTO known_locations (name, longitude, latitude)
@@ -145,7 +145,7 @@ func Update(db *sqlx.DB, model interface{}) error {
 	case *models.Spots:
 		query = `
 			UPDATE spots
-			SET name = :name, location_ref = :location_ref, description = :description, 
+			SET name = :name, locationºº = :locationºº, description = :description, 
 			    attachment_refs = :attachment_refs, task_refs = :task_refs
 			WHERE id = :id`
 		_, err := db.NamedExec(query, m)

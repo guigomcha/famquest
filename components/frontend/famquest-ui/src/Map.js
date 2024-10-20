@@ -12,27 +12,32 @@ const defaultCenter = {
 };
 
 
-const Map = ({ coordinates }) => {
+const Map = ({ coordinates, spots }) => {
   const [selectedMarker, setSelectedMarker] = useState(null); // Track selected marker for InfoWindow
   const canvasRef = useRef(null);
   const mapRef = useRef(null);
 
   useEffect(() => {
   prepareMap();
-  }, [coordinates]);
+  }, [coordinates, spots]);
 
   
-  const prepareMap = (markerPos) => {
+  const prepareMap = (location) => {
     hideMap();
     // After the map is loaded, reveal the area around each marker
     if (mapRef.current && coordinates.length > 0) {
-      coordinates.forEach((markerPos) => {
-        revealMapAroundMarker(markerPos);
+      coordinates.forEach((location) => {
+        revealMapAroundMarker(location);
+      });
+    }
+    if (mapRef.current && spots.length > 0) {
+      spots.locations.forEach((location) => {
+        revealMapAroundMarker(location);
       });
     }
   };
   
-  const hideMap = (markerPos) => {
+  const hideMap = () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
@@ -64,7 +69,7 @@ const Map = ({ coordinates }) => {
   
     return radius;
   };
-  const revealMapAroundMarker = (markerPos) => {
+  const revealMapAroundMarker = (location) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     // const bounds = mapRef.current.getBounds();
@@ -74,7 +79,7 @@ const Map = ({ coordinates }) => {
   
   
     // Convert LatLng to pixel position on the map
-    const latLng = new window.google.maps.LatLng(markerPos.latitude, markerPos.longitude);
+    const latLng = new window.google.maps.LatLng(location.latitude, location.longitude);
     const point = projection.fromLatLngToPoint(latLng);
     const centerPoint = projection.fromLatLngToPoint(mapRef.current.getCenter());
   
@@ -88,8 +93,8 @@ const Map = ({ coordinates }) => {
     ctx.fill();
   };
 
-  const handleZoomChanged = (markerPos) => {
-    prepareMap(markerPos);  
+  const handleZoomChanged = (location) => {
+    prepareMap(location);  
   
   };
 
@@ -110,11 +115,11 @@ const Map = ({ coordinates }) => {
           onDrag={handleZoomChanged} // Add zoom change handler
           onIdle={handleZoomChanged} // Add zoom change handler
         >
-          {coordinates.map((coordinate, index) => (
+          {spots.locations.map((location, index) => (
             <Marker
               key={index}
-              position={{ lat: coordinate.latitude, lng: coordinate.longitude }}
-              onClick={() => setSelectedMarker(coordinate)} // Set selected marker when clicked
+              position={{ lat: location.latitude, lng: location.longitude }}
+              onClick={() => setSelectedMarker(location)} // Set selected marker when clicked
             />
           ))}
 

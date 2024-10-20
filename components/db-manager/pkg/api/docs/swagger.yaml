@@ -1,7 +1,7 @@
 definitions:
   models.KnownLocations:
     properties:
-      created_at:
+      createdAt:
         description: Automatically generated
         type: string
       id:
@@ -15,7 +15,34 @@ definitions:
         type: number
       name:
         type: string
-      updated_at:
+      updatedAt:
+        description: Automatically managed by trigger
+        type: string
+    type: object
+  models.Spots:
+    properties:
+      attachments:
+        items:
+          type: integer
+        type: array
+      createdAt:
+        description: Automatically generated
+        type: string
+      description:
+        type: string
+      id:
+        description: db + json
+        type: integer
+      location:
+        description: only json -> Need to create the parse the json  to and from db
+        type: integer
+      name:
+        type: string
+      tasks:
+        items:
+          type: integer
+        type: array
+      updatedAt:
         description: Automatically managed by trigger
         type: string
     type: object
@@ -144,4 +171,103 @@ paths:
       summary: Update a location by ID
       tags:
       - location
+  /spot:
+    get:
+      description: Get a list of all spots
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Spots'
+            type: array
+      summary: Retrieve all spots
+      tags:
+      - spot
+    post:
+      consumes:
+      - application/json
+      description: Create a new spot
+      parameters:
+      - description: Spot data
+        in: body
+        name: spot
+        required: true
+        schema:
+          $ref: '#/definitions/models.Spots'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Spots'
+      summary: Create a spot
+      tags:
+      - spot
+  /spot/{id}:
+    delete:
+      description: Delete a spot and nullify its references in spots
+      parameters:
+      - description: Spot ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+      summary: Delete a spot by ID
+      tags:
+      - spot
+    get:
+      description: Get spot details by ID
+      parameters:
+      - description: Spot ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Spots'
+      summary: Retrieve a spot by ID
+      tags:
+      - spot
+    put:
+      consumes:
+      - application/json
+      description: Update spot details by ID
+      parameters:
+      - description: Spot ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Spot data
+        in: body
+        name: spot
+        required: true
+        schema:
+          $ref: '#/definitions/models.Spots'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Spots'
+      summary: Update a spot by ID
+      tags:
+      - spot
 swagger: "2.0"
