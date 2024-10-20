@@ -18,7 +18,6 @@ export const fetchCoordinates = async () => {
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    console.info("pepe")
     // Use response.json() to parse the JSON body
     const coordinates = await response.json();
 
@@ -30,3 +29,25 @@ export const fetchCoordinates = async () => {
     return [];
   }
 };
+// export const fetchSpots = async () => {
+//   try {
+//     const response = await fetch(`${API_URL}/spots`, {
+//       headers: {
+//         'accept': 'application/json',
+//       },
+//     });
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! Status: ${response.status}`);
+//     }
+//     console.info("pepe")
+//     // Use response.json() to parse the JSON body
+//     const spots = await response.json();
+
+//     // Assuming the API returns { coordinates: [{ lat: ..., lng: ... }] }
+//     console.info(coordinates)
+//     return coordinates;  // Returning the coordinates array
+//   } catch (error) {
+//     console.error("Error fetching coordinates: ", error);
+//     return [];
+//   }
+// };
