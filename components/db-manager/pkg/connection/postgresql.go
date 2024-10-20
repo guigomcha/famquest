@@ -61,17 +61,17 @@ func Insert(db *sqlx.DB, model interface{}) (int, error) {
 }
 
 // Get Function
-func Get(db *sqlx.DB, model interface{}, id int, dest interface{}) error {
+func Get(db *sqlx.DB, id int, dest interface{}) error {
 	var query string
 	var tableName string
-	switch m := model.(type) {
-	case models.Attachments:
+	switch m := dest.(type) {
+	case *models.Attachments:
 		tableName = "attachments"
-	case models.Spots:
+	case *models.Spots:
 		tableName = "spots"
-	case models.KnownLocations:
+	case *models.KnownLocations:
 		tableName = "known_locations"
-	case models.Tasks:
+	case *models.Tasks:
 		tableName = "tasks"
 	default:
 		return fmt.Errorf("unsupported model type: %T", m)
@@ -85,20 +85,20 @@ func Get(db *sqlx.DB, model interface{}, id int, dest interface{}) error {
 }
 
 // GetAll Function
-func GetAll(db *sqlx.DB, model interface{}, dest interface{}) error {
+func GetAll(db *sqlx.DB, dest interface{}) error {
 	var query string
 
-	switch model.(type) {
-	case models.Attachments:
+	switch m := dest.(type) {
+	case *[]models.Attachments:
 		query = `SELECT * FROM attachments`
-	case models.Spots:
+	case *[]models.Spots:
 		query = `SELECT * FROM spots`
-	case models.KnownLocations:
+	case *[]models.KnownLocations:
 		query = `SELECT * FROM known_locations`
-	case models.Tasks:
+	case *[]models.Tasks:
 		query = `SELECT * FROM tasks`
 	default:
-		return fmt.Errorf("unsupported model type: %T", model)
+		return fmt.Errorf("unsupported model type: %T", m)
 	}
 	err := db.Select(dest, query)
 	return err
@@ -109,13 +109,13 @@ func Delete(db *sqlx.DB, model interface{}, id int) error {
 	var query string
 	var tableName string
 	switch m := model.(type) {
-	case models.Attachments:
+	case *models.Attachments:
 		tableName = "attachments"
-	case models.Spots:
+	case *models.Spots:
 		tableName = "spots"
-	case models.KnownLocations:
+	case *models.KnownLocations:
 		tableName = "known_locations"
-	case models.Tasks:
+	case *models.Tasks:
 		tableName = "tasks"
 	default:
 		return fmt.Errorf("unsupported model type: %T", m)
@@ -130,6 +130,7 @@ func Delete(db *sqlx.DB, model interface{}, id int) error {
 
 // Update Function
 func Update(db *sqlx.DB, model interface{}) error {
+	// difficult to know if the json was only partially added ....
 	var query string
 
 	switch m := model.(type) {

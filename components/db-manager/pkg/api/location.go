@@ -7,7 +7,6 @@ import (
 	"famquest/components/go-common/logger"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -23,25 +22,17 @@ import (
 // @Router /location [post]
 func LocationPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationPost")
-	db, err := connection.ConnectToPostgreSQL()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+
 	var location models.KnownLocations
 	if err := json.NewDecoder(r.Body).Decode(&location); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	logger.Log.Debug("location decoded")
-	if lastInsertId, err := connection.Insert(db, &location); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	logger.Log.Debug("object decoded")
+	httpStatus, err := crudPost(&location)
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
 		return
-	} else if err := connection.Get(db, models.KnownLocations{}, lastInsertId, &location); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	} else {
-		logger.Log.Debugf("location created: %d", lastInsertId)
 	}
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(location)
@@ -56,14 +47,10 @@ func LocationPost(w http.ResponseWriter, r *http.Request) {
 // @Router /location [get]
 func LocationGetAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationGetAll")
-	db, err := connection.ConnectToPostgreSQL()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 	var locations []models.KnownLocations
-	if err := connection.GetAll(db, models.KnownLocations{}, &locations); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	httpStatus, err := crudGetAll(&locations)
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
 		return
 	}
 	json.NewEncoder(w).Encode(locations)
@@ -79,26 +66,10 @@ func LocationGetAll(w http.ResponseWriter, r *http.Request) {
 // @Router /location/{id} [get]
 func LocationGet(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationGet")
-	db, err := connection.ConnectToPostgreSQL()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	vars := mux.Vars(r)
-	id := vars["id"]
-	intId, err := strconv.Atoi(id) //ParseInt(id, 0 , 64)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
 	var location models.KnownLocations
-	if err := connection.Get(db, models.KnownLocations{}, intId, &location); err != nil {
-		logger.Log.Debugf("Unable to Get: %d", intId)
-		if err.Error() == connection.ErrorIdDoesNotExits {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	httpStatus, err := crudGet(&location, mux.Vars(r))
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
 		return
 	}
 	json.NewEncoder(w).Encode(location)
@@ -114,30 +85,20 @@ func LocationGet(w http.ResponseWriter, r *http.Request) {
 // @Router /location/{id} [delete]
 func LocationDelete(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationDelete")
+	// First delete the location
+	var location models.KnownLocations
+	httpStatus, err := crudDelete(&location, mux.Vars(r))
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	// Now Nullify location_ref in spots. Custom to the endpoint
 	db, err := connection.ConnectToPostgreSQL()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	vars := mux.Vars(r)
-	id := vars["id"]
-	intId, err := strconv.Atoi(id) //ParseInt(id, 0 , 64)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	// First delete the location
-	if err := connection.Delete(db, models.KnownLocations{}, intId); err != nil {
-		logger.Log.Debugf("Unable to delete: %d", intId)
-		if err.Error() == connection.ErrorIdDoesNotExits {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	// Now Nullify location_ref in spots
-	_, err = db.Exec("UPDATE spots SET location_ref = NULL WHERE location_ref = $1", id)
+	_, err = db.Exec("UPDATE spots SET location_ref = NULL WHERE location_ref = $1", mux.Vars(r)["id"])
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -157,22 +118,15 @@ func LocationDelete(w http.ResponseWriter, r *http.Request) {
 // @Router /location/{id} [put]
 func LocationPut(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationPut")
-	db, err := connection.ConnectToPostgreSQL()
+	var location models.KnownLocations
+	err := json.NewDecoder(r.Body).Decode(&location)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	vars := mux.Vars(r)
-	id := vars["id"]
-	intId, err := strconv.Atoi(id) //ParseInt(id, 0 , 64)
+	intId, err := parseId(mux.Vars(r)["id"])
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	var location models.KnownLocations
-	err = json.NewDecoder(r.Body).Decode(&location)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	if location.ID > 0 && location.ID != intId {
@@ -181,19 +135,10 @@ func LocationPut(w http.ResponseWriter, r *http.Request) {
 	}
 	location.ID = intId
 	// Update the location
-	logger.Log.Debug("Decoded Location")
-	if err := connection.Update(db, &location); err != nil {
-		logger.Log.Debugf("Unable to update: %d", location.ID)
-		if err.Error() == connection.ErrorIdDoesNotExits {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	// Return latest location
-	if err := connection.Get(db, models.KnownLocations{}, intId, &location); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	logger.Log.Debug("Decoded object")
+	httpStatus, err := crudPut(&location, mux.Vars(r))
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
