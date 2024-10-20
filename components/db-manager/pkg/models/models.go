@@ -6,37 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// `db:"spots"`
-type Spots struct {
-	// Only DB
-	UUID uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
-	// db + json
-	ID          int       `db:"id" json:"id"` // Auto-incremented integer ID
-	Name        string    `db:"name" json:"name"`
-	Description string    `db:"description" json:"description"`
-	CreatedAt   time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
-	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
-	// only json -> Need to create the parse the json  to and from db
-	Location    int   `json:"location"`
-	Attachments []int `json:"attachments"`
-	Tasks       []int `json:"tasks"`
-}
-
-// `db:"known_locations"`
-type KnownLocations struct {
-	// Only db
-	UUID    uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
-	RefType string    `db:"ref_type" json:"-"`
-	Ref     int       `db:"ref" json:"-"`
-	// Db + json
-	ID        int       `db:"id" json:"id,omitempty"` // Auto-incremented integer ID
-	Name      string    `db:"name" json:"name"`
-	Longitude float64   `db:"longitude" json:"longitude"`            // Longitude as signed float
-	Latitude  float64   `db:"latitude" json:"latitude"`              // Latitude as signed float
-	CreatedAt time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
-	UpdatedAt time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
-}
-
 // `db:"tasks"`
 type Tasks struct {
 	// Only DB

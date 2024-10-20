@@ -5,6 +5,7 @@ import (
 	"famquest/components/db-manager/pkg/models"
 	"famquest/components/go-common/logger"
 	"fmt"
+	"strings"
 
 	// "log"
 
@@ -28,151 +29,112 @@ func ConnectToPostgreSQL() (*sqlx.DB, error) {
 }
 
 // Insert Function
-func Insert(db *sqlx.DB, model interface{}) (int, error) {
-	var query string
-
-	switch m := model.(type) {
-	case *models.Attachments:
-		query = `
-			INSERT INTO attachments (name, description, url, ref_type, ref)
-			VALUES (:name, :description, :url, :ref_type, :ref) RETURNING id`
-	case *models.Spots:
-		query = `
-			INSERT INTO spots (name, locationºº, description, attachment_refs, task_refs)
-			VALUES (:name, :locationºº, :description, :attachment_refs, :task_refs) RETURNING id`
-	case *models.KnownLocations:
-		query = `
-			INSERT INTO known_locations (name, longitude, latitude)
-			VALUES (:name, :longitude, :latitude) RETURNING id`
-	case *models.Tasks:
-		query = `
-			INSERT INTO tasks (name, description, ref_type, ref)
-			VALUES (:name, :description, :ref_type, :ref) RETURNING id`
-	default:
-		return 0, fmt.Errorf("unsupported model type: %T", m)
-	}
+func Insert(db *sqlx.DB, model DbInterface) (int, error) {
 	// Get last index (id)
-	result, err := db.NamedQuery(query, model) //QueryRow // (query, model).Scan(&lastInsertId), nil
+	logger.Log.Debug("Trying to insert")
+	result, err := db.NamedQuery(model.GetInsertQuery(), model)
 	lastInsertId := 0
+	if err != nil {
+		logger.Log.Debug("unable to insert")
+		return 0, err
+	}
 	if ok := result.Next(); !ok {
 		return 0, err
 	}
-	return lastInsertId, result.Scan(&lastInsertId)
+	err = result.Scan(&lastInsertId)
+	if err != nil {
+		return 0, err
+	}
+	err = performMultipleNamedQueries(db, model, model.GetInsertExtraQueries())
+	if err != nil {
+		return lastInsertId, err
+	}
+	logger.Log.Debugf("inserted with id '%d'", lastInsertId)
+	return lastInsertId, nil
 }
 
 // Get Function
-func Get(db *sqlx.DB, id int, dest interface{}) error {
-	var query string
-	var tableName string
-	switch m := dest.(type) {
-	case *models.Attachments:
-		tableName = "attachments"
-	case *models.Spots:
-		tableName = "spots"
+func Get(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
+	if ok := checkIDExists(db, model.GetTableName(), id); !ok {
+		return nil, errors.New(ErrorIdDoesNotExits)
+	}
+	switch m := model.(type) {
 	case *models.KnownLocations:
-		tableName = "known_locations"
-	case *models.Tasks:
-		tableName = "tasks"
+		received := models.KnownLocations{}
+		query := fmt.Sprintf(`SELECT * FROM %s  WHERE id = $1`, model.GetTableName())
+		err := db.Get(&received, query, id)
+		return &received, err
+
+	case *models.Spots:
+		received := models.Spots{}
+		query := fmt.Sprintf(`SELECT * FROM %s  WHERE id = $1`, model.GetTableName())
+		err := db.Get(&received, query, id)
+		return &received, err
+
 	default:
-		return fmt.Errorf("unsupported model type: %T", m)
+		return nil, fmt.Errorf("unsuported struct in GetAll %+v", m)
 	}
-	if ok := checkIDExists(db, tableName, id); !ok {
-		return errors.New(ErrorIdDoesNotExits)
-	}
-	query = fmt.Sprintf(`SELECT * FROM %s WHERE id = $1`, tableName)
-	err := db.Get(dest, query, id)
-	return err
 }
 
 // GetAll Function
-func GetAll(db *sqlx.DB, dest interface{}) error {
-	var query string
+func GetAll(db *sqlx.DB, model DbInterface) ([]DbInterface, error) {
+	var dest []DbInterface
+	switch m := model.(type) {
+	case *models.KnownLocations:
+		received := []models.KnownLocations{}
+		query := fmt.Sprintf(`SELECT * FROM %s`, model.GetTableName())
+		err := db.Select(&received, query)
+		logger.Log.Debugf("objects obtained '%+v'", received)
+		if err != nil {
+			return dest, err
+		}
+		// Slices need to be reconverted element by element
+		for _, s := range received {
+			dest = append(dest, &s) // Add the struct to the interface slice
+		}
+		logger.Log.Debug("objects casted to dbinterface")
 
-	switch m := dest.(type) {
-	case *[]models.Attachments:
-		query = `SELECT * FROM attachments`
-	case *[]models.Spots:
-		query = `SELECT * FROM spots`
-	case *[]models.KnownLocations:
-		query = `SELECT * FROM known_locations`
-	case *[]models.Tasks:
-		query = `SELECT * FROM tasks`
+	case *models.Spots:
+		received := []models.Spots{}
+		query := fmt.Sprintf(`SELECT * FROM %s`, model.GetTableName())
+		err := db.Select(&received, query)
+		if err != nil {
+			return dest, err
+		}
+		// Slices need to be reconverted element by element
+		for _, s := range received {
+			dest = append(dest, &s) // Add the struct to the interface slice
+		}
 	default:
-		return fmt.Errorf("unsupported model type: %T", m)
+		return dest, fmt.Errorf("unsuported struct in GetAll %+v", m)
 	}
-	err := db.Select(dest, query)
-	return err
+	return dest, nil
 }
 
 // Delete Function
-func Delete(db *sqlx.DB, model interface{}, id int) error {
-	var query string
-	var tableName string
-	switch m := model.(type) {
-	case *models.Attachments:
-		tableName = "attachments"
-	case *models.Spots:
-		tableName = "spots"
-	case *models.KnownLocations:
-		tableName = "known_locations"
-	case *models.Tasks:
-		tableName = "tasks"
-	default:
-		return fmt.Errorf("unsupported model type: %T", m)
-	}
-	if ok := checkIDExists(db, tableName, id); !ok {
+func Delete(db *sqlx.DB, id int, model DbInterface) error {
+	if ok := checkIDExists(db, model.GetTableName(), id); !ok {
 		return errors.New(ErrorIdDoesNotExits)
 	}
-	query = fmt.Sprintf(`DELETE FROM %s WHERE id = $1`, tableName)
+	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1`, model.GetTableName())
 	_, err := db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+	err = performMultipleNamedQueries(db, model, model.GetDeleteExtraQueries())
 	return err
 }
 
 // Update Function
-func Update(db *sqlx.DB, model interface{}) error {
-	// difficult to know if the json was only partially added ....
-	var query string
-
-	switch m := model.(type) {
-	case *models.Attachments:
-		query = `
-			UPDATE attachments
-			SET name = :name, description = :description, url = :url, ref_type = :ref_type, ref = :ref
-			WHERE id = :id`
-		_, err := db.NamedExec(query, m)
-		return err
-
-	case *models.Spots:
-		query = `
-			UPDATE spots
-			SET name = :name, locationºº = :locationºº, description = :description, 
-			    attachment_refs = :attachment_refs, task_refs = :task_refs
-			WHERE id = :id`
-		_, err := db.NamedExec(query, m)
-		return err
-
-	case *models.KnownLocations:
-		if ok := checkIDExists(db, "known_locations", m.ID); !ok {
-			return errors.New(ErrorIdDoesNotExits)
-		}
-		query = `
-			UPDATE known_locations
-			SET name = :name, longitude = :longitude, latitude = :latitude
-			WHERE id = :id`
-		_, err := db.NamedExec(query, m)
-		return err
-
-	case *models.Tasks:
-		query = `
-			UPDATE tasks
-			SET name = :name, description = :description, ref_type = :ref_type, ref = :ref
-			WHERE id = :id`
-		_, err := db.NamedExec(query, m)
-		return err
-
-	default:
-		return fmt.Errorf("unsupported model type: %T", model)
+func Update(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
+	if ok := checkIDExists(db, model.GetTableName(), id); !ok {
+		return nil, errors.New(ErrorIdDoesNotExits)
 	}
+	_, err := db.NamedQuery(model.GetUpdateQuery(), model)
+	if err != nil {
+		return nil, err
+	}
+	return Get(db, id, model)
 }
 
 func checkIDExists(db *sqlx.DB, tableName string, intId int) bool {
@@ -186,4 +148,42 @@ func checkIDExists(db *sqlx.DB, tableName string, intId int) bool {
 		logger.Log.Debugf("Failed with '%s'", err.Error())
 	}
 	return err == nil && exists
+}
+
+func performMultipleNamedQueries(db *sqlx.DB, m DbInterface, queries []string) error {
+	if len(queries) == 0 {
+		return nil
+	}
+	// Begin the transaction
+	tx, err := db.Beginx()
+	if err != nil {
+		return err
+	}
+
+	// Defer rollback in case of failure
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	errorMessages := []string{}
+	for _, query := range queries {
+		_, err = tx.NamedExec(query, m)
+		if err != nil {
+			logger.Log.Debugf("unable to do transaction: `%s`", err.Error())
+			tx.Rollback()
+			errorMessages = append(errorMessages, err.Error())
+		}
+	}
+	// Commit the transaction if everything succeeded
+	err = tx.Commit()
+	if err != nil {
+		logger.Log.Debugf("unable to commit: `%s`", err.Error())
+		return err
+	}
+	if len(errorMessages) > 0 {
+		return fmt.Errorf("some query did not execute right: '%s'", strings.Join(errorMessages, "\n"))
+	}
+
+	return nil
 }

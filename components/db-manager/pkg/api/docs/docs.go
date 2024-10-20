@@ -85,7 +85,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.KnownLocations"
+                            "$ref": "#/definitions/models.APIKnownLocations"
                         }
                     }
                 ],
@@ -153,7 +153,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.KnownLocations"
+                            "$ref": "#/definitions/models.APIKnownLocations"
                         }
                     }
                 ],
@@ -193,159 +193,25 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/spot": {
-            "get": {
-                "description": "Get a list of all spots",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "spot"
-                ],
-                "summary": "Retrieve all spots",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Spots"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new spot",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "spot"
-                ],
-                "summary": "Create a spot",
-                "parameters": [
-                    {
-                        "description": "Spot data",
-                        "name": "spot",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Spots"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.Spots"
-                        }
-                    }
-                }
-            }
-        },
-        "/spot/{id}": {
-            "get": {
-                "description": "Get spot details by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "spot"
-                ],
-                "summary": "Retrieve a spot by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Spot ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Spots"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update spot details by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "spot"
-                ],
-                "summary": "Update a spot by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Spot ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Spot data",
-                        "name": "spot",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Spots"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Spots"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a spot and nullify its references in spots",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "spot"
-                ],
-                "summary": "Delete a spot by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Spot ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
+        "models.APIKnownLocations": {
+            "type": "object",
+            "properties": {
+                "latitude": {
+                    "description": "Latitude as signed float",
+                    "type": "number"
+                },
+                "longitude": {
+                    "description": "Longitude as signed float",
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "models.KnownLocations": {
             "type": "object",
             "properties": {
@@ -367,45 +233,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                },
-                "updatedAt": {
-                    "description": "Automatically managed by trigger",
-                    "type": "string"
-                }
-            }
-        },
-        "models.Spots": {
-            "type": "object",
-            "properties": {
-                "attachments": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "createdAt": {
-                    "description": "Automatically generated",
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "description": "db + json",
-                    "type": "integer"
-                },
-                "location": {
-                    "description": "only json -\u003e Need to create the parse the json  to and from db",
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "tasks": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
                 },
                 "updatedAt": {
                     "description": "Automatically managed by trigger",

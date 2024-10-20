@@ -33,6 +33,7 @@ go mod init
 GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -v -a -installsuffix cgo -o dbmanager . 
 cp install/.env-tests .env
 export $(grep -v '^#' .env | xargs)
+./dbmanager 
 ```
 
 ## Documentation

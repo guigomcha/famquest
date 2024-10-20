@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+// Generic operations used by all endpoints
+
 func parseId(stringId string) (int, error) {
 	intId, err := strconv.Atoi(stringId) //ParseInt(id, 0 , 64)
 	if err != nil {
@@ -16,55 +18,66 @@ func parseId(stringId string) (int, error) {
 }
 
 // pointer to interface
-func crudPost(m interface{}) (int, error) {
+func crudPost(m connection.DbInterface) (connection.DbInterface, int, error) {
+	var dest connection.DbInterface
 	db, err := connection.ConnectToPostgreSQL()
 	if err != nil {
-		return http.StatusInternalServerError, err
+		return dest, http.StatusInternalServerError, err
 	}
-	if lastInsertId, err := connection.Insert(db, m); err != nil {
-		return http.StatusInternalServerError, err
-	} else if err := connection.Get(db, lastInsertId, m); err != nil {
-		return http.StatusInternalServerError, err
-	} else {
-		logger.Log.Debugf("object created in db: %d", lastInsertId)
+	lastInsertId, err := connection.Insert(db, m)
+	if err != nil {
+		logger.Log.Debug("insert error")
+		return dest, http.StatusInternalServerError, err
 	}
-	return http.StatusAccepted, nil
+	dest, err = connection.Get(db, lastInsertId, m)
+	if err != nil {
+		logger.Log.Debug("Get error")
+		return dest, http.StatusInternalServerError, err
+	}
+	logger.Log.Debugf("object created in db: %d", lastInsertId)
+	return dest, http.StatusAccepted, nil
 }
 
 // pointer to interface
-func crudGetAll(m interface{}) (int, error) {
+func crudGetAll(m connection.DbInterface) ([]connection.DbInterface, int, error) {
+	var dest []connection.DbInterface
 	db, err := connection.ConnectToPostgreSQL()
 	if err != nil {
-		return http.StatusInternalServerError, err
+		return dest, http.StatusInternalServerError, err
 	}
-	if err := connection.GetAll(db, m); err != nil {
-		return http.StatusInternalServerError, err
+	dest, err = connection.GetAll(db, m)
+	if err != nil {
+		logger.Log.Debugf("%+v: %s", dest, err.Error())
+		return dest, http.StatusInternalServerError, err
 	}
-	return http.StatusAccepted, nil
+	logger.Log.Debugf("objects obtained in db: %d", len(dest))
+	return dest, http.StatusAccepted, nil
 }
 
 // pointer to interface
-func crudGet(m interface{}, mVars map[string]string) (int, error) {
+func crudGet(m connection.DbInterface, mVars map[string]string) (connection.DbInterface, int, error) {
+	var dest connection.DbInterface
 	db, err := connection.ConnectToPostgreSQL()
 	if err != nil {
-		return http.StatusInternalServerError, err
+		return dest, http.StatusInternalServerError, err
 	}
 	intId, err := parseId(mVars["id"])
 	if err != nil {
-		return http.StatusBadRequest, err
+		return dest, http.StatusBadRequest, err
 	}
-	if err := connection.Get(db, intId, m); err != nil {
-		logger.Log.Debugf("Unable to Get: %d", intId)
+	dest, err = connection.Get(db, intId, m)
+	if err != nil {
 		if err.Error() == connection.ErrorIdDoesNotExits {
-			return http.StatusBadRequest, err
+			return dest, http.StatusBadRequest, err
 		}
-		return http.StatusInternalServerError, err
+		return dest, http.StatusInternalServerError, err
 	}
-	return http.StatusAccepted, nil
+
+	return dest, http.StatusAccepted, nil
 }
 
 // pointer to interface
-func crudDelete(m interface{}, mVars map[string]string) (int, error) {
+func crudDelete(m connection.DbInterface, mVars map[string]string) (int, error) {
 	db, err := connection.ConnectToPostgreSQL()
 	if err != nil {
 		return http.StatusInternalServerError, err
@@ -73,7 +86,7 @@ func crudDelete(m interface{}, mVars map[string]string) (int, error) {
 	if err != nil {
 		return http.StatusBadRequest, err
 	}
-	if err := connection.Delete(db, m, intId); err != nil {
+	if err := connection.Delete(db, intId, m); err != nil {
 		logger.Log.Debugf("Unable to delete: %d", intId)
 		if err.Error() == connection.ErrorIdDoesNotExits {
 			return http.StatusBadRequest, err
@@ -84,25 +97,23 @@ func crudDelete(m interface{}, mVars map[string]string) (int, error) {
 }
 
 // pointer to interface
-func crudPut(m interface{}, mVars map[string]string) (int, error) {
+func crudPut(m connection.DbInterface, mVars map[string]string) (connection.DbInterface, int, error) {
+	var dest connection.DbInterface
 	db, err := connection.ConnectToPostgreSQL()
 	if err != nil {
-		return http.StatusInternalServerError, err
+		return dest, http.StatusInternalServerError, err
 	}
 	intId, err := parseId(mVars["id"])
 	if err != nil {
-		return http.StatusBadRequest, err
+		return dest, http.StatusBadRequest, err
 	}
-	if err := connection.Update(db, m); err != nil {
-		logger.Log.Debugf("Unable to update: %+v", m)
+	dest, err = connection.Update(db, intId, m)
+	if err != nil {
 		if err.Error() == connection.ErrorIdDoesNotExits {
-			return http.StatusBadRequest, err
+			return dest, http.StatusBadRequest, err
 		}
-		return http.StatusInternalServerError, err
+		return dest, http.StatusInternalServerError, err
 	}
-	// Return latest location
-	if err := connection.Get(db, intId, m); err != nil {
-		return http.StatusInternalServerError, err
-	}
-	return http.StatusAccepted, nil
+
+	return dest, http.StatusAccepted, nil
 }
