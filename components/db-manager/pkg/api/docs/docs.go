@@ -23,6 +23,218 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/attachment": {
+            "get": {
+                "description": "Get a list of all attachments",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachment"
+                ],
+                "summary": "Retrieve all attachments",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Attachments"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new attachment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachment"
+                ],
+                "summary": "Create a attachment",
+                "parameters": [
+                    {
+                        "description": "Attachment data",
+                        "name": "attachment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APIAttachments"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Reference ID (optional)",
+                        "name": "ref",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "spot"
+                        ],
+                        "type": "string",
+                        "description": "Reference Type",
+                        "name": "refType",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Attachments"
+                        }
+                    }
+                }
+            }
+        },
+        "/attachment/{id}": {
+            "get": {
+                "description": "Get attachment details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachment"
+                ],
+                "summary": "Retrieve a attachment by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Attachment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Attachments"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update attachment details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachment"
+                ],
+                "summary": "Update a attachment by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Attachment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Attachment data",
+                        "name": "attachment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APIAttachments"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Attachments"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a attachment and nullify its references in spots",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachment"
+                ],
+                "summary": "Delete a attachment by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Attachment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/attachment/{id}/ref": {
+            "put": {
+                "description": "Update the ref in a attachment details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachment"
+                ],
+                "summary": "Update the ref",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Attachment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Reference ID (optional)",
+                        "name": "ref",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "spot",
+                            "task"
+                        ],
+                        "type": "string",
+                        "description": "Reference Type",
+                        "name": "refType",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Attachments"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Check the health of the service",
@@ -407,6 +619,22 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.APIAttachments": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "Description",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "description": "Url",
+                    "type": "string"
+                }
+            }
+        },
         "models.APIKnownLocations": {
             "type": "object",
             "properties": {
@@ -430,6 +658,32 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Attachments": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "description": "Automatically generated",
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "DB + JSON",
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "description": "Automatically managed by trigger",
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }

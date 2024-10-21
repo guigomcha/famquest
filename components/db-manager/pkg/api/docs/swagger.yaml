@@ -1,4 +1,15 @@
 definitions:
+  models.APIAttachments:
+    properties:
+      description:
+        description: Description
+        type: string
+      name:
+        type: string
+      url:
+        description: Url
+        type: string
+    type: object
   models.APIKnownLocations:
     properties:
       latitude:
@@ -15,6 +26,24 @@ definitions:
       description:
         type: string
       name:
+        type: string
+    type: object
+  models.Attachments:
+    properties:
+      createdAt:
+        description: Automatically generated
+        type: string
+      description:
+        type: string
+      id:
+        description: DB + JSON
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        description: Automatically managed by trigger
+        type: string
+      url:
         type: string
     type: object
   models.KnownLocations:
@@ -76,6 +105,147 @@ info:
   title: FamQuest DB Manager API
   version: "1.0"
 paths:
+  /attachment:
+    get:
+      description: Get a list of all attachments
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Attachments'
+            type: array
+      summary: Retrieve all attachments
+      tags:
+      - attachment
+    post:
+      consumes:
+      - application/json
+      description: Create a new attachment
+      parameters:
+      - description: Attachment data
+        in: body
+        name: attachment
+        required: true
+        schema:
+          $ref: '#/definitions/models.APIAttachments'
+      - description: Reference ID (optional)
+        in: query
+        name: ref
+        type: integer
+      - description: Reference Type
+        enum:
+        - spot
+        in: query
+        name: refType
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Attachments'
+      summary: Create a attachment
+      tags:
+      - attachment
+  /attachment/{id}:
+    delete:
+      description: Delete a attachment and nullify its references in spots
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+      summary: Delete a attachment by ID
+      tags:
+      - attachment
+    get:
+      description: Get attachment details by ID
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Attachments'
+      summary: Retrieve a attachment by ID
+      tags:
+      - attachment
+    put:
+      consumes:
+      - application/json
+      description: Update attachment details by ID
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Attachment data
+        in: body
+        name: attachment
+        required: true
+        schema:
+          $ref: '#/definitions/models.APIAttachments'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Attachments'
+      summary: Update a attachment by ID
+      tags:
+      - attachment
+  /attachment/{id}/ref:
+    put:
+      description: Update the ref in a attachment details by ID
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Reference ID (optional)
+        in: query
+        name: ref
+        required: true
+        type: integer
+      - description: Reference Type
+        enum:
+        - spot
+        - task
+        in: query
+        name: refType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Attachments'
+      summary: Update the ref
+      tags:
+      - attachment
   /health:
     get:
       description: Check the health of the service

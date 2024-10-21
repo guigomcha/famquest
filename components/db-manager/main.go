@@ -46,11 +46,12 @@ func main() {
 	r.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 	r.HandleFunc("/health", api.Health).Methods("GET")
 
-	// r.HandleFunc("/attachment", api.AttachmentPost).Methods("POST")
-	// r.HandleFunc("/attachment", api.AttachmentGetAll).Methods("GET")
-	// r.HandleFunc("/attachment/{id}", api.AttachmentGet).Methods("GET")
-	// r.HandleFunc("/attachment/{id}", api.AttachmentPut).Methods("PUT")
-	// r.HandleFunc("/attachment/{id}", api.AttachmentDelete).Methods("DELETE")
+	r.HandleFunc("/attachment", api.AttachmentPost).Methods("POST")
+	r.HandleFunc("/attachment", api.AttachmentGetAll).Methods("GET")
+	r.HandleFunc("/attachment/{id}", api.AttachmentGet).Methods("GET")
+	r.HandleFunc("/attachment/{id}", api.AttachmentPut).Methods("PUT")
+	r.HandleFunc("/attachment/{id}/ref", api.AttachmentPutRef).Methods("PUT")
+	r.HandleFunc("/attachment/{id}", api.AttachmentDelete).Methods("DELETE")
 
 	r.HandleFunc("/spot", api.SpotPost).Methods("POST")
 	r.HandleFunc("/spot", api.SpotGetAll).Methods("GET")

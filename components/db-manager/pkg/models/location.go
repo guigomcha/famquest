@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,6 +31,14 @@ type KnownLocations struct {
 
 func (m *KnownLocations) GetTableName() string {
 	return "known_locations"
+}
+
+func (m *KnownLocations) GetSelectOneQuery() string {
+	return fmt.Sprintf(`SELECT * FROM %s  WHERE id = $1`, m.GetTableName())
+}
+
+func (m *KnownLocations) GetSelectAllQuery() string {
+	return fmt.Sprintf(`SELECT * FROM %s  WHERE id = $1`, m.GetTableName())
 }
 
 func (m *KnownLocations) GetInsertQuery() string {

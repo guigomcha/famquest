@@ -10,6 +10,7 @@ import (
 	// "log"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
 
@@ -61,19 +62,22 @@ func Get(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
 	switch m := model.(type) {
 	case *models.KnownLocations:
 		received := models.KnownLocations{}
-		query := fmt.Sprintf(`SELECT * FROM %s  WHERE id = $1`, model.GetTableName())
-		err := db.Get(&received, query, id)
+		err := db.Get(&received, model.GetSelectOneQuery(), id)
+		return &received, err
+
+	case *models.Attachments:
+		received := models.Attachments{}
+		err := db.Get(&received, model.GetSelectOneQuery(), id)
 		return &received, err
 
 	case *models.Spots:
 		received := models.Spots{}
-		query := fmt.Sprintf(`SELECT * FROM %s  WHERE id = $1`, model.GetTableName())
-		err := db.Get(&received, query, id)
+		err := db.Get(&received, model.GetSelectOneQuery(), id)
 		if received.Attachments == nil {
-			received.Attachments = []int{}
+			received.Attachments = pq.Int64Array{}
 		}
 		if received.Tasks == nil {
-			received.Tasks = []int{}
+			received.Tasks = pq.Int64Array{}
 		}
 		return &received, err
 
@@ -88,8 +92,20 @@ func GetAll(db *sqlx.DB, model DbInterface) ([]DbInterface, error) {
 	switch m := model.(type) {
 	case *models.KnownLocations:
 		received := []models.KnownLocations{}
-		query := fmt.Sprintf(`SELECT * FROM %s`, model.GetTableName())
-		err := db.Select(&received, query)
+		err := db.Select(&received, m.GetSelectAllQuery())
+		logger.Log.Debugf("objects obtained '%+v'", received)
+		if err != nil {
+			return dest, err
+		}
+		// Slices need to be reconverted element by element
+		for _, s := range received {
+			dest = append(dest, &s) // Add the struct to the interface slice
+		}
+		logger.Log.Debug("objects casted to dbinterface")
+
+	case *models.Attachments:
+		received := []models.Attachments{}
+		err := db.Select(&received, m.GetSelectAllQuery())
 		logger.Log.Debugf("objects obtained '%+v'", received)
 		if err != nil {
 			return dest, err
@@ -103,18 +119,17 @@ func GetAll(db *sqlx.DB, model DbInterface) ([]DbInterface, error) {
 	case *models.Spots:
 		// todo call the get function instead if there is too much duplicated code in the end
 		received := []models.Spots{}
-		query := fmt.Sprintf(`SELECT * FROM %s`, model.GetTableName())
-		err := db.Select(&received, query)
+		err := db.Select(&received, m.GetSelectAllQuery())
 		if err != nil {
 			return dest, err
 		}
 		// Slices need to be reconverted element by element
 		for _, s := range received {
 			if s.Attachments == nil {
-				s.Attachments = []int{}
+				s.Attachments = pq.Int64Array{}
 			}
 			if s.Tasks == nil {
-				s.Tasks = []int{}
+				s.Tasks = pq.Int64Array{}
 			}
 			dest = append(dest, &s) // Add the struct to the interface slice
 		}

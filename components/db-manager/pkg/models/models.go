@@ -20,21 +20,6 @@ type Tasks struct {
 	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 }
 
-// `db:"attachments"`
-type Attachments struct {
-	// only DB
-	UUID    uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
-	RefType string    `db:"ref_type" json:"-"`
-	Ref     int       `db:"ref" json:"-"`
-	// DB + JSON
-	ID          int       `db:"id" json:"id"` // Auto-incremented integer ID
-	Name        string    `db:"name" json:"name"`
-	Description string    `db:"description" json:"description"`
-	URL         string    `db:"url" json:"url"`
-	CreatedAt   time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
-	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
-}
-
 // Baseline for a Many to Many relationship. Right now everything is 1toMany.
 // - The referenced table has the key
 // - The "owner" table does not know

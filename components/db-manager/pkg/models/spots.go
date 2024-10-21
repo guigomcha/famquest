@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 // For swagger input
@@ -23,13 +24,61 @@ type Spots struct {
 	CreatedAt   time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
 	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 	// only json -> Need to create the parse the json  to and from db
-	Location    int   `json:"location"`
-	Attachments []int `json:"attachments"`
-	Tasks       []int `json:"tasks"`
+	Location    int           `json:"location"`
+	Attachments pq.Int64Array `json:"attachments"`
+	Tasks       pq.Int64Array `json:"tasks"`
 }
 
 func (m *Spots) GetTableName() string {
 	return "spots"
+}
+
+func (m *Spots) GetSelectOneQuery() string {
+	return `
+	SELECT 
+			s.id, 
+			s.name, 
+			s.description, 
+			s.created_at, 
+			s.updated_at,
+			kl.id AS location,
+			COALESCE(array_agg(DISTINCT a.id) FILTER (WHERE a.id IS NOT NULL), '{}'::INT[]) AS attachments,
+			COALESCE(array_agg(DISTINCT t.id) FILTER (WHERE t.id IS NOT NULL), '{}'::INT[]) AS tasks
+	FROM 
+			spots s
+	LEFT JOIN 
+			known_locations kl ON kl.ref = s.id AND kl.ref_type = 'spot'
+	LEFT JOIN 
+			attachments a ON a.ref = s.id AND a.ref_type = 'spot'
+	LEFT JOIN 
+			tasks t ON t.ref = s.id AND t.ref_type = 'spot'
+	WHERE
+			s.id = $1
+	GROUP BY 
+			s.id, kl.id, s.name, s.description, s.created_at, s.updated_at`
+}
+
+func (m *Spots) GetSelectAllQuery() string {
+	return `
+	SELECT 
+			s.id, 
+			s.name, 
+			s.description, 
+			s.created_at, 
+			s.updated_at,
+			kl.id AS location,
+			COALESCE(array_agg(DISTINCT a.id) FILTER (WHERE a.id IS NOT NULL), '{}'::INT[]) AS attachments,
+			COALESCE(array_agg(DISTINCT t.id) FILTER (WHERE t.id IS NOT NULL), '{}'::INT[]) AS tasks
+	FROM 
+			spots s
+	LEFT JOIN 
+			known_locations kl ON kl.ref = s.id AND kl.ref_type = 'spot'
+	LEFT JOIN 
+			attachments a ON a.ref = s.id AND a.ref_type = 'spot'
+	LEFT JOIN 
+			tasks t ON t.ref = s.id AND t.ref_type = 'spot'
+	GROUP BY 
+			s.id, kl.id, s.name, s.description, s.created_at, s.updated_at`
 }
 
 func (m *Spots) GetInsertQuery() string {
