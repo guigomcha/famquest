@@ -69,6 +69,12 @@ func Get(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
 		received := models.Spots{}
 		query := fmt.Sprintf(`SELECT * FROM %s  WHERE id = $1`, model.GetTableName())
 		err := db.Get(&received, query, id)
+		if received.Attachments == nil {
+			received.Attachments = []int{}
+		}
+		if received.Tasks == nil {
+			received.Tasks = []int{}
+		}
 		return &received, err
 
 	default:
@@ -95,6 +101,7 @@ func GetAll(db *sqlx.DB, model DbInterface) ([]DbInterface, error) {
 		logger.Log.Debug("objects casted to dbinterface")
 
 	case *models.Spots:
+		// todo call the get function instead if there is too much duplicated code in the end
 		received := []models.Spots{}
 		query := fmt.Sprintf(`SELECT * FROM %s`, model.GetTableName())
 		err := db.Select(&received, query)
@@ -103,6 +110,12 @@ func GetAll(db *sqlx.DB, model DbInterface) ([]DbInterface, error) {
 		}
 		// Slices need to be reconverted element by element
 		for _, s := range received {
+			if s.Attachments == nil {
+				s.Attachments = []int{}
+			}
+			if s.Tasks == nil {
+				s.Tasks = []int{}
+			}
 			dest = append(dest, &s) // Add the struct to the interface slice
 		}
 	default:
@@ -116,12 +129,12 @@ func Delete(db *sqlx.DB, id int, model DbInterface) error {
 	if ok := checkIDExists(db, model.GetTableName(), id); !ok {
 		return errors.New(ErrorIdDoesNotExits)
 	}
-	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1`, model.GetTableName())
-	_, err := db.Exec(query, id)
+	err := performMultipleNamedQueries(db, model, model.GetDeleteExtraQueries())
 	if err != nil {
 		return err
 	}
-	err = performMultipleNamedQueries(db, model, model.GetDeleteExtraQueries())
+	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1`, model.GetTableName())
+	_, err = db.Exec(query, id)
 	return err
 }
 
@@ -131,6 +144,10 @@ func Update(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
 		return nil, errors.New(ErrorIdDoesNotExits)
 	}
 	_, err := db.NamedQuery(model.GetUpdateQuery(), model)
+	if err != nil {
+		return nil, err
+	}
+	err = performMultipleNamedQueries(db, model, model.GetInsertExtraQueries())
 	if err != nil {
 		return nil, err
 	}

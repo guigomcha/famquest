@@ -35,19 +35,22 @@ func (m *Spots) GetTableName() string {
 func (m *Spots) GetInsertQuery() string {
 	return `
 	INSERT INTO spots (name, description)
-	VALUES (:name, :location, :description) RETURNING id`
+	VALUES (:name, :description) RETURNING id`
 }
 
 func (m *Spots) GetUpdateQuery() string {
 	return `
 			UPDATE spots
-			SET name = :name, location = :location, description = :description
+			SET name = :name, description = :description
 			WHERE id = :id`
 }
 
 func (m *Spots) GetDeleteExtraQueries() []string {
 	return []string{
 		`UPDATE attachments
+		 SET ref = 0 
+		 WHERE ref = :id AND ref_type = 'spot'`,
+		`UPDATE tasks
 		 SET ref = 0 
 		 WHERE ref = :id AND ref_type = 'spot'`,
 	}

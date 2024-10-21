@@ -18,6 +18,8 @@ import (
 // @Accept json
 // @Produce json
 // @Param location body models.APIKnownLocations true "Location data"
+// @Param ref query int false "Reference ID (optional)"
+// @Param refType query string false "Reference Type" Enums(spot)
 // @Success 201 {object} models.KnownLocations
 // @Router /location [post]
 func LocationPost(w http.ResponseWriter, r *http.Request) {
@@ -29,6 +31,12 @@ func LocationPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logger.Log.Debug("object decoded")
+	if ref := r.URL.Query().Get("ref"); ref != "" {
+		if intId, err := parseId(ref); err != nil {
+			location.Ref = intId
+			location.RefType = r.URL.Query().Get("refType")
+		}
+	}
 	dest, httpStatus, err := crudPost(&location)
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
@@ -132,6 +140,55 @@ func LocationPut(w http.ResponseWriter, r *http.Request) {
 	// Update the location
 	logger.Log.Debug("Decoded object")
 	dest, httpStatus, err := crudPut(&location, mux.Vars(r))
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(dest)
+}
+
+// LocationPut
+// @Summary Update the ref
+// @Description Update the ref in a location details by ID
+// @Tags location
+// @Produce json
+// @Param id path int true "Location ID"
+// @Param ref query int true "Reference ID (optional)"
+// @Param refType query string true "Reference Type" Enums(spot)
+// @Success 200 {object} models.KnownLocations
+// @Router /location/{id}/ref [put]
+func LocationPutRef(w http.ResponseWriter, r *http.Request) {
+	logger.Log.Info("Called to func LocationPutRef")
+	// first ensure ref is ok
+	intId, err := parseId(r.URL.Query().Get("ref"))
+	if err != nil || intId == 0 {
+		http.Error(w, fmt.Sprintf("Ref error or cero: %+v", err), http.StatusBadRequest)
+		return
+	}
+	var dest connection.DbInterface
+	_, httpStatus, err := crudGet(&models.Spots{}, map[string]string{"id": fmt.Sprint(intId)})
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	logger.Log.Debug("Ref to Spot seems ok")
+	// Now bring the original location
+	dest, httpStatus, err = crudGet(&models.KnownLocations{}, mux.Vars(r))
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	location, ok := dest.(*models.KnownLocations)
+	if !ok {
+		http.Error(w, fmt.Sprintf("Unable to cast the struct correctly from %+v", dest), http.StatusInternalServerError)
+		return
+	}
+	location.Ref = intId
+	location.RefType = r.URL.Query().Get("refType")
+	// Update the location which will trigger the GetInsertExtraQueries
+	logger.Log.Debug("Decoded object")
+	dest, httpStatus, err = crudPut(dest, mux.Vars(r))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
 		return

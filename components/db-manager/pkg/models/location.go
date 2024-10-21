@@ -38,6 +38,12 @@ func (m *KnownLocations) GetInsertQuery() string {
 		VALUES (:name, :longitude, :latitude) RETURNING id`
 }
 
+func (m *KnownLocations) GetQuery() string {
+	return `
+		INSERT INTO known_locations (name, longitude, latitude)
+		VALUES (:name, :longitude, :latitude) RETURNING id`
+}
+
 func (m *KnownLocations) GetUpdateQuery() string {
 	return `
 			UPDATE known_locations
@@ -50,5 +56,13 @@ func (m *KnownLocations) GetDeleteExtraQueries() []string {
 }
 
 func (m *KnownLocations) GetInsertExtraQueries() []string {
+	if m.Ref != 0 {
+		return []string{
+			`
+			UPDATE known_locations
+			SET ref = :ref, ref_type = :ref_type
+			WHERE id = :id`,
+		}
+	}
 	return []string{}
 }
