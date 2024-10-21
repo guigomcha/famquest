@@ -1,6 +1,6 @@
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
-export const fetchCoordinates = async () => {
+export const fetchLocations = async () => {
   try {
     const response = await fetch(`${API_URL}/location`, {
       headers: {
@@ -11,13 +11,35 @@ export const fetchCoordinates = async () => {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     // Use response.json() to parse the JSON body
-    const coordinates = await response.json();
+    const locations = await response.json();
 
-    // Assuming the API returns { coordinates: [{ lat: ..., lng: ... }] }
-    console.info(coordinates)
-    return coordinates;  // Returning the coordinates array
+    // Assuming the API returns { locations: [{ lat: ..., lng: ... }] }
+    console.info(locations)
+    return locations;  // Returning the locations array
   } catch (error) {
-    console.error("Error fetching coordinates: ", error);
+    console.error("Error fetching locations: ", error);
+    return [];
+  }
+};
+
+export const fetchLocation =  async (id) => {
+  try {
+    const response = await fetch(`${API_URL}/location/`+id, {
+      headers: {
+        'accept': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    // Use response.json() to parse the JSON body
+    const location = await response.json();
+
+    // Assuming the API returns { location: [{ lat: ..., lng: ... }] }
+    console.info(location)
+    return location;  // Returning the location array
+  } catch (error) {
+    console.error("Error fetching location: ", error);
     return [];
   }
 };

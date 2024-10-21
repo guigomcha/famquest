@@ -2,13 +2,13 @@ import logo from './logo.svg';
 import './App.css';
 import React, { useState, useEffect } from "react";
 import Map from "./Map";
-import { fetchCoordinates } from "./api";
+import { fetchLocations } from "./api";
 
 function App() {
-  const [coordinates, setCoordinates] = useState([]);
+  const [locations, setCoordinates] = useState([]);
 
   useEffect(() => {
-    fetchCoordinates()
+    fetchLocations()
       .then((data) => setCoordinates(data))
       .catch((err) => console.error(err));
   }, []);
@@ -16,7 +16,7 @@ function App() {
   return (
     <div>
       <h1>Google Maps with Markers</h1>
-      <Map coordinates={coordinates} />
+      <Map coordinates={locations} />
     </div>
   );
 }
