@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
 
@@ -75,6 +76,14 @@ func main() {
 		port = "8080" // Default port if not set
 	}
 	fmt.Printf("Starting server on port %s...\n", port)
+	// Use CORS middleware to allow requests from frontend
+	allowedOrigins := handlers.AllowedOrigins([]string{"http://localhost:3000"})
+	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"})
+	allowedHeaders := handlers.AllowedHeaders([]string{"Content-Type", "Accept"})
+
+	// Wrap your router with the CORS middleware
+	http.ListenAndServe(":8080", handlers.CORS(allowedOrigins, allowedMethods, allowedHeaders)(r))
+
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
 }
 

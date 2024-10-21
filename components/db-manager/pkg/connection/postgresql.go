@@ -153,7 +153,7 @@ func Update(db *sqlx.DB, model interface{}) error {
 	case *models.KnownLocations:
 		if ok := checkIDExists(db, "known_locations", m.ID); !ok {
 			return errors.New(ErrorIdDoesNotExits)
-		} 
+		}
 		query = `
 			UPDATE known_locations
 			SET name = :name, longitude = :longitude, latitude = :latitude
