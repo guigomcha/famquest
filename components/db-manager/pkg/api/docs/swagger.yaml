@@ -28,6 +28,17 @@ definitions:
       name:
         type: string
     type: object
+  models.APITasks:
+    properties:
+      description:
+        description: Description
+        type: string
+      name:
+        type: string
+      url:
+        description: Url
+        type: string
+    type: object
   models.Attachments:
     properties:
       createdAt:
@@ -93,6 +104,22 @@ definitions:
         description: Automatically managed by trigger
         type: string
     type: object
+  models.Tasks:
+    properties:
+      createdAt:
+        description: Automatically generated
+        type: string
+      description:
+        type: string
+      id:
+        description: Db + Json
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        description: Automatically managed by trigger
+        type: string
+    type: object
 info:
   contact:
     email: guillermo.gc1994@gmail.com
@@ -131,16 +158,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.APIAttachments'
-      - description: Reference ID (optional)
-        in: query
-        name: ref
-        type: integer
-      - description: Reference Type
-        enum:
-        - spot
-        in: query
-        name: refType
-        type: string
       produces:
       - application/json
       responses:
@@ -286,16 +303,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/models.APIKnownLocations'
-      - description: Reference ID (optional)
-        in: query
-        name: ref
-        type: integer
-      - description: Reference Type
-        enum:
-        - spot
-        in: query
-        name: refType
-        type: string
       produces:
       - application/json
       responses:
@@ -499,4 +506,134 @@ paths:
       summary: Update a spot by ID
       tags:
       - spot
+  /task:
+    get:
+      description: Get a list of all tasks
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Tasks'
+            type: array
+      summary: Retrieve all tasks
+      tags:
+      - task
+    post:
+      consumes:
+      - application/json
+      description: Create a new task
+      parameters:
+      - description: Task data
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/models.APITasks'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Tasks'
+      summary: Create a task
+      tags:
+      - task
+  /task/{id}:
+    delete:
+      description: Delete a task and nullify its references in spots
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+      summary: Delete a task by ID
+      tags:
+      - task
+    get:
+      description: Get task details by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tasks'
+      summary: Retrieve a task by ID
+      tags:
+      - task
+    put:
+      consumes:
+      - application/json
+      description: Update task details by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Task data
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/models.APITasks'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tasks'
+      summary: Update a task by ID
+      tags:
+      - task
+  /task/{id}/ref:
+    put:
+      description: Update the ref in a task details by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Reference ID (optional)
+        in: query
+        name: ref
+        required: true
+        type: integer
+      - description: Reference Type
+        enum:
+        - spot
+        in: query
+        name: refType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tasks'
+      summary: Update the ref
+      tags:
+      - task
 swagger: "2.0"

@@ -70,6 +70,11 @@ func Get(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
 		err := db.Get(&received, model.GetSelectOneQuery(), id)
 		return &received, err
 
+	case *models.Tasks:
+		received := models.Tasks{}
+		err := db.Get(&received, model.GetSelectOneQuery(), id)
+		return &received, err
+
 	case *models.Spots:
 		received := models.Spots{}
 		err := db.Get(&received, model.GetSelectOneQuery(), id)
@@ -116,6 +121,19 @@ func GetAll(db *sqlx.DB, model DbInterface) ([]DbInterface, error) {
 		}
 		logger.Log.Debug("objects casted to dbinterface")
 
+	case *models.Tasks:
+		received := []models.Tasks{}
+		err := db.Select(&received, m.GetSelectAllQuery())
+		logger.Log.Debugf("objects obtained '%+v'", received)
+		if err != nil {
+			return dest, err
+		}
+		// Slices need to be reconverted element by element
+		for _, s := range received {
+			dest = append(dest, &s) // Add the struct to the interface slice
+		}
+		logger.Log.Debug("objects casted to dbinterface")
+
 	case *models.Spots:
 		// todo call the get function instead if there is too much duplicated code in the end
 		received := []models.Spots{}
@@ -125,12 +143,12 @@ func GetAll(db *sqlx.DB, model DbInterface) ([]DbInterface, error) {
 		}
 		// Slices need to be reconverted element by element
 		for _, s := range received {
-			if s.Attachments == nil {
-				s.Attachments = pq.Int64Array{}
-			}
-			if s.Tasks == nil {
-				s.Tasks = pq.Int64Array{}
-			}
+			// if s.Attachments == nil {
+			// 	s.Attachments = pq.Int64Array{}
+			// }
+			// if s.Tasks == nil {
+			// 	s.Tasks = pq.Int64Array{}
+			// }
 			dest = append(dest, &s) // Add the struct to the interface slice
 		}
 	default:

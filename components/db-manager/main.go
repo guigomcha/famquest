@@ -66,11 +66,12 @@ func main() {
 	r.HandleFunc("/location/{id}/ref", api.LocationPutRef).Methods("PUT")
 	r.HandleFunc("/location/{id}", api.LocationDelete).Methods("DELETE")
 
-	// r.HandleFunc("/task", api.TaskPost).Methods("POST")
-	// r.HandleFunc("/task", api.TaskGetAll).Methods("GET")
-	// r.HandleFunc("/task/{id}", api.TaskGet).Methods("GET")
-	// r.HandleFunc("/task/{id}", api.TaskDelete).Methods("DELETE")
-	// r.HandleFunc("/task/{id}", api.TaskPut).Methods("PUT")
+	r.HandleFunc("/task", api.TaskPost).Methods("POST")
+	r.HandleFunc("/task", api.TaskGetAll).Methods("GET")
+	r.HandleFunc("/task/{id}", api.TaskGet).Methods("GET")
+	r.HandleFunc("/task/{id}/ref", api.TaskPutRef).Methods("PUT")
+	r.HandleFunc("/task/{id}", api.TaskPut).Methods("PUT")
+	r.HandleFunc("/task/{id}", api.TaskDelete).Methods("DELETE")
 
 	// Start the server
 	port := os.Getenv("SWAGGER_PORT")

@@ -18,8 +18,6 @@ import (
 // @Accept json
 // @Produce json
 // @Param location body models.APIKnownLocations true "Location data"
-// @Param ref query int false "Reference ID (optional)"
-// @Param refType query string false "Reference Type" Enums(spot)
 // @Success 201 {object} models.KnownLocations
 // @Router /location [post]
 func LocationPost(w http.ResponseWriter, r *http.Request) {

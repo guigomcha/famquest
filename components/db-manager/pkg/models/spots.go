@@ -41,7 +41,7 @@ func (m *Spots) GetSelectOneQuery() string {
 			s.description, 
 			s.created_at, 
 			s.updated_at,
-			kl.id AS location,
+			COALESCE(kl.id, 0) AS location,
 			COALESCE(array_agg(DISTINCT a.id) FILTER (WHERE a.id IS NOT NULL), '{}'::INT[]) AS attachments,
 			COALESCE(array_agg(DISTINCT t.id) FILTER (WHERE t.id IS NOT NULL), '{}'::INT[]) AS tasks
 	FROM 
@@ -66,7 +66,7 @@ func (m *Spots) GetSelectAllQuery() string {
 			s.description, 
 			s.created_at, 
 			s.updated_at,
-			kl.id AS location,
+			COALESCE(kl.id, 0) AS location,
 			COALESCE(array_agg(DISTINCT a.id) FILTER (WHERE a.id IS NOT NULL), '{}'::INT[]) AS attachments,
 			COALESCE(array_agg(DISTINCT t.id) FILTER (WHERE t.id IS NOT NULL), '{}'::INT[]) AS tasks
 	FROM 

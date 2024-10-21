@@ -19,8 +19,6 @@ import (
 // @Accept json
 // @Produce json
 // @Param attachment body models.APIAttachments true "Attachment data"
-// @Param ref query int false "Reference ID (optional)"
-// @Param refType query string false "Reference Type" Enums(spot)
 // @Success 201 {object} models.Attachments
 // @Router /attachment [post]
 func AttachmentPost(w http.ResponseWriter, r *http.Request) {

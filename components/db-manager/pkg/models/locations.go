@@ -38,26 +38,26 @@ func (m *KnownLocations) GetSelectOneQuery() string {
 }
 
 func (m *KnownLocations) GetSelectAllQuery() string {
-	return fmt.Sprintf(`SELECT * FROM %s  WHERE id = $1`, m.GetTableName())
+	return fmt.Sprintf(`SELECT * FROM %s`, m.GetTableName())
 }
 
 func (m *KnownLocations) GetInsertQuery() string {
-	return `
-		INSERT INTO known_locations (name, longitude, latitude)
-		VALUES (:name, :longitude, :latitude) RETURNING id`
+	return fmt.Sprintf(`
+		INSERT INTO %s (name, longitude, latitude)
+		VALUES (:name, :longitude, :latitude) RETURNING id`, m.GetTableName())
 }
 
 func (m *KnownLocations) GetQuery() string {
-	return `
-		INSERT INTO known_locations (name, longitude, latitude)
-		VALUES (:name, :longitude, :latitude) RETURNING id`
+	return fmt.Sprintf(`
+		INSERT INTO %s (name, longitude, latitude)
+		VALUES (:name, :longitude, :latitude) RETURNING id`, m.GetTableName())
 }
 
 func (m *KnownLocations) GetUpdateQuery() string {
-	return `
-			UPDATE known_locations
+	return fmt.Sprintf(`
+			UPDATE %s
 			SET name = :name, longitude = :longitude, latitude = :latitude
-			WHERE id = :id`
+			WHERE id = :id`, m.GetTableName())
 }
 
 func (m *KnownLocations) GetDeleteExtraQueries() []string {
@@ -67,10 +67,14 @@ func (m *KnownLocations) GetDeleteExtraQueries() []string {
 func (m *KnownLocations) GetInsertExtraQueries() []string {
 	if m.Ref != 0 {
 		return []string{
-			`
-			UPDATE known_locations
+			fmt.Sprintf(`
+			UPDATE %s
 			SET ref = :ref, ref_type = :ref_type
-			WHERE id = :id`,
+			WHERE id = :id`, m.GetTableName()),
+			fmt.Sprintf(`
+			UPDATE %s
+			SET ref = 0
+			WHERE ref = :ref AND ref_type = :ref_type AND id != :id`, m.GetTableName()),
 		}
 	}
 	return []string{}

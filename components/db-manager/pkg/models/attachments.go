@@ -38,26 +38,26 @@ func (m *Attachments) GetSelectOneQuery() string {
 }
 
 func (m *Attachments) GetSelectAllQuery() string {
-	return fmt.Sprintf(`SELECT * FROM %s  WHERE id = $1`, m.GetTableName())
+	return fmt.Sprintf(`SELECT * FROM %s `, m.GetTableName())
 }
 
 func (m *Attachments) GetInsertQuery() string {
-	return `
-		INSERT INTO attachments (name, description, url)
-		VALUES (:name, :description, :url) RETURNING id`
+	return fmt.Sprintf(`
+		INSERT INTO %s (name, description, url)
+		VALUES (:name, :description, :url) RETURNING id`, m.GetTableName())
 }
 
 func (m *Attachments) GetQuery() string {
-	return `
-		INSERT INTO attachments (name, description, url)
-		VALUES (:name, :description, :url) RETURNING id`
+	return fmt.Sprintf(`
+		INSERT INTO %s (name, description, url)
+		VALUES (:name, :description, :url) RETURNING id`, m.GetTableName())
 }
 
 func (m *Attachments) GetUpdateQuery() string {
-	return `
-			UPDATE attachments
+	return fmt.Sprintf(`
+			UPDATE %s
 			SET name = :name, description = :description, url = :url
-			WHERE id = :id`
+			WHERE id = :id`, m.GetTableName())
 }
 
 func (m *Attachments) GetDeleteExtraQueries() []string {
@@ -67,10 +67,10 @@ func (m *Attachments) GetDeleteExtraQueries() []string {
 func (m *Attachments) GetInsertExtraQueries() []string {
 	if m.Ref != 0 {
 		return []string{
-			`
-			UPDATE attachments
+			fmt.Sprintf(`
+			UPDATE %s
 			SET ref = :ref, ref_type = :ref_type
-			WHERE id = :id`,
+			WHERE id = :id`, m.GetTableName()),
 		}
 	}
 	return []string{}

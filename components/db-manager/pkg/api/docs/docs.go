@@ -66,21 +66,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.APIAttachments"
                         }
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Reference ID (optional)",
-                        "name": "ref",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "spot"
-                        ],
-                        "type": "string",
-                        "description": "Reference Type",
-                        "name": "refType",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -299,21 +284,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.APIKnownLocations"
                         }
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Reference ID (optional)",
-                        "name": "ref",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "spot"
-                        ],
-                        "type": "string",
-                        "description": "Reference Type",
-                        "name": "refType",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -616,6 +586,202 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/task": {
+            "get": {
+                "description": "Get a list of all tasks",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task"
+                ],
+                "summary": "Retrieve all tasks",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Tasks"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new task",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task"
+                ],
+                "summary": "Create a task",
+                "parameters": [
+                    {
+                        "description": "Task data",
+                        "name": "task",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APITasks"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Tasks"
+                        }
+                    }
+                }
+            }
+        },
+        "/task/{id}": {
+            "get": {
+                "description": "Get task details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task"
+                ],
+                "summary": "Retrieve a task by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Tasks"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update task details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task"
+                ],
+                "summary": "Update a task by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Task data",
+                        "name": "task",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APITasks"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Tasks"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a task and nullify its references in spots",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task"
+                ],
+                "summary": "Delete a task by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/task/{id}/ref": {
+            "put": {
+                "description": "Update the ref in a task details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task"
+                ],
+                "summary": "Update the ref",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Reference ID (optional)",
+                        "name": "ref",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "spot"
+                        ],
+                        "type": "string",
+                        "description": "Reference Type",
+                        "name": "refType",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Tasks"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -658,6 +824,22 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.APITasks": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "Description",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "description": "Url",
                     "type": "string"
                 }
             }
@@ -748,6 +930,29 @@ const docTemplate = `{
                     "items": {
                         "type": "integer"
                     }
+                },
+                "updatedAt": {
+                    "description": "Automatically managed by trigger",
+                    "type": "string"
+                }
+            }
+        },
+        "models.Tasks": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "description": "Automatically generated",
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Db + Json",
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "updatedAt": {
                     "description": "Automatically managed by trigger",
