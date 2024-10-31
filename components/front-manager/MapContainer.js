@@ -30,10 +30,12 @@ const MapContainer = () => {
     data: dataLocations 
   } = useQuery('locations', fetchCoordinates, {
     keepPreviousData: true,
-    onSuccess: () => {
-      console.log("locations onsuccess: "+ JSON.stringify(dataLocations))
-      // setLocations(dataLocations)
-      prepareMap()
+    onSettled: (data, error) => {
+      console.log("locations onsuccess: "+ JSON.stringify(data))
+      if (data) {
+        setLocations(data);
+      }
+      // prepareMap()
     }
   });
   const { 
@@ -45,15 +47,15 @@ const MapContainer = () => {
   });
   const prepareMap = function() {
     hideMap();
-    console.log("locations in prepare: "+ JSON.stringify(this.dataLocations))
+    console.log("locations in prepare: "+ JSON.stringify(this.locations))
     // After the map is loaded, reveal the area around each marker
-    if (mapRef.current && this.dataLocations) {
-      this.dataLocations.forEach((location) => {
+    if (mapRef.current && this.locations) {
+      this.locations.forEach((location) => {
         console.log("used coordinate: "+ location.id)
         revealMapAroundMarker(location);
       });
     }
-  }.bind({ dataLocations });
+  }.bind({ locations });
 
   const calculateRadius = (scale) => {
     // Cap radius based on the scale thresholds
@@ -125,13 +127,13 @@ const MapContainer = () => {
     if (!mapRef.current) {
       // Initialize map
       mapRef.current = L.map('mapId').setView([defaultCenter.lat, defaultCenter.lng], 13);   
-      mapRef.current.on('zoom', prepareMap);
-      mapRef.current.on('zoomend', prepareMap);
-      mapRef.current.on('move', prepareMap);
-      mapRef.current.on('moveend', prepareMap);
-      mapRef.current.on('drag', prepareMap);
-      mapRef.current.on('dragend', prepareMap);
-      mapRef.current.on('resize', prepareMap);
+      // mapRef.current.on('zoom', prepareMap);
+      // mapRef.current.on('zoomend', prepareMap);
+      // mapRef.current.on('move', prepareMap);
+      // mapRef.current.on('moveend', prepareMap);
+      // mapRef.current.on('drag', prepareMap);
+      // mapRef.current.on('dragend', prepareMap);
+      // mapRef.current.on('resize', prepareMap);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
       }).addTo(mapRef.current);
@@ -146,9 +148,9 @@ const MapContainer = () => {
     return <p>Error Location {errorLocations.message}<br>Error spots {errorSpots.message}</br></p>;
   } 
   else {
-    useEffect(() => {
-      prepareMap()
-    });
+    // useEffect(() => {
+    prepareMap();
+    // });
   }
   
   // Add the markers in the spots
