@@ -1,0 +1,31 @@
+{
+  "name": "front-manager",
+  "version": "1.0.0",
+  "main": "expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "-": "^0.0.1",
+    "@expo/metro-runtime": "~3.2.3",
+    "expo": "~51.0.28",
+    "expo-status-bar": "~1.12.1",
+    "leaflet": "^1.9.4",
+    "leaflet-defaulticon-compatibility": "^0.1.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-leaflet": "^4.2.1",
+    "react-native": "0.74.5",
+    "react-native-maps": "1.14.0",
+    "react-native-web": "~0.19.10",
+    "save": "^2.9.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@types/leaflet": "^1.9.14"
+  },
+  "private": true
+}

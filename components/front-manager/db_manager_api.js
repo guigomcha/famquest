@@ -22,16 +22,16 @@ export const fetchCoordinates = async () => {
     const coordinates = await response.json();
 
     // Assuming the API returns { coordinates: [{ lat: ..., lng: ... }] }
-    console.info(coordinates)
+    //console.info(coordinates)
     return coordinates;  // Returning the coordinates array
   } catch (error) {
     console.error("Error fetching coordinates: ", error);
     return [];
   }
 };
-export const fetchSpotsWithLocation = async () => {
+export const fetchSpots = async () => {
   try {
-    const response = await fetch(`${API_URL}/spots`, {
+    const response = await fetch(`${API_URL}/spot`, {
       headers: {
         'accept': 'application/json',
       },
@@ -42,10 +42,27 @@ export const fetchSpotsWithLocation = async () => {
     // Use response.json() to parse the JSON body
     const spots = await response.json();
     // Return location + info about task for the markers
-    console.info(spots)
+    //console.info(spots)
     return spots;  // Returning the spots array
   } catch (error) {
     console.error("Error fetching spots: ", error);
     return [];
   }
+};
+export const addLocationToSpot = async (spot) => {
+  // Replace with your API call logic
+  //console.info("Spot: "+spot.id)
+  const response = await fetch(`${API_URL}/location/${spot.location}`, {
+    headers: {
+      'accept': 'application/json',
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! Status: ${response.status}`);
+  }
+  const location = await response.json();
+  //console.info("Spot: "+spot.id+" "+JSON.stringify(location))
+  spot.location = location
+  //console.info(spot)
+  return spot; // Combine original spot with additional data
 };
