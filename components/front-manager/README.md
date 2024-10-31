@@ -44,6 +44,7 @@ npm install react react-dom leaflet
 npm install react-leaflet
 npm install -D @types/leaflet
 npm install leaflet-defaulticon-compatibility - save
+npm i --save react-query
 npx expo install react-native-web react-dom @expo/metro-runtime
 npx expo start
 ```

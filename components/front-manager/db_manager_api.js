@@ -22,7 +22,7 @@ export const fetchCoordinates = async () => {
     const coordinates = await response.json();
 
     // Assuming the API returns { coordinates: [{ lat: ..., lng: ... }] }
-    //console.info(coordinates)
+    console.info("Fetched locations "+ JSON.stringify(coordinates))
     return coordinates;  // Returning the coordinates array
   } catch (error) {
     console.error("Error fetching coordinates: ", error);
@@ -42,13 +42,35 @@ export const fetchSpots = async () => {
     // Use response.json() to parse the JSON body
     const spots = await response.json();
     // Return location + info about task for the markers
-    //console.info(spots)
+    console.info(spots)
     return spots;  // Returning the spots array
   } catch (error) {
     console.error("Error fetching spots: ", error);
     return [];
   }
 };
+
+export const fetchAndPrepareSpots = async () => {
+  try {
+    // Fetch spots data
+    const spotsData = await fetchSpots();
+
+    // Wait for all spots to be updated with location
+    const spotsWithLocation = await Promise.all(
+      spotsData.map(async (spot) => {
+        const updatedSpot = await addLocationToSpot(spot);
+        console.info("Updated spot with location:", updatedSpot); // Log each updated spot
+        return updatedSpot;
+      })
+    );
+
+    // Set the fully fetched spots with location data
+    return spotsWithLocation;
+  } catch (err) {
+    console.error("Error fetching spots with location:", err);
+  }
+};
+
 export const addLocationToSpot = async (spot) => {
   // Replace with your API call logic
   //console.info("Spot: "+spot.id)

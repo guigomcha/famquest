@@ -4,8 +4,8 @@ import './node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaultico
 import 'leaflet/dist/leaflet.css';
 import * as L from 'leaflet';
 import React, { useEffect, useRef, useState } from "react";
-import { fetchCoordinates, fetchSpots, addLocationToSpot } from "./db_manager_api";
-
+import { fetchCoordinates, fetchAndPrepareSpots } from "./db_manager_api";
+import { QueryClient, QueryClientProvider, useQuery } from 'react-query'
 
 const mapStyles = {
     height: "400px",
@@ -16,62 +16,45 @@ const defaultCenter = {
   lat: 37.31942002016036,
   lng: -6.0678988062297465,
 };
-
   
 const MapContainer = () => {
-  const [coordinates, setCoordinates] = useState([]);
-  const [spots, setSpots] = useState([]);
   // const [selectedMarker, setSelectedMarker] = useState(null); // Track selected marker for InfoWindow
   const canvasRef = useRef(null);
   const mapRef = useRef(null);
-
-  useEffect(() => {
-    // Fetch coordinates
-    fetchCoordinates()
-      .then((data) => setCoordinates(data))
-      .catch((err) => console.error(err));
-  }, []);
-
-  useEffect(() => {
-    // Call the function to fetch spots and update location
-    prepareSpots();
-  }, []);
-
-  const prepareSpots = async () => {
-    try {
-      // Fetch spots data
-      const spotsData = await fetchSpots();
-
-      // Wait for all spots to be updated with location
-      const spotsWithLocation = await Promise.all(
-        spotsData.map(async (spot) => {
-          const updatedSpot = await addLocationToSpot(spot);
-          console.info("Updated spot with location:", updatedSpot); // Log each updated spot
-          return updatedSpot;
-        })
-      );
-
-      // Set the fully fetched spots with location data
-      setSpots(spotsWithLocation);
-    } catch (err) {
-      console.error("Error fetching spots with location:", err);
+  const [locations, setLocations] = useState([])
+  const [spots, setSpots] = useState([])
+  
+  const { 
+    isLoadingLocations, 
+    errorLocations, 
+    data: dataLocations 
+  } = useQuery('locations', fetchCoordinates, {
+    keepPreviousData: true,
+    onSuccess: () => {
+      console.log("locations onsuccess: "+ JSON.stringify(dataLocations))
+      // setLocations(dataLocations)
+      prepareMap()
     }
-  };
-
-  const prepareMap = () => {
-    fetchCoordinates()
-    .then((data) => setCoordinates(data))
-    .catch((err) => console.error(err));
+  });
+  const { 
+    isLoadingSpots, 
+    errorSpots, 
+    dataSpots 
+  } = useQuery('spots', fetchAndPrepareSpots, {
+    keepPreviousData: true,
+  });
+  const prepareMap = function() {
     hideMap();
+    console.log("locations in prepare: "+ JSON.stringify(this.dataLocations))
     // After the map is loaded, reveal the area around each marker
-    if (mapRef.current && coordinates.length > 0) {
-      coordinates.forEach((location) => {
+    if (mapRef.current && this.dataLocations) {
+      this.dataLocations.forEach((location) => {
         console.log("used coordinate: "+ location.id)
         revealMapAroundMarker(location);
       });
     }
-  }; 
-  
+  }.bind({ dataLocations });
+
   const calculateRadius = (scale) => {
     // Cap radius based on the scale thresholds
     const minRadius = 200;
@@ -121,6 +104,9 @@ const MapContainer = () => {
   };
   const hideMap = () => {
     const canvas = canvasRef.current;
+    if (!canvas) {
+      return
+    }
     const ctx = canvas.getContext("2d");
 
     // Set canvas size based on the map container
@@ -154,33 +140,42 @@ const MapContainer = () => {
     // hideMap();
   }, []);
 
-  // Clear view of the known locations
-  useEffect(() => {
-    prepareMap();
-  }, [coordinates]);
+  if (isLoadingLocations || isLoadingSpots ) {
+    return <p>Loading...</p>;
+  } else if (errorLocations || errorSpots ) {
+    return <p>Error Location {errorLocations.message}<br>Error spots {errorSpots.message}</br></p>;
+  } 
+  else {
+    useEffect(() => {
+      prepareMap()
+    });
+  }
+  
   // Add the markers in the spots
   useEffect(() => {
-    spots.forEach((spot) => {
-      console.log("used spot: "+ location.id)
-      // Adding a marker with custom icon
-      L.marker([spot.location.latitude, spot.location.longitude], {
-        icon: L.icon({
-          iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-green.png',
-          iconSize: [28, 75],
-          iconAnchor: [22, 94],
-          popupAnchor: [-3, -76],
-        }),
-      })
-        .addTo(mapRef.current)
-        .bindPopup('I am an example marker.');
-    });
+    if (mapRef.current && dataSpots) {
+      dataSpots.forEach((spot) => {
+        console.log("used spot: "+ location.id)
+        // Adding a marker with custom icon
+        L.marker([spot.location.latitude, spot.location.longitude], {
+          icon: L.icon({
+            iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-green.png',
+            iconSize: [28, 75],
+            iconAnchor: [22, 94],
+            popupAnchor: [-3, -76],
+          }),
+        })
+          .addTo(mapRef.current)
+          .bindPopup('I am an example marker.');
+      });
+    }
       
-  }, [spots])
+  }, [])
   return (
     <div style={{ position: "relative", width: "100%", height: "100%"}}>
-    {/* Canvas for revealing part of the map */}
-    <canvas ref={canvasRef} style={{position: "absolute", width: "100%", height: "100%", zIndex: 10000, pointerEvents: "none"}} />
-    <div id="mapId" style={{ height: '100vh', width: '100vw' }}></div>;
+      {/* Canvas for revealing part of the map */}
+      <canvas ref={canvasRef} style={{position: "absolute", width: "100%", height: "100%", zIndex: 10000, pointerEvents: "none"}} />
+      <div id="mapId" style={{ height: '100vh', width: '100vw' }}></div>;
     </div>
   );
 };
