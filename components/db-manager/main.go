@@ -42,6 +42,7 @@ func init() {
 // @license.name Guillermo Gomez GPL V3
 func main() {
 	initialDbData()
+	defer connection.DB.Close()
 	r := mux.NewRouter()
 	r.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 	r.HandleFunc("/health", api.Health).Methods("GET")
@@ -80,7 +81,7 @@ func main() {
 	}
 	fmt.Printf("Starting server on port %s...\n", port)
 	// Use CORS middleware to allow requests from frontend
-	allowedOrigins := handlers.AllowedOrigins([]string{"http://localhost:3000"})
+	allowedOrigins := handlers.AllowedOrigins([]string{"http://localhost:3000", "http://localhost:8081"})
 	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"})
 	allowedHeaders := handlers.AllowedHeaders([]string{"Content-Type", "Accept"})
 
@@ -95,14 +96,8 @@ func initialDbData() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer db.Close()
-
+	connection.DB = db
 	if _, err := db.Exec(models.Schema); err != nil {
 		log.Fatalln(err)
 	}
-	// Populate the database with sample data
-	// connection.PopulateDatabase(db)
-
-	// Print the contents of the database
-	// connection.PrintDatabaseContents(db)
 }

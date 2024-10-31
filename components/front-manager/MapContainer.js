@@ -2,9 +2,9 @@ import './node_modules/leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility';
 import './node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet/dist/leaflet.css';
+import * as L from 'leaflet';
 import React, { useEffect, useRef, useState } from "react";
-
-import { MapContainer as Map, Marker, Popup, TileLayer, useMapEvents } from 'react-leaflet';
+import { fetchCoordinates, fetchSpots, addLocationToSpot } from "./db_manager_api";
 
 
 const mapStyles = {
@@ -18,16 +18,55 @@ const defaultCenter = {
 };
 
   
-const MapContainer = ({ coordinates , spots }) => {
+const MapContainer = () => {
+  const [coordinates, setCoordinates] = useState([]);
+  const [spots, setSpots] = useState([]);
   // const [selectedMarker, setSelectedMarker] = useState(null); // Track selected marker for InfoWindow
   const canvasRef = useRef(null);
   const mapRef = useRef(null);
-  
+
+  useEffect(() => {
+    // Fetch coordinates
+    fetchCoordinates()
+      .then((data) => setCoordinates(data))
+      .catch((err) => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    // Call the function to fetch spots and update location
+    prepareSpots();
+  }, []);
+
+  const prepareSpots = async () => {
+    try {
+      // Fetch spots data
+      const spotsData = await fetchSpots();
+
+      // Wait for all spots to be updated with location
+      const spotsWithLocation = await Promise.all(
+        spotsData.map(async (spot) => {
+          const updatedSpot = await addLocationToSpot(spot);
+          console.info("Updated spot with location:", updatedSpot); // Log each updated spot
+          return updatedSpot;
+        })
+      );
+
+      // Set the fully fetched spots with location data
+      setSpots(spotsWithLocation);
+    } catch (err) {
+      console.error("Error fetching spots with location:", err);
+    }
+  };
+
   const prepareMap = () => {
+    fetchCoordinates()
+    .then((data) => setCoordinates(data))
+    .catch((err) => console.error(err));
     hideMap();
     // After the map is loaded, reveal the area around each marker
     if (mapRef.current && coordinates.length > 0) {
       coordinates.forEach((location) => {
+        console.log("used coordinate: "+ location.id)
         revealMapAroundMarker(location);
       });
     }
@@ -35,8 +74,8 @@ const MapContainer = ({ coordinates , spots }) => {
   
   const calculateRadius = (scale) => {
     // Cap radius based on the scale thresholds
-    const minRadius = 10;
-    const maxRadius = 100;
+    const minRadius = 200;
+    const maxRadius = 600;
     const minScale = 500;
     const maxScale = 200000;
   
@@ -80,8 +119,6 @@ const MapContainer = ({ coordinates , spots }) => {
     ctx.arc(offsetX, offsetY, calculateRadius(scale), 0, Math.PI * 2, true);
     ctx.fill();
   };
-
-
   const hideMap = () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -96,55 +133,55 @@ const MapContainer = ({ coordinates , spots }) => {
 
   };
 
-  // Use this component to add event listeners to the map
-  function MapEventHandlers() {
-    const map = useMapEvents({
-      zoom: prepareMap,
-      zoomend: prepareMap,   // Trigger when zoom ends
-      move: prepareMap,
-      moveend: prepareMap,
-      drag: prepareMap,
-      resize: prepareMap,
-    });
-
-    // Store the map instance in mapRef when map is created
-    if (!mapRef.current) {
-      mapRef.current = map;
-    }
-
-    return null;  // No need to render anything
-  }
+  // First load the map
   useEffect(() => {
-    hideMap();
+    // Check if map is already initialized
+    if (!mapRef.current) {
+      // Initialize map
+      mapRef.current = L.map('mapId').setView([defaultCenter.lat, defaultCenter.lng], 13);   
+      mapRef.current.on('zoom', prepareMap);
+      mapRef.current.on('zoomend', prepareMap);
+      mapRef.current.on('move', prepareMap);
+      mapRef.current.on('moveend', prepareMap);
+      mapRef.current.on('drag', prepareMap);
+      mapRef.current.on('dragend', prepareMap);
+      mapRef.current.on('resize', prepareMap);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+      }).addTo(mapRef.current);
+    }
+    // Hide everything
+    // hideMap();
   }, []);
+
+  // Clear view of the known locations
   useEffect(() => {
     prepareMap();
-  }, [coordinates, spots]);
+  }, [coordinates]);
+  // Add the markers in the spots
+  useEffect(() => {
+    spots.forEach((spot) => {
+      console.log("used spot: "+ location.id)
+      // Adding a marker with custom icon
+      L.marker([spot.location.latitude, spot.location.longitude], {
+        icon: L.icon({
+          iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-green.png',
+          iconSize: [28, 75],
+          iconAnchor: [22, 94],
+          popupAnchor: [-3, -76],
+        }),
+      })
+        .addTo(mapRef.current)
+        .bindPopup('I am an example marker.');
+    });
+      
+  }, [spots])
   return (
     <div style={{ position: "relative", width: "100%", height: "100%"}}>
     {/* Canvas for revealing part of the map */}
-    <canvas ref={canvasRef} style={{position: "absolute", width: "100%", height: "100%", zIndex: 2, pointerEvents: "none"}} />
-
-        <Map
-            center={[defaultCenter.lat, defaultCenter.lng]}
-            zoom={13}
-            scrollWheelZoom={true}
-            style={mapStyles}
-            whenCreated={(mapInstance) => (mapRef.current = mapInstance)} // Store map reference    
-            zIndex={1}  
-        >
-        <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <Marker position={[defaultCenter.lat, defaultCenter.lng]}>
-            <Popup>
-                An approach to solve using osm in expo web platform.
-            </Popup>
-        </Marker>
-        {/* <MapEventHandlers /> */}
-     </Map>
-     </div>
+    <canvas ref={canvasRef} style={{position: "absolute", width: "100%", height: "100%", zIndex: 10000, pointerEvents: "none"}} />
+    <div id="mapId" style={{ height: '100vh', width: '100vw' }}></div>;
+    </div>
   );
 };
   

@@ -29,9 +29,9 @@ type APISpots struct {
 }
 
 func main() {
-	
-	spotIDs := []int{1,2,3,4}
-	locationIDs := []int{1,3,5,6}
+	populateDB()
+	spotIDs := []int{1, 2, 3, 4}
+	locationIDs := []int{1, 3, 5, 6}
 	// Link spots to locations
 	for i, spotID := range spotIDs {
 		locationID := locationIDs[i%numLocations] // Distribute spots across locations
@@ -39,7 +39,7 @@ func main() {
 	}
 }
 
-func populateDB(){
+func populateDB() {
 	rand.Seed(time.Now().UnixNano())
 
 	// Create locations

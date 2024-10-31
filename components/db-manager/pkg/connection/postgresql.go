@@ -7,11 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	// "log"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	_ "github.com/lib/pq"
 )
 
 const (
@@ -22,6 +19,8 @@ const (
 	DB_PORT             = "5432"
 	ErrorIdDoesNotExits = "id does not exist"
 )
+
+var DB *sqlx.DB
 
 func ConnectToPostgreSQL() (*sqlx.DB, error) {
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable",

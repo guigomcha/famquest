@@ -12,27 +12,27 @@ const defaultCenter = {
 };
 
 
-const Map = ({ coordinates , spots }) => {
+const Map = ({ coordinates }) => {
   const [selectedMarker, setSelectedMarker] = useState(null); // Track selected marker for InfoWindow
   const canvasRef = useRef(null);
   const mapRef = useRef(null);
 
   useEffect(() => {
   prepareMap();
-  }, [coordinates, spots]);
+  }, [coordinates]);
 
   
-  const prepareMap = () => {
+  const prepareMap = (markerPos) => {
     hideMap();
     // After the map is loaded, reveal the area around each marker
     if (mapRef.current && coordinates.length > 0) {
-      coordinates.forEach((location) => {
-        revealMapAroundMarker(location);
+      coordinates.forEach((markerPos) => {
+        revealMapAroundMarker(markerPos);
       });
     }
   };
   
-  const hideMap = () => {
+  const hideMap = (markerPos) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
@@ -64,7 +64,7 @@ const Map = ({ coordinates , spots }) => {
   
     return radius;
   };
-  const revealMapAroundMarker = (location) => {
+  const revealMapAroundMarker = (markerPos) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     // const bounds = mapRef.current.getBounds();
@@ -74,7 +74,7 @@ const Map = ({ coordinates , spots }) => {
   
   
     // Convert LatLng to pixel position on the map
-    const latLng = new window.google.maps.LatLng(location.latitude, location.longitude);
+    const latLng = new window.google.maps.LatLng(markerPos.latitude, markerPos.longitude);
     const point = projection.fromLatLngToPoint(latLng);
     const centerPoint = projection.fromLatLngToPoint(mapRef.current.getCenter());
   
@@ -88,12 +88,12 @@ const Map = ({ coordinates , spots }) => {
     ctx.fill();
   };
 
-  const handleZoomChanged = (location) => {
-    prepareMap(location);  
+  const handleZoomChanged = (markerPos) => {
+    prepareMap(markerPos);  
   
   };
 
-  console.info("Inside map: "+JSON.stringify(spots))
+
   return (
     <div style={{ position: "relative" }}>
       {/* Canvas for revealing part of the map */}
@@ -110,18 +110,18 @@ const Map = ({ coordinates , spots }) => {
           onDrag={handleZoomChanged} // Add zoom change handler
           onIdle={handleZoomChanged} // Add zoom change handler
         >
-          {spots.map((spot, index) => (
+          {coordinates.map((coordinate, index) => (
             <Marker
               key={index}
-              position={{ lat: spot.location.latitude, lng: spot.location.longitude }}
-              onClick={() => setSelectedMarker(spot)} // Set selected marker when clicked
+              position={{ lat: coordinate.latitude, lng: coordinate.longitude }}
+              onClick={() => setSelectedMarker(coordinate)} // Set selected marker when clicked
             />
           ))}
 
           {/* InfoWindow for the selected marker */}
           {selectedMarker && (
             <InfoWindow
-              position={{ lat: selectedMarker.location.latitude, lng: selectedMarker.location.longitude }}
+              position={{ lat: selectedMarker.latitude, lng: selectedMarker.longitude }}
               onCloseClick={() => setSelectedMarker(null)} // Close InfoWindow when clicked outside
             >
               <div style={{ padding: "10px", maxWidth: "200px" }}>

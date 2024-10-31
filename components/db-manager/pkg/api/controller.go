@@ -20,16 +20,12 @@ func parseId(stringId string) (int, error) {
 // pointer to interface
 func crudPost(m connection.DbInterface) (connection.DbInterface, int, error) {
 	var dest connection.DbInterface
-	db, err := connection.ConnectToPostgreSQL()
-	if err != nil {
-		return dest, http.StatusInternalServerError, err
-	}
-	lastInsertId, err := connection.Insert(db, m)
+	lastInsertId, err := connection.Insert(connection.DB, m)
 	if err != nil {
 		logger.Log.Debug("insert error")
 		return dest, http.StatusInternalServerError, err
 	}
-	dest, err = connection.Get(db, lastInsertId, m)
+	dest, err = connection.Get(connection.DB, lastInsertId, m)
 	if err != nil {
 		logger.Log.Debug("Get error")
 		return dest, http.StatusInternalServerError, err
@@ -41,11 +37,7 @@ func crudPost(m connection.DbInterface) (connection.DbInterface, int, error) {
 // pointer to interface
 func crudGetAll(m connection.DbInterface) ([]connection.DbInterface, int, error) {
 	var dest []connection.DbInterface
-	db, err := connection.ConnectToPostgreSQL()
-	if err != nil {
-		return dest, http.StatusInternalServerError, err
-	}
-	dest, err = connection.GetAll(db, m)
+	dest, err := connection.GetAll(connection.DB, m)
 	if err != nil {
 		logger.Log.Debugf("%+v: %s", dest, err.Error())
 		return dest, http.StatusInternalServerError, err
@@ -57,15 +49,11 @@ func crudGetAll(m connection.DbInterface) ([]connection.DbInterface, int, error)
 // pointer to interface
 func crudGet(m connection.DbInterface, mVars map[string]string) (connection.DbInterface, int, error) {
 	var dest connection.DbInterface
-	db, err := connection.ConnectToPostgreSQL()
-	if err != nil {
-		return dest, http.StatusInternalServerError, err
-	}
 	intId, err := parseId(mVars["id"])
 	if err != nil {
 		return dest, http.StatusBadRequest, err
 	}
-	dest, err = connection.Get(db, intId, m)
+	dest, err = connection.Get(connection.DB, intId, m)
 	if err != nil {
 		if err.Error() == connection.ErrorIdDoesNotExits {
 			return dest, http.StatusBadRequest, err
@@ -78,15 +66,11 @@ func crudGet(m connection.DbInterface, mVars map[string]string) (connection.DbIn
 
 // pointer to interface
 func crudDelete(m connection.DbInterface, mVars map[string]string) (int, error) {
-	db, err := connection.ConnectToPostgreSQL()
-	if err != nil {
-		return http.StatusInternalServerError, err
-	}
 	intId, err := parseId(mVars["id"])
 	if err != nil {
 		return http.StatusBadRequest, err
 	}
-	if err := connection.Delete(db, intId, m); err != nil {
+	if err := connection.Delete(connection.DB, intId, m); err != nil {
 		logger.Log.Debugf("Unable to delete: %d", intId)
 		if err.Error() == connection.ErrorIdDoesNotExits {
 			return http.StatusBadRequest, err
@@ -99,15 +83,11 @@ func crudDelete(m connection.DbInterface, mVars map[string]string) (int, error) 
 // pointer to interface
 func crudPut(m connection.DbInterface, mVars map[string]string) (connection.DbInterface, int, error) {
 	var dest connection.DbInterface
-	db, err := connection.ConnectToPostgreSQL()
-	if err != nil {
-		return dest, http.StatusInternalServerError, err
-	}
 	intId, err := parseId(mVars["id"])
 	if err != nil {
 		return dest, http.StatusBadRequest, err
 	}
-	dest, err = connection.Update(db, intId, m)
+	dest, err = connection.Update(connection.DB, intId, m)
 	if err != nil {
 		if err.Error() == connection.ErrorIdDoesNotExits {
 			return dest, http.StatusBadRequest, err
