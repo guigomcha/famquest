@@ -1,4 +1,4 @@
-.custom-popup {
+.custom-form {
   /* max-width: 300px; Set a maximum width for the popup */
   min-width: 33vw; /* Minimum width is one-third of the viewport width */
   padding: 10px;    /* Add padding for better spacing */
@@ -7,25 +7,12 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
 }
 
-.custom-popup h3 {
+.custom-form h3 {
   margin: 0 0 8px; /* Spacing for heading */
   font-size: 18px; /* Font size for the name */
 }
 
-.custom-popup p {
+.custom-form p {
   margin: 0 0 8px; /* Spacing for description */
   font-size: 14px; /* Font size for the description */
-}
-
-.custom-popup .carousel {
-  display: flex;      /* Flexbox for the carousel */
-  overflow-x: auto;   /* Allow horizontal scrolling */
-  margin-top: 10px;   /* Spacing above carousel */
-}
-
-.custom-popup .carousel img {
-  max-width: 100%;    /* Ensure images fit within the carousel */
-  height: auto;       /* Maintain aspect ratio */
-  margin-right: 5px;  /* Space between images */
-  border-radius: 4px; /* Rounded corners for images */
 }

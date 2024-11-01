@@ -92,7 +92,7 @@ const MapContainer = ( {locations, spots } ) => {
     
         root.render(<SpotPopup {...data} />);
         marker.bindPopup(popupContent);
-    
+   
         // Close the popup after submission
         marker.openPopup();
       };
