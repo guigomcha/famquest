@@ -4,13 +4,11 @@ import './node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaultico
 import 'leaflet/dist/leaflet.css';
 import * as L from 'leaflet';
 import {CanvasLayer} from "./CanvasLeaflet"
+import { createRoot } from 'react-dom/client'; // Import createRoot
 import React, { useEffect, useRef, useState } from "react";
+import SpotForm from './SpotForm';
+import SpotPopup from './SpotPopup';
 
-const mapStyles = {
-    height: "400px",
-    width: "100%",
-  };
-  
 const scale = 13;
 const defaultCenter = {
   lat: 37.31942002016036,
@@ -22,6 +20,9 @@ const MapContainer = ( {locations, spots } ) => {
   const canvasRef = useRef(null);
   const mapRef = useRef(null);
   const locs = useRef(null);
+  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [showForm, setShowForm] = useState(false);
+  const [clickLatLng, setClickLatLng] = useState(null);
 
   const prepareMap = () => {
     console.log("locations in prepare: "+ JSON.stringify(locs))
@@ -40,7 +41,7 @@ const MapContainer = ( {locations, spots } ) => {
 
   useEffect(() => {
     if (!mapRef.current) {
-      console.log("Adding event")
+      console.log("Creating the map")
       mapRef.current = L.map('mapId').setView([defaultCenter.lat, defaultCenter.lng], scale);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
@@ -75,7 +76,39 @@ const MapContainer = ( {locations, spots } ) => {
       events.forEach(event => {
         mapRef.current.addEventListener(event, handleEvent);
       });
+      // Right-click event to show the form
+      const handleFormSubmit = (data, latlng, popupContainer) => {
+        // Create marker
+        const marker = L.marker(latlng, {
+          icon: L.icon({
+            iconUrl: 'node_modules/leaflet/dist/images/marker-icon.png'
+          }),
+        })
+          .addTo(mapRef.current);
+    
+        // Use the CustomPopup component
+        const popupContent = document.createElement('div');
+        const root = createRoot(popupContent); // Create root for popup content
+    
+        root.render(<SpotPopup {...data} />);
+        marker.bindPopup(popupContent);
+    
+        // Close the popup after submission
+        marker.openPopup();
+      };
+      mapRef.current.on('contextmenu', (e) => {
+        const popupContainer = document.createElement('div');
+        const root = createRoot(popupContainer); // Create root for new container
 
+        root.render(
+          <SpotForm onSubmit={(data) => handleFormSubmit(data, e.latlng, popupContainer)} />
+        );
+        L.popup()
+          .setLatLng(e.latlng)
+          .setContent(popupContainer)
+          .openOn(mapRef.current);
+      });
+  
       
       // Create overlay controls
       const overlays = {
@@ -106,11 +139,7 @@ const MapContainer = ( {locations, spots } ) => {
         // Adding a marker with custom icon
         L.marker([spot.location.latitude, spot.location.longitude], {
           icon: L.icon({
-            iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-green.png',
-            iconSize: [28, 75],
-            iconAnchor: [22, 94],
-            popupAnchor: [-3, -76],
-            zIndexOffset: 1
+            iconUrl: 'node_modules/leaflet/dist/images/marker-icon.png'
           }),
         })
           .addTo(mapRef.current)
@@ -119,10 +148,51 @@ const MapContainer = ( {locations, spots } ) => {
     }
       
   }, [spots]);
+
+  // const handleInputChange = (e) => {
+  //   setFormData({ ...formData, [e.target.name]: e.target.value });
+  // };
+
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   const { name, description } = formData;
+
+  //   if (clickLatLng && name) {
+  //     console.log("creating marker")
+  //     L.marker(clickLatLng, {
+  //       icon: L.icon({
+  //         iconUrl: 'node_modules/leaflet/dist/images/marker-icon.png'
+  //       }),
+  //     })
+  //       .addTo(mapRef.current)
+  //       .bindPopup(<CustomPopup name=${name description=${description} attachments=["https://www.biografiasyvidas.com/biografia/j/fotos/jaime_i_conquistador.jpg"]} />);
+  //     setFormData({ name: '', description: '' }); // Reset form
+  //     setShowForm(false); // Close the form
+  //     setClickLatLng(null); // Clear clicked location
+  //   }
+  // };
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%"}}>
       {/* Canvas for revealing part of the map */}
       {/* <canvas ref={canvasRef} style={{position: "absolute", width: "100%", height: "100%", zIndex: 10000, pointerEvents: "none"}} /> */}
+      {/* {showForm && (
+        <div style={{ position: 'absolute', top: '10%', left: '10%', background: 'white', padding: '10px', border: '1px solid black', zIndex: 200000 }}>
+          <h3>Add Marker</h3>
+          <form onSubmit={handleSubmit}>
+            <div>
+              <label>Name:</label>
+              <input type="text" name="name" value={formData.name} onChange={handleInputChange} required />
+            </div>
+            <div>
+              <label>Description:</label>
+              <textarea name="description" value={formData.description} onChange={handleInputChange} />
+            </div>
+            <button type="submit">Add Marker</button>
+            <button type="button" onClick={() => setShowForm(false)}>Cancel</button>
+          </form>
+        </div>
+      )} */}
       <div id="mapId" style={{ height: '100vh', width: '100vw' }}></div>;
     </div>
   );

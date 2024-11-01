@@ -1,0 +1,18 @@
+.custom-popup {
+  width: 200px;
+}
+
+.carousel {
+  display: flex;
+  align-items: center;
+}
+
+.carousel img {
+  max-width: 100%;
+  height: auto;
+  margin: 0 10px;
+}
+
+button {
+  cursor: pointer;
+}

@@ -3,10 +3,9 @@ import 'leaflet-defaulticon-compatibility';
 import './node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet/dist/leaflet.css';
 import MapContainer from './MapContainer';
-import * as L from 'leaflet';
 import React, { useEffect, useRef, useState } from "react";
 import { fetchCoordinates, fetchAndPrepareSpots } from "./db_manager_api";
-import { QueryClient, QueryClientProvider, useQuery } from 'react-query'
+import { useQuery } from 'react-query'
 
 
 const MapManager = () => {  
