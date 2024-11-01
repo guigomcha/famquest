@@ -19,13 +19,14 @@ const MapContainer = ( {locations, spots } ) => {
   // const [selectedMarker, setSelectedMarker] = useState(null); // Track selected marker for InfoWindow
   const canvasRef = useRef(null);
   const mapRef = useRef(null);
+  const locs = useRef(null);
 
   const prepareMap = () => {
     hideMap();
-    console.log("locations in prepare: "+ JSON.stringify(locations))
+    console.log("locations in prepare: "+ JSON.stringify(locs))
     // After the map is loaded, reveal the area around each marker
-    if (mapRef.current && locations) {
-      locations.forEach((location) => {
+    if (mapRef.current && locs.current) {
+      locs.current.forEach((location) => {
         console.log("used coordinate: "+ location.id)
         revealMapAroundMarker(location);
       });
@@ -34,8 +35,8 @@ const MapContainer = ( {locations, spots } ) => {
 
   const calculateRadius = (scale) => {
     // Cap radius based on the scale thresholds
-    const minRadius = 200;
-    const maxRadius = 600;
+    const minRadius = 50;
+    const maxRadius = 200;
     const minScale = 500;
     const maxScale = 200000;
   
@@ -98,35 +99,38 @@ const MapContainer = ( {locations, spots } ) => {
 
   // 
   useEffect(() => {
-    prepareMap()
+    locs.current = locations;
+    prepareMap();
   }, [locations]);
-  // First load the map
+
   useEffect(() => {
-    // Check if map is already initialized
     if (!mapRef.current) {
-      // Initialize map
-      mapRef.current = L.map('mapId').setView([defaultCenter.lat, defaultCenter.lng], 13);   
-      // mapRef.current.on('zoom', prepareMap);
-      // mapRef.current.on('zoomend', prepareMap);
-      // mapRef.current.on('move', prepareMap);
-      // mapRef.current.on('moveend', prepareMap);
-      // mapRef.current.on('drag', prepareMap);
-      // mapRef.current.on('dragend', prepareMap);
-      // mapRef.current.on('resize', prepareMap);
+      console.log("Adding event")
+      mapRef.current = L.map('mapId').setView([defaultCenter.lat, defaultCenter.lng], 13);
+      mapRef.current.addEventListener('zoom', prepareMap);
+      mapRef.current.addEventListener('zoomend', prepareMap);
+      mapRef.current.addEventListener('move', prepareMap);
+      mapRef.current.addEventListener('moveend', prepareMap);
+      mapRef.current.addEventListener('drag', prepareMap);
+      mapRef.current.addEventListener('idle', prepareMap);
+      mapRef.current.addEventListener('dragend', prepareMap);
+      mapRef.current.addEventListener('resize', prepareMap);
+      
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
       }).addTo(mapRef.current);
     }
-    // Hide everything
-    // hideMap();
-  });
+  
+    return () => {
+    };
+  }, []);
 
   
   // Add the markers in the spots
   useEffect(() => {
     if (mapRef.current && spots) {
       spots.forEach((spot) => {
-        console.log("used spot: "+ location.id)
+        console.log("used spot: "+ spot.id)
         // Adding a marker with custom icon
         L.marker([spot.location.latitude, spot.location.longitude], {
           icon: L.icon({
