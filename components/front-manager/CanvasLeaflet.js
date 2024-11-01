@@ -17,6 +17,9 @@ export class CanvasLayer extends L.Layer {
     // Hide the map initially
     this.redraw(map);
     this.canvas.style.position = 'absolute';
+    // this.canvas.style.width = '100%';
+    // this.canvas.style.height = '100%';
+    // this.canvas.style.zIndex = 10000000;
     this.canvas.style.pointerEvents = 'none'; // Allow clicks to pass through
     map.getPanes().overlayPane.appendChild(this.canvas);
     console.log("onAdd second "+ map.getPanes()[0] +map.getPanes()[1])
@@ -35,10 +38,12 @@ export class CanvasLayer extends L.Layer {
   }
   
   redraw(map) {
-    console.log("redraw "+ map)
+    const leftBottomCorner = map.latLngToContainerPoint(map.getBounds().getSouthWest());
+    // Set the canvas position to align with the map
+    console.log("redraw "+ leftBottomCorner.x + "  "+leftBottomCorner.y)
     this.setSize(map.getSize());
     this.ctx.fillStyle = 'blue';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillRect(0 +leftBottomCorner.x, 0+leftBottomCorner.y - this.canvas.height, this.canvas.width, this.canvas.height);
   }
 
   revealArea(point, scale) {

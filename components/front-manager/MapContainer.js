@@ -38,12 +38,6 @@ const MapContainer = ( {locations, spots } ) => {
   };
 
 
-  // 
-  useEffect(() => {
-    locs.current = locations;
-    prepareMap();
-  }, [locations]);
-
   useEffect(() => {
     if (!mapRef.current) {
       console.log("Adding event")
@@ -55,35 +49,33 @@ const MapContainer = ( {locations, spots } ) => {
 
       // Add layer group with circles
       const layerGroup = L.layerGroup().addTo(mapRef.current);
-      L.circle([defaultCenter.lat+0.05, defaultCenter.lng+0.05], { color: 'blue', fillColor: 'blue', fillOpacity: 0.5, radius: 200 }).addTo(layerGroup);
-      L.circle([defaultCenter.lat+0.08, defaultCenter.lng+0.05], { color: 'red', fillColor: 'red', fillOpacity: 0.5, radius: 100, stroke: false }).addTo(layerGroup);
-      L.circle([defaultCenter.lat+0.06, defaultCenter.lng+0.05], { color: 'green', fillColor: 'green', fillOpacity: 0.5, radius: 100 }).addTo(layerGroup);
+      // L.circle([defaultCenter.lat+0.05, defaultCenter.lng+0.05], { color: 'blue', fillColor: 'blue', fillOpacity: 0.5, radius: 200 }).addTo(layerGroup);
+      // L.circle([defaultCenter.lat+0.08, defaultCenter.lng+0.05], { color: 'red', fillColor: 'red', fillOpacity: 0.5, radius: 100, stroke: false }).addTo(layerGroup);
+      // L.circle([defaultCenter.lat+0.06, defaultCenter.lng+0.05], { color: 'green', fillColor: 'green', fillOpacity: 0.5, radius: 100 }).addTo(layerGroup);
 
       // Add feature group with a popup and shapes
       const featureGroup = L.featureGroup().addTo(mapRef.current);
       // L.popup().setContent('Popup in FeatureGroup').setLatLng([defaultCenter.lat+0.15, defaultCenter.lng+0.05]).openOn(mapRef.current);
-      L.circle([defaultCenter.lat+0.05, defaultCenter.lng+0.01], { color: 'purple', radius: 200 }).addTo(featureGroup);
-      L.rectangle([[defaultCenter.lat+0.15, defaultCenter.lng+0.19],[defaultCenter.lat+0.05, defaultCenter.lng+0.25]], { color: 'purple', weight: 1 }).addTo(featureGroup);
+      // L.circle([defaultCenter.lat+0.05, defaultCenter.lng+0.01], { color: 'purple', radius: 200 }).addTo(featureGroup);
+      // L.rectangle([[defaultCenter.lat+0.15, defaultCenter.lng+0.19],[defaultCenter.lat+0.05, defaultCenter.lng+0.25]], { color: 'purple', weight: 1 }).addTo(featureGroup);
       
       // Create a blue canvas overlay
       canvasRef.current = new CanvasLayer();
       featureGroup.addLayer(canvasRef.current);
-      canvasRef.current.addTo(mapRef.current);
 
       // Events
       const handleEvent = () => {
         if (canvasRef.current) {
           canvasRef.current.redraw(mapRef.current); // Pass current map
+          prepareMap()
         }
       };
-      mapRef.current.addEventListener('zoom', handleEvent);
-      mapRef.current.addEventListener('zoomend', handleEvent);
-      mapRef.current.addEventListener('move', handleEvent);
-      mapRef.current.addEventListener('moveend', handleEvent);
-      mapRef.current.addEventListener('drag', handleEvent);
-      mapRef.current.addEventListener('idle', handleEvent);
-      mapRef.current.addEventListener('dragend', handleEvent);
-      mapRef.current.addEventListener('resize', handleEvent);
+      // Add map event listeners
+      const events = ['zoom', 'zoomend', 'move', 'moveend', 'drag', 'dragend', 'resize'];
+      events.forEach(event => {
+        mapRef.current.addEventListener(event, handleEvent);
+      });
+
       
       // Create overlay controls
       const overlays = {
@@ -98,6 +90,12 @@ const MapContainer = ( {locations, spots } ) => {
     return () => {
     };
   }, []);
+
+  // Add the reveal locations
+  useEffect(() => {
+    locs.current = locations;
+    prepareMap();
+  }, [locations]);
 
   
   // Add the markers in the spots
