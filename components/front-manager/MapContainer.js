@@ -28,7 +28,7 @@ const MapContainer = ( {locations, spots } ) => {
     // After the map is loaded, reveal the area around each marker
     if (mapRef.current && locs.current) {
       locs.current.forEach((location) => {
-        console.log("used coordinate: "+ location.id)
+        console.log("used coordinate: "+ location.id+ "->"+mapRef.current.latLngToContainerPoint(L.latLng(location.latitude, location.longitude)))
         canvasRef.current.revealArea(
           mapRef.current.latLngToContainerPoint(L.latLng(location.latitude, location.longitude)),
           scale
@@ -38,11 +38,11 @@ const MapContainer = ( {locations, spots } ) => {
   };
 
 
-  // 
-  useEffect(() => {
-    locs.current = locations;
-    prepareMap();
-  }, [locations]);
+  // // 
+  // useEffect(() => {
+  //   locs.current = locations;
+  //   prepareMap();
+  // }, [locations]);
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -66,14 +66,14 @@ const MapContainer = ( {locations, spots } ) => {
       L.rectangle([[defaultCenter.lat+0.15, defaultCenter.lng+0.19],[defaultCenter.lat+0.05, defaultCenter.lng+0.25]], { color: 'purple', weight: 1 }).addTo(featureGroup);
       
       // Create a blue canvas overlay
-      canvasRef.current = new CanvasLayer();
-      featureGroup.addLayer(canvasRef.current);
-      canvasRef.current.addTo(mapRef.current);
+      // canvasRef.current = new CanvasLayer();
+      // featureGroup.addLayer(canvasRef.current);
 
-      // Events
       const handleEvent = () => {
         if (canvasRef.current) {
-          canvasRef.current.redraw(mapRef.current); // Pass current map
+          // locs.current = locations;
+          canvasRef.current.setBounds(mapRef.current.getBounds()); // Pass current map
+          prepareMap();
         }
       };
       mapRef.current.addEventListener('zoom', handleEvent);
@@ -84,7 +84,15 @@ const MapContainer = ( {locations, spots } ) => {
       mapRef.current.addEventListener('idle', handleEvent);
       mapRef.current.addEventListener('dragend', handleEvent);
       mapRef.current.addEventListener('resize', handleEvent);
+
+      // canvasRef.current.addTo(mapRef.current);
+      var svgElement = document.querySelector('#svg');
       
+      canvasRef.current = L.svgOverlay(svgElement, mapRef.current.getBounds(), {
+        opacity: 0.8,
+        interactive: false
+      }).addTo(featureGroup);
+
       // Create overlay controls
       const overlays = {
         // "Marker with popup": marker,
@@ -125,6 +133,7 @@ const MapContainer = ( {locations, spots } ) => {
     <div style={{ position: "relative", width: "100%", height: "100%"}}>
       {/* Canvas for revealing part of the map */}
       {/* <canvas ref={canvasRef} style={{position: "absolute", width: "100%", height: "100%", zIndex: 10000, pointerEvents: "none"}} /> */}
+      <svg id="svg" xmlns="http://www.w3.org/2000/svg"><rect style={{height: '100vh', width: '100vw'}}/></svg>
       <div id="mapId" style={{ height: '100vh', width: '100vw' }}></div>;
     </div>
   );
