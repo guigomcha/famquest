@@ -1,10 +1,10 @@
-import './node_modules/leaflet/dist/leaflet.css';
+import '../node_modules/leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility';
-import './node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
+import '../node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet/dist/leaflet.css';
 import MapContainer from './MapContainer';
 import React, { useEffect, useRef, useState } from "react";
-import { fetchCoordinates, fetchAndPrepareSpots } from "./db_manager_api";
+import { fetchCoordinates, fetchAndPrepareSpots } from "../backend_interface/db_manager_api";
 import { useQuery } from 'react-query'
 
 

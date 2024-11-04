@@ -1,7 +1,6 @@
 .leaflet-popup {
   max-width: none; /* Allow custom width for popups */
   min-width: 300px; /* Optional: set a minimum width */
-  /* z-index: 1000; Ensure it is above other layers */
 }
 
 .leaflet-popup-content {

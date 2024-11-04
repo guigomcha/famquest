@@ -1,8 +1,8 @@
-.user-profile {
+.user-info {
+  z-index: 10;
   position: fixed;
   bottom: 20px;
   right: 20px;
-  z-index: 10;
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -37,4 +37,28 @@ label {
   background-color: #4caf50; /* Green color for progress */
   height: 100%;
   transition: width 0.3s ease;
+}
+
+.collapsible-label {
+  cursor: pointer;
+  color: #007bff; /* Blue color for clickable text */
+}
+
+.collapsible-label:hover {
+  text-decoration: underline;
+}
+
+.subtask-container {
+  margin-top: 10px;
+  border: 1px solid #ddd; /* Thin outline */
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #f9f9f9; /* Light background for contrast */
+  display: flex;
+  flex-direction: column;
+  gap: 5px; /* Space between subtasks */
+}
+
+.subtask-container .progress-bar {
+  margin: 0; /* Remove margin for subtasks */
 }

@@ -1,4 +1,4 @@
-import './node_modules/leaflet/dist/leaflet.css';
+import '../node_modules/leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility';
 import * as L from 'leaflet';
 

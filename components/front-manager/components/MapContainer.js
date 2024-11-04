@@ -1,10 +1,10 @@
-import './node_modules/leaflet/dist/leaflet.css';
+import '../node_modules/leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility';
-import './node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
+import '../node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet/dist/leaflet.css';
-import './css/leaflet-custom.css';
+import '../css/leaflet-custom.css';
 import * as L from 'leaflet';
-import {CanvasLayer} from "./CanvasLeaflet"
+import { CanvasLayer } from "./CanvasLeaflet"
 import { createRoot } from 'react-dom/client'; // Import createRoot
 import React, { useEffect, useRef, useState } from "react";
 import SpotForm from './SpotForm';

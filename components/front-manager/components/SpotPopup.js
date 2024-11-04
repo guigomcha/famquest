@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import './css/SpotPopup.css'; // Import your CSS for styling
+import '../css/SpotPopup.css'; // Import your CSS for styling
 
 const attachments = [
   "https://th.bing.com/th/id/OIP.Z4qIxA17cq1sPEirnRyzGQHaLT?w=655&h=1000&rs=1&pid=ImgDetMain",
