@@ -129,9 +129,6 @@ const MapContainer = ( {locations, spots } ) => {
                 alert("Location access denied.");
             });
 
-
-
-
       // Create overlay controls
       const overlays = {
         "Spots Guille": layerGroup,
