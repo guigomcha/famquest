@@ -27,9 +27,6 @@ const popUpStyle = {
 };
 
 
-
-
-
 const MapContainer = ( {locations, spots } ) => {
   const canvasRef = useRef(null);
   const mapRef = useRef(null);
