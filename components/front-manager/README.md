@@ -49,7 +49,7 @@ npx expo install react-native-web react-dom @expo/metro-runtime
 npx expo start
 ```
 
-### Installation
+### Installationw
 
 
 ### Run tests

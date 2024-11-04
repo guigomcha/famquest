@@ -2,6 +2,7 @@ import './node_modules/leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility';
 import './node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet/dist/leaflet.css';
+import './css/leaflet-custom.css';
 import * as L from 'leaflet';
 import {CanvasLayer} from "./CanvasLeaflet"
 import { createRoot } from 'react-dom/client'; // Import createRoot
@@ -10,19 +11,29 @@ import SpotForm from './SpotForm';
 import SpotPopup from './SpotPopup';
 
 const scale = 13;
+
 const defaultCenter = {
   lat: 37.31942002016036,
   lng: -6.0678988062297465,
 };
-  
+
+const iconStyle = {
+  iconUrl: 'node_modules/leaflet/dist/images/marker-icon.png'
+};
+
+
+const popUpStyle = {
+  'className' : 'leaflet-popup'
+};
+
+
+
+
+
 const MapContainer = ( {locations, spots } ) => {
-  // const [selectedMarker, setSelectedMarker] = useState(null); // Track selected marker for InfoWindow
   const canvasRef = useRef(null);
   const mapRef = useRef(null);
   const locs = useRef(null);
-  const [formData, setFormData] = useState({ name: '', description: '' });
-  const [showForm, setShowForm] = useState(false);
-  const [clickLatLng, setClickLatLng] = useState(null);
 
   const prepareMap = () => {
     console.log("locations in prepare: "+ JSON.stringify(locs))
@@ -38,33 +49,42 @@ const MapContainer = ( {locations, spots } ) => {
     }
   };
 
+  function CreateSpotFromForm(data, latlng) {
+    // Create marker which will be later a location + spot
+    const marker = L.marker(latlng, {
+      icon: L.icon(iconStyle),
+    })
+      .addTo(mapRef.current);
+    // Inject our custom component 
+    const popupContainer = document.createElement('div');
+    const root = createRoot(popupContainer); 
+    root.render(<SpotPopup {...data} />);
+    marker.bindPopup(popupContainer, popUpStyle);   
+    // Close the popup after submission
+    marker.openPopup();
+  };
 
+  // Create and configure the map
   useEffect(() => {
     if (!mapRef.current) {
       console.log("Creating the map")
       mapRef.current = L.map('mapId').setView([defaultCenter.lat, defaultCenter.lng], scale);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
+        attribution: 'GuiGomcha FamQuest powered by OpenStreetMap',
       }).addTo(mapRef.current);
-          // Create layer groups
+      // Create layer groups
 
-      // Add layer group with circles
+      // Add layer group to host the spots from 1 user
       const layerGroup = L.layerGroup().addTo(mapRef.current);
-      // L.circle([defaultCenter.lat+0.05, defaultCenter.lng+0.05], { color: 'blue', fillColor: 'blue', fillOpacity: 0.5, radius: 200 }).addTo(layerGroup);
-      // L.circle([defaultCenter.lat+0.08, defaultCenter.lng+0.05], { color: 'red', fillColor: 'red', fillOpacity: 0.5, radius: 100, stroke: false }).addTo(layerGroup);
-      // L.circle([defaultCenter.lat+0.06, defaultCenter.lng+0.05], { color: 'green', fillColor: 'green', fillOpacity: 0.5, radius: 100 }).addTo(layerGroup);
 
-      // Add feature group with a popup and shapes
+      // Add feature group to enable/disable the discovery map
       const featureGroup = L.featureGroup().addTo(mapRef.current);
-      // L.popup().setContent('Popup in FeatureGroup').setLatLng([defaultCenter.lat+0.15, defaultCenter.lng+0.05]).openOn(mapRef.current);
-      // L.circle([defaultCenter.lat+0.05, defaultCenter.lng+0.01], { color: 'purple', radius: 200 }).addTo(featureGroup);
-      // L.rectangle([[defaultCenter.lat+0.15, defaultCenter.lng+0.19],[defaultCenter.lat+0.05, defaultCenter.lng+0.25]], { color: 'purple', weight: 1 }).addTo(featureGroup);
       
-      // Create a blue canvas overlay
+      // Create a canvas overlay for the feature group
       canvasRef.current = new CanvasLayer();
       featureGroup.addLayer(canvasRef.current);
 
-      // Events
+      // Events associated to the canvas
       const handleEvent = () => {
         if (canvasRef.current) {
           canvasRef.current.redraw(mapRef.current); // Pass current map
@@ -76,47 +96,27 @@ const MapContainer = ( {locations, spots } ) => {
       events.forEach(event => {
         mapRef.current.addEventListener(event, handleEvent);
       });
-      // Right-click event to show the form
-      const handleFormSubmit = (data, latlng, popupContainer) => {
-        // Create marker
-        const marker = L.marker(latlng, {
-          icon: L.icon({
-            iconUrl: 'node_modules/leaflet/dist/images/marker-icon.png'
-          }),
-        })
-          .addTo(mapRef.current);
-    
-        // Use the CustomPopup component
-        const popupContent = document.createElement('div');
-        const root = createRoot(popupContent); // Create root for popup content
-    
-        root.render(<SpotPopup {...data} />);
-        marker.bindPopup(popupContent);
-   
-        // Close the popup after submission
-        marker.openPopup();
-      };
-      mapRef.current.on('contextmenu', (e) => {
-        const popupContainer = document.createElement('div');
-        const root = createRoot(popupContainer); // Create root for new container
 
+
+      // Right click to create a new spot
+      mapRef.current.on('contextmenu', (e) => {
+        const formContainer = document.createElement('div');
+        const root = createRoot(formContainer); // Create root for new container
+        // TODO: change to the creation of the spot + location in our DB and force re-render somehow
         root.render(
-          <SpotForm onSubmit={(data) => handleFormSubmit(data, e.latlng, popupContainer)} />
+          <SpotForm onSubmit={(data) => CreateSpotFromForm(data, e.latlng)} />
         );
-        L.popup()
+        L.popup(popUpStyle)
           .setLatLng(e.latlng)
-          .setContent(popupContainer)
+          .setContent(formContainer)
           .openOn(mapRef.current);
-      });
-  
+      }); 
       
       // Create overlay controls
       const overlays = {
-        // "Marker with popup": marker,
-        "Layer group with circles": layerGroup,
-        "Feature group": featureGroup
+        "Spots Guille": layerGroup,
+        "Mask map": featureGroup
       };
-
       L.control.layers(null, overlays, { collapsed: false }).addTo(mapRef.current);
     }
   
@@ -138,9 +138,7 @@ const MapContainer = ( {locations, spots } ) => {
         console.log("used spot: "+ spot.id)
         // Adding a marker with custom icon
         L.marker([spot.location.latitude, spot.location.longitude], {
-          icon: L.icon({
-            iconUrl: 'node_modules/leaflet/dist/images/marker-icon.png'
-          }),
+          icon: L.icon(iconStyle),
         })
           .addTo(mapRef.current)
           .bindPopup(spot.name);
@@ -149,50 +147,9 @@ const MapContainer = ( {locations, spots } ) => {
       
   }, [spots]);
 
-  // const handleInputChange = (e) => {
-  //   setFormData({ ...formData, [e.target.name]: e.target.value });
-  // };
-
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   const { name, description } = formData;
-
-  //   if (clickLatLng && name) {
-  //     console.log("creating marker")
-  //     L.marker(clickLatLng, {
-  //       icon: L.icon({
-  //         iconUrl: 'node_modules/leaflet/dist/images/marker-icon.png'
-  //       }),
-  //     })
-  //       .addTo(mapRef.current)
-  //       .bindPopup(<CustomPopup name=${name description=${description} attachments=["https://www.biografiasyvidas.com/biografia/j/fotos/jaime_i_conquistador.jpg"]} />);
-  //     setFormData({ name: '', description: '' }); // Reset form
-  //     setShowForm(false); // Close the form
-  //     setClickLatLng(null); // Clear clicked location
-  //   }
-  // };
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%"}}>
-      {/* Canvas for revealing part of the map */}
-      {/* <canvas ref={canvasRef} style={{position: "absolute", width: "100%", height: "100%", zIndex: 10000, pointerEvents: "none"}} /> */}
-      {/* {showForm && (
-        <div style={{ position: 'absolute', top: '10%', left: '10%', background: 'white', padding: '10px', border: '1px solid black', zIndex: 200000 }}>
-          <h3>Add Marker</h3>
-          <form onSubmit={handleSubmit}>
-            <div>
-              <label>Name:</label>
-              <input type="text" name="name" value={formData.name} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <label>Description:</label>
-              <textarea name="description" value={formData.description} onChange={handleInputChange} />
-            </div>
-            <button type="submit">Add Marker</button>
-            <button type="button" onClick={() => setShowForm(false)}>Cancel</button>
-          </form>
-        </div>
-      )} */}
       <div id="mapId" style={{ height: '100vh', width: '100vw' }}></div>;
     </div>
   );

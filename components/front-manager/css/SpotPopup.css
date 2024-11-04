@@ -1,31 +1,60 @@
 .custom-popup {
-  /* max-width: 300px; Set a maximum width for the popup */
   min-width: 33vw; /* Minimum width is one-third of the viewport width */
-  padding: 10px;    /* Add padding for better spacing */
-  background-color: white; /* Ensure a white background */
-  border-radius: 8px; /* Rounded corners */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  max-width: 400px;
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
-.custom-popup h3 {
-  margin: 0 0 8px; /* Spacing for heading */
-  font-size: 18px; /* Font size for the name */
+h3 {
+  margin: 0 0 10px;
+  font-size: 1.5em;
 }
 
-.custom-popup p {
-  margin: 0 0 8px; /* Spacing for description */
-  font-size: 14px; /* Font size for the description */
+p {
+  margin: 0 0 20px;
+  color: #666;
 }
 
-.custom-popup .carousel {
-  display: flex;      /* Flexbox for the carousel */
-  overflow-x: auto;   /* Allow horizontal scrolling */
-  margin-top: 10px;   /* Spacing above carousel */
+.file-input {
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 100%;
+  cursor: pointer;
 }
 
-.custom-popup .carousel img {
-  max-width: 100%;    /* Ensure images fit within the carousel */
-  height: auto;       /* Maintain aspect ratio */
-  margin-right: 5px;  /* Space between images */
-  border-radius: 4px; /* Rounded corners for images */
+.carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-image {
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin: 0 10px;
+}
+
+button {
+  background-color: #0095f6;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  background-color: #007bb5;
 }
