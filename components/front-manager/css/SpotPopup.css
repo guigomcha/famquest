@@ -1,63 +1,80 @@
 .custom-popup {
-  min-width: 33vw; /* Minimum width is one-third of the viewport width */
-  max-width: 400px;
-  background-color: white;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  display: flex;
+  flex-direction: column;
 }
 
-h3 {
-  margin: 0 0 10px;
-  font-size: 1.5em;
+.header-container {
+  display: flex;
+  justify-content: space-between;
 }
 
-p {
-  margin: 0 0 20px;
-  color: #666;
+.info-container {
+  flex: 2; /* Takes up 2/3 of the space */
+  margin-right: 10px;
+}
+
+.task-container {
+  flex: 1; /* Takes up 1/3 of the space */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+.task-item {
+  margin: 5px 0;
+}
+
+.task-item a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.task-item a:hover {
+  text-decoration: underline;
 }
 
 .file-input {
-  margin-bottom: 20px;
-  padding: 10px;
-  border: 1px solid #ddd;
+  margin-top: 10px; /* Add some space above the input */
+  cursor: pointer; /* Makes it look like a button */
+}
+
+.empty-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ccc;
   border-radius: 5px;
-  width: 100%;
-  cursor: pointer;
+  height: 100px; /* Adjust height as needed */
+  color: #666; /* Color for the message text */
+  text-align: center;
+  font-style: italic;
 }
 
 .carousel {
-  display: flex; /* Use flexbox for alignment */
-  align-items: center; /* Center items vertically */
-  justify-content: center; /* Center items horizontally */
+  display: flex;
+  align-items: center;
 }
 
 .carousel-image {
   min-width: 200px; 
   max-width: 400px;
-  min-height: 200px; 
   max-height: 600px;
-  object-fit: contain; /* Use contain to ensure the entire image is visible */
+  min-height: 200px; 
+  object-fit: cover;
   border-radius: 10px;
   margin: 0 10px;
 }
 
-button {
-  background-color: #0095f6;
-  color: white;
-  border: none;
+.empty-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ccc;
   border-radius: 5px;
-  padding: 10px 15px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-button:hover:not(:disabled) {
-  background-color: #007bb5;
+  height: 100px; /* Adjust height as needed */
+  margin-top: 10px;
+  color: #666; /* Color for the message text */
+  text-align: center;
+  font-style: italic;
 }
