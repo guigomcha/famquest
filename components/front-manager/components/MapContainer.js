@@ -109,6 +109,29 @@ const MapContainer = ( {locations, spots } ) => {
           .openOn(mapRef.current);
       }); 
       
+      // Get user location
+      mapRef.current.locate({setView: true, watch: true})
+            .on('locationfound', function(e){
+                var marker = L.marker([e.latitude, e.longitude], {
+                  icon: L.icon(iconStyle),
+                }).bindPopup('Your are here :)');
+                var circle = L.circle([e.latitude, e.longitude], e.accuracy/2, {
+                    weight: 1,
+                    color: 'blue',
+                    fillColor: '#cacaca',
+                    fillOpacity: 0.2
+                });
+                mapRef.current.addLayer(marker);
+                mapRef.current.addLayer(circle);
+            })
+           .on('locationerror', function(e){
+                console.log(e);
+                alert("Location access denied.");
+            });
+
+
+
+
       // Create overlay controls
       const overlays = {
         "Spots Guille": layerGroup,

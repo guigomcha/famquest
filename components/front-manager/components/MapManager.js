@@ -7,7 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { fetchCoordinates, fetchAndPrepareSpots } from "../backend_interface/db_manager_api";
 import { useQuery } from 'react-query'
 
-
+// This is the main component of the Map which should connect with APIs to get the required info to feed it down
 const MapManager = () => {  
   const [locations, setLocations] = useState([])
   const [spots, setSpots] = useState([])
