@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react';
-import TaskForm from './TaskForm';
-// Import your CSS for styling
-import '../css/TaskContainer.css'; 
-import '../css/SpotPopup.css'; 
+import '../css/SpotPopup.css'; // Import your CSS for styling
+import TaskForm from './TaskForm'; // Import the TaskForm component
 
 const attachments = [
   "https://th.bing.com/th/id/OIP.Z4qIxA17cq1sPEirnRyzGQHaLT?w=655&h=1000&rs=1&pid=ImgDetMain",
@@ -70,17 +68,15 @@ const SpotPopup = ({ name, description }) => {
         <div className="info-container">
           <h3>{name}</h3>
           <p>{description}</p>
-          <input 
-            type="file" 
-            accept="image/*" 
-            multiple 
-            onChange={handleImageUpload} 
-            className="file-input" 
-            ref={fileInputRef} 
-          />
         </div>
         
         <div className="task-container">
+          <button onClick={() => setShowTaskForm(!showTaskForm)}>
+            {showTaskForm ? 'Cancel' : 'Add Task'}
+          </button>
+          
+          {showTaskForm && <TaskForm onAddTask={addTask} />}
+          
           {tasks.length > 0 ? (
             tasks.map((task, index) => (
               <div key={index} className="task-item">
@@ -95,21 +91,31 @@ const SpotPopup = ({ name, description }) => {
         </div>
       </div>
 
-      <button onClick={() => setShowTaskForm(!showTaskForm)}>
-        {showTaskForm ? 'Cancel' : 'Add Task'}
-      </button>
-      
-      {showTaskForm && <TaskForm onAddTask={addTask} />}
-      
-      {selectedImages.length > 0 ? (
-        <div className="carousel">
-          <button onClick={handlePrev} disabled={selectedImages.length <= 1}>Prev</button>
-          <img src={selectedImages[currentIndex]} alt={`Attachment ${currentIndex + 1}`} className="carousel-image" />
-          <button onClick={handleNext} disabled={selectedImages.length <= 1}>Next</button>
+      <div className="attachment-container">
+        <div className="file-input-container">
+          <label className="file-input-label">
+            Choose Files
+            <input 
+              type="file" 
+              accept="image/*" 
+              multiple 
+              onChange={handleImageUpload} 
+              className="file-input" 
+              ref={fileInputRef} 
+            />
+          </label>
         </div>
-      ) : (
-        renderEmptyState("Create new to see it")
-      )}
+
+        {selectedImages.length > 0 ? (
+          <div className="carousel-container">
+            <button onClick={handlePrev} disabled={selectedImages.length <= 1}>Prev</button>
+            <img src={selectedImages[currentIndex]} alt={`Attachment ${currentIndex + 1}`} className="carousel-image" />
+            <button onClick={handleNext} disabled={selectedImages.length <= 1}>Next</button>
+          </div>
+        ) : (
+          renderEmptyState("Create new to see it")
+        )}
+      </div>
     </div>
   );
 };

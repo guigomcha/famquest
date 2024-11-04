@@ -110,7 +110,8 @@ const MapContainer = ( {locations, spots } ) => {
       }); 
       
       // Get user location
-      mapRef.current.locate({setView: true, watch: true})
+      mapRef.current.locate({setView: false, watch: true})
+            // Probably better to try to save the location if it does not exist something close and the get the markers
             .on('locationfound', function(e){
                 var marker = L.marker([e.latitude, e.longitude], {
                   icon: L.icon(iconStyle),
