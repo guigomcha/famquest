@@ -1,7 +1,65 @@
 definitions:
+  models.APIAttachments:
+    properties:
+      description:
+        description: Description
+        type: string
+      name:
+        type: string
+      url:
+        description: Url
+        type: string
+    type: object
+  models.APIKnownLocations:
+    properties:
+      latitude:
+        description: Latitude as signed float
+        type: number
+      longitude:
+        description: Longitude as signed float
+        type: number
+      name:
+        type: string
+    type: object
+  models.APISpots:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  models.APITasks:
+    properties:
+      description:
+        description: Description
+        type: string
+      name:
+        type: string
+      url:
+        description: Url
+        type: string
+    type: object
+  models.Attachments:
+    properties:
+      createdAt:
+        description: Automatically generated
+        type: string
+      description:
+        type: string
+      id:
+        description: DB + JSON
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        description: Automatically managed by trigger
+        type: string
+      url:
+        type: string
+    type: object
   models.KnownLocations:
     properties:
-      created_at:
+      createdAt:
         description: Automatically generated
         type: string
       id:
@@ -15,7 +73,50 @@ definitions:
         type: number
       name:
         type: string
-      updated_at:
+      updatedAt:
+        description: Automatically managed by trigger
+        type: string
+    type: object
+  models.Spots:
+    properties:
+      attachments:
+        items:
+          type: integer
+        type: array
+      createdAt:
+        description: Automatically generated
+        type: string
+      description:
+        type: string
+      id:
+        description: db + json
+        type: integer
+      location:
+        description: only json -> Need to create the parse the json  to and from db
+        type: integer
+      name:
+        type: string
+      tasks:
+        items:
+          type: integer
+        type: array
+      updatedAt:
+        description: Automatically managed by trigger
+        type: string
+    type: object
+  models.Tasks:
+    properties:
+      createdAt:
+        description: Automatically generated
+        type: string
+      description:
+        type: string
+      id:
+        description: Db + Json
+        type: integer
+      name:
+        type: string
+      updatedAt:
         description: Automatically managed by trigger
         type: string
     type: object
@@ -31,6 +132,137 @@ info:
   title: FamQuest DB Manager API
   version: "1.0"
 paths:
+  /attachment:
+    get:
+      description: Get a list of all attachments
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Attachments'
+            type: array
+      summary: Retrieve all attachments
+      tags:
+      - attachment
+    post:
+      consumes:
+      - application/json
+      description: Create a new attachment
+      parameters:
+      - description: Attachment data
+        in: body
+        name: attachment
+        required: true
+        schema:
+          $ref: '#/definitions/models.APIAttachments'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Attachments'
+      summary: Create a attachment
+      tags:
+      - attachment
+  /attachment/{id}:
+    delete:
+      description: Delete a attachment and nullify its references in spots
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+      summary: Delete a attachment by ID
+      tags:
+      - attachment
+    get:
+      description: Get attachment details by ID
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Attachments'
+      summary: Retrieve a attachment by ID
+      tags:
+      - attachment
+    put:
+      consumes:
+      - application/json
+      description: Update attachment details by ID
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Attachment data
+        in: body
+        name: attachment
+        required: true
+        schema:
+          $ref: '#/definitions/models.APIAttachments'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Attachments'
+      summary: Update a attachment by ID
+      tags:
+      - attachment
+  /attachment/{id}/ref:
+    put:
+      description: Update the ref in a attachment details by ID
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Reference ID (optional)
+        in: query
+        name: ref
+        required: true
+        type: integer
+      - description: Reference Type
+        enum:
+        - spot
+        - task
+        in: query
+        name: refType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Attachments'
+      summary: Update the ref
+      tags:
+      - attachment
   /health:
     get:
       description: Check the health of the service
@@ -70,7 +302,7 @@ paths:
         name: location
         required: true
         schema:
-          $ref: '#/definitions/models.KnownLocations'
+          $ref: '#/definitions/models.APIKnownLocations'
       produces:
       - application/json
       responses:
@@ -133,7 +365,7 @@ paths:
         name: location
         required: true
         schema:
-          $ref: '#/definitions/models.KnownLocations'
+          $ref: '#/definitions/models.APIKnownLocations'
       produces:
       - application/json
       responses:
@@ -144,4 +376,264 @@ paths:
       summary: Update a location by ID
       tags:
       - location
+  /location/{id}/ref:
+    put:
+      description: Update the ref in a location details by ID
+      parameters:
+      - description: Location ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Reference ID (optional)
+        in: query
+        name: ref
+        required: true
+        type: integer
+      - description: Reference Type
+        enum:
+        - spot
+        in: query
+        name: refType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.KnownLocations'
+      summary: Update the ref
+      tags:
+      - location
+  /spot:
+    get:
+      description: Get a list of all spots
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Spots'
+            type: array
+      summary: Retrieve all spots
+      tags:
+      - spot
+    post:
+      consumes:
+      - application/json
+      description: Create a new spot
+      parameters:
+      - description: Spot data
+        in: body
+        name: spot
+        required: true
+        schema:
+          $ref: '#/definitions/models.APISpots'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Spots'
+      summary: Create a spot
+      tags:
+      - spot
+  /spot/{id}:
+    delete:
+      description: Delete a spot and nullify its references in spots
+      parameters:
+      - description: Spot ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+      summary: Delete a spot by ID
+      tags:
+      - spot
+    get:
+      description: Get spot details by ID
+      parameters:
+      - description: Spot ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Spots'
+      summary: Retrieve a spot by ID
+      tags:
+      - spot
+    put:
+      consumes:
+      - application/json
+      description: Update spot details by ID
+      parameters:
+      - description: Spot ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Spot data
+        in: body
+        name: spot
+        required: true
+        schema:
+          $ref: '#/definitions/models.APISpots'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Spots'
+      summary: Update a spot by ID
+      tags:
+      - spot
+  /task:
+    get:
+      description: Get a list of all tasks
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Tasks'
+            type: array
+      summary: Retrieve all tasks
+      tags:
+      - task
+    post:
+      consumes:
+      - application/json
+      description: Create a new task
+      parameters:
+      - description: Task data
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/models.APITasks'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Tasks'
+      summary: Create a task
+      tags:
+      - task
+  /task/{id}:
+    delete:
+      description: Delete a task and nullify its references in spots
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+      summary: Delete a task by ID
+      tags:
+      - task
+    get:
+      description: Get task details by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tasks'
+      summary: Retrieve a task by ID
+      tags:
+      - task
+    put:
+      consumes:
+      - application/json
+      description: Update task details by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Task data
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/models.APITasks'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tasks'
+      summary: Update a task by ID
+      tags:
+      - task
+  /task/{id}/ref:
+    put:
+      description: Update the ref in a task details by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Reference ID (optional)
+        in: query
+        name: ref
+        required: true
+        type: integer
+      - description: Reference Type
+        enum:
+        - spot
+        in: query
+        name: refType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Tasks'
+      summary: Update the ref
+      tags:
+      - task
 swagger: "2.0"

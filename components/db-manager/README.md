@@ -26,17 +26,19 @@ go install github.com/swaggo/swag/cmd/swag@latest
 go install github.com/swaggo/http-swagger
 PATH=$(go env GOPATH)/bin:$PATH
 swag init --parseDependency --output pkg/api/docs
-go mod init
+go mod tidy
 ```
 
 ```bash
 GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -v -a -installsuffix cgo -o dbmanager . 
 cp install/.env-tests .env
 export $(grep -v '^#' .env | xargs)
+./dbmanager 
 ```
 
 ## Documentation
 
+- https://www.alexedwards.net/blog/using-postgresql-jsonb
 
 ## API documentation
 

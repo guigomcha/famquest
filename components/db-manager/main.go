@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
 
@@ -41,33 +42,37 @@ func init() {
 // @license.name Guillermo Gomez GPL V3
 func main() {
 	initialDbData()
+	defer connection.DB.Close()
 	r := mux.NewRouter()
 	r.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 	r.HandleFunc("/health", api.Health).Methods("GET")
 
-	// r.HandleFunc("/attachment", api.AttachmentPost).Methods("POST")
-	// r.HandleFunc("/attachment", api.AttachmentGetAll).Methods("GET")
-	// r.HandleFunc("/attachment/{id}", api.AttachmentGet).Methods("GET")
-	// r.HandleFunc("/attachment/{id}", api.AttachmentPut).Methods("PUT")
-	// r.HandleFunc("/attachment/{id}", api.AttachmentDelete).Methods("DELETE")
+	r.HandleFunc("/attachment", api.AttachmentPost).Methods("POST")
+	r.HandleFunc("/attachment", api.AttachmentGetAll).Methods("GET")
+	r.HandleFunc("/attachment/{id}", api.AttachmentGet).Methods("GET")
+	r.HandleFunc("/attachment/{id}", api.AttachmentPut).Methods("PUT")
+	r.HandleFunc("/attachment/{id}/ref", api.AttachmentPutRef).Methods("PUT")
+	r.HandleFunc("/attachment/{id}", api.AttachmentDelete).Methods("DELETE")
 
-	// r.HandleFunc("/spot", api.SpotPost).Methods("POST")
-	// r.HandleFunc("/spot", api.SpotGetAll).Methods("GET")
-	// r.HandleFunc("/spot/{id}", api.SpotGet).Methods("GET")
-	// r.HandleFunc("/spot/{id}", api.SpotDelete).Methods("DELETE")
-	// r.HandleFunc("/spot/{id}", api.SpotPut).Methods("PUT")
+	r.HandleFunc("/spot", api.SpotPost).Methods("POST")
+	r.HandleFunc("/spot", api.SpotGetAll).Methods("GET")
+	r.HandleFunc("/spot/{id}", api.SpotGet).Methods("GET")
+	r.HandleFunc("/spot/{id}", api.SpotPut).Methods("PUT")
+	r.HandleFunc("/spot/{id}", api.SpotDelete).Methods("DELETE")
 
 	r.HandleFunc("/location", api.LocationPost).Methods("POST")
 	r.HandleFunc("/location", api.LocationGetAll).Methods("GET")
 	r.HandleFunc("/location/{id}", api.LocationGet).Methods("GET")
-	r.HandleFunc("/location/{id}", api.LocationDelete).Methods("DELETE")
 	r.HandleFunc("/location/{id}", api.LocationPut).Methods("PUT")
+	r.HandleFunc("/location/{id}/ref", api.LocationPutRef).Methods("PUT")
+	r.HandleFunc("/location/{id}", api.LocationDelete).Methods("DELETE")
 
-	// r.HandleFunc("/task", api.TaskPost).Methods("POST")
-	// r.HandleFunc("/task", api.TaskGetAll).Methods("GET")
-	// r.HandleFunc("/task/{id}", api.TaskGet).Methods("GET")
-	// r.HandleFunc("/task/{id}", api.TaskDelete).Methods("DELETE")
-	// r.HandleFunc("/task/{id}", api.TaskPut).Methods("PUT")
+	r.HandleFunc("/task", api.TaskPost).Methods("POST")
+	r.HandleFunc("/task", api.TaskGetAll).Methods("GET")
+	r.HandleFunc("/task/{id}", api.TaskGet).Methods("GET")
+	r.HandleFunc("/task/{id}/ref", api.TaskPutRef).Methods("PUT")
+	r.HandleFunc("/task/{id}", api.TaskPut).Methods("PUT")
+	r.HandleFunc("/task/{id}", api.TaskDelete).Methods("DELETE")
 
 	// Start the server
 	port := os.Getenv("SWAGGER_PORT")
@@ -75,6 +80,14 @@ func main() {
 		port = "8080" // Default port if not set
 	}
 	fmt.Printf("Starting server on port %s...\n", port)
+	// Use CORS middleware to allow requests from frontend
+	allowedOrigins := handlers.AllowedOrigins([]string{"http://localhost:3000", "http://localhost:8081"})
+	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"})
+	allowedHeaders := handlers.AllowedHeaders([]string{"Content-Type", "Accept"})
+
+	// Wrap your router with the CORS middleware
+	http.ListenAndServe(":8080", handlers.CORS(allowedOrigins, allowedMethods, allowedHeaders)(r))
+
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
 }
 
@@ -83,14 +96,8 @@ func initialDbData() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer db.Close()
-
+	connection.DB = db
 	if _, err := db.Exec(models.Schema); err != nil {
 		log.Fatalln(err)
 	}
-	// Populate the database with sample data
-	// connection.PopulateDatabase(db)
-
-	// Print the contents of the database
-	// connection.PrintDatabaseContents(db)
 }

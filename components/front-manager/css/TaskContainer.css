@@ -1,0 +1,20 @@
+.task-container {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.task-item {
+  margin: 5px 0;
+}
+
+.task-item a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.task-item a:hover {
+  text-decoration: underline;
+}

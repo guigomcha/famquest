@@ -7,7 +7,6 @@ import (
 	"famquest/components/go-common/logger"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -18,33 +17,31 @@ import (
 // @Tags location
 // @Accept json
 // @Produce json
-// @Param location body models.KnownLocations true "Location data"
+// @Param location body models.APIKnownLocations true "Location data"
 // @Success 201 {object} models.KnownLocations
 // @Router /location [post]
 func LocationPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationPost")
-	db, err := connection.ConnectToPostgreSQL()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 	var location models.KnownLocations
+	var dest connection.DbInterface
 	if err := json.NewDecoder(r.Body).Decode(&location); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	logger.Log.Debug("location decoded")
-	if lastInsertId, err := connection.Insert(db, &location); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	logger.Log.Debug("object decoded")
+	if ref := r.URL.Query().Get("ref"); ref != "" {
+		if intId, err := parseId(ref); err != nil {
+			location.Ref = intId
+			location.RefType = r.URL.Query().Get("refType")
+		}
+	}
+	dest, httpStatus, err := crudPost(&location)
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
 		return
-	} else if err := connection.Get(db, models.KnownLocations{}, lastInsertId, &location); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	} else {
-		logger.Log.Debugf("location created: %d", lastInsertId)
 	}
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(location)
+	json.NewEncoder(w).Encode(dest)
 }
 
 // LocationGetAll retrieves all locations
@@ -56,17 +53,18 @@ func LocationPost(w http.ResponseWriter, r *http.Request) {
 // @Router /location [get]
 func LocationGetAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationGetAll")
-	db, err := connection.ConnectToPostgreSQL()
+	dest, httpStatus, err := crudGetAll(&models.KnownLocations{})
+	logger.Log.Debugf("objects obtained '%d'", len(dest))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), httpStatus)
 		return
 	}
-	var locations []models.KnownLocations
-	if err := connection.GetAll(db, models.KnownLocations{}, &locations); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if len(dest) == 0 {
+		empty := make([]string, 0)
+		json.NewEncoder(w).Encode(empty)
+	} else {
+		json.NewEncoder(w).Encode(dest)
 	}
-	json.NewEncoder(w).Encode(locations)
 }
 
 // LocationGet retrieves a specific location by ID
@@ -79,29 +77,13 @@ func LocationGetAll(w http.ResponseWriter, r *http.Request) {
 // @Router /location/{id} [get]
 func LocationGet(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationGet")
-	db, err := connection.ConnectToPostgreSQL()
+	var dest connection.DbInterface
+	dest, httpStatus, err := crudGet(&models.KnownLocations{}, mux.Vars(r))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), httpStatus)
 		return
 	}
-	vars := mux.Vars(r)
-	id := vars["id"]
-	intId, err := strconv.Atoi(id) //ParseInt(id, 0 , 64)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	var location models.KnownLocations
-	if err := connection.Get(db, models.KnownLocations{}, intId, &location); err != nil {
-		logger.Log.Debugf("Unable to Get: %d", intId)
-		if err.Error() == connection.ErrorIdDoesNotExits {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	json.NewEncoder(w).Encode(location)
+	json.NewEncoder(w).Encode(dest)
 }
 
 // LocationDelete deletes a location by ID
@@ -114,32 +96,11 @@ func LocationGet(w http.ResponseWriter, r *http.Request) {
 // @Router /location/{id} [delete]
 func LocationDelete(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationDelete")
-	db, err := connection.ConnectToPostgreSQL()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	vars := mux.Vars(r)
-	id := vars["id"]
-	intId, err := strconv.Atoi(id) //ParseInt(id, 0 , 64)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
 	// First delete the location
-	if err := connection.Delete(db, models.KnownLocations{}, intId); err != nil {
-		logger.Log.Debugf("Unable to delete: %d", intId)
-		if err.Error() == connection.ErrorIdDoesNotExits {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	// Now Nullify location_ref in spots
-	_, err = db.Exec("UPDATE spots SET location_ref = NULL WHERE location_ref = $1", id)
+	var location models.KnownLocations
+	httpStatus, err := crudDelete(&location, mux.Vars(r))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), httpStatus)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -152,27 +113,21 @@ func LocationDelete(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Location ID"
-// @Param location body models.KnownLocations true "Location data"
+// @Param location body models.APIKnownLocations true "Location data"
 // @Success 200 {object} models.KnownLocations
 // @Router /location/{id} [put]
 func LocationPut(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationPut")
-	db, err := connection.ConnectToPostgreSQL()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	vars := mux.Vars(r)
-	id := vars["id"]
-	intId, err := strconv.Atoi(id) //ParseInt(id, 0 , 64)
+	var location models.KnownLocations
+	var dest connection.DbInterface
+	err := json.NewDecoder(r.Body).Decode(&location)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	var location models.KnownLocations
-	err = json.NewDecoder(r.Body).Decode(&location)
+	intId, err := parseId(mux.Vars(r)["id"])
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	if location.ID > 0 && location.ID != intId {
@@ -181,21 +136,61 @@ func LocationPut(w http.ResponseWriter, r *http.Request) {
 	}
 	location.ID = intId
 	// Update the location
-	logger.Log.Debug("Decoded Location")
-	if err := connection.Update(db, &location); err != nil {
-		logger.Log.Debugf("Unable to update: %d", location.ID)
-		if err.Error() == connection.ErrorIdDoesNotExits {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	// Return latest location
-	if err := connection.Get(db, models.KnownLocations{}, intId, &location); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	logger.Log.Debug("Decoded object")
+	dest, httpStatus, err := crudPut(&location, mux.Vars(r))
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(location)
+	json.NewEncoder(w).Encode(dest)
+}
+
+// LocationPut
+// @Summary Update the ref
+// @Description Update the ref in a location details by ID
+// @Tags location
+// @Produce json
+// @Param id path int true "Location ID"
+// @Param ref query int true "Reference ID (optional)"
+// @Param refType query string true "Reference Type" Enums(spot)
+// @Success 200 {object} models.KnownLocations
+// @Router /location/{id}/ref [put]
+func LocationPutRef(w http.ResponseWriter, r *http.Request) {
+	logger.Log.Info("Called to func LocationPutRef")
+	// first ensure ref is ok
+	intId, err := parseId(r.URL.Query().Get("ref"))
+	if err != nil || intId == 0 {
+		http.Error(w, fmt.Sprintf("Ref error or cero: %+v", err), http.StatusBadRequest)
+		return
+	}
+	var dest connection.DbInterface
+	_, httpStatus, err := crudGet(&models.Spots{}, map[string]string{"id": fmt.Sprint(intId)})
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	logger.Log.Debug("Ref to Spot seems ok")
+	// Now bring the original location
+	dest, httpStatus, err = crudGet(&models.KnownLocations{}, mux.Vars(r))
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	location, ok := dest.(*models.KnownLocations)
+	if !ok {
+		http.Error(w, fmt.Sprintf("Unable to cast the struct correctly from %+v", dest), http.StatusInternalServerError)
+		return
+	}
+	location.Ref = intId
+	location.RefType = r.URL.Query().Get("refType")
+	// Update the location which will trigger the GetInsertExtraQueries
+	logger.Log.Debug("Decoded object")
+	dest, httpStatus, err = crudPut(dest, mux.Vars(r))
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(dest)
 }
