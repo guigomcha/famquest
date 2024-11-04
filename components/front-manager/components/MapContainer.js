@@ -30,6 +30,8 @@ const popUpStyle = {
 const MapContainer = ( {locations, spots } ) => {
   const canvasRef = useRef(null);
   const mapRef = useRef(null);
+  const guilleSpotsGroup   = useRef(null);
+  const featureGroup = useRef(null);
   const locs = useRef(null);
 
   const prepareMap = () => {
@@ -52,10 +54,12 @@ const MapContainer = ( {locations, spots } ) => {
       icon: L.icon(iconStyle),
     })
       .addTo(mapRef.current);
+    guilleSpotsGroup.current.addLayer(marker);
     // Inject our custom component 
-    const popupContainer = document.createElement('div');
+    const popupContainer = document.createElement('div', popUpStyle);
     const root = createRoot(popupContainer); 
     root.render(<SpotPopup {...data} />);
+
     marker.bindPopup(popupContainer, popUpStyle);   
     // Close the popup after submission
     marker.openPopup();
@@ -72,14 +76,14 @@ const MapContainer = ( {locations, spots } ) => {
       // Create layer groups
 
       // Add layer group to host the spots from 1 user
-      const layerGroup = L.layerGroup().addTo(mapRef.current);
+      guilleSpotsGroup.current = L.layerGroup().addTo(mapRef.current);
 
       // Add feature group to enable/disable the discovery map
-      const featureGroup = L.featureGroup().addTo(mapRef.current);
+      featureGroup.current = L.featureGroup().addTo(mapRef.current);
       
       // Create a canvas overlay for the feature group
       canvasRef.current = new CanvasLayer();
-      featureGroup.addLayer(canvasRef.current);
+      featureGroup.current.addLayer(canvasRef.current);
 
       // Events associated to the canvas
       const handleEvent = () => {
@@ -97,7 +101,7 @@ const MapContainer = ( {locations, spots } ) => {
 
       // Right click to create a new spot
       mapRef.current.on('contextmenu', (e) => {
-        const formContainer = document.createElement('div');
+        const formContainer = document.createElement('div', popUpStyle);
         const root = createRoot(formContainer); // Create root for new container
         // TODO: change to the creation of the spot + location in our DB and force re-render somehow
         root.render(
@@ -115,8 +119,8 @@ const MapContainer = ( {locations, spots } ) => {
             .on('locationfound', function(e){
                 var marker = L.marker([e.latitude, e.longitude], {
                   icon: L.icon(iconStyle),
-                }).bindPopup('Your are here :)');
-                var circle = L.circle([e.latitude, e.longitude], e.accuracy/2, {
+                }).bindPopup('Your are here :)'); 
+                var circle = L.circle([e.latitude, e.longitude], Math.min(e.accuracy/2, 100), {
                     weight: 1,
                     color: 'blue',
                     fillColor: '#cacaca',
@@ -132,8 +136,8 @@ const MapContainer = ( {locations, spots } ) => {
 
       // Create overlay controls
       const overlays = {
-        "Spots Guille": layerGroup,
-        "Mask map": featureGroup
+        "Spots Guille": guilleSpotsGroup.current,
+        "Mask map": featureGroup.current
       };
       L.control.layers(null, overlays, { collapsed: false }).addTo(mapRef.current);
     }
@@ -155,11 +159,12 @@ const MapContainer = ( {locations, spots } ) => {
       spots.forEach((spot) => {
         console.log("used spot: "+ spot.id)
         // Adding a marker with custom icon
-        L.marker([spot.location.latitude, spot.location.longitude], {
+        const marker = L.marker([spot.location.latitude, spot.location.longitude], {
           icon: L.icon(iconStyle),
         })
           .addTo(mapRef.current)
           .bindPopup(spot.name);
+        guilleSpotsGroup.current.addLayer(marker);
       });
     }
       

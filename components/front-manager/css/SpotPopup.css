@@ -18,7 +18,7 @@
 
 .attachment-container {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   border: 1px solid #ccc; /* Thin outline */
   border-radius: 5px;
   padding: 10px;
@@ -42,7 +42,6 @@
   padding: 10px;
   margin-bottom: 10px; /* Space below header */
   align-items: center;
-  margin-top: 20px; /* Space between the header and carousel */
 }
 
 .info-container {
