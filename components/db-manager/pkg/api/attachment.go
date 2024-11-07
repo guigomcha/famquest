@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"famquest/components/db-manager/pkg/connection"
@@ -8,34 +9,60 @@ import (
 	"famquest/components/go-common/logger"
 	"fmt"
 	"net/http"
+	"strings"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/minio/minio-go/v7"
 )
 
 // AttachmentPost creates a new attachment
 // @Summary Create a attachment
 // @Description Create a new attachment
 // @Tags attachment
-// @Accept json
+// @Accept multipart/form-data
+// mpfd
 // @Produce json
-// @Param attachment body models.APIAttachments true "Attachment data"
+// @Param  data formData file true "Image/audio file"
+// @Param  name formData string true "name of the attachment"
+// @Param  description formData string true "description of the attachment"
+// @Param  contentType formData string true "image/jpeg or media/mpeg"
 // @Success 201 {object} models.Attachments
 // @Router /attachment [post]
 func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentPost")
-	var attachment models.Attachments
-	var dest connection.DbInterface
-	if err := json.NewDecoder(r.Body).Decode(&attachment); err != nil {
+	data, _, err := r.FormFile("data")
+	if err != nil {
+		logger.Log.Debug(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	logger.Log.Debug("object decoded")
-	if ref := r.URL.Query().Get("ref"); ref != "" {
-		if intId, err := parseId(ref); err != nil {
-			attachment.Ref = intId
-			attachment.RefType = r.URL.Query().Get("refType")
-		}
+	defer data.Close()
+	attachment := models.Attachments{
+		Name:        r.FormValue("name"),
+		Description: r.FormValue("description"),
+		ContentType: r.FormValue("contentType"),
 	}
+	if attachment.ContentType != "image/jpeg" && attachment.ContentType != "audio/mpeg" {
+		http.Error(w, "ContentType not supported", http.StatusBadRequest)
+		return
+	}
+	logger.Log.Infof("Metadata received: %+v", attachment)
+	minioClient, err := connection.ConnectToMinio()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	urlId := (uuid.New()).String()
+	_, err = minioClient.PutObject(context.Background(), strings.Split(attachment.ContentType, "/")[0], urlId, data, -1, minio.PutObjectOptions{ContentType: attachment.ContentType})
+	if err != nil {
+		http.Error(w, "Failed to upload to minio: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	url := strings.Join([]string{minioClient.EndpointURL().String(), strings.Split(attachment.ContentType, "/")[0], urlId}, "/")
+	logger.Log.Infof("%s stored with URL %s", strings.Split(attachment.ContentType, "/")[0], url)
+	var dest connection.DbInterface
+	attachment.URL = url
 	dest, httpStatus, err := crudPost(&attachment)
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
@@ -97,13 +124,36 @@ func AttachmentGet(w http.ResponseWriter, r *http.Request) {
 // @Router /attachment/{id} [delete]
 func AttachmentDelete(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentDelete")
-	// First delete the attachment
-	var attachment models.Attachments
+	intId, err := parseId(mux.Vars(r)["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	attachment := models.Attachments{}
+	err = connection.DB.Get(&attachment, attachment.GetSelectOneQuery(), intId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	logger.Log.Info("Obtained first from DB")
+	minioClient, err := connection.ConnectToMinio()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	uuid := strings.Split(attachment.URL, "/")[len(strings.Split(attachment.URL, "/"))-1]
+	err = minioClient.RemoveObject(context.Background(), strings.Split(attachment.ContentType, "/")[0], uuid, minio.RemoveObjectOptions{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	logger.Log.Info("Deleted from minio")
 	httpStatus, err := crudDelete(&attachment, mux.Vars(r))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
+	logger.Log.Info("Deleted from db")
 	w.WriteHeader(http.StatusNoContent)
 }
 

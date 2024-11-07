@@ -48,7 +48,7 @@ const docTemplate = `{
             "post": {
                 "description": "Create a new attachment",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -59,13 +59,32 @@ const docTemplate = `{
                 "summary": "Create a attachment",
                 "parameters": [
                     {
-                        "description": "Attachment data",
-                        "name": "attachment",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.APIAttachments"
-                        }
+                        "type": "file",
+                        "description": "Image/audio file",
+                        "name": "data",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the attachment",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "description of the attachment",
+                        "name": "description",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "image/jpeg or media/mpeg",
+                        "name": "contentType",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -794,10 +813,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                },
-                "url": {
-                    "description": "Url",
-                    "type": "string"
                 }
             }
         },
@@ -847,6 +862,9 @@ const docTemplate = `{
         "models.Attachments": {
             "type": "object",
             "properties": {
+                "contentType": {
+                    "type": "string"
+                },
                 "createdAt": {
                     "description": "Automatically generated",
                     "type": "string"

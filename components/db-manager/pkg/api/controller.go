@@ -82,6 +82,7 @@ func crudDelete(m connection.DbInterface, mVars map[string]string) (int, error) 
 
 // pointer to interface
 func crudPut(m connection.DbInterface, mVars map[string]string) (connection.DbInterface, int, error) {
+	// TODO: Only update what is not ""...
 	var dest connection.DbInterface
 	intId, err := parseId(mVars["id"])
 	if err != nil {

@@ -21,7 +21,6 @@ services:
         ]
     ports:
       - 15432:80
-
   famquest:
     image: postgres:latest
     container_name: famquest
@@ -31,4 +30,19 @@ services:
       POSTGRES_PASSWORD: mypassword
     ports:
       - "5432:5432"
-  
+  minio:
+    image: docker.io/bitnami/minio:2022
+    container_name: minio
+    ports: # 9000 for some reason busy in localhost
+      - 5430:9000
+      - 5431:9001
+    # volumes:
+    #   - 'minio_data:/data'
+    environment:
+      - MINIO_ROOT_USER=myuser
+      - MINIO_ROOT_PASSWORD=mypassword
+      - MINIO_DEFAULT_BUCKETS=image
+
+# volumes:
+#   minio_data:
+#     driver: local  
