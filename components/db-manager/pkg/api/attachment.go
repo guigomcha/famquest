@@ -59,6 +59,9 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to upload to minio: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// TODO: This URLs are not valid as they still need credentials
+	// reqParams := make(map[string]string)
+	// presignedURL, err := minioClient.PresignedGetObject(context.Background(), bucketName, objectName, urlExpiry, reqParams)
 	url := strings.Join([]string{minioClient.EndpointURL().String(), strings.Split(attachment.ContentType, "/")[0], urlId}, "/")
 	logger.Log.Infof("%s stored with URL %s", strings.Split(attachment.ContentType, "/")[0], url)
 	var dest connection.DbInterface
@@ -71,6 +74,7 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(dest)
 }
+
 
 // AttachmentGetAll retrieves all attachments
 // @Summary Retrieve all attachments
