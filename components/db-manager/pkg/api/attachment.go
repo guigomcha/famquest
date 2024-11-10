@@ -9,7 +9,9 @@ import (
 	"famquest/components/go-common/logger"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -48,24 +50,15 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logger.Log.Infof("Metadata received: %+v", attachment)
-	minioClient, err := connection.ConnectToMinio()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 	urlId := (uuid.New()).String()
-	_, err = minioClient.PutObject(context.Background(), strings.Split(attachment.ContentType, "/")[0], urlId, data, -1, minio.PutObjectOptions{ContentType: attachment.ContentType})
+	_, err = connection.Minio.PutObject(context.Background(), strings.Split(attachment.ContentType, "/")[0], urlId, data, -1, minio.PutObjectOptions{ContentType: attachment.ContentType})
 	if err != nil {
 		http.Error(w, "Failed to upload to minio: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	// TODO: This URLs are not valid as they still need credentials
-	// reqParams := make(map[string]string)
-	// presignedURL, err := minioClient.PresignedGetObject(context.Background(), bucketName, objectName, urlExpiry, reqParams)
-	url := strings.Join([]string{minioClient.EndpointURL().String(), strings.Split(attachment.ContentType, "/")[0], urlId}, "/")
-	logger.Log.Infof("%s stored with URL %s", strings.Split(attachment.ContentType, "/")[0], url)
 	var dest connection.DbInterface
-	attachment.URL = url
+	// db stores the uuid but the get and getall returns the actual url pre-authorized
+	attachment.URL = urlId
 	dest, httpStatus, err := crudPost(&attachment)
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
@@ -74,7 +67,6 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(dest)
 }
-
 
 // AttachmentGetAll retrieves all attachments
 // @Summary Retrieve all attachments
@@ -85,18 +77,38 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 // @Router /attachment [get]
 func AttachmentGetAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentGetAll")
-	dest, httpStatus, err := crudGetAll(&models.Attachments{})
-	logger.Log.Debugf("objects obtained '%d'", len(dest))
+	dests, httpStatus, err := crudGetAll(&models.Attachments{})
+	logger.Log.Debugf("objects obtained '%d'", len(dests))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
-	if len(dest) == 0 {
+	if len(dests) == 0 {
 		empty := make([]string, 0)
 		json.NewEncoder(w).Encode(empty)
-	} else {
-		json.NewEncoder(w).Encode(dest)
+		return
 	}
+	var attachments []*models.Attachments
+	// preauthorize urls
+	for _, dest := range dests {
+		// Type assertion: convert interface back to the concrete type
+		if att, ok := dest.(*models.Attachments); ok {
+			// Set request parameters
+			reqHeaders := make(http.Header)
+			// reqHeaders.Set("Host", "host.docker.internal")
+			presignedURL, err := connection.Minio.PresignHeader(context.Background(), http.MethodGet, strings.Split(att.ContentType, "/")[0], att.URL, time.Hour, make(url.Values), reqHeaders)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			att.URL = presignedURL.String()
+			attachments = append(attachments, att)
+		} else {
+			http.Error(w, "unable to cast attachment", http.StatusInternalServerError)
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(attachments)
 }
 
 // AttachmentGet retrieves a specific attachment by ID
@@ -115,7 +127,20 @@ func AttachmentGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
-	json.NewEncoder(w).Encode(dest)
+	if att, ok := dest.(*models.Attachments); ok {
+		// Set request parameters
+		reqHeaders := make(http.Header)
+		// reqHeaders.Set("Host", "host.docker.internal")
+		presignedURL, err := connection.Minio.PresignHeader(context.Background(), http.MethodGet, strings.Split(att.ContentType, "/")[0], att.URL, time.Hour, make(url.Values), reqHeaders)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		att.URL = presignedURL.String()
+		json.NewEncoder(w).Encode(dest)
+		return
+	}
+	http.Error(w, "unable to cast attachment", httpStatus)
 }
 
 // AttachmentDelete deletes a attachment by ID

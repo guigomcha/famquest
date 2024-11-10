@@ -101,4 +101,10 @@ func initialDbData() {
 	if _, err := db.Exec(models.Schema); err != nil {
 		log.Fatalln(err)
 	}
+	minioClient, err := connection.ConnectToMinio()
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
+	connection.Minio = minioClient
 }
