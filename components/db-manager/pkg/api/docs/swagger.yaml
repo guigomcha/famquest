@@ -134,6 +134,18 @@ paths:
   /attachment:
     get:
       description: Get a list of all attachments
+      parameters:
+      - description: Reference ID (optional)
+        in: query
+        name: refId
+        type: integer
+      - description: Reference Type (optional)
+        enum:
+        - spot
+        - task
+        in: query
+        name: refType
+        type: string
       produces:
       - application/json
       responses:

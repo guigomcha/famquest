@@ -34,7 +34,7 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 	// Parse multipart form data with a maximum file size of 10MB
 	err := r.ParseMultipartForm(500 << 20) // 500 MB
 	if err != nil {
-		msg := "Unable to parse form data: "+ err.Error()
+		msg := "Unable to parse form data: " + err.Error()
 		logger.Log.Debug(msg)
 		http.Error(w, msg, http.StatusBadRequest)
 		return
@@ -42,7 +42,7 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Debugf("Available: '%+v'", r.Form)
 	data, header, err := r.FormFile("file")
 	if err != nil {
-		logger.Log.Debugf("error %s for '%+v' and '%+v'",  err.Error(), data, header)
+		logger.Log.Debugf("error %s for '%+v' and '%+v'", err.Error(), data, header)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -52,7 +52,7 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 		Description: r.FormValue("description"),
 		ContentType: header.Header.Get("Content-Type"),
 	}
-	if attachment.ContentType != "image/jpeg" && attachment.ContentType != "audio/mpeg" {
+	if strings.HasPrefix(attachment.ContentType, "image/") && strings.HasPrefix(attachment.ContentType, "audio/") {
 		http.Error(w, "ContentType not supported", http.StatusBadRequest)
 		return
 	}
@@ -80,11 +80,24 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 // @Description Get a list of all attachments
 // @Tags attachment
 // @Produce json
+// @Param refId query int false "Reference ID (optional)"
+// @Param refType query string false "Reference Type (optional)" Enums(spot,task)
 // @Success 200 {array} models.Attachments
 // @Router /attachment [get]
 func AttachmentGetAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentGetAll")
-	dests, httpStatus, err := crudGetAll(&models.Attachments{})
+	// Create the filter
+	filter := ""
+	if r.URL.Query().Get("refId") != "" {
+		intId, err := parseId(r.URL.Query().Get("refId"))
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Ref error: %s", err.Error()), http.StatusBadRequest)
+			return
+		}
+		filter = fmt.Sprintf("WHERE ref_id = %d AND ref_type = '%s'", intId, r.URL.Query().Get("refType"))
+		logger.Log.Debugf("created filer '%s'", filter)
+	}
+	dests, httpStatus, err := crudGetAll(&models.Attachments{}, filter)
 	logger.Log.Debugf("objects obtained '%d'", len(dests))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)

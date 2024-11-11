@@ -73,7 +73,7 @@ const MapContainer = ( {locations, spots } ) => {
         // Inject our custom component 
         const popupContainer = document.createElement('div', popUpStyle);
         const root = createRoot(popupContainer); 
-        root.render(<SpotPopup id={spotDb.id} {...data} />);
+        root.render(<SpotPopup spot={spotDb} />);
 
         marker.bindPopup(popupContainer, popUpStyle);   
         // Close the popup after submission
@@ -187,7 +187,7 @@ const MapContainer = ( {locations, spots } ) => {
         // Inject our custom component 
         const popupContainer = document.createElement('div', popUpStyle);
         const root = createRoot(popupContainer); 
-        root.render(<SpotPopup id={spot.id} name={spot.name} description={spot.description} />);
+        root.render(<SpotPopup spot={spot} />);
         marker.bindPopup(popupContainer, popUpStyle);
         guilleSpotsGroup.current.addLayer(marker);
       });

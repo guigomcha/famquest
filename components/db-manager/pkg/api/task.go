@@ -54,7 +54,7 @@ func TaskPost(w http.ResponseWriter, r *http.Request) {
 // @Router /task [get]
 func TaskGetAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func TaskGetAll")
-	dest, httpStatus, err := crudGetAll(&models.Tasks{})
+	dest, httpStatus, err := crudGetAll(&models.Tasks{}, "")
 	logger.Log.Debugf("objects obtained '%d'", len(dest))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)

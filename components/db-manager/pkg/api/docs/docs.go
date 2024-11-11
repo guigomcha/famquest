@@ -33,6 +33,24 @@ const docTemplate = `{
                     "attachment"
                 ],
                 "summary": "Retrieve all attachments",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Reference ID (optional)",
+                        "name": "refId",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "spot",
+                            "task"
+                        ],
+                        "type": "string",
+                        "description": "Reference Type (optional)",
+                        "name": "refType",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

@@ -55,7 +55,7 @@ func LocationPost(w http.ResponseWriter, r *http.Request) {
 // @Router /location [get]
 func LocationGetAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationGetAll")
-	dest, httpStatus, err := crudGetAll(&models.KnownLocations{})
+	dest, httpStatus, err := crudGetAll(&models.KnownLocations{}, "")
 	logger.Log.Debugf("objects obtained '%d'", len(dest))
 	if err != nil {
 		logger.Log.Error(err.Error())

@@ -91,12 +91,12 @@ func Get(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
 }
 
 // GetAll Function
-func GetAll(db *sqlx.DB, model DbInterface) ([]DbInterface, error) {
+func GetAll(db *sqlx.DB, model DbInterface, filter string) ([]DbInterface, error) {
 	var dest []DbInterface
 	switch m := model.(type) {
 	case *models.KnownLocations:
 		received := []models.KnownLocations{}
-		err := db.Select(&received, m.GetSelectAllQuery())
+		err := db.Select(&received, m.GetSelectAllQuery()+" "+filter)
 		logger.Log.Debugf("objects obtained '%+v'", received)
 		if err != nil {
 			return dest, err
@@ -109,7 +109,7 @@ func GetAll(db *sqlx.DB, model DbInterface) ([]DbInterface, error) {
 
 	case *models.Attachments:
 		received := []models.Attachments{}
-		err := db.Select(&received, m.GetSelectAllQuery())
+		err := db.Select(&received, m.GetSelectAllQuery()+" "+filter)
 		logger.Log.Debugf("objects obtained '%+v'", received)
 		if err != nil {
 			return dest, err
@@ -122,7 +122,7 @@ func GetAll(db *sqlx.DB, model DbInterface) ([]DbInterface, error) {
 
 	case *models.Tasks:
 		received := []models.Tasks{}
-		err := db.Select(&received, m.GetSelectAllQuery())
+		err := db.Select(&received, m.GetSelectAllQuery()+" "+filter)
 		logger.Log.Debugf("objects obtained '%+v'", received)
 		if err != nil {
 			return dest, err
@@ -136,18 +136,12 @@ func GetAll(db *sqlx.DB, model DbInterface) ([]DbInterface, error) {
 	case *models.Spots:
 		// todo call the get function instead if there is too much duplicated code in the end
 		received := []models.Spots{}
-		err := db.Select(&received, m.GetSelectAllQuery())
+		err := db.Select(&received, m.GetSelectAllQuery()+" "+filter)
 		if err != nil {
 			return dest, err
 		}
 		// Slices need to be reconverted element by element
 		for _, s := range received {
-			// if s.Attachments == nil {
-			// 	s.Attachments = pq.Int64Array{}
-			// }
-			// if s.Tasks == nil {
-			// 	s.Tasks = pq.Int64Array{}
-			// }
 			dest = append(dest, &s) // Add the struct to the interface slice
 		}
 	default:

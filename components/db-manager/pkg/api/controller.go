@@ -36,9 +36,9 @@ func crudPost(m connection.DbInterface) (connection.DbInterface, int, error) {
 }
 
 // pointer to interface
-func crudGetAll(m connection.DbInterface) ([]connection.DbInterface, int, error) {
+func crudGetAll(m connection.DbInterface, filter string) ([]connection.DbInterface, int, error) {
 	var dest []connection.DbInterface
-	dest, err := connection.GetAll(connection.DB, m)
+	dest, err := connection.GetAll(connection.DB, m, filter)
 	if err != nil {
 		logger.Log.Debugf("%+v: %s", dest, err.Error())
 		return dest, http.StatusInternalServerError, err

@@ -214,6 +214,7 @@ export const fetchAttachment = async (attachmentId) => {
 
     if (response.ok) {
       const data = await response.json();
+      console.info("Received attachment: "+ JSON.stringify(data))
       return data; // return attachment data if needed
     } else {
       throw new Error('Failed to fetch attachment');
@@ -221,5 +222,31 @@ export const fetchAttachment = async (attachmentId) => {
   } catch (error) {
     console.error('Error fetching attachment:', error);
     return null;
+  }
+};
+
+export const fetchAttachments = async (refId, refType) => {
+  try {
+    var filter = "";
+    if (refId > 0) {
+      filter = `?refId=${refId}&refType=${refType}`
+    }
+    const response = await fetch(`${API_URL}/attachment${filter}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json'
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.info("Received attachments: "+ JSON.stringify(data))
+      return data; // return attachment data if needed
+    } else {
+      throw new Error('Failed to fetch attachments');
+    }
+  } catch (error) {
+    console.error('Error fetching attachment:', error);
+    return [];
   }
 };
