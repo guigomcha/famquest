@@ -151,9 +151,9 @@ paths:
       - multipart/form-data
       description: Create a new attachment
       parameters:
-      - description: Image/audio file
+      - description: image/jpeg or media/mpeg
         in: formData
-        name: data
+        name: file
         required: true
         type: file
       - description: name of the attachment
@@ -164,11 +164,6 @@ paths:
       - description: description of the attachment
         in: formData
         name: description
-        required: true
-        type: string
-      - description: image/jpeg or media/mpeg
-        in: formData
-        name: contentType
         required: true
         type: string
       produces:
@@ -255,7 +250,7 @@ paths:
         type: integer
       - description: Reference ID (optional)
         in: query
-        name: ref
+        name: refId
         required: true
         type: integer
       - description: Reference Type
@@ -400,7 +395,7 @@ paths:
         type: integer
       - description: Reference ID (optional)
         in: query
-        name: ref
+        name: refId
         required: true
         type: integer
       - description: Reference Type

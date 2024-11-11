@@ -1,18 +1,22 @@
 import React, { useState, useRef } from 'react';
-import '../css/SpotPopup.css'; // Import your CSS for styling
-import TaskForm from './TaskForm'; // Import the TaskForm component
+import '../css/SpotPopup.css';
+import TaskForm from './TaskForm';
+import { uploadAttachment, addReferenceToAttachment, fetchAttachment } from '../backend_interface/db_manager_api';
 
 const attachments = [
   "https://th.bing.com/th/id/OIP.Z4qIxA17cq1sPEirnRyzGQHaLT?w=655&h=1000&rs=1&pid=ImgDetMain",
   "https://th.bing.com/th/id/R.49837456df01910ef35de88bdff89bea?rik=kU1JPVDY5co4%2fQ&riu=http%3a%2f%2farteguias.com%2fimagenes4%2fjaimeconquistador-2.jpg&ehk=YvUEHibrNGst307pVny1muBp2Vec5YJwqwqZQQKVPmQ%3d&risl=&pid=ImgRaw&r=0"
 ];
 
-const SpotPopup = ({ name, description }) => {
+const SpotPopup = ({ id, name, description }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedImages, setSelectedImages] = useState(attachments);
   const [tasks, setTasks] = useState([]);
   const [showTaskForm, setShowTaskForm] = useState(false);
-  const fileInputRef = useRef(null);
+  const [imageName, setImageName] = useState('');
+  const [imageDescription, setImageDescription] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
+  const [file, setFile] = useState(null);
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % selectedImages.length);
@@ -23,15 +27,38 @@ const SpotPopup = ({ name, description }) => {
       (prevIndex - 1 + selectedImages.length) % selectedImages.length
     );
   };
-  
-  const handleImageUpload = (event) => {
-    const files = Array.from(event.target.files);
-    const newFileURLs = files.map((file) => URL.createObjectURL(file));
-    setSelectedImages((prevImages) => [...prevImages, ...newFileURLs]);
+  // Handle file selection
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = null;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!file || !imageName || !imageDescription) {
+      console.info("FILL OUT EVERYTHING");
+      setStatusMessage("Please fill out all fields.");
+      return;
     }
+
+    const attachment = await uploadAttachment(file, imageName, imageDescription);
+
+    if (attachment) {
+      // Add reference to current spot
+      await addReferenceToAttachment(attachment.id, id, "spot");
+
+      // Fetch the attachment data
+      const fullAttachment = await fetchAttachment(attachment.id);
+      console.debug("image Name: "+ imageName + " Url: "+fullAttachment.url)
+      // Update the selected images
+      setSelectedImages((prevImages) => [...prevImages, fullAttachment.url]);
+    } else {
+      setStatusMessage("Unable to send image.");
+    }
+    setImageName('');
+    setImageDescription('');
+    setFile('');
+
   };
 
   const addTask = (task) => {
@@ -92,20 +119,34 @@ const SpotPopup = ({ name, description }) => {
       </div>
 
       <div className="attachment-container">
-        <div className="file-input-container">
-          <label className="file-input-label">
-            Choose Files
-            <input 
-              type="file" 
-              accept="image/*" 
-              multiple 
-              onChange={handleImageUpload} 
-              className="file-input" 
-              ref={fileInputRef} 
-            />
-          </label>
-        </div>
-
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
+          <input 
+            type="text" 
+            value={imageName} 
+            onChange={(e) => setImageName(e.target.value)} 
+            placeholder="Image Name" 
+            required 
+          />
+          <textarea 
+            value={imageDescription} 
+            onChange={(e) => setImageDescription(e.target.value)} 
+            placeholder="Image Description" 
+            required 
+          />
+          
+          <div className="file-input-container">
+              <input 
+                type="file" 
+                placeholder="Select file"
+                accept="image/*" 
+                onChange={handleFileChange} 
+                className="file-input"
+                required
+              />
+          </div>
+          <button type="submit">Upload</button>
+          {statusMessage && <p>{statusMessage}</p>}
+          </form>
         {selectedImages.length > 0 ? (
           <div className="carousel-container">
             <button onClick={handlePrev} disabled={selectedImages.length <= 1}>Prev</button>

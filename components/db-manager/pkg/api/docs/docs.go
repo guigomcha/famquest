@@ -60,8 +60,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "file",
-                        "description": "Image/audio file",
-                        "name": "data",
+                        "description": "image/jpeg or media/mpeg",
+                        "name": "file",
                         "in": "formData",
                         "required": true
                     },
@@ -76,13 +76,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "description of the attachment",
                         "name": "description",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "image/jpeg or media/mpeg",
-                        "name": "contentType",
                         "in": "formData",
                         "required": true
                     }
@@ -213,7 +206,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Reference ID (optional)",
-                        "name": "ref",
+                        "name": "refId",
                         "in": "query",
                         "required": true
                     },
@@ -431,7 +424,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Reference ID (optional)",
-                        "name": "ref",
+                        "name": "refId",
                         "in": "query",
                         "required": true
                     },

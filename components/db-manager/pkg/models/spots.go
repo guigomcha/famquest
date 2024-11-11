@@ -47,11 +47,11 @@ func (m *Spots) GetSelectOneQuery() string {
 	FROM 
 			spots s
 	LEFT JOIN 
-			known_locations kl ON kl.ref = s.id AND kl.ref_type = 'spot'
+			known_locations kl ON kl.ref_id = s.id AND kl.ref_type = 'spot'
 	LEFT JOIN 
-			attachments a ON a.ref = s.id AND a.ref_type = 'spot'
+			attachments a ON a.ref_id = s.id AND a.ref_type = 'spot'
 	LEFT JOIN 
-			tasks t ON t.ref = s.id AND t.ref_type = 'spot'
+			tasks t ON t.ref_id = s.id AND t.ref_type = 'spot'
 	WHERE
 			s.id = $1
 	GROUP BY 
@@ -72,11 +72,11 @@ func (m *Spots) GetSelectAllQuery() string {
 	FROM 
 			spots s
 	LEFT JOIN 
-			known_locations kl ON kl.ref = s.id AND kl.ref_type = 'spot'
+			known_locations kl ON kl.ref_id = s.id AND kl.ref_type = 'spot'
 	LEFT JOIN 
-			attachments a ON a.ref = s.id AND a.ref_type = 'spot'
+			attachments a ON a.ref_id = s.id AND a.ref_type = 'spot'
 	LEFT JOIN 
-			tasks t ON t.ref = s.id AND t.ref_type = 'spot'
+			tasks t ON t.ref_id = s.id AND t.ref_type = 'spot'
 	GROUP BY 
 			s.id, kl.id, s.name, s.description, s.created_at, s.updated_at`
 }
@@ -97,11 +97,11 @@ func (m *Spots) GetUpdateQuery() string {
 func (m *Spots) GetDeleteExtraQueries() []string {
 	return []string{
 		`UPDATE attachments
-		 SET ref = 0 
-		 WHERE ref = :id AND ref_type = 'spot'`,
+		 SET ref_id = 0 
+		 WHERE ref_id = :id AND ref_type = 'spot'`,
 		`UPDATE tasks
-		 SET ref = 0 
-		 WHERE ref = :id AND ref_type = 'spot'`,
+		 SET ref_id = 0 
+		 WHERE ref_id = :id AND ref_type = 'spot'`,
 	}
 }
 

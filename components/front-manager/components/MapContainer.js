@@ -9,6 +9,7 @@ import { createRoot } from 'react-dom/client'; // Import createRoot
 import React, { useEffect, useRef, useState } from "react";
 import SpotForm from './SpotForm';
 import SpotPopup from './SpotPopup';
+import { uploadLocation, uploadSpot, addReferenceToLocation } from '../backend_interface/db_manager_api';
 
 const scale = 13;
 
@@ -48,21 +49,40 @@ const MapContainer = ( {locations, spots } ) => {
     }
   };
 
-  function CreateSpotFromForm(data, latlng) {
-    // Create marker which will be later a location + spot
-    const marker = L.marker(latlng, {
-      icon: L.icon(iconStyle),
-    })
-      .addTo(mapRef.current);
-    guilleSpotsGroup.current.addLayer(marker);
-    // Inject our custom component 
-    const popupContainer = document.createElement('div', popUpStyle);
-    const root = createRoot(popupContainer); 
-    root.render(<SpotPopup {...data} />);
+  async function CreateSpotFromForm(data, latlng) {
+    // Add to DB
+    var locationBody = {
+      "name": "location for spot "+ data.name,
+      "longitude": latlng.lng,
+      "latitude": latlng.lat
+    }
+    console.info("using location "+JSON.stringify(locationBody))
+    const locationDb = await uploadLocation(locationBody);
+    if (locationDb) {
+      const spotDb = await uploadSpot(data);
+      console.info("created spot in DB "+ JSON.stringify(spotDb))
+      if (spotDb) {
+        await addReferenceToLocation(locationDb.id, spotDb.id, "spot");
+        // Create marker which will be later a location + spot
+        const marker = L.marker(latlng, {
+          icon: L.icon(iconStyle),
+        })
+          .addTo(mapRef.current);
+        // Todo: Decide the owner based on something
+        guilleSpotsGroup.current.addLayer(marker);
+        // Inject our custom component 
+        const popupContainer = document.createElement('div', popUpStyle);
+        const root = createRoot(popupContainer); 
+        root.render(<SpotPopup id={spotDb.id} {...data} />);
 
-    marker.bindPopup(popupContainer, popUpStyle);   
-    // Close the popup after submission
-    marker.openPopup();
+        marker.bindPopup(popupContainer, popUpStyle);   
+        // Close the popup after submission
+        marker.openPopup();
+
+      }
+    }
+
+    
   };
 
   // Create and configure the map
@@ -105,7 +125,7 @@ const MapContainer = ( {locations, spots } ) => {
         const root = createRoot(formContainer); // Create root for new container
         // TODO: change to the creation of the spot + location in our DB and force re-render somehow
         root.render(
-          <SpotForm onSubmit={(data) => CreateSpotFromForm(data, e.latlng)} />
+          <SpotForm onSubmit={async (data) => CreateSpotFromForm(data, e.latlng)} />
         );
         L.popup(popUpStyle)
           .setLatLng(e.latlng)
@@ -154,6 +174,7 @@ const MapContainer = ( {locations, spots } ) => {
 
   
   // Add the markers in the spots
+  // TODO: this should be the same as with the create from context
   useEffect(() => {
     if (mapRef.current && spots) {
       spots.forEach((spot) => {

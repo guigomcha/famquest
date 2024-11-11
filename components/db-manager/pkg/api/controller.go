@@ -22,12 +22,13 @@ func crudPost(m connection.DbInterface) (connection.DbInterface, int, error) {
 	var dest connection.DbInterface
 	lastInsertId, err := connection.Insert(connection.DB, m)
 	if err != nil {
-		logger.Log.Debug("insert error")
+		logger.Log.Debugf("insert error: %s", err.Error())
 		return dest, http.StatusInternalServerError, err
 	}
+	logger.Log.Debugf("Inserted with %d", lastInsertId)
 	dest, err = connection.Get(connection.DB, lastInsertId, m)
 	if err != nil {
-		logger.Log.Debug("Get error")
+		logger.Log.Debugf("Get error: %s", err.Error())
 		return dest, http.StatusInternalServerError, err
 	}
 	logger.Log.Debugf("object created in db: %d", lastInsertId)

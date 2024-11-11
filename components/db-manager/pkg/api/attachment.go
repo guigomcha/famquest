@@ -23,19 +23,26 @@ import (
 // @Description Create a new attachment
 // @Tags attachment
 // @Accept multipart/form-data
-// mpfd
 // @Produce json
-// @Param  data formData file true "Image/audio file"
+// @Param  file formData file true "image/jpeg or media/mpeg"
 // @Param  name formData string true "name of the attachment"
 // @Param  description formData string true "description of the attachment"
-// @Param  contentType formData string true "image/jpeg or media/mpeg"
 // @Success 201 {object} models.Attachments
 // @Router /attachment [post]
 func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentPost")
-	data, _, err := r.FormFile("data")
+	// Parse multipart form data with a maximum file size of 10MB
+	err := r.ParseMultipartForm(500 << 20) // 500 MB
 	if err != nil {
-		logger.Log.Debug(err.Error())
+		msg := "Unable to parse form data: "+ err.Error()
+		logger.Log.Debug(msg)
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+	logger.Log.Debugf("Available: '%+v'", r.Form)
+	data, header, err := r.FormFile("file")
+	if err != nil {
+		logger.Log.Debugf("error %s for '%+v' and '%+v'",  err.Error(), data, header)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -43,7 +50,7 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 	attachment := models.Attachments{
 		Name:        r.FormValue("name"),
 		Description: r.FormValue("description"),
-		ContentType: r.FormValue("contentType"),
+		ContentType: header.Header.Get("Content-Type"),
 	}
 	if attachment.ContentType != "image/jpeg" && attachment.ContentType != "audio/mpeg" {
 		http.Error(w, "ContentType not supported", http.StatusBadRequest)
@@ -232,14 +239,14 @@ func AttachmentPut(w http.ResponseWriter, r *http.Request) {
 // @Tags attachment
 // @Produce json
 // @Param id path int true "Attachment ID"
-// @Param ref query int true "Reference ID (optional)"
+// @Param refId query int true "Reference ID (optional)"
 // @Param refType query string true "Reference Type" Enums(spot,task)
 // @Success 200 {object} models.Attachments
 // @Router /attachment/{id}/ref [put]
 func AttachmentPutRef(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentPutRef")
 	// first ensure ref is ok
-	intId, err := parseId(r.URL.Query().Get("ref"))
+	intId, err := parseId(r.URL.Query().Get("refId"))
 	if err != nil || intId == 0 {
 		http.Error(w, fmt.Sprintf("Ref error or cero: %+v", err), http.StatusBadRequest)
 		return
@@ -268,7 +275,7 @@ func AttachmentPutRef(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Unable to cast the struct correctly from %+v", dest), http.StatusInternalServerError)
 		return
 	}
-	attachment.Ref = intId
+	attachment.RefId = intId
 	attachment.RefType = r.URL.Query().Get("refType")
 	// Update the attachment which will trigger the GetInsertExtraQueries
 	logger.Log.Debug("Decoded object")

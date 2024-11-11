@@ -75,6 +75,7 @@ export const addLocationToSpot = async (spot) => {
   // Replace with your API call logic
   //console.info("Spot: "+spot.id)
   const response = await fetch(`${API_URL}/location/${spot.location}`, {
+    method: "GET",
     headers: {
       'accept': 'application/json',
     },
@@ -87,4 +88,138 @@ export const addLocationToSpot = async (spot) => {
   spot.location = location
   //console.info(spot)
   return spot; // Combine original spot with additional data
+};
+
+
+export const uploadSpot = async (body) => {
+
+  try {
+    const response = await fetch(`${API_URL}/spot`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data; // return the URL or data if needed
+    } else {
+      console.error('Failed to upload the spot');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error uploading spot:', error);
+    return null;
+  }
+};
+
+export const uploadLocation = async (body) => {
+
+  try {
+    console.info("using location data for post: "+ JSON.stringify(body))
+    const response = await fetch(`${API_URL}/location`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data; // return the URL or data if needed
+    } else {
+      console.error('Failed to upload the location');
+      console.error(response.text());
+      return null;
+    }
+  } catch (error) {
+    console.error('Error uploading location:', error);
+    return null;
+  }
+};
+
+
+export const uploadAttachment = async (file, imageName, imageDescription) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('name', imageName);
+  formData.append('description', imageDescription);
+  console.info("upload attachment: "+file +" ---- "+imageName, +" "+ imageDescription);
+  console.info(formData.entries());
+  try {
+    const response = await fetch(`${API_URL}/attachment`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'accept': 'application/json',
+        // 'Content-Type': 'multipart/form-data' Included automatically with the boundary as well
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data; // return the URL or data if needed
+    } else {
+      console.error('Failed to upload the image');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    return null;
+  }
+};
+
+export const addReferenceToAttachment = async (attachmentId, refId, refType) => {
+  try {
+    const response = await fetch(`${API_URL}/attachment/${attachmentId}/ref?refId=${refId}&refType=${refType}`, {
+      method: 'PUT',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to add spot reference to attachment');
+    }
+  } catch (error) {
+    console.error('Error adding reference to attachment:', error);
+  }
+};
+
+export const addReferenceToLocation = async (locationId, refId, refType) => {
+  try {
+    const response = await fetch(`${API_URL}/location/${locationId}/ref?refId=${refId}&refType=${refType}`, {
+      method: 'PUT',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to add spot reference to location');
+    }
+  } catch (error) {
+    console.error('Error adding reference to spot:', error);
+  }
+};
+
+
+export const fetchAttachment = async (attachmentId) => {
+  try {
+    const response = await fetch(`${API_URL}/attachment/${attachmentId}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json'
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data; // return attachment data if needed
+    } else {
+      throw new Error('Failed to fetch attachment');
+    }
+  } catch (error) {
+    console.error('Error fetching attachment:', error);
+    return null;
+  }
 };

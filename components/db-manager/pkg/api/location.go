@@ -25,18 +25,20 @@ func LocationPost(w http.ResponseWriter, r *http.Request) {
 	var location models.KnownLocations
 	var dest connection.DbInterface
 	if err := json.NewDecoder(r.Body).Decode(&location); err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	logger.Log.Debug("object decoded")
 	if ref := r.URL.Query().Get("ref"); ref != "" {
 		if intId, err := parseId(ref); err != nil {
-			location.Ref = intId
+			location.RefId = intId
 			location.RefType = r.URL.Query().Get("refType")
 		}
 	}
 	dest, httpStatus, err := crudPost(&location)
 	if err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
@@ -56,6 +58,7 @@ func LocationGetAll(w http.ResponseWriter, r *http.Request) {
 	dest, httpStatus, err := crudGetAll(&models.KnownLocations{})
 	logger.Log.Debugf("objects obtained '%d'", len(dest))
 	if err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
@@ -80,6 +83,7 @@ func LocationGet(w http.ResponseWriter, r *http.Request) {
 	var dest connection.DbInterface
 	dest, httpStatus, err := crudGet(&models.KnownLocations{}, mux.Vars(r))
 	if err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
@@ -100,6 +104,7 @@ func LocationDelete(w http.ResponseWriter, r *http.Request) {
 	var location models.KnownLocations
 	httpStatus, err := crudDelete(&location, mux.Vars(r))
 	if err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
@@ -122,15 +127,19 @@ func LocationPut(w http.ResponseWriter, r *http.Request) {
 	var dest connection.DbInterface
 	err := json.NewDecoder(r.Body).Decode(&location)
 	if err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	intId, err := parseId(mux.Vars(r)["id"])
 	if err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	if location.ID > 0 && location.ID != intId {
+		msg := fmt.Sprintf("location id in payload '%d' and path '%d' do not match", location.ID, intId)
+		logger.Log.Error(msg)
 		http.Error(w, fmt.Sprintf("location id in payload '%d' and path '%d' do not match", location.ID, intId), http.StatusBadRequest)
 		return
 	}
@@ -139,6 +148,7 @@ func LocationPut(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Debug("Decoded object")
 	dest, httpStatus, err := crudPut(&location, mux.Vars(r))
 	if err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
@@ -152,21 +162,24 @@ func LocationPut(w http.ResponseWriter, r *http.Request) {
 // @Tags location
 // @Produce json
 // @Param id path int true "Location ID"
-// @Param ref query int true "Reference ID (optional)"
+// @Param refId query int true "Reference ID (optional)"
 // @Param refType query string true "Reference Type" Enums(spot)
 // @Success 200 {object} models.KnownLocations
 // @Router /location/{id}/ref [put]
 func LocationPutRef(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationPutRef")
 	// first ensure ref is ok
-	intId, err := parseId(r.URL.Query().Get("ref"))
+	intId, err := parseId(r.URL.Query().Get("refId"))
 	if err != nil || intId == 0 {
-		http.Error(w, fmt.Sprintf("Ref error or cero: %+v", err), http.StatusBadRequest)
+		msg := fmt.Sprintf("Ref error or cero: %+v", err)
+		logger.Log.Error(msg)
+		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
 	var dest connection.DbInterface
 	_, httpStatus, err := crudGet(&models.Spots{}, map[string]string{"id": fmt.Sprint(intId)})
 	if err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
@@ -174,20 +187,24 @@ func LocationPutRef(w http.ResponseWriter, r *http.Request) {
 	// Now bring the original location
 	dest, httpStatus, err = crudGet(&models.KnownLocations{}, mux.Vars(r))
 	if err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
 	location, ok := dest.(*models.KnownLocations)
 	if !ok {
-		http.Error(w, fmt.Sprintf("Unable to cast the struct correctly from %+v", dest), http.StatusInternalServerError)
+		msg := fmt.Sprintf("Unable to cast the struct correctly from %+v", dest)
+		logger.Log.Error(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
 		return
 	}
-	location.Ref = intId
+	location.RefId = intId
 	location.RefType = r.URL.Query().Get("refType")
 	// Update the location which will trigger the GetInsertExtraQueries
 	logger.Log.Debug("Decoded object")
 	dest, httpStatus, err = crudPut(dest, mux.Vars(r))
 	if err != nil {
+		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}

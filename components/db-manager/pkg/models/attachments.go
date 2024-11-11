@@ -18,7 +18,7 @@ type Attachments struct {
 	// only DB
 	UUID    uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
 	RefType string    `db:"ref_type" json:"-"`
-	Ref     int       `db:"ref" json:"-"`
+	RefId   int       `db:"ref_id" json:"-"`
 	// DB + JSON
 	ID          int       `db:"id" json:"id"` // Auto-incremented integer ID
 	Name        string    `db:"name" json:"name"`
@@ -65,11 +65,11 @@ func (m *Attachments) GetDeleteExtraQueries() []string {
 }
 
 func (m *Attachments) GetInsertExtraQueries() []string {
-	if m.Ref != 0 {
+	if m.RefId != 0 {
 		return []string{
 			fmt.Sprintf(`
 			UPDATE %s
-			SET ref = :ref, ref_type = :ref_type
+			SET ref_id = :ref_id, ref_type = :ref_type
 			WHERE id = :id`, m.GetTableName()),
 		}
 	}

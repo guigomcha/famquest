@@ -32,7 +32,7 @@ func TaskPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Debug("object decoded")
 	if ref := r.URL.Query().Get("ref"); ref != "" {
 		if intId, err := parseId(ref); err != nil {
-			task.Ref = intId
+			task.RefId = intId
 			task.RefType = r.URL.Query().Get("refType")
 		}
 	}
@@ -189,7 +189,7 @@ func TaskPutRef(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Unable to cast the struct correctly from %+v", dest), http.StatusInternalServerError)
 		return
 	}
-	task.Ref = intId
+	task.RefId = intId
 	task.RefType = r.URL.Query().Get("refType")
 	// Update the task which will trigger the GetInsertExtraQueries
 	logger.Log.Debug("Decoded object")
