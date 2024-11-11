@@ -120,33 +120,34 @@ const SpotPopup = ({ id, name, description }) => {
 
       <div className="attachment-container">
         <form onSubmit={handleSubmit} encType="multipart/form-data">
-          <input 
-            type="text" 
-            value={imageName} 
-            onChange={(e) => setImageName(e.target.value)} 
-            placeholder="Image Name" 
-            required 
-          />
-          <textarea 
-            value={imageDescription} 
-            onChange={(e) => setImageDescription(e.target.value)} 
-            placeholder="Image Description" 
-            required 
-          />
-          
-          <div className="file-input-container">
-              <input 
-                type="file" 
-                placeholder="Select file"
-                accept="image/*" 
-                onChange={handleFileChange} 
-                className="file-input"
-                required
-              />
+          <div className="attachment-container">
+            <input 
+              type="text" 
+              value={imageName} 
+              onChange={(e) => setImageName(e.target.value)} 
+              placeholder="Image Name" 
+              required 
+            />
+            <textarea 
+              value={imageDescription} 
+              onChange={(e) => setImageDescription(e.target.value)} 
+              placeholder="Image Description" 
+              required 
+            />
           </div>
-          <button type="submit">Upload</button>
-          {statusMessage && <p>{statusMessage}</p>}
-          </form>
+          <div className="form-row">
+            <div className="form-cell">
+              <label htmlFor="fileUpload">Upload from Device</label>
+              <input type="file" id="fileUpload" name="fileUpload" accept="image/*" style={{"display": "none"}} onChange={handleFileChange}/>
+            </div>
+            <div className="form-cell">
+              <label htmlFor="cameraCapture">Capture from Camera</label>
+              <input type="file" id="cameraCapture" name="cameraCapture" accept="image/*" capture="environment" style={{"display": "none"}} onChange={handleFileChange}/>
+            </div>
+          </div>
+            <button type="submit">Upload</button>
+            {statusMessage && <p>{statusMessage}</p>}
+        </form>
         {selectedImages.length > 0 ? (
           <div className="carousel-container">
             <button onClick={handlePrev} disabled={selectedImages.length <= 1}>Prev</button>

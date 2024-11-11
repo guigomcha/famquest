@@ -171,20 +171,24 @@ const MapContainer = ( {locations, spots } ) => {
     locs.current = locations;
     prepareMap();
   }, [locations]);
-
   
   // Add the markers in the spots
-  // TODO: this should be the same as with the create from context
   useEffect(() => {
     if (mapRef.current && spots) {
       spots.forEach((spot) => {
         console.log("used spot: "+ spot.id)
+        // Todo: Decide the owner based on something
         // Adding a marker with custom icon
         const marker = L.marker([spot.location.latitude, spot.location.longitude], {
           icon: L.icon(iconStyle),
         })
-          .addTo(mapRef.current)
-          .bindPopup(spot.name);
+          .addTo(mapRef.current);
+        guilleSpotsGroup.current.addLayer(marker);
+        // Inject our custom component 
+        const popupContainer = document.createElement('div', popUpStyle);
+        const root = createRoot(popupContainer); 
+        root.render(<SpotPopup id={spot.id} name={spot.name} description={spot.description} />);
+        marker.bindPopup(popupContainer, popUpStyle);
         guilleSpotsGroup.current.addLayer(marker);
       });
     }
