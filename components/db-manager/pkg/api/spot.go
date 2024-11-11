@@ -47,7 +47,7 @@ func SpotPost(w http.ResponseWriter, r *http.Request) {
 // @Router /spot [get]
 func SpotGetAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func SpotGetAll")
-	dest, httpStatus, err := crudGetAll(&models.Spots{})
+	dest, httpStatus, err := crudGetAll(&models.Spots{}, "")
 	logger.Log.Debugf("objects obtained '%d'", len(dest))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)

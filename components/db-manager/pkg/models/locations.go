@@ -19,7 +19,7 @@ type KnownLocations struct {
 	// Only db
 	UUID    uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
 	RefType string    `db:"ref_type" json:"-"`
-	Ref     int       `db:"ref" json:"-"`
+	RefId   int       `db:"ref_id" json:"-"`
 	// Db + json
 	ID        int       `db:"id" json:"id,omitempty"` // Auto-incremented integer ID
 	Name      string    `db:"name" json:"name"`
@@ -65,16 +65,16 @@ func (m *KnownLocations) GetDeleteExtraQueries() []string {
 }
 
 func (m *KnownLocations) GetInsertExtraQueries() []string {
-	if m.Ref != 0 {
+	if m.RefId != 0 {
 		return []string{
 			fmt.Sprintf(`
 			UPDATE %s
-			SET ref = :ref, ref_type = :ref_type
+			SET ref_id = :ref_id, ref_type = :ref_type
 			WHERE id = :id`, m.GetTableName()),
 			fmt.Sprintf(`
 			UPDATE %s
-			SET ref = 0
-			WHERE ref = :ref AND ref_type = :ref_type AND id != :id`, m.GetTableName()),
+			SET ref_id = 0
+			WHERE ref_id = :ref_id AND ref_type = :ref_type AND id != :id`, m.GetTableName()),
 		}
 	}
 	return []string{}

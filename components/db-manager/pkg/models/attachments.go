@@ -11,7 +11,6 @@ import (
 type APIAttachments struct {
 	Name        string `json:"name"`
 	Description string `json:"description"` // Description
-	Url         string `json:"url"`         // Url
 }
 
 // `db:"attachments"` and swagger ouput
@@ -19,10 +18,11 @@ type Attachments struct {
 	// only DB
 	UUID    uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
 	RefType string    `db:"ref_type" json:"-"`
-	Ref     int       `db:"ref" json:"-"`
+	RefId   int       `db:"ref_id" json:"-"`
 	// DB + JSON
 	ID          int       `db:"id" json:"id"` // Auto-incremented integer ID
 	Name        string    `db:"name" json:"name"`
+	ContentType string    `db:"content_type" json:"contentType"`
 	Description string    `db:"description" json:"description"`
 	URL         string    `db:"url" json:"url"`
 	CreatedAt   time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
@@ -43,20 +43,20 @@ func (m *Attachments) GetSelectAllQuery() string {
 
 func (m *Attachments) GetInsertQuery() string {
 	return fmt.Sprintf(`
-		INSERT INTO %s (name, description, url)
-		VALUES (:name, :description, :url) RETURNING id`, m.GetTableName())
+		INSERT INTO %s (name, description, url, content_type)
+		VALUES (:name, :description, :url, :content_type) RETURNING id`, m.GetTableName())
 }
 
 func (m *Attachments) GetQuery() string {
 	return fmt.Sprintf(`
-		INSERT INTO %s (name, description, url)
-		VALUES (:name, :description, :url) RETURNING id`, m.GetTableName())
+		INSERT INTO %s (name, description, url, content_type)
+		VALUES (:name, :description, :url, :content_type) RETURNING id`, m.GetTableName())
 }
 
 func (m *Attachments) GetUpdateQuery() string {
 	return fmt.Sprintf(`
 			UPDATE %s
-			SET name = :name, description = :description, url = :url
+			SET name = :name, description = :description
 			WHERE id = :id`, m.GetTableName())
 }
 
@@ -65,11 +65,11 @@ func (m *Attachments) GetDeleteExtraQueries() []string {
 }
 
 func (m *Attachments) GetInsertExtraQueries() []string {
-	if m.Ref != 0 {
+	if m.RefId != 0 {
 		return []string{
 			fmt.Sprintf(`
 			UPDATE %s
-			SET ref = :ref, ref_type = :ref_type
+			SET ref_id = :ref_id, ref_type = :ref_type
 			WHERE id = :id`, m.GetTableName()),
 		}
 	}

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"famquest/components/db-manager/pkg/connection"
@@ -8,34 +9,63 @@ import (
 	"famquest/components/go-common/logger"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/minio/minio-go/v7"
 )
 
 // AttachmentPost creates a new attachment
 // @Summary Create a attachment
 // @Description Create a new attachment
 // @Tags attachment
-// @Accept json
+// @Accept multipart/form-data
 // @Produce json
-// @Param attachment body models.APIAttachments true "Attachment data"
+// @Param  file formData file true "image/jpeg or media/mpeg"
+// @Param  name formData string true "name of the attachment"
+// @Param  description formData string true "description of the attachment"
 // @Success 201 {object} models.Attachments
 // @Router /attachment [post]
 func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentPost")
-	var attachment models.Attachments
-	var dest connection.DbInterface
-	if err := json.NewDecoder(r.Body).Decode(&attachment); err != nil {
+	// Parse multipart form data with a maximum file size of 10MB
+	err := r.ParseMultipartForm(500 << 20) // 500 MB
+	if err != nil {
+		msg := "Unable to parse form data: " + err.Error()
+		logger.Log.Debug(msg)
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+	logger.Log.Debugf("Available: '%+v'", r.Form)
+	data, header, err := r.FormFile("file")
+	if err != nil {
+		logger.Log.Debugf("error %s for '%+v' and '%+v'", err.Error(), data, header)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	logger.Log.Debug("object decoded")
-	if ref := r.URL.Query().Get("ref"); ref != "" {
-		if intId, err := parseId(ref); err != nil {
-			attachment.Ref = intId
-			attachment.RefType = r.URL.Query().Get("refType")
-		}
+	defer data.Close()
+	attachment := models.Attachments{
+		Name:        r.FormValue("name"),
+		Description: r.FormValue("description"),
+		ContentType: header.Header.Get("Content-Type"),
 	}
+	if strings.HasPrefix(attachment.ContentType, "image/") && strings.HasPrefix(attachment.ContentType, "audio/") {
+		http.Error(w, "ContentType not supported", http.StatusBadRequest)
+		return
+	}
+	logger.Log.Infof("Metadata received: %+v", attachment)
+	urlId := (uuid.New()).String()
+	_, err = connection.Minio.PutObject(context.Background(), strings.Split(attachment.ContentType, "/")[0], urlId, data, -1, minio.PutObjectOptions{ContentType: attachment.ContentType})
+	if err != nil {
+		http.Error(w, "Failed to upload to minio: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var dest connection.DbInterface
+	// db stores the uuid but the get and getall returns the actual url pre-authorized
+	attachment.URL = urlId
 	dest, httpStatus, err := crudPost(&attachment)
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
@@ -50,22 +80,55 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 // @Description Get a list of all attachments
 // @Tags attachment
 // @Produce json
+// @Param refId query int false "Reference ID (optional)"
+// @Param refType query string false "Reference Type (optional)" Enums(spot,task)
 // @Success 200 {array} models.Attachments
 // @Router /attachment [get]
 func AttachmentGetAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentGetAll")
-	dest, httpStatus, err := crudGetAll(&models.Attachments{})
-	logger.Log.Debugf("objects obtained '%d'", len(dest))
+	// Create the filter
+	filter := ""
+	if r.URL.Query().Get("refId") != "" {
+		intId, err := parseId(r.URL.Query().Get("refId"))
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Ref error: %s", err.Error()), http.StatusBadRequest)
+			return
+		}
+		filter = fmt.Sprintf("WHERE ref_id = %d AND ref_type = '%s'", intId, r.URL.Query().Get("refType"))
+		logger.Log.Debugf("created filer '%s'", filter)
+	}
+	dests, httpStatus, err := crudGetAll(&models.Attachments{}, filter)
+	logger.Log.Debugf("objects obtained '%d'", len(dests))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
-	if len(dest) == 0 {
+	if len(dests) == 0 {
 		empty := make([]string, 0)
 		json.NewEncoder(w).Encode(empty)
-	} else {
-		json.NewEncoder(w).Encode(dest)
+		return
 	}
+	var attachments []*models.Attachments
+	// preauthorize urls
+	for _, dest := range dests {
+		// Type assertion: convert interface back to the concrete type
+		if att, ok := dest.(*models.Attachments); ok {
+			// Set request parameters
+			reqHeaders := make(http.Header)
+			// reqHeaders.Set("Host", "host.docker.internal")
+			presignedURL, err := connection.Minio.PresignHeader(context.Background(), http.MethodGet, strings.Split(att.ContentType, "/")[0], att.URL, time.Hour, make(url.Values), reqHeaders)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			att.URL = presignedURL.String()
+			attachments = append(attachments, att)
+		} else {
+			http.Error(w, "unable to cast attachment", http.StatusInternalServerError)
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(attachments)
 }
 
 // AttachmentGet retrieves a specific attachment by ID
@@ -84,7 +147,20 @@ func AttachmentGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
-	json.NewEncoder(w).Encode(dest)
+	if att, ok := dest.(*models.Attachments); ok {
+		// Set request parameters
+		reqHeaders := make(http.Header)
+		// reqHeaders.Set("Host", "host.docker.internal")
+		presignedURL, err := connection.Minio.PresignHeader(context.Background(), http.MethodGet, strings.Split(att.ContentType, "/")[0], att.URL, time.Hour, make(url.Values), reqHeaders)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		att.URL = presignedURL.String()
+		json.NewEncoder(w).Encode(dest)
+		return
+	}
+	http.Error(w, "unable to cast attachment", httpStatus)
 }
 
 // AttachmentDelete deletes a attachment by ID
@@ -97,13 +173,36 @@ func AttachmentGet(w http.ResponseWriter, r *http.Request) {
 // @Router /attachment/{id} [delete]
 func AttachmentDelete(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentDelete")
-	// First delete the attachment
-	var attachment models.Attachments
+	intId, err := parseId(mux.Vars(r)["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	attachment := models.Attachments{}
+	err = connection.DB.Get(&attachment, attachment.GetSelectOneQuery(), intId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	logger.Log.Info("Obtained first from DB")
+	minioClient, err := connection.ConnectToMinio()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	uuid := strings.Split(attachment.URL, "/")[len(strings.Split(attachment.URL, "/"))-1]
+	err = minioClient.RemoveObject(context.Background(), strings.Split(attachment.ContentType, "/")[0], uuid, minio.RemoveObjectOptions{})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	logger.Log.Info("Deleted from minio")
 	httpStatus, err := crudDelete(&attachment, mux.Vars(r))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
+	logger.Log.Info("Deleted from db")
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -153,14 +252,14 @@ func AttachmentPut(w http.ResponseWriter, r *http.Request) {
 // @Tags attachment
 // @Produce json
 // @Param id path int true "Attachment ID"
-// @Param ref query int true "Reference ID (optional)"
+// @Param refId query int true "Reference ID (optional)"
 // @Param refType query string true "Reference Type" Enums(spot,task)
 // @Success 200 {object} models.Attachments
 // @Router /attachment/{id}/ref [put]
 func AttachmentPutRef(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentPutRef")
 	// first ensure ref is ok
-	intId, err := parseId(r.URL.Query().Get("ref"))
+	intId, err := parseId(r.URL.Query().Get("refId"))
 	if err != nil || intId == 0 {
 		http.Error(w, fmt.Sprintf("Ref error or cero: %+v", err), http.StatusBadRequest)
 		return
@@ -189,7 +288,7 @@ func AttachmentPutRef(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Unable to cast the struct correctly from %+v", dest), http.StatusInternalServerError)
 		return
 	}
-	attachment.Ref = intId
+	attachment.RefId = intId
 	attachment.RefType = r.URL.Query().Get("refType")
 	// Update the attachment which will trigger the GetInsertExtraQueries
 	logger.Log.Debug("Decoded object")

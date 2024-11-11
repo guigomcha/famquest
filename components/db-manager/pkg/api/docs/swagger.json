@@ -25,6 +25,24 @@
                     "attachment"
                 ],
                 "summary": "Retrieve all attachments",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Reference ID (optional)",
+                        "name": "refId",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "spot",
+                            "task"
+                        ],
+                        "type": "string",
+                        "description": "Reference Type (optional)",
+                        "name": "refType",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -40,7 +58,7 @@
             "post": {
                 "description": "Create a new attachment",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -51,13 +69,25 @@
                 "summary": "Create a attachment",
                 "parameters": [
                     {
-                        "description": "Attachment data",
-                        "name": "attachment",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.APIAttachments"
-                        }
+                        "type": "file",
+                        "description": "image/jpeg or media/mpeg",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the attachment",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "description of the attachment",
+                        "name": "description",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -186,7 +216,7 @@
                     {
                         "type": "integer",
                         "description": "Reference ID (optional)",
-                        "name": "ref",
+                        "name": "refId",
                         "in": "query",
                         "required": true
                     },
@@ -404,7 +434,7 @@
                     {
                         "type": "integer",
                         "description": "Reference ID (optional)",
-                        "name": "ref",
+                        "name": "refId",
                         "in": "query",
                         "required": true
                     },
@@ -786,10 +816,6 @@
                 },
                 "name": {
                     "type": "string"
-                },
-                "url": {
-                    "description": "Url",
-                    "type": "string"
                 }
             }
         },
@@ -839,6 +865,9 @@
         "models.Attachments": {
             "type": "object",
             "properties": {
+                "contentType": {
+                    "type": "string"
+                },
                 "createdAt": {
                     "description": "Automatically generated",
                     "type": "string"

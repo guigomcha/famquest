@@ -30,7 +30,7 @@ const SpotForm = ({ onSubmit }) => {
           onChange={(e) => setDescription(e.target.value)}
           required
         />
-        <button type="submit">Create Marker</button>
+        <button type="submit">Create Spot</button>
       </form>
     </div>
   );

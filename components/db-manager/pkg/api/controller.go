@@ -22,12 +22,13 @@ func crudPost(m connection.DbInterface) (connection.DbInterface, int, error) {
 	var dest connection.DbInterface
 	lastInsertId, err := connection.Insert(connection.DB, m)
 	if err != nil {
-		logger.Log.Debug("insert error")
+		logger.Log.Debugf("insert error: %s", err.Error())
 		return dest, http.StatusInternalServerError, err
 	}
+	logger.Log.Debugf("Inserted with %d", lastInsertId)
 	dest, err = connection.Get(connection.DB, lastInsertId, m)
 	if err != nil {
-		logger.Log.Debug("Get error")
+		logger.Log.Debugf("Get error: %s", err.Error())
 		return dest, http.StatusInternalServerError, err
 	}
 	logger.Log.Debugf("object created in db: %d", lastInsertId)
@@ -35,9 +36,9 @@ func crudPost(m connection.DbInterface) (connection.DbInterface, int, error) {
 }
 
 // pointer to interface
-func crudGetAll(m connection.DbInterface) ([]connection.DbInterface, int, error) {
+func crudGetAll(m connection.DbInterface, filter string) ([]connection.DbInterface, int, error) {
 	var dest []connection.DbInterface
-	dest, err := connection.GetAll(connection.DB, m)
+	dest, err := connection.GetAll(connection.DB, m, filter)
 	if err != nil {
 		logger.Log.Debugf("%+v: %s", dest, err.Error())
 		return dest, http.StatusInternalServerError, err
@@ -82,6 +83,7 @@ func crudDelete(m connection.DbInterface, mVars map[string]string) (int, error) 
 
 // pointer to interface
 func crudPut(m connection.DbInterface, mVars map[string]string) (connection.DbInterface, int, error) {
+	// TODO: Only update what is not ""...
 	var dest connection.DbInterface
 	intId, err := parseId(mVars["id"])
 	if err != nil {

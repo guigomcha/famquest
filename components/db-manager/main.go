@@ -20,6 +20,7 @@ import (
 	"famquest/components/db-manager/pkg/api/docs"
 	"famquest/components/db-manager/pkg/connection"
 	"famquest/components/db-manager/pkg/models"
+	"famquest/components/go-common/logger"
 )
 
 func init() {
@@ -81,14 +82,14 @@ func main() {
 	}
 	fmt.Printf("Starting server on port %s...\n", port)
 	// Use CORS middleware to allow requests from frontend
-	allowedOrigins := handlers.AllowedOrigins([]string{"http://localhost:3000", "http://localhost:8081"})
-	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"})
+	allowedOrigins := handlers.AllowedOrigins([]string{"http://localhost:3000", "http://localhost:8081", "http://localhost:8080"})
+	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
 	allowedHeaders := handlers.AllowedHeaders([]string{"Content-Type", "Accept"})
-
+	logger.Log.Debugf("CORS: %+v, %+v, %+v", allowedOrigins, allowedHeaders, allowedMethods)
 	// Wrap your router with the CORS middleware
-	http.ListenAndServe(":8080", handlers.CORS(allowedOrigins, allowedMethods, allowedHeaders)(r))
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), handlers.CORS(allowedOrigins, allowedMethods, allowedHeaders)(r)))
+	// log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
 }
 
 func initialDbData() {
@@ -100,4 +101,10 @@ func initialDbData() {
 	if _, err := db.Exec(models.Schema); err != nil {
 		log.Fatalln(err)
 	}
+	minioClient, err := connection.ConnectToMinio()
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
+	connection.Minio = minioClient
 }

@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS known_locations (
     longitude FLOAT NOT NULL, -- Longitude as signed float
     latitude FLOAT NOT NULL, -- Latitude as signed float
     ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot')), -- Constraint for ref_type
-    ref INT DEFAULT 0,
+    ref_id INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
 );
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
     id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
     ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot')), -- Constraint for ref_type
-    ref INT DEFAULT 0,
+    ref_id INT DEFAULT 0,
     name TEXT NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
@@ -40,9 +40,10 @@ CREATE TABLE IF NOT EXISTS attachments (
     uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
     id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
     ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot', 'task')), -- Constraint for ref_type
-    ref INT DEFAULT 0,
+    ref_id INT DEFAULT 0,
     name TEXT NOT NULL,
     description TEXT,
+    content_type TEXT DEFAULT 'image/jpeg' CHECK (content_type IN ('image/jpeg', 'media/mpeg')), -- Constraint for ref_type
     url TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger

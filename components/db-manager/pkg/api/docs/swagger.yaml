@@ -6,9 +6,6 @@ definitions:
         type: string
       name:
         type: string
-      url:
-        description: Url
-        type: string
     type: object
   models.APIKnownLocations:
     properties:
@@ -41,6 +38,8 @@ definitions:
     type: object
   models.Attachments:
     properties:
+      contentType:
+        type: string
       createdAt:
         description: Automatically generated
         type: string
@@ -135,6 +134,18 @@ paths:
   /attachment:
     get:
       description: Get a list of all attachments
+      parameters:
+      - description: Reference ID (optional)
+        in: query
+        name: refId
+        type: integer
+      - description: Reference Type (optional)
+        enum:
+        - spot
+        - task
+        in: query
+        name: refType
+        type: string
       produces:
       - application/json
       responses:
@@ -149,15 +160,24 @@ paths:
       - attachment
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       description: Create a new attachment
       parameters:
-      - description: Attachment data
-        in: body
-        name: attachment
+      - description: image/jpeg or media/mpeg
+        in: formData
+        name: file
         required: true
-        schema:
-          $ref: '#/definitions/models.APIAttachments'
+        type: file
+      - description: name of the attachment
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: description of the attachment
+        in: formData
+        name: description
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -242,7 +262,7 @@ paths:
         type: integer
       - description: Reference ID (optional)
         in: query
-        name: ref
+        name: refId
         required: true
         type: integer
       - description: Reference Type
@@ -387,7 +407,7 @@ paths:
         type: integer
       - description: Reference ID (optional)
         in: query
-        name: ref
+        name: refId
         required: true
         type: integer
       - description: Reference Type
