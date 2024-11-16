@@ -125,12 +125,13 @@ const Camera = ( {refId, refType} ) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!file || !imageName || !imageDescription) {
+    const dataToUpload = file || imageBlob;
+    if (!dataToUpload || !imageName || !imageDescription) {
       setStatusMessage("Please fill out all fields.");
       return;
     }
 
-    const attachment = await uploadAttachment(file, imageName, imageDescription);
+    const attachment = await uploadAttachment(dataToUpload, imageName, imageDescription);
 
     if (attachment) {
       // Add reference to current spot
