@@ -105,13 +105,12 @@ const Camera = ( {refId, refType} ) => {
         const context = canvas.getContext("2d");
         canvas.width = img.width;  // Set canvas size to image size
         canvas.height = img.height;
-        context.drawImage(img, 0, 0);  // Draw image on canvas
+        context.drawImage(img, 0, 0, canvas.width, canvas.height);  // Draw image on canvas
+        canvas.toBlob((blob) => setImageBlob(blob), "image/jpeg");
       };
       img.src = reader.result;  // Set image source as the result of the FileReader
     };
-    if (selectedFile) {
-      reader.readAsDataURL(selectedFile);
-    }
+    reader.readAsDataURL(selectedFile);
   };
 
   const callFetchAttachmentsForSpot = async (refId, refType) => {
@@ -156,121 +155,123 @@ const Camera = ( {refId, refType} ) => {
     callFetchAttachmentsForSpot(refId, refType)
   }, [refId]);
 
+  
   return (
-      <div className="attachment-container">
-        <form onSubmit={handleSubmit} encType="multipart/form-data">
-          <div className="attachment-container">
+    <div className="attachment-container">
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <div className="attachment-container">
+          <input 
+            type="text" 
+            value={imageName} 
+            onChange={(e) => setImageName(e.target.value)} 
+            placeholder="Image Name" 
+            required 
+          />
+          <textarea 
+            value={imageDescription} 
+            onChange={(e) => setImageDescription(e.target.value)} 
+            placeholder="Image Description" 
+            required 
+          />
+        </div>
+        <div className="form-row">
+          <div className="form-cell">
+            <label htmlFor="fileUpload" style={{
+                display: "inline-block",
+                padding: "10px 20px",
+                backgroundColor: "#007BFF", // Button color
+                color: "#FFFFFF",          // Text color
+                border: "none",
+                borderRadius: "4px",
+                textAlign: "center",
+                cursor: "pointer",
+                fontSize: "16px",
+                fontWeight: "bold",
+                textDecoration: "none",    // Remove underline
+                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", // Optional shadow
+                transition: "background-color 0.3s ease",
+            }}>Upload from Device</label>
             <input 
-              type="text" 
-              value={imageName} 
-              onChange={(e) => setImageName(e.target.value)} 
-              placeholder="Image Name" 
-              required 
-            />
-            <textarea 
-              value={imageDescription} 
-              onChange={(e) => setImageDescription(e.target.value)} 
-              placeholder="Image Description" 
-              required 
+              type="file" 
+              id="fileUpload" 
+              name="fileUpload" 
+              accept="image/*" 
+              style={{ display: "none" }} 
+              onChange={handleFileChange} 
             />
           </div>
-          <div className="form-row">
-            <div className="form-cell">
-              <label htmlFor="fileUpload" style={{
-                  display: "inline-block",
-                  padding: "10px 20px",
-                  backgroundColor: "#007BFF", // Button color
-                  color: "#FFFFFF",          // Text color
-                  border: "none",
-                  borderRadius: "4px",
-                  textAlign: "center",
-                  cursor: "pointer",
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                  textDecoration: "none",    // Remove underline
-                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", // Optional shadow
-                  transition: "background-color 0.3s ease",
-              }}>Upload from Device</label>
-              <input type="file" id="fileUpload" name="fileUpload" accept="image/*" style={{"display": "none"}} onChange={handleFileChange}/>
-            </div>
-            <div className="form-cell">
-                <button onClick={toggleCamera}>Open/Close Camera</button>
-                {cameraOpened && (
-                    <div>
-                      <button onClick={toggleVideoRecording}>Start/Stop Video Recording</button>
-                      <button onClick={captureImage}>Capture Image</button>
-                    </div>
-                  )}
-                  {(cameraOpened || selectedFile != null ) && (
-                    <div style={{ position: "relative", zIndex: 1000000000}}>
-                      <h3>Camera Preview</h3>
-                      <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
-                      {cameraOpened && (                      
-                      <video
-                        name="videoPreview"
-                        ref={videoRef}
-                        style={{ width: "300px" }}
-                        autoPlay
-                        muted
-                      ></video>
-                      {isRecording && (
-                        <label 
-                          htmlFor="videoPreview"
-                          style={{
-                            backgroundColor: "red",
-                            color: "white",
-                            padding: "5px 10px",
-                            borderRadius: "5px",
-                            fontWeight: "bold",
-                            zIndex: 10,
-                          }}
-                        >
-                          Recording
-                        </label>
-                      )}
-                      )}                      
-                    </div>
-                  )}
-            </div>
+          <div className="form-cell">
+            <button onClick={toggleCamera}>Open/Close Camera</button>
+            {cameraOpened && (
+              <div>
+                <button onClick={toggleVideoRecording}>Start/Stop Video Recording</button>
+                <button onClick={captureImage}>Capture Image</button>
+              </div>
+            )}
+            {(cameraOpened || file != null) && (
+              <div style={{ position: "relative", zIndex: 1000000000 }}>
+                <h3>Camera Preview</h3>
+                <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
+                {cameraOpened && (                       
+                  <video
+                    name="videoPreview"
+                    ref={videoRef}
+                    style={{ width: "300px" }}
+                    autoPlay
+                    muted
+                  ></video>
+                )}
+                {isRecording && (
+                  <label 
+                    htmlFor="videoPreview"
+                    style={{
+                      backgroundColor: "red",
+                      color: "white",
+                      padding: "5px 10px",
+                      borderRadius: "5px",
+                      fontWeight: "bold",
+                      zIndex: 10,
+                    }}
+                  >
+                    Recording
+                  </label>
+                )}
+              </div>
+            )}
           </div>
-          {imageBlob && (
+        </div>
+        {imageBlob && (
           <div className="form-row">
             <div className="form-row">
               <h3>Loaded Content</h3>
             </div>
             <div className="form-row">
               <img
-              src={URL.createObjectURL(imageBlob)}
-              alt="Captured"
-              style={{ width: "200px", marginTop: "10px" }}
+                src={URL.createObjectURL(imageBlob)}
+                alt="Captured"
+                style={{ width: "200px", marginTop: "10px" }}
               />
               {videoBlob && (
-              <video
-              controls
-              width="300"
-              src={URL.createObjectURL(videoBlob)}
-              ></video>
+                <video controls width="300" src={URL.createObjectURL(videoBlob)}></video>
               )}
             </div>
           </div>
-          )}
-          <div className="form-row">
-            <button type="submit">Upload</button>
-            {statusMessage && <p>{statusMessage}</p>}
-          </div>
-        </form>
-        {selectedImages.length > 0 ? (
-          <div className="carousel-container">
-            <button onClick={handlePrev} disabled={selectedImages.length <= 1}>Prev</button>
-            <img src={selectedImages[currentIndex]} alt={`Attachment ${currentIndex + 1}`} className="carousel-image" />
-            <button onClick={handleNext} disabled={selectedImages.length <= 1}>Next</button>
-          </div>
-        ) : (
-          renderEmptyState("Create new to see it")
         )}
-      </div>
-
+        <div className="form-row">
+          <button type="submit">Upload</button>
+          {statusMessage && <p>{statusMessage}</p>}
+        </div>
+      </form>
+      {selectedImages.length > 0 ? (
+        <div className="carousel-container">
+          <button onClick={handlePrev} disabled={selectedImages.length <= 1}>Prev</button>
+          <img src={selectedImages[currentIndex]} alt={`Attachment ${currentIndex + 1}`} className="carousel-image" />
+          <button onClick={handleNext} disabled={selectedImages.length <= 1}>Next</button>
+        </div>
+      ) : (
+        renderEmptyState("Create new to see it")
+      )}
+    </div>
   );
 };
-
 export default Camera;
