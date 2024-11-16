@@ -39,11 +39,11 @@ CREATE TABLE IF NOT EXISTS tasks (
 CREATE TABLE IF NOT EXISTS attachments (
     uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
     id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
-    ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot', 'task')), -- Constraint for ref_type
+    ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot', 'task', 'attachment' )), -- Constraint for ref_type
     ref_id INT DEFAULT 0,
     name TEXT NOT NULL,
     description TEXT,
-    content_type TEXT DEFAULT 'image/jpeg' CHECK (content_type IN ('image/jpeg', 'media/mpeg')), -- Constraint for ref_type
+    content_type TEXT DEFAULT 'image/jpeg', -- Constraint for ref_type
     url TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger

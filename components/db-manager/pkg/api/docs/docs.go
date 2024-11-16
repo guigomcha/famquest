@@ -78,7 +78,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "file",
-                        "description": "image/jpeg or media/mpeg",
+                        "description": "image/* or media/*",
                         "name": "file",
                         "in": "formData",
                         "required": true
@@ -231,7 +231,8 @@ const docTemplate = `{
                     {
                         "enum": [
                             "spot",
-                            "task"
+                            "task",
+                            "attachment"
                         ],
                         "type": "string",
                         "description": "Reference Type",

@@ -144,14 +144,18 @@ export const uploadLocation = async (body) => {
 };
 
 
-export const uploadAttachment = async (data, imageName, imageDescription) => {
+export const uploadAttachment = async (data, name, description) => {
   const formData = new FormData();
-  formData.append('name', imageName);
-  formData.append('description', imageDescription);
+  formData.append('name', name);
+  formData.append('description', description);
 
   if (data instanceof Blob) {
-    // If it's a Blob (image from the camera), append it with a filename
-    formData.append("file", data, "camera_image.jpg");
+    // If it's a Blob (image from the camera or audio fromthe mic), append it with a filename of the right type
+    if (name == "audio") {
+      formData.append("file", data, "audio.mpeg");
+    } else {
+      formData.append("file", data, "camera_image.jpg");
+    }
   } else {
     // If it's a file selected via the file input
     formData.append("file", data);
@@ -163,7 +167,6 @@ export const uploadAttachment = async (data, imageName, imageDescription) => {
       body: formData,
       headers: {
         'accept': 'application/json',
-        // 'Content-Type': 'multipart/form-data' Included automatically with the boundary as well
       },
     });
 
@@ -171,11 +174,11 @@ export const uploadAttachment = async (data, imageName, imageDescription) => {
       const data = await response.json();
       return data; // return the URL or data if needed
     } else {
-      console.error('Failed to upload the image');
+      console.error('Failed to upload the attachment');
       return null;
     }
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error('Error uploading attachment:', error);
     return null;
   }
 };

@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"famquest/components/db-manager/pkg/connection"
 	"famquest/components/db-manager/pkg/models"
 	"famquest/components/go-common/logger"
@@ -24,7 +23,7 @@ import (
 // @Tags attachment
 // @Accept multipart/form-data
 // @Produce json
-// @Param  file formData file true "image/jpeg or media/mpeg"
+// @Param  file formData file true "image/* or media/*"
 // @Param  name formData string true "name of the attachment"
 // @Param  description formData string true "description of the attachment"
 // @Success 201 {object} models.Attachments
@@ -253,7 +252,7 @@ func AttachmentPut(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id path int true "Attachment ID"
 // @Param refId query int true "Reference ID (optional)"
-// @Param refType query string true "Reference Type" Enums(spot,task)
+// @Param refType query string true "Reference Type" Enums(spot,task,attachment)
 // @Success 200 {object} models.Attachments
 // @Router /attachment/{id}/ref [put]
 func AttachmentPutRef(w http.ResponseWriter, r *http.Request) {
@@ -266,11 +265,16 @@ func AttachmentPutRef(w http.ResponseWriter, r *http.Request) {
 	}
 	var dest connection.DbInterface
 	var httpStatus int
-	if r.URL.Query().Get("refType") == "spot" {
+	switch r.URL.Query().Get("refType") {
+	case "spot":
 		_, httpStatus, err = crudGet(&models.Spots{}, map[string]string{"id": fmt.Sprint(intId)})
-	} else {
+	case "task":
+		_, httpStatus, err = crudGet(&models.Tasks{}, map[string]string{"id": fmt.Sprint(intId)})
+	case "attachment":
+		_, httpStatus, err = crudGet(&models.Attachments{}, map[string]string{"id": fmt.Sprint(intId)})
+	default:
+		err = fmt.Errorf("reftype '%s' not implemented", r.URL.Query().Get("refType"))
 		httpStatus = http.StatusBadRequest
-		err = errors.New("not yet implemented")
 	}
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
