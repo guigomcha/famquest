@@ -5,6 +5,7 @@ const MediaRecorderComponent = () => {
   const [imageBlob, setImageBlob] = useState(null);
   const [videoBlob, setVideoBlob] = useState(null);
   const [cameraOpened, setCameraOpened] = useState(false);
+  const [audioOpened, setAudioOpened] = useState(false);
   const [isRecording, setIsRecording] = useState(false); // State for recording label
   const audioRecorder = useRef(null);
   const videoRecorder = useRef(null);
@@ -15,7 +16,14 @@ const MediaRecorderComponent = () => {
   const cameraRef = useRef(null); // To keep track of the camera stream
 
   // Start recording audio
-  const startAudioRecording = async () => {
+  const toggleAudioRecording = async () => {
+    setAudioOpened(!audioOpened);
+    // Uses the previous value (anticipate it will be false)
+    if (audioOpened) {
+      audioRecorder.current?.stop();
+      audioStream?.getTracks().forEach((track) => track.stop());
+      return;
+    }
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const recorder = new MediaRecorder(stream);
     audioRecorder.current = recorder;
@@ -25,10 +33,6 @@ const MediaRecorderComponent = () => {
     recorder.start();
   };
 
-  const stopAudioRecording = () => {
-    audioRecorder.current?.stop();
-    audioStream?.getTracks().forEach((track) => track.stop());
-  };
 
   const stopCameraPreview = () => {
     mediaStream?.getTracks().forEach((track) => track.stop());
@@ -69,7 +73,15 @@ const MediaRecorderComponent = () => {
   };
 
   // Start video recording
-  const startVideoRecording = async () => {
+  const toggleVideoRecording = async () => {
+    setIsRecording(!isRecording);
+    // Uses the previous value (anticipate it will be false)
+    if (isRecording) {
+      videoRecorder.current?.stop();
+      stopCameraPreview();
+      setIsRecording(false); // Remove recording label
+      return;
+    }
     const recorder = new MediaRecorder(cameraRef.current);
     videoRecorder.current = recorder;
 
@@ -78,12 +90,6 @@ const MediaRecorderComponent = () => {
     setIsRecording(true); // Show recording label
   };
 
-  // Stop video recording
-  const stopVideoRecording = () => {
-    videoRecorder.current?.stop();
-    stopCameraPreview();
-    setIsRecording(false); // Remove recording label
-  };
 
   return (
     <div>
@@ -92,8 +98,19 @@ const MediaRecorderComponent = () => {
       {/* Audio Recording */}
       <div>
         <h3>Audio</h3>
-        <button onClick={startAudioRecording}>Start Audio Recording</button>
-        <button onClick={stopAudioRecording}>Stop Audio Recording</button>
+        <button onClick={toggleAudioRecording}>Start/Stop Audio Recording
+          {audioOpened && (<div
+            style={{
+              backgroundColor: "red",
+              color: "white",
+              padding: "5px 10px",
+              borderRadius: "5px",
+              fontWeight: "bold",
+            }}
+          >
+            Recording
+          </div>)}
+        </button>
         {audioBlob && (
           <audio controls src={URL.createObjectURL(audioBlob)}></audio>
         )}
@@ -147,8 +164,7 @@ const MediaRecorderComponent = () => {
         {cameraOpened && (
           <div>
             <div>
-              <button onClick={startVideoRecording}>Start Video Recording</button>
-              <button onClick={stopVideoRecording}>Stop Video Recording</button>
+              <button onClick={toggleVideoRecording}>Start/Stop Video Recording</button>
             </div>
           </div>
         )}
