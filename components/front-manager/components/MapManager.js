@@ -40,7 +40,9 @@ const MapManager = () => {
     return <p>Error Location {errorLocations.message}<br>Error spots {errorSpots.message}</br></p>;
   } 
   return (
-    <MapContainer locations={locations} spots={spots}/>
+    <div>
+      <MapContainer locations={locations} spots={spots}/>
+    </div>
   );
 };
   
