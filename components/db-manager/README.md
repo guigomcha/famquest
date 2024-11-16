@@ -26,6 +26,8 @@ go install github.com/swaggo/swag/cmd/swag@latest
 go install github.com/swaggo/http-swagger
 PATH=$(go env GOPATH)/bin:$PATH
 swag init --parseDependency --output pkg/api/docs
+go fmt $(go list ./... | grep -v /vendor/)
+go vet $(go list ./... | grep -v /vendor/)
 go mod tidy
 ```
 

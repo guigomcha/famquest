@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { uploadAttachment, addReferenceToAttachment, fetchAttachments } from '../backend_interface/db_manager_api';
+import {renderEmptyState} from '../utils/render_message';
 
-const Camera = ( {refId, refType} ) => {
+const Images = ( {refId, refType} ) => {
   const [imageBlob, setImageBlob] = useState(null);
   const [videoBlob, setVideoBlob] = useState(null);
   const [cameraOpened, setCameraOpened] = useState(false);
@@ -118,7 +119,9 @@ const Camera = ( {refId, refType} ) => {
     const attachments = await fetchAttachments(refId, refType);
 
     attachments.forEach(attachment => {
-      setSelectedImages((prevImages) => [...prevImages, attachment.url]);
+      if (attachment.contentType.startsWith("image/")) {
+        setSelectedImages((prevImages) => [...prevImages, attachment.url]);
+      }
     });
   };
 
@@ -146,11 +149,7 @@ const Camera = ( {refId, refType} ) => {
 
   };
 
-  const renderEmptyState = (message) => (
-    <div className="empty-container">
-      <p>{message}</p>
-    </div>
-  );
+
   // fetch the attachments for this spot
   useEffect(() => {
     callFetchAttachmentsForSpot(refId, refType)
@@ -275,4 +274,4 @@ const Camera = ( {refId, refType} ) => {
     </div>
   );
 };
-export default Camera;
+export default Images;

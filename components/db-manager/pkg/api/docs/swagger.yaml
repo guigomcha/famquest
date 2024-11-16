@@ -163,7 +163,7 @@ paths:
       - multipart/form-data
       description: Create a new attachment
       parameters:
-      - description: image/jpeg or media/mpeg
+      - description: image/* or media/*
         in: formData
         name: file
         required: true

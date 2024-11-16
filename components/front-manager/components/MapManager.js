@@ -19,7 +19,6 @@ const MapManager = () => {
   } = useQuery('locations', fetchCoordinates, {
     keepPreviousData: true,
     onSettled: (data, error) => {
-      console.log("locations onsuccess: "+ JSON.stringify(data))
       setLocations(data);
     }
   });
@@ -30,7 +29,6 @@ const MapManager = () => {
   } = useQuery('spots', fetchAndPrepareSpots, {
     keepPreviousData: true,
     onSettled: (data, error) => {
-      console.log("spots onsuccess: "+ JSON.stringify(data))
       setSpots(data);
     }
   });

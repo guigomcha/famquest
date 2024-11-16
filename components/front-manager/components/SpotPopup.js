@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../css/SpotPopup.css';
 import TaskForm from './TaskForm';
-import Attachments from './Attachments';
+import Images from './Images';
 import Audio from './Audio';
-
+import {renderEmptyState} from '../utils/render_message';
 
 const SpotPopup = ({ spot }) => {
   const [tasks, setTasks] = useState([]);
@@ -31,19 +31,13 @@ const SpotPopup = ({ spot }) => {
     taskWindow.document.close();
   };
 
-  const renderEmptyState = (message) => (
-    <div className="empty-container">
-      <p>{message}</p>
-    </div>
-  );
-
   return (
     <div className="custom-popup">
       <div className="header-container">
         <div className="info-container">
           <h3>{spot.name}</h3>
           <p>{spot.description}</p>
-          {/* <Audio /> */}
+          <Audio refId={spot.id} refType={'spot'}/>
         </div>
         
         <div className="task-container">
@@ -64,7 +58,7 @@ const SpotPopup = ({ spot }) => {
           ) : (
             renderEmptyState("Create new to see it")
           )}
-          <Attachments refId={spot.id} refType={'spot'} />
+          <Images refId={spot.id} refType={'spot'} />
         </div>
       </div>
 

@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS attachments (
     ref_id INT DEFAULT 0,
     name TEXT NOT NULL,
     description TEXT,
-    content_type TEXT DEFAULT 'image/jpeg' CHECK (content_type IN ('image/jpeg', 'media/mpeg')), -- Constraint for ref_type
+    content_type TEXT DEFAULT 'image/jpeg', -- Constraint for ref_type
     url TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger

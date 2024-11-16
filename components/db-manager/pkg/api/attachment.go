@@ -24,7 +24,7 @@ import (
 // @Tags attachment
 // @Accept multipart/form-data
 // @Produce json
-// @Param  file formData file true "image/jpeg or media/mpeg"
+// @Param  file formData file true "image/* or media/*"
 // @Param  name formData string true "name of the attachment"
 // @Param  description formData string true "description of the attachment"
 // @Success 201 {object} models.Attachments

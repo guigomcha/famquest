@@ -36,7 +36,6 @@ const MapContainer = ( {locations, spots } ) => {
   const locs = useRef(null);
 
   const prepareMap = () => {
-    console.log("locations in prepare: "+ JSON.stringify(locs))
     // After the map is loaded, reveal the area around each marker
     if (mapRef.current && locs.current) {
       locs.current.forEach((location) => {
@@ -56,11 +55,9 @@ const MapContainer = ( {locations, spots } ) => {
       "longitude": latlng.lng,
       "latitude": latlng.lat
     }
-    console.info("using location "+JSON.stringify(locationBody))
     const locationDb = await uploadLocation(locationBody);
     if (locationDb) {
       const spotDb = await uploadSpot(data);
-      console.info("created spot in DB "+ JSON.stringify(spotDb))
       if (spotDb) {
         await addReferenceToLocation(locationDb.id, spotDb.id, "spot");
         // Create marker which will be later a location + spot
