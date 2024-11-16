@@ -92,9 +92,26 @@ const Camera = ( {refId, refType} ) => {
       (prevIndex - 1 + selectedImages.length) % selectedImages.length
     );
   };
-  // Handle file selection
+  // Handle file selection and show the image on the canvas
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = canvasRef.current;
+        const context = canvas.getContext("2d");
+        canvas.width = img.width;  // Set canvas size to image size
+        canvas.height = img.height;
+        context.drawImage(img, 0, 0);  // Draw image on canvas
+      };
+      img.src = reader.result;  // Set image source as the result of the FileReader
+    };
+    if (selectedFile) {
+      reader.readAsDataURL(selectedFile);
+    }
   };
 
   const callFetchAttachmentsForSpot = async (refId, refType) => {
@@ -140,8 +157,6 @@ const Camera = ( {refId, refType} ) => {
   }, [refId]);
 
   return (
-
-    <div>
       <div className="attachment-container">
         <form onSubmit={handleSubmit} encType="multipart/form-data">
           <div className="attachment-container">
@@ -179,7 +194,6 @@ const Camera = ( {refId, refType} ) => {
               <input type="file" id="fileUpload" name="fileUpload" accept="image/*" style={{"display": "none"}} onChange={handleFileChange}/>
             </div>
             <div className="form-cell">
-              <div >
                 <button onClick={toggleCamera}>Open/Close Camera</button>
                 {cameraOpened && (
                     <div>
@@ -187,38 +201,36 @@ const Camera = ( {refId, refType} ) => {
                       <button onClick={captureImage}>Capture Image</button>
                     </div>
                   )}
-              </div>
-              <div >
-                <div>
-                    {cameraOpened && (
-                      <div style={{ position: "relative", zIndex: 1000000000}}>
-                        <h3>Camera Preview</h3>
-                        <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
-                        <video
-                          id="videoPreview"
-                          ref={videoRef}
-                          style={{ width: "300px" }}
-                          autoPlay
-                          muted
-                        ></video>
-                        {isRecording && (
-                          <label htmlFor="videoPreview"
-                            style={{
-                              backgroundColor: "red",
-                              color: "white",
-                              padding: "5px 10px",
-                              borderRadius: "5px",
-                              fontWeight: "bold",
-                              zIndex: 10,
-                            }}
-                          >
-                            Recording
-                          </label>
-                        )}
-                      </div>
-                    )}
-                </div>
-              </div>
+                  {(cameraOpened || selectedFile != null ) && (
+                    <div style={{ position: "relative", zIndex: 1000000000}}>
+                      <h3>Camera Preview</h3>
+                      <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
+                      {cameraOpened && (                      
+                      <video
+                        name="videoPreview"
+                        ref={videoRef}
+                        style={{ width: "300px" }}
+                        autoPlay
+                        muted
+                      ></video>
+                      {isRecording && (
+                        <label 
+                          htmlFor="videoPreview"
+                          style={{
+                            backgroundColor: "red",
+                            color: "white",
+                            padding: "5px 10px",
+                            borderRadius: "5px",
+                            fontWeight: "bold",
+                            zIndex: 10,
+                          }}
+                        >
+                          Recording
+                        </label>
+                      )}
+                      )}                      
+                    </div>
+                  )}
             </div>
           </div>
           {imageBlob && (
@@ -258,8 +270,6 @@ const Camera = ( {refId, refType} ) => {
         )}
       </div>
 
-
-    </div>
   );
 };
 
