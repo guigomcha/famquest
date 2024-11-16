@@ -179,66 +179,74 @@ const Camera = ( {refId, refType} ) => {
               <input type="file" id="fileUpload" name="fileUpload" accept="image/*" style={{"display": "none"}} onChange={handleFileChange}/>
             </div>
             <div className="form-cell">
-              <button onClick={toggleCamera}>Open/Close Camera</button>
-              {cameraOpened && (
-                  <div>
-                    <button onClick={toggleVideoRecording}>Start/Stop Video Recording</button>
-                    <button onClick={captureImage}>Capture Image</button>
-                  </div>
-                )}
+              <div >
+                <button onClick={toggleCamera}>Open/Close Camera</button>
+                {cameraOpened && (
+                    <div>
+                      <button onClick={toggleVideoRecording}>Start/Stop Video Recording</button>
+                      <button onClick={captureImage}>Capture Image</button>
+                    </div>
+                  )}
+              </div>
+              <div >
+                <div>
+                    {cameraOpened && (
+                      <div style={{ position: "relative", zIndex: 1000000000}}>
+                        <h3>Camera Preview</h3>
+                        <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
+                        <video
+                          id="videoPreview"
+                          ref={videoRef}
+                          style={{ width: "300px" }}
+                          autoPlay
+                          muted
+                        ></video>
+                        {isRecording && (
+                          <label htmlFor="videoPreview"
+                            style={{
+                              backgroundColor: "red",
+                              color: "white",
+                              padding: "5px 10px",
+                              borderRadius: "5px",
+                              fontWeight: "bold",
+                              zIndex: 10,
+                            }}
+                          >
+                            Recording
+                          </label>
+                        )}
+                      </div>
+                    )}
+                </div>
+              </div>
             </div>
           </div>
+          {imageBlob && (
           <div className="form-row">
-            <button type="submit">Upload</button>
-            {statusMessage && <p>{statusMessage}</p>}
-          </div>
-          <div className="form-row">
-            {imageBlob && (
+            <div className="form-row">
+              <h3>Loaded Content</h3>
+            </div>
+            <div className="form-row">
               <img
               src={URL.createObjectURL(imageBlob)}
               alt="Captured"
               style={{ width: "200px", marginTop: "10px" }}
               />
-            )}
-            {videoBlob && (
+              {videoBlob && (
               <video
               controls
               width="300"
               src={URL.createObjectURL(videoBlob)}
               ></video>
-            )}
+              )}
+            </div>
+          </div>
+          )}
+          <div className="form-row">
+            <button type="submit">Upload</button>
+            {statusMessage && <p>{statusMessage}</p>}
           </div>
         </form>
-        <div className="form-row">
-          {cameraOpened && (
-              <div style={{ position: "relative", zIndex: 1000000000}}>
-                <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
-                <video
-                  ref={videoRef}
-                  style={{ width: "300px" }}
-                  autoPlay
-                  muted
-                ></video>
-                {isRecording && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "10px",
-                      left: "10px",
-                      backgroundColor: "red",
-                      color: "white",
-                      padding: "5px 10px",
-                      borderRadius: "5px",
-                      fontWeight: "bold",
-                      zIndex: 10,
-                    }}
-                  >
-                    Recording
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
         {selectedImages.length > 0 ? (
           <div className="carousel-container">
             <button onClick={handlePrev} disabled={selectedImages.length <= 1}>Prev</button>

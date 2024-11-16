@@ -122,6 +122,7 @@
 .form-row {
   display: flex;
   gap: 20px;
+  flex-direction: row;
 }
 
 .form-cell {
