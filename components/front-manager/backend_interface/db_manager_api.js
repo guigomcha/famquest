@@ -144,13 +144,19 @@ export const uploadLocation = async (body) => {
 };
 
 
-export const uploadAttachment = async (file, imageName, imageDescription) => {
+export const uploadAttachment = async (data, imageName, imageDescription) => {
   const formData = new FormData();
-  formData.append('file', file);
   formData.append('name', imageName);
   formData.append('description', imageDescription);
-  console.info("upload attachment: "+file +" ---- "+imageName, +" "+ imageDescription);
-  console.info(formData.entries());
+
+  if (data instanceof Blob) {
+    // If it's a Blob (image from the camera), append it with a filename
+    formData.append("file", data, "camera_image.jpg");
+  } else {
+    // If it's a file selected via the file input
+    formData.append("file", data);
+  }
+
   try {
     const response = await fetch(`${API_URL}/attachment`, {
       method: 'POST',
