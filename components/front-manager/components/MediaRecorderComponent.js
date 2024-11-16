@@ -4,12 +4,14 @@ const MediaRecorderComponent = () => {
   const [audioBlob, setAudioBlob] = useState(null);
   const [imageBlob, setImageBlob] = useState(null);
   const [videoBlob, setVideoBlob] = useState(null);
+  const [cameraOpened, setCameraOpened] = useState(false);
   const audioRecorder = useRef(null);
   const videoRecorder = useRef(null);
   const [audioStream, setAudioStream] = useState(null);
   const [mediaStream, setMediaStream] = useState(null);
   const videoRef = useRef(null); // For real-time preview
   const canvasRef = useRef(null); // To capture still images
+  const cameraRef = useRef(null); // To keep the camera Open
 
   // Start recording audio
   const startAudioRecording = async () => {
@@ -28,11 +30,16 @@ const MediaRecorderComponent = () => {
   };
 
   // Start camera for capturing image
-  const startCamera = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoRef.current.srcObject = stream;
-    setMediaStream(stream);
+  const openCamera = async () => {
+    setCameraOpened(true);
+    cameraRef.current = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+    videoRef.current.srcObject = cameraRef.current;
+    setMediaStream(cameraRef.current);
     videoRef.current.play();
+
   };
 
   // Capture an image from the camera
@@ -43,26 +50,17 @@ const MediaRecorderComponent = () => {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
     canvas.toBlob((blob) => setImageBlob(blob), "image/jpeg");
-  };
-
-  // Stop camera
-  const stopCamera = () => {
+    
+    // Stop camera
     mediaStream?.getTracks().forEach((track) => track.stop());
+    cameraRef.current = null;
+    setCameraOpened(false);
   };
 
   // Start video recording with audio
   const startVideoRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-    setMediaStream(stream);
-    videoRef.current.srcObject = stream;
-    videoRef.current.play();
-
-    const recorder = new MediaRecorder(stream);
+    const recorder = new MediaRecorder(cameraRef.current);
     videoRecorder.current = recorder;
 
     recorder.ondataavailable = (e) => setVideoBlob(e.data);
@@ -72,6 +70,8 @@ const MediaRecorderComponent = () => {
   const stopVideoRecording = () => {
     videoRecorder.current?.stop();
     mediaStream?.getTracks().forEach((track) => track.stop());
+    cameraRef.current = null;
+    setCameraOpened(false);
   };
 
   return (
@@ -91,12 +91,10 @@ const MediaRecorderComponent = () => {
       {/* Image Capture */}
       <div>
         <h3>Camera</h3>
-        <video ref={videoRef} style={{ width: "300px" }}></video>
-        <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
+        
         <div>
-          <button onClick={startCamera}>Start Camera</button>
+          <button onClick={openCamera}>Open Camera</button>
           <button onClick={captureImage}>Capture Image</button>
-          <button onClick={stopCamera}>Stop Camera</button>
         </div>
         {imageBlob && (
           <img
@@ -111,6 +109,7 @@ const MediaRecorderComponent = () => {
       <div>
         <h3>Video (with Audio)</h3>
         <video ref={videoRef} style={{ width: "300px" }} autoPlay muted></video>
+        <canvas ref={canvasRef} style={{ display: "none" }}></canvas>        
         <div>
           <button onClick={startVideoRecording}>Start Video Recording</button>
           <button onClick={stopVideoRecording}>Stop Video Recording</button>
