@@ -11,7 +11,7 @@ const MediaRecorderComponent = () => {
   const [mediaStream, setMediaStream] = useState(null);
   const videoRef = useRef(null); // For real-time preview
   const canvasRef = useRef(null); // To capture still images
-  const cameraRef = useRef(null); // To keep the camera Open
+  const cameraRef = useRef(null); // To keep track of the camera stream
 
   // Start recording audio
   const startAudioRecording = async () => {
@@ -29,17 +29,28 @@ const MediaRecorderComponent = () => {
     audioStream?.getTracks().forEach((track) => track.stop());
   };
 
-  // Start camera for capturing image
-  const openCamera = async () => {
-    setCameraOpened(true);
-    cameraRef.current = await navigator.mediaDevices.getUserMedia({
+  const stopCameraPreview = () => {
+    mediaStream?.getTracks().forEach((track) => track.stop());
+    setCameraOpened(false);
+    cameraRef.current = null;
+  };
+
+  // Open the camera for capturing image or recording video
+  const toggleCamera = async () => {
+    setCameraOpened(!cameraOpened);
+    // Uses the previous value (anticipate it will be false)
+    if (cameraOpened){ 
+      stopCameraPreview();
+      return;
+    }
+    const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     });
-    videoRef.current.srcObject = cameraRef.current;
-    setMediaStream(cameraRef.current);
+    cameraRef.current = stream;
+    videoRef.current.srcObject = stream;
+    setMediaStream(stream);
     videoRef.current.play();
-
   };
 
   // Capture an image from the camera
@@ -51,14 +62,12 @@ const MediaRecorderComponent = () => {
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     canvas.toBlob((blob) => setImageBlob(blob), "image/jpeg");
-    
-    // Stop camera
-    mediaStream?.getTracks().forEach((track) => track.stop());
-    cameraRef.current = null;
-    setCameraOpened(false);
+
+    // Stop the camera after capturing the image
+    stopCameraPreview();
   };
 
-  // Start video recording with audio
+  // Start video recording
   const startVideoRecording = async () => {
     const recorder = new MediaRecorder(cameraRef.current);
     videoRecorder.current = recorder;
@@ -67,11 +76,10 @@ const MediaRecorderComponent = () => {
     recorder.start();
   };
 
+  // Stop video recording
   const stopVideoRecording = () => {
     videoRecorder.current?.stop();
-    mediaStream?.getTracks().forEach((track) => track.stop());
-    cameraRef.current = null;
-    setCameraOpened(false);
+    stopCameraPreview();
   };
 
   return (
@@ -91,11 +99,19 @@ const MediaRecorderComponent = () => {
       {/* Image Capture */}
       <div>
         <h3>Camera</h3>
-        
-        <div>
-          <button onClick={openCamera}>Open Camera</button>
-          <button onClick={captureImage}>Capture Image</button>
-        </div>
+        <button onClick={toggleCamera}>Open/Close Camera</button>
+        {cameraOpened && (
+          <div>
+            <video
+              ref={videoRef}
+              style={{ width: "300px" }}
+              autoPlay
+              muted
+            ></video>
+            <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
+            <button onClick={captureImage}>Capture Image</button>
+          </div>
+        )}
         {imageBlob && (
           <img
             src={URL.createObjectURL(imageBlob)}
@@ -108,12 +124,14 @@ const MediaRecorderComponent = () => {
       {/* Video Recording */}
       <div>
         <h3>Video (with Audio)</h3>
-        <video ref={videoRef} style={{ width: "300px" }} autoPlay muted></video>
-        <canvas ref={canvasRef} style={{ display: "none" }}></canvas>        
-        <div>
-          <button onClick={startVideoRecording}>Start Video Recording</button>
-          <button onClick={stopVideoRecording}>Stop Video Recording</button>
-        </div>
+        {cameraOpened && (
+          <div>
+            <div>
+              <button onClick={startVideoRecording}>Start Video Recording</button>
+              <button onClick={stopVideoRecording}>Stop Video Recording</button>
+            </div>
+          </div>
+        )}
         {videoBlob && (
           <video
             controls
