@@ -40,7 +40,7 @@ const Audio = ({ refId, refType }) => {
 
     attachments.forEach(attachment => {
       if (attachment.contentType.startsWith("audio/")) {
-        setSelectedAudios((prevImages) => [...prevImages, attachment.url]);
+        setSelectedAudios((prevImages) => [...prevImages, attachment]);
       }
     });
   };
@@ -82,7 +82,6 @@ const Audio = ({ refId, refType }) => {
   }, [refId]);
   return (
     <div>
-      <h2>Audio Recorder</h2>
       {/* Audio Recording */}
       <div>
         <h3>Record your audio</h3>
@@ -115,8 +114,7 @@ const Audio = ({ refId, refType }) => {
       {selectedAudios.length > 0 ? (
         <div className="carousel-container">
           <button onClick={handlePrev} disabled={selectedAudios.length <= 1}>Prev</button>
-          {/* Audio carousel display */}
-          <audio controls src={selectedAudios[currentIndex]}></audio>
+          <audio controls src={selectedAudios[currentIndex].url}></audio>
           <button onClick={handleNext} disabled={selectedAudios.length <= 1}>Next</button>
         </div>
       ) : (

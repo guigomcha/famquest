@@ -231,7 +231,8 @@ const docTemplate = `{
                     {
                         "enum": [
                             "spot",
-                            "task"
+                            "task",
+                            "attachment"
                         ],
                         "type": "string",
                         "description": "Reference Type",

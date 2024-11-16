@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { uploadAttachment, addReferenceToAttachment, fetchAttachments } from '../backend_interface/db_manager_api';
 import {renderEmptyState} from '../utils/render_message';
+import Audio from './Audio';
 
 const Images = ( {refId, refType} ) => {
   const [imageBlob, setImageBlob] = useState(null);
@@ -120,7 +121,7 @@ const Images = ( {refId, refType} ) => {
 
     attachments.forEach(attachment => {
       if (attachment.contentType.startsWith("image/")) {
-        setSelectedImages((prevImages) => [...prevImages, attachment.url]);
+        setSelectedImages((prevImages) => [...prevImages, attachment]);
       }
     });
   };
@@ -265,7 +266,12 @@ const Images = ( {refId, refType} ) => {
       {selectedImages.length > 0 ? (
         <div className="carousel-container">
           <button onClick={handlePrev} disabled={selectedImages.length <= 1}>Prev</button>
-          <img src={selectedImages[currentIndex]} alt={`Attachment ${currentIndex + 1}`} className="carousel-image" />
+          <div>
+          <h3>{selectedImages[currentIndex].name}</h3>
+          <h4>{selectedImages[currentIndex].description}</h4>
+          <img src={selectedImages[currentIndex].url} alt={`Attachment ${currentIndex + 1}`} className="carousel-image" />
+          <Audio refId={selectedImages[currentIndex].id} refType={'attachment'} />
+          </div>
           <button onClick={handleNext} disabled={selectedImages.length <= 1}>Next</button>
         </div>
       ) : (
