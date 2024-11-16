@@ -5,6 +5,7 @@ const MediaRecorderComponent = () => {
   const [imageBlob, setImageBlob] = useState(null);
   const [videoBlob, setVideoBlob] = useState(null);
   const [cameraOpened, setCameraOpened] = useState(false);
+  const [isRecording, setIsRecording] = useState(false); // State for recording label
   const audioRecorder = useRef(null);
   const videoRecorder = useRef(null);
   const [audioStream, setAudioStream] = useState(null);
@@ -39,7 +40,7 @@ const MediaRecorderComponent = () => {
   const toggleCamera = async () => {
     setCameraOpened(!cameraOpened);
     // Uses the previous value (anticipate it will be false)
-    if (cameraOpened){ 
+    if (cameraOpened) {
       stopCameraPreview();
       return;
     }
@@ -74,12 +75,14 @@ const MediaRecorderComponent = () => {
 
     recorder.ondataavailable = (e) => setVideoBlob(e.data);
     recorder.start();
+    setIsRecording(true); // Show recording label
   };
 
   // Stop video recording
   const stopVideoRecording = () => {
     videoRecorder.current?.stop();
     stopCameraPreview();
+    setIsRecording(false); // Remove recording label
   };
 
   return (
@@ -101,13 +104,30 @@ const MediaRecorderComponent = () => {
         <h3>Camera</h3>
         <button onClick={toggleCamera}>Open/Close Camera</button>
         {cameraOpened && (
-          <div>
+          <div style={{ position: "relative" }}>
             <video
               ref={videoRef}
               style={{ width: "300px" }}
               autoPlay
               muted
             ></video>
+            {isRecording && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  left: "10px",
+                  backgroundColor: "red",
+                  color: "white",
+                  padding: "5px 10px",
+                  borderRadius: "5px",
+                  fontWeight: "bold",
+                  zIndex: 10,
+                }}
+              >
+                Recording
+              </div>
+            )}
             <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
             <button onClick={captureImage}>Capture Image</button>
           </div>
