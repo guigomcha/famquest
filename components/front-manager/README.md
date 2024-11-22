@@ -39,7 +39,7 @@ sudo apt install nodejs
 ```bash
 npx create-react-app famquest-ui
 # npm install @react-google-maps/api
-sudo npm install -g expo-cli
+sudo npm install -g expo-cli eas-cli
 npm install react react-dom leaflet
 npm install react-leaflet
 npm install -D @types/leaflet
@@ -47,6 +47,14 @@ npm install leaflet-defaulticon-compatibility - save
 npm i --save react-query
 npx expo install react-native-web react-dom @expo/metro-runtime
 npx expo start
+https://github.com/expo/eas-cli/issues/1300
+```
+
+Trying to run android emulator 
+```
+https://gist.github.com/sushant-at-nitor/30ca1185f2501f55fff61752d18387cc
+https://atekihcan.com/blog/codeorrandom/how-to-setup-android-sdk-on-wsl/
+https://medium.com/@danielrauhut/running-expo-dev-builds-from-wsl-on-your-windows-virtual-devices-android-emulator-bd7cc7e29418
 ```
 
 ### Installationw

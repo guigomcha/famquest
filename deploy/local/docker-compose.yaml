@@ -3,7 +3,7 @@ version: '3.8'
 services:
   pgadmin_domain:
     image: dpage/pgadmin4:6.15
-    container_name: pgadmin_domain
+    container_name: pgadmin_famquest
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
       PGADMIN_DEFAULT_PASSWORD: mypassword
@@ -49,3 +49,5 @@ services:
 # volumes:
 #   minio_data:
 #     driver: local  
+
+C:\Users\a809921\.android

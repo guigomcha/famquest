@@ -1,0 +1,3 @@
+[submodule "external/android-emulator"]
+	path = external/android-emulator
+	url = https://github.com/amrsa1/Android-Emulator-image.git
