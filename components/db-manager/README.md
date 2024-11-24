@@ -32,9 +32,8 @@ go mod tidy
 ```
 
 ```bash
-GOOS=linux GARCH=amd64 CGO_ENABLED=0 go build -v -a -installsuffix cgo -o dbmanager . 
-cp install/.env-tests .env
-export $(grep -v '^#' .env | xargs)
+GOOS=linux  GARCH=amd64 CGO_ENABLED=0 go build -v -a -installsuffix cgo -o dbmanager . 
+export $(grep -v '^#' install/.env-tests | xargs)
 ./dbmanager 
 ```
 

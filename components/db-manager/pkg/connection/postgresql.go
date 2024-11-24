@@ -2,21 +2,21 @@ package connection
 
 import (
 	"errors"
-	"famquest/components/db-manager/pkg/models"
-	"famquest/components/go-common/logger"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
+
+	"famquest/components/db-manager/pkg/models"
+	"famquest/components/go-common/logger"
 )
 
 const (
 	DB_USER             = "myuser"
 	DB_PASSWORD         = "mypassword"
 	DB_NAME             = "famquest"
-	DB_HOST             = "localhost"
-	DB_PORT             = "5432"
 	ErrorIdDoesNotExits = "id does not exist"
 )
 
@@ -24,7 +24,8 @@ var DB *sqlx.DB
 
 func ConnectToPostgreSQL() (*sqlx.DB, error) {
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable",
-		DB_USER, DB_PASSWORD, DB_NAME, DB_HOST, DB_PORT)
+		DB_USER, DB_PASSWORD, DB_NAME, os.Getenv("POSTGRES_DB_HOST"), os.Getenv("POSTGRES_DB_PORT"))
+	logger.Log.Infof("Connecting to Postgress '%s'", connStr)
 	return sqlx.Connect("postgres", connStr)
 }
 
