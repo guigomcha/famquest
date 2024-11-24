@@ -13,7 +13,7 @@ services:
           {
             "Name": "Famquest DB",
             "Group": "Servers",
-            "Host": "famquest",
+            "Host": "famquest_db",
             "Port": 5432,
             "Username": "myuser",
             "SSLMode": "prefer"
@@ -21,18 +21,18 @@ services:
         ]
     ports:
       - 15432:80
-  famquest:
+  famquest_db:
     image: postgres:latest
-    container_name: famquest
+    container_name: famquest_db
     environment:
       POSTGRES_DB: famquest
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
     ports:
       - "5432:5432"
-  minio:
+  minio_db:
     image: docker.io/bitnami/minio:2022
-    container_name: minio
+    container_name: minio_db
     ports: # 9000 for some reason busy in localhost
       - 5430:5430
       - 5431:5431
@@ -41,13 +41,44 @@ services:
     environment:
       - MINIO_ROOT_USER=myuser
       - MINIO_ROOT_PASSWORD=mypassword
+      - MINIO_DOCKER_NAME=minio_db
       - MINIO_API_PORT_NUMBER=5430
       - MINIO_CONSOLE_PORT_NUMBER=5431
       - MINIO_APACHE_API_HTTP_PORT_NUMBER=5430
-      # - MINIO_DEFAULT_BUCKETS=image
-
+  dbmanager:
+    container_name: dbmanager
+    build: 
+      context: ../../
+      dockerfile: components/db-manager/install/Dockerfile
+      target: builder
+      args:
+        DEV: "True"
+    ports: # 9000 for some reason busy in localhost
+      - 8080:8080
+    volumes:
+      - ../../components:/go/src/famquest/components
+    command: sleep infinity
+    working_dir: /go/src/famquest/components/db-manager
+    depends_on:
+      - minio_db
+      - famquest_db
+  frontend:
+    build: 
+      context: ../../
+      dockerfile: components/front-manager/install/Dockerfile
+      # target: builder
+    container_name: frontend
+    ports:
+      - "3000:3000"
+      - "8081:8080"
+    volumes:
+      - ../../components:/usr/app/famquest/components
+    # environment:
+    #   - CHOKIDAR_USEPOLLING=true  # To enable file watching on certain systems (like Windows or WSL)
+    command: sleep infinity
+    working_dir: /usr/app/famquest/components/front-manager
+    depends_on:
+      - dbmanager
 # volumes:
 #   minio_data:
 #     driver: local  
-
-C:\Users\a809921\.android
