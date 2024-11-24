@@ -4,13 +4,14 @@
   "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
     "-": "^0.0.1",
     "@expo/metro-runtime": "~3.2.3",
+    "@react-navigation/native-stack": "^7.1.1",
     "expo": "~51.0.28",
     "expo-status-bar": "~1.12.1",
     "leaflet": "^1.9.4",
@@ -19,14 +20,15 @@
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
     "react-native": "0.74.5",
-    "react-native-maps": "1.14.0",
     "react-native-web": "~0.19.10",
     "react-query": "^3.39.3",
+    "react-router-dom": "^5.3.4",
     "save": "^2.9.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "@types/leaflet": "^1.9.14"
+    "@types/leaflet": "^1.9.14",
+    "@types/react-router-dom": "^5.3.3"
   },
   "private": true
 }

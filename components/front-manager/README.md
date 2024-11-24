@@ -14,6 +14,9 @@ The idea is to have a view of google-map which is discovered based on the locati
 
 There are several pages that need to be shown floating on top of the main webpage.
 - https://www.freecodecamp.org/news/how-work-with-restful-apis-in-react-simplified-steps-and-practical-examples/
+This is going to be a Progresive Web App
+- https://www.freecodecamp.org/news/what-are-progressive-web-apps/
+- https://www.youtube.com/watch?v=4XT23X0Fjfk&list=PL4cUxeGkcC9gTxqJBcDmoi5Q2pzDusSL7
 
 ## Getting Started
 
@@ -37,25 +40,26 @@ sudo apt install nodejs
 ```
 
 ```bash
-npx create-react-app famquest-ui
-# npm install @react-google-maps/api
-sudo npm install -g expo-cli eas-cli
+npx create-react-app front-manager
+npm install expo-cli
+npx expo install react-native-web react-dom @expo/metro-runtime
 npm install react react-dom leaflet
 npm install react-leaflet
 npm install -D @types/leaflet
-npm install leaflet-defaulticon-compatibility - save
-npm i --save react-query
+npm install leaflet-defaulticon-compatibility
+npm install react-query
 npx expo install react-native-web react-dom @expo/metro-runtime
 npx expo start
-https://github.com/expo/eas-cli/issues/1300
 ```
 
-Trying to run android emulator 
-```
-https://gist.github.com/sushant-at-nitor/30ca1185f2501f55fff61752d18387cc
-https://atekihcan.com/blog/codeorrandom/how-to-setup-android-sdk-on-wsl/
-https://medium.com/@danielrauhut/running-expo-dev-builds-from-wsl-on-your-windows-virtual-devices-android-emulator-bd7cc7e29418
-```
+Trying to run android emulator: 
+- Android studio has to be on the wondows side and can only interact with backends running also on the wondows side or deployed with docker in WSL.
+
+Refs used:
+- https://gist.github.com/sushant-at-nitor/30ca1185f2501f55fff61752d18387cc
+- https://atekihcan.com/blog/codeorrandom/how-to-setup-android-sdk-on-wsl/
+- https://medium.com/@danielrauhut/running-expo-dev-builds-from-wsl-on-your-windows-virtual-devices-android-emulator-bd7cc7e29418
+
 
 ### Installationw
 
@@ -68,3 +72,10 @@ https://medium.com/@danielrauhut/running-expo-dev-builds-from-wsl-on-your-window
 
 ## API documentation
 
+https://user-images.githubusercontent.com/23381975/229468456-36d01223-2820-46d6-86a5-441aef5a1640.mp4
+
+https://github.com/leahbanks/BE-through-the-fog
+
+https://github.com/Mburnand-tech/Through-the-fog/tree/master
+
+https://blog.logrocket.com/complete-guide-react-native-web/
