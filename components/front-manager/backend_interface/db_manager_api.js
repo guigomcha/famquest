@@ -6,7 +6,7 @@
 //   ];
 // };
 
-const API_URL = "https://api.famquest.nephele.ari-imet.eu";
+const API_URL = "https://api.famquest.$REPLACE_BASE_DOMAIN";
 
 export const fetchCoordinates = async () => {
   console.info("URL: "+ API_URL);

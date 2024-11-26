@@ -6,11 +6,12 @@ import (
 
 	_ "github.com/lib/pq"
 
+	"net/http"
+	"os"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"net/http"
-	"os"
 
 	// API demo https://www.soberkoder.com/swagger-go-api-swaggo/
 	// Use https://github.com/swaggo/swag#declarative-comments-format to format REST API
@@ -83,7 +84,7 @@ func main() {
 		"http://localhost:3000",
 		"http://localhost:8081",
 		"http://localhost:8080",
-		"https://portal.famquest.nephele.ari-imet.eu",
+		"https://portal.famquest.$REPLACE_BASE_DOMAIN",
 	})
 	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
 	allowedHeaders := handlers.AllowedHeaders([]string{"Content-Type", "Accept"})

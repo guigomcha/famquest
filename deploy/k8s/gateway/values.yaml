@@ -45,7 +45,7 @@ proxy:
     content: |
       server {
         listen 80;
-        server_name monitoring.famquest.nephele.ari-imet.eu;
+        server_name monitoring.famquest.$REPLACE_BASE_DOMAIN;
         resolver kube-dns.kube-system.svc.cluster.local valid=10s;
         location / {
           proxy_pass http://promstack-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090;
@@ -59,7 +59,7 @@ common:
     # Useful to link to other deployments
     app: gateway
     fullapp: famquest
-  baseDomain: famquest.nephele.ari-imet.eu
+  baseDomain: famquest.$REPLACE_BASE_DOMAIN
   pullSecret: gatewaysecrets
 
 # Configure the Exposure layer

@@ -19,9 +19,9 @@ spec:
           - name: POSTGRES_DB
             value: "famquest"
           - name: POSTGRES_USER
-            value: "myuser"
+            value: "$REPLACE_MYUSER"
           - name: POSTGRES_PASSWORD
-            value: "mypassword"
+            value: "$REPLACE_MYPASSWORD"
         ports:
         - containerPort: 5432
 ---

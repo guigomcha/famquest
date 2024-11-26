@@ -17,9 +17,9 @@ spec:
         image: docker.io/bitnami/minio:2022
         env:
           - name: MINIO_ROOT_USER
-            value: "myuser"
+            value: "$REPLACE_MYUSER"
           - name: MINIO_ROOT_PASSWORD
-            value: "mypassword"
+            value: "$REPLACE_MYPASSWORD"
           - name: MINIO_API_PORT_NUMBER
             value: "9000"
           - name: MINIO_CONSOLE_PORT_NUMBER

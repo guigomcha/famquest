@@ -5,8 +5,8 @@ services:
     image: dpage/pgadmin4:6.15
     container_name: pgadmin_famquest
     environment:
-      PGADMIN_DEFAULT_EMAIL: myuser@pgadmin.com
-      PGADMIN_DEFAULT_PASSWORD: mypassword
+      PGADMIN_DEFAULT_EMAIL: $REPLACE_MYUSER@pgadmin.com
+      PGADMIN_DEFAULT_PASSWORD: $REPLACE_MYPASSWORD
       PGADMIN_LISTEN_PORT: 80
       PGADMIN_SERVER_JSON: |
         [
@@ -15,7 +15,7 @@ services:
             "Group": "Servers",
             "Host": "famquest_db",
             "Port": 5432,
-            "Username": "myuser",
+            "Username": "$REPLACE_MYUSER",
             "SSLMode": "prefer"
           }
         ]
@@ -27,8 +27,8 @@ services:
     container_name: famquest_db
     environment:
       POSTGRES_DB: famquest
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+      POSTGRES_USER: $REPLACE_MYUSER
+      POSTGRES_PASSWORD: $REPLACE_MYPASSWORD
     ports:
       - "5432:5432"  # Port for PostgreSQL database
 
@@ -36,8 +36,8 @@ services:
     image: docker.io/bitnami/minio:2022
     container_name: minio
     environment:
-      MINIO_ROOT_USER: myuser
-      MINIO_ROOT_PASSWORD: mypassword
+      MINIO_ROOT_USER: $REPLACE_MYUSER
+      MINIO_ROOT_PASSWORD: $REPLACE_MYPASSWORD
       MINIO_API_PORT_NUMBER: 5430  
       MINIO_CONSOLE_PORT_NUMBER: 5431 
     ports: # For some reason 9000 is busy in my PC
@@ -51,8 +51,8 @@ services:
     container_name: dbmanager
     environment:
       MINIO_URL: minio:5430
-      MINIO_USER: myuser
-      MINIO_PASSWORD: mypassword
+      MINIO_USER: $REPLACE_MYUSER
+      MINIO_PASSWORD: $REPLACE_MYPASSWORD
     build:
       context: ../../
       dockerfile: components/db-manager/install/Dockerfile
@@ -74,6 +74,7 @@ services:
     build:
       context: ../../
       dockerfile: components/front-manager/install/Dockerfile
+      target: builder
     container_name: frontend
     ports:
       - "8081:8081"
