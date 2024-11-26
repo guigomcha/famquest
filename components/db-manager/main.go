@@ -18,7 +18,6 @@ import (
 	"famquest/components/db-manager/pkg/api"
 	"famquest/components/db-manager/pkg/api/docs"
 	"famquest/components/db-manager/pkg/connection"
-	"famquest/components/db-manager/pkg/models"
 	"famquest/components/go-common/logger"
 )
 
@@ -40,12 +39,11 @@ func init() {
 // @contact.email guillermo.gc1994@gmail.com
 // @license.name Guillermo Gomez GPL V3
 func main() {
-	logger.Log.Info("initiating db manager backend")
-	initialDbData()
 	defer connection.DB.Close()
 	r := mux.NewRouter()
 	r.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 	r.HandleFunc("/health", api.Health).Methods("GET")
+	r.HandleFunc("/configure", api.Configure).Methods("GET")
 
 	r.HandleFunc("/attachment", api.AttachmentPost).Methods("POST")
 	r.HandleFunc("/attachment", api.AttachmentGetAll).Methods("GET")
@@ -94,24 +92,4 @@ func main() {
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), handlers.CORS(allowedOrigins, allowedMethods, allowedHeaders)(r)))
 	// log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
-}
-
-func initialDbData() {
-	db, err := connection.ConnectToPostgreSQL()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	logger.Log.Info("Postgress connected")
-	connection.DB = db
-	if _, err := db.Exec(models.Schema); err != nil {
-		log.Fatalln(err)
-	}
-	logger.Log.Info("Postgress configured")
-	minioClient, err := connection.ConnectToMinio()
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
-	logger.Log.Info("Minio configured")
-	connection.Minio = minioClient
 }

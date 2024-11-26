@@ -251,6 +251,27 @@ const docTemplate = `{
                 }
             }
         },
+        "/configure": {
+            "get": {
+                "description": "Connect and check dependencies",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Configure"
+                ],
+                "summary": "Configure",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Check the health of the service",

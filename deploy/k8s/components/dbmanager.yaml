@@ -29,7 +29,7 @@ spec:
         ports:
         - containerPort: 8080
         command: ["/bin/sh"]
-        args: ["-c", "while true; do sleep 1d; done"]
+        args: ["-c", "./dbmanager"]
         env:
           - name: SWAGGER_URL
             value: "api.famquest.nephele.ari-imet.eu"
@@ -39,8 +39,12 @@ spec:
             value: ""
           - name: SWAGGER_PORT
             value: "8080"
-          - name: MINIO
+          - name: MINIO_URL
             value: "minioapi.famquest.nephele.ari-imet.eu"
+          - name: MINIO_USER
+            value: "myuser"
+          - name: MINIO_PASSWORDMINIO
+            value: "mypassword"
           - name: POSTGRES_DB_HOST
             value: "postgresql-svc"
           - name: POSTGRES_DB_PORT

@@ -38,46 +38,48 @@ services:
     environment:
       MINIO_ROOT_USER: myuser
       MINIO_ROOT_PASSWORD: mypassword
-      # MINIO_BROWSER_REDIRECT_URL: minio
-      MINIO_API_PORT_NUMBER: 5430  # Minio API port
-      MINIO_CONSOLE_PORT_NUMBER: 5431  # Minio console port
-    ports:
+      MINIO_API_PORT_NUMBER: 5430  
+      MINIO_CONSOLE_PORT_NUMBER: 5431 
+    ports: # For some reason 9000 is busy in my PC
       - "5430:5430"  # Minio API port
       - "5431:5431"  # Minio console port
     volumes:
       - minio_data:/data  # Mount a volume for persistent data
 
   dbmanager:
-    image: ghcr.io/guigomcha/famquest/dbmanager:latest
+    # image: ghcr.io/guigomcha/famquest/dbmanager:latest
     container_name: dbmanager
-    # build:
-    #   context: ../../
-    #   dockerfile: components/db-manager/install/Dockerfile
-    #   target: builder
-    #   args:
-    #     DEV: "True"
+    environment:
+      MINIO_URL: minio:5430
+      MINIO_USER: myuser
+      MINIO_PASSWORD: mypassword
+    build:
+      context: ../../
+      dockerfile: components/db-manager/install/Dockerfile
+      target: builder
+      args:
+        DEV: "True"
     ports:
       - "8080:8080"  # Port for dbmanager web UI
-    # volumes:
-    #   - ../../components:/go/src/famquest/components
-    # command: sleep infinity
-    # working_dir: /go/src/famquest/components/db-manager
+    volumes:
+      - ../../components:/go/src/famquest/components
+    command: sleep infinity
+    working_dir: /go/src/famquest/components/db-manager
     depends_on:
       - minio
       - famquest_db
 
   frontend:
-    image: ghcr.io/guigomcha/famquest/frontmanager:latest
-    # build:
-    #   context: ../../
-    #   dockerfile: components/front-manager/install/Dockerfile
+    # image: ghcr.io/guigomcha/famquest/frontmanager:latest
+    build:
+      context: ../../
+      dockerfile: components/front-manager/install/Dockerfile
     container_name: frontend
     ports:
-      - "3000:3000"  # React app
-      - "8081:8081"  # Frontend port
-    # volumes:
-    #   - ../../components:/usr/src/famquest/components
-    # command: sleep infinity
+      - "8081:8081"
+    volumes:
+      - ../../components:/usr/src/famquest/components
+    command: sleep infinity
     working_dir:  /usr/src/famquest/components/front-manager
     depends_on:
       - dbmanager
