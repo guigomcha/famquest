@@ -1,6 +1,28 @@
 version: '3.8'
 
 services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.6
+    command: start
+    environment:
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8082
+      KC_HOSTNAME_STRICT_BACKCHANNEL: false
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HEALTH_ENABLED: true
+      KEYCLOAK_ADMIN: $REPLACE_MYUSER
+      KEYCLOAK_ADMIN_PASSWORD: $REPLACE_MYPASSWORD
+      KC_DB: postgres
+      KC_DB_URL: $REPLACE_MYUSER:$REPLACE_MYPASSWORD://postgres/users
+      KC_DB_USERNAME: $REPLACE_MYUSER
+      KC_DB_PASSWORD: $REPLACE_MYPASSWORD
+    ports:
+      - 8082:8082
+    restart: always
+    depends_on:
+      - postgresql
+
   pgadmin_domain:
     image: dpage/pgadmin4:6.15
     container_name: pgadmin_famquest
@@ -13,7 +35,7 @@ services:
           {
             "Name": "Famquest DB",
             "Group": "Servers",
-            "Host": "famquest_db",
+            "Host": "postgresql",
             "Port": 5432,
             "Username": "$REPLACE_MYUSER",
             "SSLMode": "prefer"
@@ -22,11 +44,11 @@ services:
     ports:
       - "15432:80"  # Port for pgAdmin web UI
 
-  famquest_db:
+  postgresql:
     image: postgres:latest
-    container_name: famquest_db
+    container_name: postgresql
     environment:
-      POSTGRES_DB: famquest
+      POSTGRES_DB: users
       POSTGRES_USER: $REPLACE_MYUSER
       POSTGRES_PASSWORD: $REPLACE_MYPASSWORD
     ports:
@@ -67,7 +89,7 @@ services:
     working_dir: /go/src/famquest/components/db-manager
     depends_on:
       - minio
-      - famquest_db
+      - postgresql
 
   frontend:
     # image: ghcr.io/guigomcha/famquest/frontmanager:latest
