@@ -61,7 +61,7 @@ cd components/front-manager
 ```
 
 Trying to run android emulator: 
-- Android studio has to be on the wondows side and can only interact with backends running also on the wondows side or deployed with docker in WSL.
+- Android studio has to be on the wondows side and can only interact with backends running also on the windows side or deployed with docker in WSL.
 
 Refs used:
 - https://gist.github.com/sushant-at-nitor/30ca1185f2501f55fff61752d18387cc
@@ -87,3 +87,5 @@ https://github.com/leahbanks/BE-through-the-fog
 https://github.com/Mburnand-tech/Through-the-fog/tree/master
 
 https://blog.logrocket.com/complete-guide-react-native-web/
+
+https://snack.expo.dev/

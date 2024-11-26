@@ -81,7 +81,12 @@ func main() {
 	}
 	fmt.Printf("Starting server on port %s...\n", port)
 	// Use CORS middleware to allow requests from frontend
-	allowedOrigins := handlers.AllowedOrigins([]string{"http://localhost:3000", "http://localhost:8081", "http://localhost:8080"})
+	allowedOrigins := handlers.AllowedOrigins([]string{
+		"http://localhost:3000",
+		"http://localhost:8081",
+		"http://localhost:8080",
+		"https://portal.famquest.nephele.ari-imet.eu",
+	})
 	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
 	allowedHeaders := handlers.AllowedHeaders([]string{"Content-Type", "Accept"})
 	logger.Log.Debugf("CORS: %+v, %+v, %+v", allowedOrigins, allowedHeaders, allowedMethods)
