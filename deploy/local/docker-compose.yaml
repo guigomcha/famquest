@@ -48,35 +48,37 @@ services:
       - minio_data:/data  # Mount a volume for persistent data
 
   dbmanager:
+    image: ghcr.io/guigomcha/famquest/dbmanager:latest
     container_name: dbmanager
-    build:
-      context: ../../
-      dockerfile: components/db-manager/install/Dockerfile
-      target: builder
-      args:
-        DEV: "True"
+    # build:
+    #   context: ../../
+    #   dockerfile: components/db-manager/install/Dockerfile
+    #   target: builder
+    #   args:
+    #     DEV: "True"
     ports:
       - "8080:8080"  # Port for dbmanager web UI
-    volumes:
-      - ../../components:/go/src/famquest/components
-    command: sleep infinity
-    working_dir: /go/src/famquest/components/db-manager
+    # volumes:
+    #   - ../../components:/go/src/famquest/components
+    # command: sleep infinity
+    # working_dir: /go/src/famquest/components/db-manager
     depends_on:
       - minio
       - famquest_db
 
   frontend:
-    build:
-      context: ../../
-      dockerfile: components/front-manager/install/Dockerfile
+    image: ghcr.io/guigomcha/famquest/frontmanager:latest
+    # build:
+    #   context: ../../
+    #   dockerfile: components/front-manager/install/Dockerfile
     container_name: frontend
     ports:
       - "3000:3000"  # React app
       - "8081:8081"  # Frontend port
-    volumes:
-      - ../../components:/usr/app/famquest/components
-    command: sleep infinity
-    working_dir: /usr/app/famquest/components/front-manager
+    # volumes:
+    #   - ../../components:/usr/src/famquest/components
+    # command: sleep infinity
+    working_dir:  /usr/src/famquest/components/front-manager
     depends_on:
       - dbmanager
 

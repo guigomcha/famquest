@@ -11,9 +11,9 @@ COPY components/go-common ../go-common
 # Make sure that the code is up to standards and docs are updated
 # Run tests and keep report
 RUN if [ -z "$DEV" ]; then \
-    ./go_tools.sh \
-    && ./go_test.sh \
-    && git reset --hard HEAD && ./go_swag_check.sh; \
+    ./install/dockerfile_tools/go_tools.sh \
+    && ./install/dockerfile_tools/go_test.sh \
+    && git reset --hard HEAD && ./install/dockerfile_tools/go_swag_check.sh; \
     fi
 
 # Finally build binaries

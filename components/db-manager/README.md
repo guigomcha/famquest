@@ -37,6 +37,13 @@ export $(grep -v '^#' install/.env-tests | xargs)
 ./dbmanager 
 ```
 
+```bash
+cd ../../
+docker build -t ghcr.io/guigomcha/famquest/dbmanager:latest -f components/db-manager/install/Dockerfile --progress plain  --network=host .
+cd components/db-manager
+```
+
+
 ## Documentation
 
 - https://www.alexedwards.net/blog/using-postgresql-jsonb

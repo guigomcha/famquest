@@ -50,6 +50,14 @@ npm install leaflet-defaulticon-compatibility
 npm install react-query
 npx expo install react-native-web react-dom @expo/metro-runtime
 npx expo start
+
+npx expo export --platform web
+```
+
+```bash
+cd ../../
+docker build -t ghcr.io/guigomcha/famquest/frontmanager:latest -f components/front-manager/install/Dockerfile --progress plain  --network=host .
+cd components/front-manager
 ```
 
 Trying to run android emulator: 
@@ -59,7 +67,7 @@ Refs used:
 - https://gist.github.com/sushant-at-nitor/30ca1185f2501f55fff61752d18387cc
 - https://atekihcan.com/blog/codeorrandom/how-to-setup-android-sdk-on-wsl/
 - https://medium.com/@danielrauhut/running-expo-dev-builds-from-wsl-on-your-windows-virtual-devices-android-emulator-bd7cc7e29418
-
+- Pending https://dev.to/ghost/running-exporeact-native-in-docker-4hme
 
 ### Installationw
 
