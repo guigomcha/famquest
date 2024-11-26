@@ -16,6 +16,8 @@ spec:
         - ip: "192.168.137.35"
           hostnames:
             - "api.famquest.nephele.ari-imet.eu"
+            - "minio.famquest.nephele.ari-imet.eu"
+            - "minioapi.famquest.nephele.ari-imet.eu"
             - "portal.famquest.nephele.ari-imet.eu"
             - "monitoring.famquest.nephele.ari-imet.eu"
       imagePullSecrets:
@@ -38,7 +40,7 @@ spec:
           - name: SWAGGER_PORT
             value: "8080"
           - name: MINIO
-            value: "minio-svc:9000"
+            value: "minioapi.famquest.nephele.ari-imet.eu"
           - name: POSTGRES_DB_HOST
             value: "postgresql-svc"
           - name: POSTGRES_DB_PORT

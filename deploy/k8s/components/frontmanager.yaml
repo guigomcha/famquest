@@ -17,6 +17,8 @@ spec:
           hostnames:
             - "api.famquest.nephele.ari-imet.eu"
             - "portal.famquest.nephele.ari-imet.eu"
+            - "minio.famquest.nephele.ari-imet.eu"
+            - "minioapi.famquest.nephele.ari-imet.eu"
             - "monitoring.famquest.nephele.ari-imet.eu"
       imagePullSecrets:
         - name: gatewaysecrets
@@ -26,9 +28,6 @@ spec:
         image: ghcr.io/guigomcha/famquest/frontmanager:latest
         ports:
         - containerPort: 80
-        env:
-          - name: REACT_APP_API_URL
-            value: "https://api.famquest.nephele.ari-imet.eu"
 ---
 apiVersion: v1
 kind: Service

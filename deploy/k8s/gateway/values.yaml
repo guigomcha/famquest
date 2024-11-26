@@ -22,6 +22,11 @@ proxy:
       svcName: minio-svc
       namespace: famquest
       port: 9001
+    - routingKey: minioapi
+      dropRoutingKey: false
+      svcName: minio-svc
+      namespace: famquest
+      port: 9000
   auth:
     enabled: false
     routingKey: auth
