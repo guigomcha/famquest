@@ -1,3 +1,2 @@
-external/*
-assets/*
 components/db-manager/dbmanager
+components/front-manager/android/*

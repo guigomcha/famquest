@@ -1,11 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	_ "github.com/lib/pq"
 
-	"fmt"
 	"net/http"
 	"os"
 
@@ -19,14 +19,12 @@ import (
 	"famquest/components/db-manager/pkg/api"
 	"famquest/components/db-manager/pkg/api/docs"
 	"famquest/components/db-manager/pkg/connection"
-	"famquest/components/db-manager/pkg/models"
 	"famquest/components/go-common/logger"
 )
 
 func init() {
 	// Env variables are used to inject the IP to the Host annotation to connect swagger correctly
 	// even in prod
-	// To enable client behind tls ingress
 	host := os.Getenv("SWAGGER_URL")
 	docs.SwaggerInfo.Host = host
 	docs.SwaggerInfo.Schemes = []string{os.Getenv("SWAGGER_SCHEMA")}
@@ -42,11 +40,11 @@ func init() {
 // @contact.email guillermo.gc1994@gmail.com
 // @license.name Guillermo Gomez GPL V3
 func main() {
-	initialDbData()
 	defer connection.DB.Close()
 	r := mux.NewRouter()
 	r.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 	r.HandleFunc("/health", api.Health).Methods("GET")
+	r.HandleFunc("/configure", api.Configure).Methods("GET")
 
 	r.HandleFunc("/attachment", api.AttachmentPost).Methods("POST")
 	r.HandleFunc("/attachment", api.AttachmentGetAll).Methods("GET")
@@ -82,7 +80,12 @@ func main() {
 	}
 	fmt.Printf("Starting server on port %s...\n", port)
 	// Use CORS middleware to allow requests from frontend
-	allowedOrigins := handlers.AllowedOrigins([]string{"http://localhost:3000", "http://localhost:8081", "http://localhost:8080"})
+	allowedOrigins := handlers.AllowedOrigins([]string{
+		"http://localhost:3000",
+		"http://localhost:8081",
+		"http://localhost:8080",
+		"https://portal.famquest.$REPLACE_BASE_DOMAIN",
+	})
 	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
 	allowedHeaders := handlers.AllowedHeaders([]string{"Content-Type", "Accept"})
 	logger.Log.Debugf("CORS: %+v, %+v, %+v", allowedOrigins, allowedHeaders, allowedMethods)
@@ -90,21 +93,4 @@ func main() {
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), handlers.CORS(allowedOrigins, allowedMethods, allowedHeaders)(r)))
 	// log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
-}
-
-func initialDbData() {
-	db, err := connection.ConnectToPostgreSQL()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	connection.DB = db
-	if _, err := db.Exec(models.Schema); err != nil {
-		log.Fatalln(err)
-	}
-	minioClient, err := connection.ConnectToMinio()
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
-	connection.Minio = minioClient
 }

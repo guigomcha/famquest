@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+      - name: minio
+        image: docker.io/bitnami/minio:2022
+        env:
+          - name: MINIO_ROOT_USER
+            value: "$REPLACE_MYUSER"
+          - name: MINIO_ROOT_PASSWORD
+            value: "$REPLACE_MYPASSWORD"
+          - name: MINIO_API_PORT_NUMBER
+            value: "9000"
+          - name: MINIO_CONSOLE_PORT_NUMBER
+            value: "9001"
+        ports:
+        - containerPort: 9000
+        - containerPort: 9001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-svc
+spec:
+  selector:
+    app: minio
+  ports:
+    - protocol: TCP
+      port: 9000
+      name: portal
+      targetPort: 9000
+    - protocol: TCP
+      name: api
+      port: 9001
+      targetPort: 9001
+  type: ClusterIP

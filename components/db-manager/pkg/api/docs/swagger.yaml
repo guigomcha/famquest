@@ -284,6 +284,20 @@ paths:
       summary: Update the ref
       tags:
       - attachment
+  /configure:
+    get:
+      description: Connect and check dependencies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Configure
+      tags:
+      - Configure
   /health:
     get:
       description: Check the health of the service

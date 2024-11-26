@@ -19,7 +19,7 @@ const defaultCenter = {
 };
 
 const iconStyle = {
-  iconUrl: 'node_modules/leaflet/dist/images/marker-icon.png'
+  iconUrl: 'assets/marker-icon.png'
 };
 
 

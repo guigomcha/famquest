@@ -1,0 +1,3 @@
+[submodule "external/Through-the-fog"]
+	path = external/Through-the-fog
+	url = https://github.com/Mburnand-tech/Through-the-fog.git

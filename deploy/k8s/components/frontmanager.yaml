@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontmanager-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontmanager
+  template:
+    metadata:
+      labels:
+        app: frontmanager
+    spec:
+      hostAliases:
+        - ip: "192.168.137.35"
+          hostnames:
+            - "api.famquest.$REPLACE_BASE_DOMAIN"
+            - "portal.famquest.$REPLACE_BASE_DOMAIN"
+            - "minio.famquest.$REPLACE_BASE_DOMAIN"
+            - "minioapi.famquest.$REPLACE_BASE_DOMAIN"
+            - "monitoring.famquest.$REPLACE_BASE_DOMAIN"
+      imagePullSecrets:
+        - name: gatewaysecrets
+        - name: guigomchasecrets
+      containers:
+      - name: frontmanager
+        image: ghcr.io/guigomcha/famquest/frontmanager:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontmanager-svc
+spec:
+  selector:
+    app: frontmanager
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 80
+  type: ClusterIP

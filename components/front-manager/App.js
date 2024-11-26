@@ -26,11 +26,9 @@ const tasks = {
 };
 
 
-export default function App() {  
-  
+export default function App() { 
 
-  return (
-    
+  return (    
     <div style={{ width: "100%", height: "100%"}}>
       <UserInfo spots={spots} tasks={tasks} />
       <QueryClientProvider client={queryClient}>

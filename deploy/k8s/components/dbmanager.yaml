@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dbmanager-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dbmanager
+  template:
+    metadata:
+      labels:
+        app: dbmanager
+    spec:
+      hostAliases:
+        - ip: "192.168.137.35"
+          hostnames:
+            - "api.famquest.$REPLACE_BASE_DOMAIN"
+            - "minio.famquest.$REPLACE_BASE_DOMAIN"
+            - "minioapi.famquest.$REPLACE_BASE_DOMAIN"
+            - "portal.famquest.$REPLACE_BASE_DOMAIN"
+            - "monitoring.famquest.$REPLACE_BASE_DOMAIN"
+      imagePullSecrets:
+        - name: gatewaysecrets
+        - name: guigomchasecrets
+      containers:
+      - name: dbmanager
+        image: ghcr.io/guigomcha/famquest/dbmanager:latest
+        ports:
+        - containerPort: 8080
+        command: ["/bin/sh"]
+        args: ["-c", "./dbmanager"]
+        env:
+          - name: SWAGGER_URL
+            value: "api.famquest.$REPLACE_BASE_DOMAIN"
+          - name: SWAGGER_SCHEMA
+            value: "https"
+          - name: SWAGGER_BASE_PATH
+            value: ""
+          - name: SWAGGER_PORT
+            value: "8080"
+          - name: MINIO_URL
+            value: "minioapi.famquest.$REPLACE_BASE_DOMAIN"
+          - name: MINIO_USER
+            value: "$REPLACE_MYUSER"
+          - name: MINIO_PASSWORDMINIO
+            value: "$REPLACE_MYPASSWORD"
+          - name: POSTGRES_DB_HOST
+            value: "postgresql-svc"
+          - name: POSTGRES_DB_PORT
+            value: "5432"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dbmanager-svc
+spec:
+  selector:
+    app: dbmanager
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP

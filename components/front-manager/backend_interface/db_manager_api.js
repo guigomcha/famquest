@@ -6,9 +6,10 @@
 //   ];
 // };
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const API_URL = "https://api.famquest.$REPLACE_BASE_DOMAIN";
 
 export const fetchCoordinates = async () => {
+  console.info("URL: "+ API_URL);
   try {
     const response = await fetch(`${API_URL}/location`, {
       headers: {
