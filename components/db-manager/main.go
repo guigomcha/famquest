@@ -40,7 +40,6 @@ func init() {
 // @contact.email guillermo.gc1994@gmail.com
 // @license.name Guillermo Gomez GPL V3
 func main() {
-	defer connection.DB.Close()
 	r := mux.NewRouter()
 	r.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 	r.HandleFunc("/health", api.Health).Methods("GET")
@@ -91,6 +90,8 @@ func main() {
 	logger.Log.Debugf("CORS: %+v, %+v, %+v", allowedOrigins, allowedHeaders, allowedMethods)
 	// Wrap your router with the CORS middleware
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), handlers.CORS(allowedOrigins, allowedMethods, allowedHeaders)(r)))
-	// log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), handlers.CORS(allowedOrigins, allowedMethods, allowedHeaders)(r)); err != nil {
+		connection.DB.Close()
+		log.Fatal(err.Error())
+	}
 }

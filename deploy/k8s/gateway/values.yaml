@@ -28,12 +28,12 @@ proxy:
       namespace: famquest
       port: 9000
   auth:
-    enabled: false
+    enabled: true
     routingKey: auth
     svcName:  gateway-svc
     namespace: famquest
     port: 4180
-    secretCookie: REPLACE
+    secretCookie: 9rCazDK7UlmSEddol9HBv0qcu4P9U5XRBlgZbVUfT54=
     realmUrl: https://keycloak.evidenresearch.eu/realms/bdsrdspain-sns 
     client: test
     secret: REPLACE

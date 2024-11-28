@@ -101,12 +101,12 @@ Pending things to implement
 - https://github.com/leahbanks/BE-through-the-fog
 - https://github.com/Mburnand-tech/Through-the-fog/tree/master
 - https://snack.expo.dev/
+- https://dev.to/ghost/running-exporeact-native-in-docker-4hme
 
 Trying to run android emulator (Android studio has to be on the wondows side and can only interact with backends running also on the windows side or deployed with docker in WSL.) :
 - https://gist.github.com/sushant-at-nitor/30ca1185f2501f55fff61752d18387cc
 - https://atekihcan.com/blog/codeorrandom/how-to-setup-android-sdk-on-wsl/
 - https://medium.com/@danielrauhut/running-expo-dev-builds-from-wsl-on-your-windows-virtual-devices-android-emulator-bd7cc7e29418
-- Pending https://dev.to/ghost/running-exporeact-native-in-docker-4hme
 
 
 ## API documentation

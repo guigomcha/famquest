@@ -33,7 +33,11 @@ kubectl port-forward --namespace famquest svc/db-postgresql 5432:5432 &
     PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgres -d postgres -p 5432
 ``` -->
 
-
+kubectl apply -f deploy/k8s/dbs/minio.yaml -n famquest
+kubectl apply -f deploy/k8s/dbs/postgresql.yaml -n famquest
+kubectl apply -f deploy/k8s/dbs/pgadmin.yaml -n famquest
+kubectl apply -f deploy/k8s/components/dbmanager.yaml -n famquest
+kubectl apply -f deploy/k8s/components/frontmanager.yaml -n famquest
 helm install gateway  OCI://registry.atosresearch.eu:18488/gateway --version 1.3.0 -n famquest -f deploy/k8s/gateway/values.yaml
 
 ## Usage
