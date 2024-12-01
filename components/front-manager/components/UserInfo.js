@@ -23,8 +23,8 @@ const UserInfo = ({ user, spots, tasks }) => {
   return (
     <div className="user-info">
       <h3>User Profile</h3>
-      <p>Welcome, {user.preferredUsername}!</p>
-      <p>Email: {user.email}</p>
+      <p>Welcome, {user?.preferredUsername}!</p>
+      <p>Email: {user?.email}</p>
       <h3>User Progress</h3>
       {renderProgressBar(spots)}
       <div className="progress-bar">

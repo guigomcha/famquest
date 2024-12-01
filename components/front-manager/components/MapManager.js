@@ -3,6 +3,7 @@ import 'leaflet-defaulticon-compatibility';
 import '../node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet/dist/leaflet.css';
 import MapContainer from './MapContainer';
+import SlideMenu from './SlideMenu';
 import React, { useEffect, useRef, useState } from "react";
 import { fetchCoordinates, fetchAndPrepareSpots } from "../backend_interface/db_manager_api";
 import { useQuery } from 'react-query'
@@ -11,6 +12,8 @@ import { useQuery } from 'react-query'
 const MapManager = () => {  
   const [locations, setLocations] = useState([])
   const [spots, setSpots] = useState([])
+  const [component, setComponent] = useState(null);
+
   const { 
     isLoadingLocations, 
     errorLocations, 
@@ -35,10 +38,15 @@ const MapManager = () => {
     return <p>Loading...</p>;
   } else if (errorLocations || errorSpots ) {
     return <p>Error Location {errorLocations.message}<br>Error spots {errorSpots.message}</br></p>;
-  } 
+  }
+  const handleMenuChange = (comp) => {
+    console.info("COMPONENT is: ", comp);
+    setComponent(comp); // Trigger show slideMenu
+  }; 
   return (
     <div>
-      <MapContainer locations={locations} spots={spots}/>
+      <MapContainer locations={locations} spots={spots} handleMenuChange={handleMenuChange}/>
+        {component && <SlideMenu component={component} ></SlideMenu>}
     </div>
   );
 };

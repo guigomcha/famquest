@@ -24,11 +24,11 @@ const iconStyle = {
 
 
 const popUpStyle = {
-  'className' : 'leaflet-popup'
+  'className' : 'leaflet-popup-scrolled'
 };
 
 
-const MapContainer = ( {locations, spots } ) => {
+const MapContainer = ( {locations, spots, handleMenuChange } ) => {
   const canvasRef = useRef(null);
   const mapRef = useRef(null);
   const guilleSpotsGroup   = useRef(null);
@@ -47,7 +47,14 @@ const MapContainer = ( {locations, spots } ) => {
       });
     }
   };
-
+  const sendBackComponent = (e) => {
+    console.info("SENDING BACK", e.target.data);
+    if (e.target.data.componentType == "SpotPopup") {
+      handleMenuChange(<SpotPopup spot={e.target.data} />);
+    } else {
+      handleMenuChange(<SpotForm onSubmit={async (data) => CreateSpotFromForm(data, e.target.data)} />);
+    }
+  };
   async function CreateSpotFromForm(data, latlng) {
     // Add to DB
     var locationBody = {
@@ -68,14 +75,10 @@ const MapContainer = ( {locations, spots } ) => {
         // Todo: Decide the owner based on something
         guilleSpotsGroup.current.addLayer(marker);
         // Inject our custom component 
-        const popupContainer = document.createElement('div', popUpStyle);
-        const root = createRoot(popupContainer); 
-        root.render(<SpotPopup spot={spotDb} />);
+        marker.data = {...spotDb, componentType: "SpotPopup"}
+        marker.addEventListener("click", sendBackComponent);
 
-        marker.bindPopup(popupContainer, popUpStyle);   
-        // Close the popup after submission
-        marker.openPopup();
-
+        
       }
     }
 
@@ -118,16 +121,12 @@ const MapContainer = ( {locations, spots } ) => {
 
       // Right click to create a new spot
       mapRef.current.on('contextmenu', (e) => {
-        const formContainer = document.createElement('div', popUpStyle);
-        const root = createRoot(formContainer); // Create root for new container
-        // TODO: change to the creation of the spot + location in our DB and force re-render somehow
-        root.render(
-          <SpotForm onSubmit={async (data) => CreateSpotFromForm(data, e.latlng)} />
-        );
-        L.popup(popUpStyle)
-          .setLatLng(e.latlng)
-          .setContent(formContainer)
-          .openOn(mapRef.current);
+        data = {
+          "target": {
+            "data": {...e.latLng, componentType: "SpotForm"}
+          }
+        }
+        sendBackComponent(data);
       }); 
       
       // Get user location
@@ -181,12 +180,9 @@ const MapContainer = ( {locations, spots } ) => {
         })
           .addTo(mapRef.current);
         guilleSpotsGroup.current.addLayer(marker);
-        // Inject our custom component 
-        const popupContainer = document.createElement('div', popUpStyle);
-        const root = createRoot(popupContainer); 
-        root.render(<SpotPopup spot={spot} />);
-        marker.bindPopup(popupContainer, popUpStyle);
-        guilleSpotsGroup.current.addLayer(marker);
+        marker.data = {...spot, componentType: "SpotPopup"}
+        marker.addEventListener("click", sendBackComponent);
+
       });
     }
       

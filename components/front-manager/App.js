@@ -25,7 +25,7 @@ const tasks = {
     technology: { visible: 1, total: 2 },
   },
 };
-
+const isLocal = true;
 // require("dotenv").config({
 //   path: `${__dirname}/../.env.${ENV}`,
 // });
@@ -39,7 +39,7 @@ export default function App() {
 
   return (    
     <div style={{ width: "100%", height: "100%"}}>
-      {user ? (
+      {(user || isLocal ) ? (
         <div style={{ width: "100%", height: "100%"}}>
         <UserInfo user={user} spots={spots} tasks={tasks} />
         <QueryClientProvider client={queryClient}>
