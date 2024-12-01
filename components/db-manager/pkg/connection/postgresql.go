@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	DB_USER             = "$REPLACE_MYUSER"
-	DB_PASSWORD         = "$REPLACE_MYPASSWORD"
+	DB_USER             = "myuseradmin"
+	DB_PASSWORD         = "mypassword"
 	DB_NAME             = "famquest"
 	ErrorIdDoesNotExits = "id does not exist"
 )

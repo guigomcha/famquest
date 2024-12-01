@@ -54,6 +54,10 @@ func LocationPost(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {array} models.KnownLocations
 // @Router /location [get]
 func LocationGetAll(w http.ResponseWriter, r *http.Request) {
+	//Allow CORS here By * or specific origin
+	w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	logger.Log.Info("Called to func LocationGetAll")
 	dest, httpStatus, err := crudGetAll(&models.KnownLocations{}, "")
 	logger.Log.Debugf("objects obtained '%d'", len(dest))

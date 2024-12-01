@@ -35,8 +35,8 @@ proxy:
     port: 4180
     secretCookie: 9rCazDK7UlmSEddol9HBv0qcu4P9U5XRBlgZbVUfT54=
     realmUrl: https://keycloak.evidenresearch.eu/realms/bdsrdspain-sns 
-    client: test
-    secret: REPLACE
+    client: traefikha
+    secret: MAE34KuW0Qjsn3mlyVxcSRHMDTnfkcSa
   # Extra configurations for the reverse proxy (NGINX syntax)
   extraServerConfig:
     enabled: true
@@ -45,7 +45,7 @@ proxy:
     content: |
       server {
         listen 80;
-        server_name monitoring.famquest.$REPLACE_BASE_DOMAIN;
+        server_name monitoring.famquest.nephele.ari-imet.eu;
         resolver kube-dns.kube-system.svc.cluster.local valid=10s;
         location / {
           proxy_pass http://promstack-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090;
@@ -59,7 +59,7 @@ common:
     # Useful to link to other deployments
     app: gateway
     fullapp: famquest
-  baseDomain: famquest.$REPLACE_BASE_DOMAIN
+  baseDomain: famquest.nephele.ari-imet.eu
   pullSecret: gatewaysecrets
 
 # Configure the Exposure layer

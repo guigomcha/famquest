@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from 'react-query/devtools';
 import React, { useState } from "react";
 import 'leaflet/dist/leaflet.css';
 import UserInfo from './components/UserInfo';
+import OAuth2 from './components/Oauth2';
 
 const queryClient = new QueryClient()
 
@@ -25,18 +26,22 @@ const tasks = {
   },
 };
 
+// require("dotenv").config({
+//   path: `${__dirname}/../.env.${ENV}`,
+// });
 
 export default function App() { 
 
   return (    
     <div style={{ width: "100%", height: "100%"}}>
-      <UserInfo spots={spots} tasks={tasks} />
+      {/* <UserInfo spots={spots} tasks={tasks} />
       <QueryClientProvider client={queryClient}>
       <View >
         <MapManager/>
       </View>
       <ReactQueryDevtools initialIsOpen={true} />
-      </QueryClientProvider>  
+      </QueryClientProvider>   */}
+      <OAuth2></OAuth2>
     </div>
   );
 }

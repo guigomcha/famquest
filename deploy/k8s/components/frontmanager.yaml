@@ -15,11 +15,11 @@ spec:
       hostAliases:
         - ip: "192.168.137.35"
           hostnames:
-            - "api.famquest.$REPLACE_BASE_DOMAIN"
-            - "portal.famquest.$REPLACE_BASE_DOMAIN"
-            - "minio.famquest.$REPLACE_BASE_DOMAIN"
-            - "minioapi.famquest.$REPLACE_BASE_DOMAIN"
-            - "monitoring.famquest.$REPLACE_BASE_DOMAIN"
+            - "api.famquest.nephele.ari-imet.eu"
+            - "portal.famquest.nephele.ari-imet.eu"
+            - "minio.famquest.nephele.ari-imet.eu"
+            - "minioapi.famquest.nephele.ari-imet.eu"
+            - "monitoring.famquest.nephele.ari-imet.eu"
       imagePullSecrets:
         - name: gatewaysecrets
         - name: guigomchasecrets

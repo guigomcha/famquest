@@ -46,6 +46,10 @@ func SpotPost(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {array} models.Spots
 // @Router /spot [get]
 func SpotGetAll(w http.ResponseWriter, r *http.Request) {
+	//Allow CORS here By * or specific origin
+	w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	logger.Log.Info("Called to func SpotGetAll")
 	dest, httpStatus, err := crudGetAll(&models.Spots{}, "")
 	logger.Log.Debugf("objects obtained '%d'", len(dest))

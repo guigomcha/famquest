@@ -2,6 +2,18 @@
 
 ## Pre-requisites
 
+If needed, make sure the cert-manager has 
+    hostAliases:
+      - hostnames:
+        - api.famquest.nephele.ari-imet.eu
+        - portal.famquest.nephele.ari-imet.eu
+        - pgadmin.famquest.nephele.ari-imet.eu
+        - minio.famquest.nephele.ari-imet.eu
+        - minioapi.famquest.nephele.ari-imet.eu
+        - monitoring.famquest.nephele.ari-imet.eu
+        - auth.famquest.nephele.ari-imet.eu
+        ip: 192.168.137.35
+
 Install kind:
 ```bash
 kind create cluster --config local/kind-cluster.yaml 
@@ -40,6 +52,9 @@ kubectl apply -f deploy/k8s/components/dbmanager.yaml -n famquest
 kubectl apply -f deploy/k8s/components/frontmanager.yaml -n famquest
 helm install gateway  OCI://registry.atosresearch.eu:18488/gateway --version 1.3.0 -n famquest -f deploy/k8s/gateway/values.yaml
 
-## Usage
+### Local
 
-EDIT: Instructions on how to use the project, including any relevant examples.
+Docker-compose 
+
+Refs:
+- https://github.com/oauth2-proxy/oauth2-proxy/tree/master/contrib/local-environment
