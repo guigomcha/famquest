@@ -17,9 +17,9 @@ spec:
         image: dpage/pgadmin4:6.15
         env:
           - name: PGADMIN_DEFAULT_EMAIL
-            value: "$REPLACE_MYUSER@pgadmin.com"
+            value: "myuseradmin@pgadmin.com"
           - name: PGADMIN_DEFAULT_PASSWORD
-            value: "$REPLACE_MYPASSWORD"
+            value: "REPLACE_PASSWORD"
           - name: PGADMIN_LISTEN_PORT
             value: "80"
           - name: PGADMIN_SERVER_JSON
@@ -30,7 +30,7 @@ spec:
                   "Group": "Servers",
                   "Host": "famquest-db",
                   "Port": 5432,
-                  "Username": "$REPLACE_MYUSER",
+                  "Username": "REPLACE_USER",
                   "SSLMode": "prefer"
                 }
               ]

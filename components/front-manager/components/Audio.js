@@ -59,7 +59,7 @@ const Audio = ({ refId, refType }) => {
     if (attachment) {
       // Add reference to current spot
       await addReferenceToAttachment(attachment.id, refId, refType);
-      callFetchAttachmentsForSpot(refId, refType)
+      callFetchAttachmentsForSpot(refId, refType);
     } else {
       setStatusMessage("Unable to send audio.");
     }

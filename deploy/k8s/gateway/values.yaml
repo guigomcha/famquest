@@ -28,15 +28,15 @@ proxy:
       namespace: famquest
       port: 9000
   auth:
-    enabled: false
+    enabled: true
     routingKey: auth
     svcName:  gateway-svc
     namespace: famquest
     port: 4180
-    secretCookie: REPLACE
+    secretCookie: "REPLACE"
     realmUrl: https://keycloak.evidenresearch.eu/realms/bdsrdspain-sns 
-    client: test
-    secret: REPLACE
+    client: traefikha
+    secret: "REPLACE"
   # Extra configurations for the reverse proxy (NGINX syntax)
   extraServerConfig:
     enabled: true
@@ -45,7 +45,7 @@ proxy:
     content: |
       server {
         listen 80;
-        server_name monitoring.famquest.$REPLACE_BASE_DOMAIN;
+        server_name monitoring.famquest.REPLACE_BASE_DOMAIN;
         resolver kube-dns.kube-system.svc.cluster.local valid=10s;
         location / {
           proxy_pass http://promstack-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090;
@@ -59,7 +59,7 @@ common:
     # Useful to link to other deployments
     app: gateway
     fullapp: famquest
-  baseDomain: famquest.$REPLACE_BASE_DOMAIN
+  baseDomain: famquest.REPLACE_BASE_DOMAIN
   pullSecret: gatewaysecrets
 
 # Configure the Exposure layer

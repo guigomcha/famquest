@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "famquest",
+      "Group": "servers",
+      "Host": "postgresql",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "REPLACE_USER",
+      "PassFile": "/pgpass",
+      "SSLMode": "prefer"
+    }
+  }
+}

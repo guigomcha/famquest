@@ -22,6 +22,7 @@ import (
 // @Router /location [post]
 func LocationPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationPost")
+	setCORSHeaders(w, r)
 	var location models.KnownLocations
 	var dest connection.DbInterface
 	if err := json.NewDecoder(r.Body).Decode(&location); err != nil {
@@ -55,6 +56,7 @@ func LocationPost(w http.ResponseWriter, r *http.Request) {
 // @Router /location [get]
 func LocationGetAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationGetAll")
+	setCORSHeaders(w, r)
 	dest, httpStatus, err := crudGetAll(&models.KnownLocations{}, "")
 	logger.Log.Debugf("objects obtained '%d'", len(dest))
 	if err != nil {
@@ -80,6 +82,7 @@ func LocationGetAll(w http.ResponseWriter, r *http.Request) {
 // @Router /location/{id} [get]
 func LocationGet(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationGet")
+	setCORSHeaders(w, r)
 	var dest connection.DbInterface
 	dest, httpStatus, err := crudGet(&models.KnownLocations{}, mux.Vars(r))
 	if err != nil {
@@ -100,6 +103,7 @@ func LocationGet(w http.ResponseWriter, r *http.Request) {
 // @Router /location/{id} [delete]
 func LocationDelete(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationDelete")
+	setCORSHeaders(w, r)
 	// First delete the location
 	var location models.KnownLocations
 	httpStatus, err := crudDelete(&location, mux.Vars(r))

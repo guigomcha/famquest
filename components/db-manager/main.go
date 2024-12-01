@@ -40,38 +40,37 @@ func init() {
 // @contact.email guillermo.gc1994@gmail.com
 // @license.name Guillermo Gomez GPL V3
 func main() {
-	defer connection.DB.Close()
 	r := mux.NewRouter()
 	r.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
-	r.HandleFunc("/health", api.Health).Methods("GET")
-	r.HandleFunc("/configure", api.Configure).Methods("GET")
+	r.HandleFunc("/health", api.Health).Methods("GET", "OPTIONS")
+	r.HandleFunc("/configure", api.Configure).Methods("GET", "OPTIONS")
 
-	r.HandleFunc("/attachment", api.AttachmentPost).Methods("POST")
-	r.HandleFunc("/attachment", api.AttachmentGetAll).Methods("GET")
-	r.HandleFunc("/attachment/{id}", api.AttachmentGet).Methods("GET")
-	r.HandleFunc("/attachment/{id}", api.AttachmentPut).Methods("PUT")
-	r.HandleFunc("/attachment/{id}/ref", api.AttachmentPutRef).Methods("PUT")
-	r.HandleFunc("/attachment/{id}", api.AttachmentDelete).Methods("DELETE")
+	r.HandleFunc("/attachment", api.AttachmentPost).Methods("POST", "OPTIONS")
+	r.HandleFunc("/attachment", api.AttachmentGetAll).Methods("GET", "OPTIONS")
+	r.HandleFunc("/attachment/{id}", api.AttachmentGet).Methods("GET", "OPTIONS")
+	r.HandleFunc("/attachment/{id}", api.AttachmentPut).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/attachment/{id}/ref", api.AttachmentPutRef).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/attachment/{id}", api.AttachmentDelete).Methods("DELETE", "OPTIONS")
 
-	r.HandleFunc("/spot", api.SpotPost).Methods("POST")
-	r.HandleFunc("/spot", api.SpotGetAll).Methods("GET")
-	r.HandleFunc("/spot/{id}", api.SpotGet).Methods("GET")
-	r.HandleFunc("/spot/{id}", api.SpotPut).Methods("PUT")
-	r.HandleFunc("/spot/{id}", api.SpotDelete).Methods("DELETE")
+	r.HandleFunc("/spot", api.SpotPost).Methods("POST", "OPTIONS")
+	r.HandleFunc("/spot", api.SpotGetAll).Methods("GET", "OPTIONS")
+	r.HandleFunc("/spot/{id}", api.SpotGet).Methods("GET", "OPTIONS")
+	r.HandleFunc("/spot/{id}", api.SpotPut).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/spot/{id}", api.SpotDelete).Methods("DELETE", "OPTIONS")
 
-	r.HandleFunc("/location", api.LocationPost).Methods("POST")
-	r.HandleFunc("/location", api.LocationGetAll).Methods("GET")
-	r.HandleFunc("/location/{id}", api.LocationGet).Methods("GET")
-	r.HandleFunc("/location/{id}", api.LocationPut).Methods("PUT")
-	r.HandleFunc("/location/{id}/ref", api.LocationPutRef).Methods("PUT")
-	r.HandleFunc("/location/{id}", api.LocationDelete).Methods("DELETE")
+	r.HandleFunc("/location", api.LocationPost).Methods("POST", "OPTIONS")
+	r.HandleFunc("/location", api.LocationGetAll).Methods("GET", "OPTIONS")
+	r.HandleFunc("/location/{id}", api.LocationGet).Methods("GET", "OPTIONS")
+	r.HandleFunc("/location/{id}", api.LocationPut).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/location/{id}/ref", api.LocationPutRef).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/location/{id}", api.LocationDelete).Methods("DELETE", "OPTIONS")
 
-	r.HandleFunc("/task", api.TaskPost).Methods("POST")
-	r.HandleFunc("/task", api.TaskGetAll).Methods("GET")
-	r.HandleFunc("/task/{id}", api.TaskGet).Methods("GET")
-	r.HandleFunc("/task/{id}/ref", api.TaskPutRef).Methods("PUT")
-	r.HandleFunc("/task/{id}", api.TaskPut).Methods("PUT")
-	r.HandleFunc("/task/{id}", api.TaskDelete).Methods("DELETE")
+	r.HandleFunc("/task", api.TaskPost).Methods("POST", "OPTIONS")
+	r.HandleFunc("/task", api.TaskGetAll).Methods("GET", "OPTIONS")
+	r.HandleFunc("/task/{id}", api.TaskGet).Methods("GET", "OPTIONS")
+	r.HandleFunc("/task/{id}/ref", api.TaskPutRef).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/task/{id}", api.TaskPut).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/task/{id}", api.TaskDelete).Methods("DELETE", "OPTIONS")
 
 	// Start the server
 	port := os.Getenv("SWAGGER_PORT")
@@ -80,17 +79,19 @@ func main() {
 	}
 	fmt.Printf("Starting server on port %s...\n", port)
 	// Use CORS middleware to allow requests from frontend
-	allowedOrigins := handlers.AllowedOrigins([]string{
+	allowedOrigins := []string{
 		"http://localhost:3000",
 		"http://localhost:8081",
 		"http://localhost:8080",
-		"https://portal.famquest.$REPLACE_BASE_DOMAIN",
-	})
-	allowedMethods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
-	allowedHeaders := handlers.AllowedHeaders([]string{"Content-Type", "Accept"})
+		"https://portal.famquest.REPLACE_BASE_DOMAIN",
+	}
+	allowedMethods := []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	allowedHeaders := []string{"Content-Type", "Accept"}
 	logger.Log.Debugf("CORS: %+v, %+v, %+v", allowedOrigins, allowedHeaders, allowedMethods)
 	// Wrap your router with the CORS middleware
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), handlers.CORS(allowedOrigins, allowedMethods, allowedHeaders)(r)))
-	// log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), handlers.CORS(handlers.AllowedOrigins(allowedOrigins), handlers.AllowedMethods(allowedMethods), handlers.AllowedHeaders(allowedHeaders))(r)); err != nil {
+		connection.DB.Close()
+		log.Fatal(err.Error())
+	}
 }

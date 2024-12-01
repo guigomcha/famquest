@@ -1,0 +1,321 @@
+apiVersion: v1
+data:
+  fluent.conf: |
+    <source>
+      @type prometheus_tail_monitor
+    </source>
+
+    <source>
+      @type prometheus
+    </source>
+
+    <source>
+        @type tail
+        <parse>
+        @type regexp
+        expression /^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) \[(?<time>[^\]]*)\] (?<server_name>[^ ]*) \"(?<method>\w+)(?:\s+(?<path>[^\"]*?)(?:\s+\S*)?)?\" (?<status_code>[^ ]*) (?<bytes_sent>[^ ]*)(?:\s"(?<referer>[^\"]*)") "(?<agent>[^\"]*)" (?<elapsed_time>[^ ]*)$/
+            time_format %d/%b/%Y:%H:%M:%S %z
+            keep_time_key true
+            types bytes_sent:integer,reqtime:float,uct:float,uht:float,elapsed_time:float
+        </parse>
+        tag gateway
+        path /var/log/nginx/access.log
+        pos_file /tmp/fluent_nginx.pos
+    </source>
+    <filter gateway>
+        @type prometheus
+
+      <metric>
+        name gateway_size_bytes_total
+        type counter
+        desc gateway bytes sent
+        key bytes_sent
+        <labels>
+          method ${method}
+          path ${path}
+          status_code ${status_code}
+          server_name ${server_name}
+        </labels>
+      </metric>
+
+      <metric>
+        name gateway_request_status_code_total
+        type counter
+        desc gateway request status code
+        <labels>
+          method ${method}
+          path ${path}
+          status_code ${status_code}
+          server_name ${server_name}
+        </labels>
+      </metric>
+
+      <metric>
+        name gateway_http_request_elapsed_time_seconds
+        type histogram
+        desc Histogram of the total time spent on receiving the response from the upstream server.
+        key elapsed_time
+        <labels>
+          method ${method}
+          path ${path}
+          status_code ${status_code}
+          server_name ${server_name}
+        </labels>
+      </metric>
+    </filter>
+  nginx.conf: |
+    user  nginx;
+    worker_processes  auto;
+
+    error_log  /var/log/nginx/error.log notice;
+    pid        /var/run/nginx.pid;
+
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        default_type application/octet-stream;
+
+        server_names_hash_bucket_size 128;
+
+        log_format custom_format '$remote_addr - $remote_user [$time_local] '
+              '$host "$request" $status $body_bytes_sent '
+              '"$http_referer" "$http_user_agent" '
+              '$upstream_response_time';
+
+        access_log /var/log/nginx/access.log custom_format;
+        access_log /dev/stdout custom_format;
+
+        sendfile on;
+
+        keepalive_timeout  65;
+
+        include /etc/nginx/conf.d/*.conf;
+
+        server {
+          listen 9000;
+          server_name _;
+
+          location = /stub_status {
+            stub_status;
+            allow 127.0.0.1;
+            deny all;
+          }
+        }
+    }
+  services.conf: |
+    server {
+        listen 80;
+        server_name auth.famquest.REPLACE_BASE_DOMAIN;
+        resolver kube-dns.kube-system.svc.cluster.local valid=5s;
+        fastcgi_buffers 16 16k;
+        fastcgi_buffer_size 32k;
+        proxy_buffer_size 128k;
+        proxy_buffers 4 256k;
+        proxy_busy_buffers_size 256k;
+
+        # Handle preflight (OPTIONS) requests
+        location / {
+            if ($request_method = OPTIONS) {
+                add_header Access-Control-Allow-Origin $http_origin always;
+                add_header Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE" always;
+                add_header Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With" always;
+                # add_header Access-Control-Allow-Credentials "false" always;
+                return 204; # No content for OPTIONS requests
+            }
+
+            try_files $uri $uri/ =404;
+            auth_request /oauth2/auth;
+            error_page 401 = /oauth2/sign_in?rd=https://$host$request_uri;
+            auth_request_set $user $upstream_http_x_auth_request_user;
+            auth_request_set $email $upstream_http_x_auth_request_email;
+            proxy_set_header X-User $user;
+            proxy_set_header X-Email $email;
+            auth_request_set $auth_cookie $upstream_http_set_cookie;
+            add_header Set-Cookie $auth_cookie;
+
+            # Allow CORS for actual requests
+            add_header Access-Control-Allow-Origin $http_origin always;
+            add_header Access-Control-Allow-Credentials "true" always;
+
+            proxy_pass http://gateway-svc.famquest.svc.cluster.local:4180;
+        }
+
+        location /oauth2/ {
+            proxy_pass http://gateway-svc.famquest.svc.cluster.local:4180;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Scheme https;
+            proxy_set_header X-Auth-Request-Redirect https://$host$request_uri;
+
+            # Allow CORS for OAuth2 endpoints
+            add_header Access-Control-Allow-Origin $http_origin always;
+            add_header Access-Control-Allow-Credentials "true" always;
+        }
+
+        location /oauth2/auth {
+            proxy_pass http://gateway-svc.famquest.svc.cluster.local:4180;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Scheme https;
+            proxy_set_header Content-Length "";
+            proxy_pass_request_body off;
+
+            # Allow CORS for auth requests
+            add_header Access-Control-Allow-Origin $http_origin always;
+            add_header Access-Control-Allow-Credentials "true" always;
+        }
+    }
+    # Credentials Managed by the UI
+    server {
+      listen 80;
+      server_name portal.famquest.REPLACE_BASE_DOMAIN;
+      resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+      fastcgi_buffers 16 16k;
+      fastcgi_buffer_size 32k;
+      proxy_buffer_size 128k;
+      proxy_buffers 4 256k;
+      proxy_busy_buffers_size 256k;
+
+      location / {
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Origin $http_origin;
+        proxy_pass http://frontmanager-svc.famquest.svc.cluster.local:8081;
+      }
+
+    }
+    # Has its own credentials 
+    server {
+      listen 80;
+      server_name pgadmin.famquest.REPLACE_BASE_DOMAIN;
+      resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+      fastcgi_buffers 16 16k;
+      fastcgi_buffer_size 32k;
+      proxy_buffer_size 128k;
+      proxy_buffers 4 256k;
+      proxy_busy_buffers_size 256k;
+
+      location / {
+        proxy_pass http://pgadmin-svc.famquest.svc.cluster.local:15432;
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Origin $http_origin;
+      }
+    }
+    # Protected behind the Oauth2
+    server {
+      listen 80;
+      server_name api.famquest.REPLACE_BASE_DOMAIN;
+      resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+      fastcgi_buffers 16 16k;
+      fastcgi_buffer_size 32k;
+      proxy_buffer_size 128k;
+      proxy_buffers 4 256k;
+      proxy_busy_buffers_size 256k;
+
+      location / {
+        if ($request_method = OPTIONS) {
+            add_header Access-Control-Allow-Origin $http_origin always;
+            add_header Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE" always;
+            add_header Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With" always;
+            add_header Access-Control-Allow-Credentials "true" always;
+            return 204; # No content for OPTIONS requests
+        }
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Auth-Request-Redirect $request_uri;
+        auth_request /oauth2/auth;
+        error_page 401 = /oauth2/sign_in?rd=https://$host$request_uri;
+        auth_request_set $user $upstream_http_x_auth_request_user;
+        auth_request_set $email $upstream_http_x_auth_request_email;
+        proxy_set_header X-User $user;
+        proxy_set_header X-Email $email;
+        auth_request_set $token $upstream_http_x_auth_request_access_token;
+        proxy_set_header X-Access-Token $token;
+
+        # Allow CORS for actual requests
+        # add_header Access-Control-Allow-Origin $http_origin always;
+        add_header Access-Control-Allow-Credentials "true" always;
+        proxy_set_header Origin $http_origin;
+        proxy_pass http://dbmanager-svc.famquest.svc.cluster.local:8080;
+      }
+
+      location /oauth2/ {
+        proxy_pass http://gateway-svc.famquest.svc.cluster.local:4180;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Scheme https;
+        proxy_set_header X-Auth-Request-Redirect $request_uri;
+      }
+    }
+    # Has its own credentials
+    server {
+      listen 80;
+      server_name minio.famquest.REPLACE_BASE_DOMAIN;
+      resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+      fastcgi_buffers 16 16k;
+      fastcgi_buffer_size 32k;
+      proxy_buffer_size 128k;
+      proxy_buffers 4 256k;
+      proxy_busy_buffers_size 256k;
+
+      location / {
+        proxy_pass http://minio-svc.famquest.svc.cluster.local:9001;
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Origin $http_origin;
+      }
+
+    }
+    # Has its own credentials
+    server {
+      listen 80;
+      server_name minioapi.famquest.REPLACE_BASE_DOMAIN;
+      resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+      fastcgi_buffers 16 16k;
+      fastcgi_buffer_size 32k;
+      proxy_buffer_size 128k;
+      proxy_buffers 4 256k;
+      proxy_busy_buffers_size 256k;
+
+      location / {
+        proxy_pass http://minio-svc.famquest.svc.cluster.local:9000;
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_set_header Origin $http_origin;
+      }
+
+    }
+
+kind: ConfigMap
+metadata:
+  annotations:
+    meta.helm.sh/release-name: gateway
+    meta.helm.sh/release-namespace: famquest
+  creationTimestamp: "2024-11-28T16:12:38Z"
+  labels:
+    app: gateway
+    app.kubernetes.io/managed-by: Helm
+    fullapp: famquest
+  name: gateway-cm
+  namespace: famquest
+  resourceVersion: "6264498"
+  uid: 71fbe634-d372-4e0b-aced-99b1a078a1dc

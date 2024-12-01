@@ -6,7 +6,7 @@
 //   ];
 // };
 
-const API_URL = "https://api.famquest.$REPLACE_BASE_DOMAIN";
+const API_URL = "https://api.famquest.REPLACE_BASE_DOMAIN";
 
 export const fetchCoordinates = async () => {
   console.info("URL: "+ API_URL);
@@ -15,6 +15,8 @@ export const fetchCoordinates = async () => {
       headers: {
         'accept': 'application/json',
       },
+      credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
     });
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -36,6 +38,8 @@ export const fetchSpots = async () => {
       headers: {
         'accept': 'application/json',
       },
+      credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
     });
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -80,6 +84,8 @@ export const addLocationToSpot = async (spot) => {
     headers: {
       'accept': 'application/json',
     },
+    credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+    // mode: 'cors',
   });
   if (!response.ok) {
     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -102,6 +108,8 @@ export const uploadSpot = async (body) => {
         'accept': 'application/json',
         'Content-Type': 'application/json'
       },
+      credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
     });
 
     if (response.ok) {
@@ -128,6 +136,8 @@ export const uploadLocation = async (body) => {
         'accept': 'application/json',
         'Content-Type': 'application/json'
       },
+      credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
     });
 
     if (response.ok) {
@@ -169,6 +179,8 @@ export const uploadAttachment = async (data, name, description) => {
       headers: {
         'accept': 'application/json',
       },
+      credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
     });
 
     if (response.ok) {
@@ -188,6 +200,8 @@ export const addReferenceToAttachment = async (attachmentId, refId, refType) => 
   try {
     const response = await fetch(`${API_URL}/attachment/${attachmentId}/ref?refId=${refId}&refType=${refType}`, {
       method: 'PUT',
+      credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
     });
 
     if (!response.ok) {
@@ -202,6 +216,8 @@ export const addReferenceToLocation = async (locationId, refId, refType) => {
   try {
     const response = await fetch(`${API_URL}/location/${locationId}/ref?refId=${refId}&refType=${refType}`, {
       method: 'PUT',
+      credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
     });
 
     if (!response.ok) {
@@ -220,6 +236,8 @@ export const fetchAttachment = async (attachmentId) => {
       headers: {
         'accept': 'application/json'
       },
+      credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
     });
 
     if (response.ok) {
@@ -246,6 +264,8 @@ export const fetchAttachments = async (refId, refType) => {
       headers: {
         'accept': 'application/json'
       },
+      credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
     });
 
     if (response.ok) {

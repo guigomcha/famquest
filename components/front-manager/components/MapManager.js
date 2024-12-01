@@ -11,7 +11,6 @@ import { useQuery } from 'react-query'
 const MapManager = () => {  
   const [locations, setLocations] = useState([])
   const [spots, setSpots] = useState([])
-
   const { 
     isLoadingLocations, 
     errorLocations, 
