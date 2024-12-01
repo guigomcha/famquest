@@ -23,6 +23,7 @@ import (
 // @Router /task [post]
 func TaskPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func TaskPost")
+	setCORSHeaders(w, r)
 	var task models.Tasks
 	var dest connection.DbInterface
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
@@ -54,6 +55,7 @@ func TaskPost(w http.ResponseWriter, r *http.Request) {
 // @Router /task [get]
 func TaskGetAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func TaskGetAll")
+	setCORSHeaders(w, r)
 	dest, httpStatus, err := crudGetAll(&models.Tasks{}, "")
 	logger.Log.Debugf("objects obtained '%d'", len(dest))
 	if err != nil {
@@ -78,6 +80,7 @@ func TaskGetAll(w http.ResponseWriter, r *http.Request) {
 // @Router /task/{id} [get]
 func TaskGet(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func TaskGet")
+	setCORSHeaders(w, r)
 	var dest connection.DbInterface
 	dest, httpStatus, err := crudGet(&models.Tasks{}, mux.Vars(r))
 	if err != nil {
@@ -97,6 +100,7 @@ func TaskGet(w http.ResponseWriter, r *http.Request) {
 // @Router /task/{id} [delete]
 func TaskDelete(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func TaskDelete")
+	setCORSHeaders(w, r)
 	// First delete the task
 	var task models.Tasks
 	httpStatus, err := crudDelete(&task, mux.Vars(r))
@@ -119,6 +123,7 @@ func TaskDelete(w http.ResponseWriter, r *http.Request) {
 // @Router /task/{id} [put]
 func TaskPut(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func TaskPut")
+	setCORSHeaders(w, r)
 	var task models.Tasks
 	var dest connection.DbInterface
 	err := json.NewDecoder(r.Body).Decode(&task)
@@ -159,6 +164,7 @@ func TaskPut(w http.ResponseWriter, r *http.Request) {
 // @Router /task/{id}/ref [put]
 func TaskPutRef(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func TaskPutRef")
+	setCORSHeaders(w, r)
 	// first ensure ref is ok
 	intId, err := parseId(r.URL.Query().Get("ref"))
 	if err != nil || intId == 0 {

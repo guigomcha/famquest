@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const OAuth2Login = () => {
+const OAuth2Login = ({ onUserChange }) => {
   const [user, setUser] = useState(null); // User information
   const [loading, setLoading] = useState(true);
 
@@ -14,8 +14,12 @@ const OAuth2Login = () => {
       .then((data) => {
         setUser(data);
         console.info(JSON.stringify(data));
+        onUserChange(data); // Notify parent component
       })
-      .catch(() => setUser(null))
+      .catch(() => {
+        setUser(null);
+        onUserChange(null); // Notify parent component
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -30,8 +34,8 @@ const OAuth2Login = () => {
     fetch("https://auth.famquest.nephele.ari-imet.eu/oauth2/sign_out", { method: "GET", credentials: "include" })
       .then(() => {
         setUser(null);
-        window.location.reload();
       });
+    window.location.reload();
   };
 
   if (loading) return <div>Loading...</div>;

@@ -16,7 +16,7 @@ export const fetchCoordinates = async () => {
         'accept': 'application/json',
       },
       credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      mode: 'cors',
+      // mode: 'cors',
     });
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -39,7 +39,7 @@ export const fetchSpots = async () => {
         'accept': 'application/json',
       },
       credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      mode: 'cors',
+      // mode: 'cors',
     });
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -85,7 +85,7 @@ export const addLocationToSpot = async (spot) => {
       'accept': 'application/json',
     },
     credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-    mode: 'cors',
+    // mode: 'cors',
   });
   if (!response.ok) {
     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -109,7 +109,7 @@ export const uploadSpot = async (body) => {
         'Content-Type': 'application/json'
       },
       credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      mode: 'cors',
+      // mode: 'cors',
     });
 
     if (response.ok) {
@@ -137,7 +137,7 @@ export const uploadLocation = async (body) => {
         'Content-Type': 'application/json'
       },
       credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      mode: 'cors',
+      // mode: 'cors',
     });
 
     if (response.ok) {
@@ -180,7 +180,7 @@ export const uploadAttachment = async (data, name, description) => {
         'accept': 'application/json',
       },
       credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      mode: 'cors',
+      // mode: 'cors',
     });
 
     if (response.ok) {
@@ -201,7 +201,7 @@ export const addReferenceToAttachment = async (attachmentId, refId, refType) => 
     const response = await fetch(`${API_URL}/attachment/${attachmentId}/ref?refId=${refId}&refType=${refType}`, {
       method: 'PUT',
       credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      mode: 'cors',
+      // mode: 'cors',
     });
 
     if (!response.ok) {
@@ -217,7 +217,7 @@ export const addReferenceToLocation = async (locationId, refId, refType) => {
     const response = await fetch(`${API_URL}/location/${locationId}/ref?refId=${refId}&refType=${refType}`, {
       method: 'PUT',
       credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      mode: 'cors',
+      // mode: 'cors',
     });
 
     if (!response.ok) {
@@ -237,7 +237,7 @@ export const fetchAttachment = async (attachmentId) => {
         'accept': 'application/json'
       },
       credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      mode: 'cors',
+      // mode: 'cors',
     });
 
     if (response.ok) {
@@ -265,7 +265,7 @@ export const fetchAttachments = async (refId, refType) => {
         'accept': 'application/json'
       },
       credentials: 'include', // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      mode: 'cors',
+      // mode: 'cors',
     });
 
     if (response.ok) {

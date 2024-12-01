@@ -22,6 +22,7 @@ import (
 // @Router /spot [post]
 func SpotPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func SpotPost")
+	setCORSHeaders(w, r)
 	var spot models.Spots
 	var dest connection.DbInterface
 	if err := json.NewDecoder(r.Body).Decode(&spot); err != nil {
@@ -47,9 +48,8 @@ func SpotPost(w http.ResponseWriter, r *http.Request) {
 // @Router /spot [get]
 func SpotGetAll(w http.ResponseWriter, r *http.Request) {
 	//Allow CORS here By * or specific origin
-	w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	// w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	setCORSHeaders(w, r)
 	logger.Log.Info("Called to func SpotGetAll")
 	dest, httpStatus, err := crudGetAll(&models.Spots{}, "")
 	logger.Log.Debugf("objects obtained '%d'", len(dest))
@@ -75,6 +75,7 @@ func SpotGetAll(w http.ResponseWriter, r *http.Request) {
 // @Router /spot/{id} [get]
 func SpotGet(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func SpotGet")
+	setCORSHeaders(w, r)
 	var dest connection.DbInterface
 	dest, httpStatus, err := crudGet(&models.Spots{}, mux.Vars(r))
 	if err != nil {
@@ -94,6 +95,7 @@ func SpotGet(w http.ResponseWriter, r *http.Request) {
 // @Router /spot/{id} [delete]
 func SpotDelete(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func SpotDelete")
+	setCORSHeaders(w, r)
 	// First delete the spot
 	var spot models.Spots
 	httpStatus, err := crudDelete(&spot, mux.Vars(r))
@@ -116,6 +118,7 @@ func SpotDelete(w http.ResponseWriter, r *http.Request) {
 // @Router /spot/{id} [put]
 func SpotPut(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func SpotPut")
+	setCORSHeaders(w, r)
 	var spot models.Spots
 	var dest connection.DbInterface
 	err := json.NewDecoder(r.Body).Decode(&spot)

@@ -8,6 +8,12 @@ import (
 )
 
 // Generic operations used by all endpoints
+func setCORSHeaders(w http.ResponseWriter, r *http.Request) {
+	// w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+	// w.Header().Set("Access-Control-Allow-Credentials", "true")
+	// w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	logger.Log.Debug("CORS managed by NGINX")
+}
 
 func parseId(stringId string) (int, error) {
 	intId, err := strconv.Atoi(stringId) //ParseInt(id, 0 , 64)

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../css/UserInfo.css'; // Import your CSS for styling
 
-const UserInfo = ({ spots, tasks }) => {
+const UserInfo = ({ user, spots, tasks }) => {
   const [isTasksExpanded, setIsTasksExpanded] = useState(false);
 
   const toggleTasks = () => {
@@ -23,6 +23,9 @@ const UserInfo = ({ spots, tasks }) => {
   return (
     <div className="user-info">
       <h3>User Profile</h3>
+      <p>Welcome, {user.preferredUsername}!</p>
+      <p>Email: {user.email}</p>
+      <h3>User Progress</h3>
       {renderProgressBar(spots)}
       <div className="progress-bar">
         <label onClick={toggleTasks} className="collapsible-label">
@@ -45,6 +48,7 @@ const UserInfo = ({ spots, tasks }) => {
           <div className="progress-fill" style={{ width: '0%' }}></div>
         </div>
       </div>
+
     </div>
   );
 };

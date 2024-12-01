@@ -31,17 +31,27 @@ const tasks = {
 // });
 
 export default function App() { 
+  const [user, setUser] = useState(null);
+
+  const handleUserChange = (userInfo) => {
+    setUser(userInfo); // Update parent state with user info
+  };
 
   return (    
     <div style={{ width: "100%", height: "100%"}}>
-      {/* <UserInfo spots={spots} tasks={tasks} />
-      <QueryClientProvider client={queryClient}>
-      <View >
-        <MapManager/>
-      </View>
-      <ReactQueryDevtools initialIsOpen={true} />
-      </QueryClientProvider>   */}
-      <OAuth2></OAuth2>
+      {user ? (
+        <div style={{ width: "100%", height: "100%"}}>
+        <UserInfo user={user} spots={spots} tasks={tasks} />
+        <QueryClientProvider client={queryClient}>
+        <View >
+          <MapManager/>
+        </View>
+        <ReactQueryDevtools initialIsOpen={true} />
+        </QueryClientProvider>
+        </div>
+      ) : (
+        <OAuth2 onUserChange={handleUserChange} />
+      ) }
     </div>
   );
 }
