@@ -2,6 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { uploadAttachment, addReferenceToAttachment, fetchAttachments } from '../backend_interface/db_manager_api';
 import {renderEmptyState} from '../utils/render_message';
 import Audio from './Audio';
+import Carousel from 'react-bootstrap/Carousel';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Card from 'react-bootstrap/Card';
 
 const Images = ( {refId, refType} ) => {
   const [imageBlob, setImageBlob] = useState(null);
@@ -14,7 +19,6 @@ const Images = ( {refId, refType} ) => {
   const canvasRef = useRef(null); // To capture still images
   const cameraRef = useRef(null); // To keep track of the camera stream
   // 
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [statusMessage, setStatusMessage] = useState('');
   const [imageName, setImageName] = useState('');
   const [imageDescription, setImageDescription] = useState('');
@@ -85,15 +89,6 @@ const Images = ( {refId, refType} ) => {
   };
 
 
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % selectedImages.length);
-  };
-
-  const handlePrev = () => {
-    setCurrentIndex((prevIndex) => 
-      (prevIndex - 1 + selectedImages.length) % selectedImages.length
-    );
-  };
   // Handle file selection and show the image on the canvas
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -158,7 +153,8 @@ const Images = ( {refId, refType} ) => {
 
   
   return (
-    <div className="attachment-container">
+    <Container>
+      <Row>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="attachment-container">
           <input 
@@ -263,21 +259,29 @@ const Images = ( {refId, refType} ) => {
           {statusMessage && <p>{statusMessage}</p>}
         </div>
       </form>
+      </Row>
+      <Row>
       {selectedImages.length > 0 ? (
-        <div className="carousel-container">
-          <button onClick={handlePrev} disabled={selectedImages.length <= 1}>Prev</button>
-          <div>
-          <h3>{selectedImages[currentIndex].name}</h3>
-          <h4>{selectedImages[currentIndex].description}</h4>
-          <img src={selectedImages[currentIndex].url} alt={`Attachment ${currentIndex + 1}`} className="carousel-image" />
-          <Audio refId={selectedImages[currentIndex].id} refType={'attachment'} />
-          </div>
-          <button onClick={handleNext} disabled={selectedImages.length <= 1}>Next</button>
-        </div>
+        <Carousel slide={false} data-bs-theme="dark" pause="hover" controls={true}> 
+          {selectedImages.map((image, index) => (
+            <Carousel.Item>
+              <Card className="bg-dark text-black">
+                <Card.Img src={image.url} alt={`Attachment ${index + 1}`} className="center-block" />
+                <Card.ImgOverlay>
+                  <Card.Title>{image.name}</Card.Title>
+                  <Card.Text>{image.description}</Card.Text>
+                </Card.ImgOverlay>
+              </Card>
+                <Audio refId={image.id} refType={'attachment'} />
+            </Carousel.Item>
+          ))}
+        </Carousel>
       ) : (
         renderEmptyState("Create new to see it")
       )}
-    </div>
+      </Row>
+
+    </Container>
   );
 };
 export default Images;
