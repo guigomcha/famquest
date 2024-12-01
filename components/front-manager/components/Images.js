@@ -2,7 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { uploadAttachment, addReferenceToAttachment, fetchAttachments } from '../backend_interface/db_manager_api';
 import {renderEmptyState} from '../utils/render_message';
 import Audio from './Audio';
-import { Carousel } from 'antd';
+import Carousel from 'react-bootstrap/Carousel';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Card from 'react-bootstrap/Card';
 
 const Images = ( {refId, refType} ) => {
   const [imageBlob, setImageBlob] = useState(null);
@@ -15,7 +19,6 @@ const Images = ( {refId, refType} ) => {
   const canvasRef = useRef(null); // To capture still images
   const cameraRef = useRef(null); // To keep track of the camera stream
   // 
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [statusMessage, setStatusMessage] = useState('');
   const [imageName, setImageName] = useState('');
   const [imageDescription, setImageDescription] = useState('');
@@ -150,7 +153,8 @@ const Images = ( {refId, refType} ) => {
 
   
   return (
-    <div className="attachment-container">
+    <Container>
+      <Row>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="attachment-container">
           <input 
@@ -255,28 +259,29 @@ const Images = ( {refId, refType} ) => {
           {statusMessage && <p>{statusMessage}</p>}
         </div>
       </form>
+      </Row>
+      <Row>
       {selectedImages.length > 0 ? (
-        <Carousel arrows infinite={false}>
+        <Carousel slide={false} data-bs-theme="dark" pause="hover" controls={true}> 
           {selectedImages.map((image, index) => (
-            <div key={index} style={{
-              margin: 0,
-              height: '160px',
-              color: '#fff',
-              lineHeight: '160px',
-              textAlign: 'center',
-              background: '#364d79',
-            }}>
-              <h3>{image.name}</h3>
-              <h4>{image.description}</h4>
-              <img src={image.url} alt={`Attachment ${index + 1}`} className="carousel-image" />
-              <Audio refId={image.id} refType={'attachment'} />
-            </div>
+            <Carousel.Item>
+              <Card className="bg-dark text-black">
+                <Card.Img src={image.url} alt={`Attachment ${index + 1}`} className="center-block" />
+                <Card.ImgOverlay>
+                  <Card.Title>{image.name}</Card.Title>
+                  <Card.Text>{image.description}</Card.Text>
+                </Card.ImgOverlay>
+              </Card>
+                <Audio refId={image.id} refType={'attachment'} />
+            </Carousel.Item>
           ))}
         </Carousel>
       ) : (
         renderEmptyState("Create new to see it")
       )}
-    </div>
+      </Row>
+
+    </Container>
   );
 };
 export default Images;

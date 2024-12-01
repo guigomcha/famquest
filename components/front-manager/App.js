@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider, useQuery } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools';
 import React, { useState } from "react";
 import 'leaflet/dist/leaflet.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import UserInfo from './components/UserInfo';
 import OAuth2 from './components/Oauth2';
 
