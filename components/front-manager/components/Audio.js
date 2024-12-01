@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { uploadAttachment, addReferenceToAttachment, fetchAttachments } from '../backend_interface/db_manager_api';
 import {renderEmptyState} from '../utils/render_message';
+import Card from 'react-bootstrap/Card';
+import Carousel from 'react-bootstrap/Carousel';
 
 const Audio = ({ refId, refType }) => {
   const [audioBlob, setAudioBlob] = useState(null);
@@ -9,7 +11,6 @@ const Audio = ({ refId, refType }) => {
   const audioRecorder = useRef(null);
   const [audioStream, setAudioStream] = useState(null);
   const [selectedAudios, setSelectedAudios] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   // Start recording audio
   const toggleAudioRecording = async (e) => {
@@ -66,16 +67,7 @@ const Audio = ({ refId, refType }) => {
     setAudioBlob('');
     
   };
-  // Handle carousel navigation
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % selectedAudios.length);
-  };
 
-  const handlePrev = () => {
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + selectedAudios.length) % selectedAudios.length
-    );
-  };
   // fetch the attachments for this spot
   useEffect(() => {
     callFetchAttachmentsForSpot(refId, refType)
@@ -112,11 +104,27 @@ const Audio = ({ refId, refType }) => {
         {statusMessage && <p>{statusMessage}</p>}
       </div>
       {selectedAudios.length > 0 ? (
-        <div className="carousel-container">
-          <button onClick={handlePrev} disabled={selectedAudios.length <= 1}>Prev</button>
-          <audio controls src={selectedAudios[currentIndex].url}></audio>
-          <button onClick={handleNext} disabled={selectedAudios.length <= 1}>Next</button>
-        </div>
+          <Carousel slide={false} data-bs-theme="dark" pause="hover" controls={true}> 
+          {selectedAudios.map((audio, index) => (
+            <Carousel.Item>
+              <Card className="bg-dark text-white">
+                <Card.Body>
+                  <Card.ImgOverlay>
+                    <Card.Title>{index}:{audio.name}</Card.Title>
+                    <Card.Text>{audio.description}</Card.Text>
+                  </Card.ImgOverlay>
+                  <Card.Text style={{
+                      "display": "flex",
+                      "justify-content": "center",
+                      "align-items": "center" 
+                    }}>
+                    <audio controls src={audio.url}></audio>
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Carousel.Item>
+          ))}
+        </Carousel>
       ) : (
         renderEmptyState("Create new to see it")
       )}

@@ -12,9 +12,8 @@ const SlideMenu = ({ component }) => {
   return (
     <>
       <Drawer
-        title="Drawer with extra actions"
         placement="bottom"
-        width={500}
+        width={"70%"}
         onClose={onClose}
         open={open}
       >
