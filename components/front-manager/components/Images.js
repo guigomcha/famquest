@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { uploadAttachment, addReferenceToAttachment, fetchAttachments } from '../backend_interface/db_manager_api';
 import {renderEmptyState} from '../utils/render_message';
 import Audio from './Audio';
+import { Carousel } from 'antd';
 
 const Images = ( {refId, refType} ) => {
   const [imageBlob, setImageBlob] = useState(null);
@@ -85,15 +86,6 @@ const Images = ( {refId, refType} ) => {
   };
 
 
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % selectedImages.length);
-  };
-
-  const handlePrev = () => {
-    setCurrentIndex((prevIndex) => 
-      (prevIndex - 1 + selectedImages.length) % selectedImages.length
-    );
-  };
   // Handle file selection and show the image on the canvas
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -264,16 +256,23 @@ const Images = ( {refId, refType} ) => {
         </div>
       </form>
       {selectedImages.length > 0 ? (
-        <div className="carousel-container">
-          <button onClick={handlePrev} disabled={selectedImages.length <= 1}>Prev</button>
-          <div>
-          <h3>{selectedImages[currentIndex].name}</h3>
-          <h4>{selectedImages[currentIndex].description}</h4>
-          <img src={selectedImages[currentIndex].url} alt={`Attachment ${currentIndex + 1}`} className="carousel-image" />
-          <Audio refId={selectedImages[currentIndex].id} refType={'attachment'} />
-          </div>
-          <button onClick={handleNext} disabled={selectedImages.length <= 1}>Next</button>
-        </div>
+        <Carousel arrows infinite={false}>
+          {selectedImages.map((image, index) => (
+            <div key={index} style={{
+              margin: 0,
+              height: '160px',
+              color: '#fff',
+              lineHeight: '160px',
+              textAlign: 'center',
+              background: '#364d79',
+            }}>
+              <h3>{image.name}</h3>
+              <h4>{image.description}</h4>
+              <img src={image.url} alt={`Attachment ${index + 1}`} className="carousel-image" />
+              <Audio refId={image.id} refType={'attachment'} />
+            </div>
+          ))}
+        </Carousel>
       ) : (
         renderEmptyState("Create new to see it")
       )}
