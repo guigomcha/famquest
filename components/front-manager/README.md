@@ -55,7 +55,7 @@ npx expo install react-native-web react-dom @expo/metro-runtime
 - Search and replace:
   + myuseradmin
   + mypassword
-  + nephele.ari-imet.eu
+  + REPLACE_BASE_DOMAIN
 
 #### Local deployment via docker-compose and vscode dev containers 
 

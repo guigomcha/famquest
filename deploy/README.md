@@ -5,13 +5,13 @@
 If needed, make sure the cert-manager has 
     hostAliases:
       - hostnames:
-        - api.famquest.nephele.ari-imet.eu
-        - portal.famquest.nephele.ari-imet.eu
-        - pgadmin.famquest.nephele.ari-imet.eu
-        - minio.famquest.nephele.ari-imet.eu
-        - minioapi.famquest.nephele.ari-imet.eu
-        - monitoring.famquest.nephele.ari-imet.eu
-        - auth.famquest.nephele.ari-imet.eu
+        - api.famquest.REPLACE_BASE_DOMAIN
+        - portal.famquest.REPLACE_BASE_DOMAIN
+        - pgadmin.famquest.REPLACE_BASE_DOMAIN
+        - minio.famquest.REPLACE_BASE_DOMAIN
+        - minioapi.famquest.REPLACE_BASE_DOMAIN
+        - monitoring.famquest.REPLACE_BASE_DOMAIN
+        - auth.famquest.REPLACE_BASE_DOMAIN
         ip: 192.168.137.35
 
 Install kind:

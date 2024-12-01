@@ -15,11 +15,11 @@ spec:
       hostAliases:
         - ip: "192.168.137.35"
           hostnames:
-            - "api.famquest.nephele.ari-imet.eu"
-            - "minio.famquest.nephele.ari-imet.eu"
-            - "minioapi.famquest.nephele.ari-imet.eu"
-            - "portal.famquest.nephele.ari-imet.eu"
-            - "monitoring.famquest.nephele.ari-imet.eu"
+            - "api.famquest.REPLACE_BASE_DOMAIN"
+            - "minio.famquest.REPLACE_BASE_DOMAIN"
+            - "minioapi.famquest.REPLACE_BASE_DOMAIN"
+            - "portal.famquest.REPLACE_BASE_DOMAIN"
+            - "monitoring.famquest.REPLACE_BASE_DOMAIN"
       imagePullSecrets:
         - name: gatewaysecrets
         - name: guigomchasecrets
@@ -32,7 +32,7 @@ spec:
         args: ["-c", "./dbmanager"]
         env:
           - name: SWAGGER_URL
-            value: "api.famquest.nephele.ari-imet.eu"
+            value: "api.famquest.REPLACE_BASE_DOMAIN"
           - name: SWAGGER_SCHEMA
             value: "https"
           - name: SWAGGER_BASE_PATH
@@ -40,19 +40,19 @@ spec:
           - name: SWAGGER_PORT
             value: "8080"
           - name: MINIO_URL
-            value: "minioapi.famquest.nephele.ari-imet.eu"
+            value: "minioapi.famquest.REPLACE_BASE_DOMAIN"
           - name: MINIO_USER
             value: "demo"
           - name: MINIO_PASSWORD
-            value: "mypassword"
+            value: "REPLACE_PASSWORD"
           - name: POSTGRES_DB_HOST
             value: "postgresql-svc"
           - name: POSTGRES_DB_PORT
             value: "5432"
           - name: POSTGRES_DB_USER
-            value: "myuseradmin"
+            value: "REPLACE_USER"
           - name: POSTGRES_DB_PASSWORD
-            value: "mypassword"
+            value: "REPLACE_PASSWORD"
 ---
 apiVersion: v1
 kind: Service

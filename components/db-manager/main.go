@@ -83,7 +83,7 @@ func main() {
 		"http://localhost:3000",
 		"http://localhost:8081",
 		"http://localhost:8080",
-		"https://portal.famquest.nephele.ari-imet.eu",
+		"https://portal.famquest.REPLACE_BASE_DOMAIN",
 	}
 	allowedMethods := []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	allowedHeaders := []string{"Content-Type", "Accept"}

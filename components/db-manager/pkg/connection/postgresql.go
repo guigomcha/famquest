@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	DB_USER             = "myuseradmin"
-	DB_PASSWORD         = "mypassword"
+	DB_USER             = "REPLACE_USER"
+	DB_PASSWORD         = "REPLACE_PASSWORD"
 	DB_NAME             = "famquest"
 	ErrorIdDoesNotExits = "id does not exist"
 )

@@ -19,7 +19,7 @@ spec:
           - name: PGADMIN_DEFAULT_EMAIL
             value: "myuseradmin@pgadmin.com"
           - name: PGADMIN_DEFAULT_PASSWORD
-            value: "mypassword"
+            value: "REPLACE_PASSWORD"
           - name: PGADMIN_LISTEN_PORT
             value: "80"
           - name: PGADMIN_SERVER_JSON
@@ -30,7 +30,7 @@ spec:
                   "Group": "Servers",
                   "Host": "famquest-db",
                   "Port": 5432,
-                  "Username": "myuseradmin",
+                  "Username": "REPLACE_USER",
                   "SSLMode": "prefer"
                 }
               ]
