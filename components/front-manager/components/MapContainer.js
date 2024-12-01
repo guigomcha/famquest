@@ -5,11 +5,10 @@ import 'leaflet/dist/leaflet.css';
 import '../css/leaflet-custom.css';
 import * as L from 'leaflet';
 import { CanvasLayer } from "./CanvasLeaflet"
-import { createRoot } from 'react-dom/client'; // Import createRoot
 import React, { useEffect, useRef, useState } from "react";
 import SpotForm from './SpotForm';
 import SpotPopup from './SpotPopup';
-import { uploadLocation, uploadSpot, addReferenceToLocation } from '../backend_interface/db_manager_api';
+import { CreateSpotFromForm } from '../backend_interface/components_helper';
 
 const scale = 13;
 
@@ -20,11 +19,6 @@ const defaultCenter = {
 
 const iconStyle = {
   iconUrl: 'assets/marker-icon.png'
-};
-
-
-const popUpStyle = {
-  'className' : 'leaflet-popup-scrolled'
 };
 
 
@@ -54,35 +48,6 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
     } else {
       handleMenuChange(<SpotForm onSubmit={async (data) => CreateSpotFromForm(data, e.target.data)} />);
     }
-  };
-  async function CreateSpotFromForm(data, latlng) {
-    // Add to DB
-    var locationBody = {
-      "name": "location for spot "+ data.name,
-      "longitude": latlng.lng,
-      "latitude": latlng.lat
-    }
-    const locationDb = await uploadLocation(locationBody);
-    if (locationDb) {
-      const spotDb = await uploadSpot(data);
-      if (spotDb) {
-        await addReferenceToLocation(locationDb.id, spotDb.id, "spot");
-        // Create marker which will be later a location + spot
-        const marker = L.marker(latlng, {
-          icon: L.icon(iconStyle),
-        })
-          .addTo(mapRef.current);
-        // Todo: Decide the owner based on something
-        guilleSpotsGroup.current.addLayer(marker);
-        // Inject our custom component 
-        marker.data = {...spotDb, componentType: "SpotPopup"}
-        marker.addEventListener("click", sendBackComponent);
-
-        
-      }
-    }
-
-    
   };
 
   // Create and configure the map
@@ -121,9 +86,10 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
 
       // Right click to create a new spot
       mapRef.current.on('contextmenu', (e) => {
+        console.info("should send event location : "+ JSON.stringify(e.latlng)+ "from ", e)
         data = {
           "target": {
-            "data": {...e.latLng, componentType: "SpotForm"}
+            "data": {"lat": e.latlng.lat, "lng": e.latlng.lng,  "componentType": "SpotForm"}
           }
         }
         sendBackComponent(data);

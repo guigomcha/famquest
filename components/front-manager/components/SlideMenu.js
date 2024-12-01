@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Drawer, Radio, Space } from 'antd';
-const SlideMenu = ({component}) => {
+const SlideMenu = ({ component }) => {
   const [open, setOpen] = useState(true);
   const onClose = () => {
     setOpen(false);
