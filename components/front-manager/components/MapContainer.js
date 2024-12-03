@@ -18,7 +18,9 @@ const defaultCenter = {
 };
 
 const iconStyle = {
-  iconUrl: 'assets/marker-icon.png'
+  iconUrl: 'assets/marker-icon.png',
+  iconSize: [24, 36],
+  iconAnchor: [12, 36],
 };
 
 const MapContainer = ( {locations, spots, handleMenuChange } ) => {
