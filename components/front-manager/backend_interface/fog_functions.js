@@ -10,6 +10,18 @@ export function uncoverFog(location, fogPolygon) {
   return newFogPolygon;
 }
 
+export function locationVisible(location, fogGeoJson){
+  // Only allow to click on the holes (starting on the second entry of the fog coordinates)
+  const pointPosition = turf.point([location.longitude, location.latitude]);
+  for (let i = 1; i < fogGeoJson.geometry.coordinates[0].length; i++) {
+    //Return true if the location is inside the uncovered area
+    if (turf.booleanPointInPolygon(pointPosition, turf.polygon([fogGeoJson.geometry.coordinates[0][i]]))){
+      return true;
+    }    
+  }
+  return false;  
+}
+
 function  _addPolygonToFog(fogPolygon, newPolygon) {
 
   //For each hole in the fog-polygon.

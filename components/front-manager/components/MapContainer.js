@@ -8,7 +8,7 @@ import React, { useEffect, useRef, useState } from "react";
 import SpotForm from './SpotForm';
 import SpotPopup from './SpotPopup';
 import { CreateSpotFromForm } from '../backend_interface/components_helper';
-import { worldPolygon, uncoverFog } from '../backend_interface/fog_functions';
+import { worldPolygon, uncoverFog, locationVisible } from '../backend_interface/fog_functions';
 
 const scale = 13;
 
@@ -66,6 +66,9 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
         attribution: 'GuiGomcha FamQuest powered by OpenStreetMap',
       }).addTo(mapRef.current);
   
+      // Add layer group to host the spots from 1 user
+      guilleSpotsGroup.current = L.layerGroup().addTo(mapRef.current);
+
       if (!fogLayer.current){
         fogGeoJson.current = worldPolygon();
         fogLayer.current = L.geoJSON([fogGeoJson.current], {
@@ -76,14 +79,22 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
         // Add feature group to enable/disable the discovery map
         featureGroup.current = L.featureGroup().addTo(mapRef.current);
         featureGroup.current.addLayer(fogLayer.current);
+        featureGroup.current.bringToFront()
       }
 
-      // Add layer group to host the spots from 1 user
-      guilleSpotsGroup.current = L.layerGroup().addTo(mapRef.current);
 
       // Right click to create a new spot
       mapRef.current.on('contextmenu', (e) => {
-        console.info("should send event location : "+ JSON.stringify(e.latlng)+ "from ", e)
+        // check if the location is within the fog or not
+        console.info("Right click detected: "+ JSON.stringify(e.latlng)+ "from ", e);
+        console.info("Layers has: ", mapRef.current.hasLayer(featureGroup.current));
+
+        if (!mapRef.current.hasLayer(featureGroup.current)){
+          console.info("no problem to rigth click : "+ JSON.stringify(e.latlng)+ "from ", e);
+        } else if (!locationVisible({"longitude": e.latlng.lng, "latitude": e.latlng.lat}, fogGeoJson.current)){
+          console.info("can only right click outside of fog");
+          return;
+        }
         data = {
           "target": {
             "data": {"lat": e.latlng.lat, "lng": e.latlng.lng,  "componentType": "SpotForm"}
