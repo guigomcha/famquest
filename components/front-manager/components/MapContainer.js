@@ -4,11 +4,11 @@ import '../node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaultic
 import 'leaflet/dist/leaflet.css';
 import '../css/leaflet-custom.css';
 import * as L from 'leaflet';
-import { CanvasLayer } from "./CanvasLeaflet"
 import React, { useEffect, useRef, useState } from "react";
 import SpotForm from './SpotForm';
 import SpotPopup from './SpotPopup';
 import { CreateSpotFromForm } from '../backend_interface/components_helper';
+import { worldPolygon, uncoverFog, locationVisible } from '../backend_interface/fog_functions';
 
 const scale = 13;
 
@@ -18,31 +18,40 @@ const defaultCenter = {
 };
 
 const iconStyle = {
-  iconUrl: 'assets/marker-icon.png'
+  iconUrl: 'assets/marker-icon.png',
+  iconSize: [24, 36],
+  iconAnchor: [12, 36],
 };
 
-
 const MapContainer = ( {locations, spots, handleMenuChange } ) => {
-  const canvasRef = useRef(null);
+  // const canvasRef = useRef(null);
   const mapRef = useRef(null);
   const guilleSpotsGroup   = useRef(null);
   const featureGroup = useRef(null);
   const locs = useRef(null);
+  const markers = useRef(null);
+  const fogLayer = useRef(null);
+  const fogGeoJson = useRef(null);
 
   const prepareMap = () => {
     // After the map is loaded, reveal the area around each marker
-    if (mapRef.current && locs.current) {
+    if (mapRef.current && locs.current && fogLayer.current) {
       locs.current.forEach((location) => {
-        console.log("used coordinate: "+ location.id)
-        canvasRef.current.revealArea(
-          mapRef.current.latLngToContainerPoint(L.latLng(location.latitude, location.longitude)),
-          scale
-        )
+        console.log("used coordinate (should only be used if no spot assigned): "+ JSON.stringify(location))
+        //Uncover new area in fog
+        fogGeoJson.current = uncoverFog(location, fogGeoJson.current);
+        featureGroup.current.removeLayer(fogLayer.current);
+        fogLayer.current = L.geoJSON([fogGeoJson.current], {
+          style(feature) {
+            return feature.properties && feature.properties.style;
+          },
+        });
+        featureGroup.current.addLayer(fogLayer.current);
       });
     }
   };
+  
   const sendBackComponent = (e) => {
-    console.info("SENDING BACK", e.target.data);
     if (e.target.data.componentType == "SpotPopup") {
       handleMenuChange(<SpotPopup spot={e.target.data} />);
     } else {
@@ -50,43 +59,95 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
     }
   };
 
+  const isVisible = (location) => {
+    if (!mapRef.current.hasLayer(featureGroup.current)){
+      console.info("mask disabled: "+ JSON.stringify(location));
+    } else if (!locationVisible(location, fogGeoJson.current)){
+      console.info("can only right click and see outside of fog");
+      return false;
+    }
+    return true;
+  }
+  const displaySpots = () => {
+    if (mapRef.current && spots) {
+      spots.forEach((spot) => {
+        let visible = true;
+        let markerRef = null;
+        markers.current.forEach((mark) => {
+          if (mark.spotId == spot.id){
+            markerRef = mark.marker;
+          }
+        }) 
+        if (!isVisible(spot.location)){
+          visible = false;
+          if (markerRef) {
+            guilleSpotsGroup.current.removeLayer(markerRef);
+            markers.current = markers.current.filter(item => item.spotId != spot.id);
+            return;
+          }
+        }
+        if (!visible || markerRef ){
+          return;
+        }
+        // Todo: Decide the owner based on something
+        // Adding a marker with custom icon
+        const marker = L.marker([spot.location.latitude, spot.location.longitude], {
+          icon: L.icon(iconStyle),
+        })
+        .addTo(mapRef.current);
+        marker.data = {...spot, componentType: "SpotPopup"}
+        marker.addEventListener("click", sendBackComponent);
+        guilleSpotsGroup.current.addLayer(marker);
+        markers.current.push({"spotId": spot.id, "marker": marker});
+
+      });
+    }
+  };
   // Create and configure the map
   useEffect(() => {
     if (!mapRef.current) {
       console.log("Creating the map")
+
       mapRef.current = L.map('mapId').setView([defaultCenter.lat, defaultCenter.lng], scale);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'GuiGomcha FamQuest powered by OpenStreetMap',
       }).addTo(mapRef.current);
-      // Create layer groups
-
+  
       // Add layer group to host the spots from 1 user
       guilleSpotsGroup.current = L.layerGroup().addTo(mapRef.current);
-
-      // Add feature group to enable/disable the discovery map
-      featureGroup.current = L.featureGroup().addTo(mapRef.current);
-      
-      // Create a canvas overlay for the feature group
-      canvasRef.current = new CanvasLayer();
-      featureGroup.current.addLayer(canvasRef.current);
-
-      // Events associated to the canvas
-      const handleEvent = () => {
-        if (canvasRef.current) {
-          canvasRef.current.redraw(mapRef.current); // Pass current map
-          prepareMap()
-        }
-      };
-      // Add map event listeners
-      const events = ['zoom', 'zoomend', 'move', 'moveend', 'drag', 'dragend', 'resize'];
-      events.forEach(event => {
-        mapRef.current.addEventListener(event, handleEvent);
-      });
+      // guilleSpotsGroup.current.bringToBack();
+      if (!fogLayer.current){
+        fogGeoJson.current = worldPolygon();
+        fogLayer.current = L.geoJSON([fogGeoJson.current], {
+          style(feature) {
+            return feature.properties && feature.properties.style;
+          },
+        }).addTo(mapRef.current);
+        fogLayer.current.bringToFront();
+        // Add feature group to enable/disable the discovery map
+        featureGroup.current = L.featureGroup().addTo(mapRef.current);
+        featureGroup.current.addLayer(fogLayer.current);
+        featureGroup.current.on('remove', (e) => {
+          console.info("mask removed", e);
+          displaySpots();
+        });
+        featureGroup.current.on('add', (e) => {
+          console.info("mask added", e);
+          displaySpots();
+        });
+        
+      }
 
 
       // Right click to create a new spot
       mapRef.current.on('contextmenu', (e) => {
-        console.info("should send event location : "+ JSON.stringify(e.latlng)+ "from ", e)
+        // check if the location is within the fog or not
+        console.info("Right click detected: "+ JSON.stringify(e.latlng)+ "from ", e);
+        console.info("Layers has: ", mapRef.current.hasLayer(featureGroup.current));
+
+        if (isVisible({"longitude": e.latlng.lng, "latitude": e.latlng.lat})){
+          return;
+        }
         data = {
           "target": {
             "data": {"lat": e.latlng.lat, "lng": e.latlng.lng,  "componentType": "SpotForm"}
@@ -113,7 +174,7 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
             })
            .on('locationerror', function(e){
                 console.log(e);
-                alert("Location access denied.");
+                alert("Live location access denied.");
             });
 
       // Create overlay controls
@@ -122,43 +183,34 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
         "Mask map": featureGroup.current
       };
       L.control.layers(null, overlays, { collapsed: false }).addTo(mapRef.current);
-      mapRef.current.removeLayer(featureGroup.current);
+      // mapRef.current.removeLayer(featureGroup.current);
     }
   
-    return () => {
-    };
   }, []);
 
   // Add the reveal locations
   useEffect(() => {
     locs.current = locations;
+    if (!fogGeoJson.current){
+      return;
+    }
+    console.info("updating map");
     prepareMap();
   }, [locations]);
   
   // Add the markers in the spots
   useEffect(() => {
-    if (mapRef.current && spots) {
-      spots.forEach((spot) => {
-        console.log("used spot: "+ spot.id)
-        // Todo: Decide the owner based on something
-        // Adding a marker with custom icon
-        const marker = L.marker([spot.location.latitude, spot.location.longitude], {
-          icon: L.icon(iconStyle),
-        })
-          .addTo(mapRef.current);
-        guilleSpotsGroup.current.addLayer(marker);
-        marker.data = {...spot, componentType: "SpotPopup"}
-        marker.addEventListener("click", sendBackComponent);
-
-      });
+    if (!markers.current) {
+      markers.current = []
     }
-      
+    displaySpots();      
   }, [spots]);
 
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%"}}>
-      <div id="mapId" style={{ height: '100vh', width: '100vw' }}></div>;
+      <div id="mapId" style={{ height: '100vh', width: '100vw' }}>
+      </div>
     </div>
   );
 };
