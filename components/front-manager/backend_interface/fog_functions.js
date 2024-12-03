@@ -3,7 +3,6 @@ import * as turf from "@turf/turf";
 export function uncoverFog(location, fogPolygon) {
   //Create new circle polygon based on the user's position.
   const circlePolygon = _createCirclePolygonFromLocation(location, 0.05, 16);
-  console.info("generated circle: ", circlePolygon);
   //Extend the fog using our new circle polygon.
   const newFogPolygon = _addPolygonToFog(fogPolygon, circlePolygon);
 
@@ -31,13 +30,11 @@ function  _addPolygonToFog(fogPolygon, newPolygon) {
     const holeCoordinates = fogPolygon.geometry.coordinates[0][i]
     //Convert the array of coordinates to a polygon object.
     const holePolygon = turf.polygon([holeCoordinates]);
-    console.info("intersection with hole:", holePolygon)
     //If the "hole" intersects with the new polygon then join them together. (e.g. user moved to edge of fog)
     if (turf.intersect(holePolygon, newPolygon)) {
       
       const newHolePolygon = turf.union(holePolygon, newPolygon);
       const newHoleCoordinates = newHolePolygon.geometry.coordinates[0];
-      console.info("intersection:", newHolePolygon)
       
       //Overwrite the old hole.
       fogPolygon.geometry.coordinates[0][i] = newHoleCoordinates;
@@ -47,9 +44,7 @@ function  _addPolygonToFog(fogPolygon, newPolygon) {
   
   //If none of the "hole" polygons intersect with the new polygon then add a new hole to the fog-polygon.
   const newHoleCoordinates = newPolygon.geometry.coordinates[0];
-  console.info("new hole coordinates:", newHoleCoordinates)
   fogPolygon.geometry.coordinates[0].push(newHoleCoordinates);
-  console.info("new fogpolygon:", fogPolygon)
 
   return fogPolygon;
 

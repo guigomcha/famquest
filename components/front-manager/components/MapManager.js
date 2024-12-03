@@ -12,6 +12,16 @@ const debugLocations = [
   { latitude: 37.321355840986044, longitude: -6.056325106677641 }, // Sample coordinates (Blue Padel)
   { latitude: 37.31942002016036, longitude: -6.0678988062297465 }, // Sample coordinates (Palomares)
 ]
+const debugSpots = [
+  {
+    "id": "1",
+    "location": { latitude: 37.31942002016036, longitude: -6.0678988062297465 }, 
+  },
+  {
+    "id": "2",
+    "location": { latitude: 37.35942002016036, longitude: -6.0678988062297465 }, 
+  }
+]
 
 // This is the main component of the Map which should connect with APIs to get the required info to feed it down
 const MapManager = () => {  
