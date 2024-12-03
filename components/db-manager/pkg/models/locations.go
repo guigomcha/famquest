@@ -17,10 +17,10 @@ type APIKnownLocations struct {
 // `db:"known_locations"` and swagger ouput
 type KnownLocations struct {
 	// Only db
-	UUID    uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
+	UUID uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
 	// Db + json
-	RefType string    `db:"ref_type" json:"refType"`
-	RefId   int       `db:"ref_id" json:"refId"`
+	RefType   string    `db:"ref_type" json:"refType"`
+	RefId     int       `db:"ref_id" json:"refId"`
 	ID        int       `db:"id" json:"id,omitempty"` // Auto-incremented integer ID
 	Name      string    `db:"name" json:"name"`
 	Longitude float64   `db:"longitude" json:"longitude"`            // Longitude as signed float

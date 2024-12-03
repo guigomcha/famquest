@@ -921,7 +921,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "Db + json",
+                    "description": "Auto-incremented integer ID",
                     "type": "integer"
                 },
                 "latitude": {
@@ -933,6 +933,13 @@
                     "type": "number"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "refId": {
+                    "type": "integer"
+                },
+                "refType": {
+                    "description": "Db + json",
                     "type": "string"
                 },
                 "updatedAt": {
