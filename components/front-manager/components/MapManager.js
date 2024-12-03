@@ -8,6 +8,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { fetchCoordinates, fetchAndPrepareSpots } from "../backend_interface/db_manager_api";
 import { useQuery } from 'react-query'
 
+const debugLocations = [
+  { latitude: 37.321355840986044, longitude: -6.056325106677641 }, // Sample coordinates (Blue Padel)
+  { latitude: 37.31942002016036, longitude: -6.0678988062297465 }, // Sample coordinates (Palomares)
+]
+
 // This is the main component of the Map which should connect with APIs to get the required info to feed it down
 const MapManager = () => {  
   const [locations, setLocations] = useState([])
@@ -40,7 +45,6 @@ const MapManager = () => {
     return <p>Error Location {errorLocations.message}<br>Error spots {errorSpots.message}</br></p>;
   }
   const handleMenuChange = (comp) => {
-    console.info("COMPONENT is: ", comp);
     setComponent(comp); // Trigger show slideMenu
   }; 
   return (
