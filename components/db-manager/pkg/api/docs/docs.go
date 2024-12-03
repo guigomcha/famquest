@@ -929,7 +929,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "Db + json",
+                    "description": "Auto-incremented integer ID",
                     "type": "integer"
                 },
                 "latitude": {
@@ -941,6 +941,13 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "refId": {
+                    "type": "integer"
+                },
+                "refType": {
+                    "description": "Db + json",
                     "type": "string"
                 },
                 "updatedAt": {

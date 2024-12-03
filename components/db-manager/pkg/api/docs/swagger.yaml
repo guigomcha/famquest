@@ -62,7 +62,7 @@ definitions:
         description: Automatically generated
         type: string
       id:
-        description: Db + json
+        description: Auto-incremented integer ID
         type: integer
       latitude:
         description: Latitude as signed float
@@ -71,6 +71,11 @@ definitions:
         description: Longitude as signed float
         type: number
       name:
+        type: string
+      refId:
+        type: integer
+      refType:
+        description: Db + json
         type: string
       updatedAt:
         description: Automatically managed by trigger

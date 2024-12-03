@@ -37,7 +37,11 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
     // After the map is loaded, reveal the area around each marker
     if (mapRef.current && locs.current && fogLayer.current) {
       locs.current.forEach((location) => {
-        console.log("used coordinate (should only be used if no spot assigned): "+ JSON.stringify(location))
+        console.info("checking coordinate: "+ JSON.stringify(location))
+        if (location.refId != 0) {
+          console.info("Ignoring location from spot: ", location);
+          return;
+        }
         //Uncover new area in fog
         fogGeoJson.current = uncoverFog(location, fogGeoJson.current);
         featureGroup.current.removeLayer(fogLayer.current);
@@ -106,8 +110,7 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
   // Create and configure the map
   useEffect(() => {
     if (!mapRef.current) {
-      console.log("Creating the map")
-
+      console.log("Creating the map");
       mapRef.current = L.map('mapId').setView([defaultCenter.lat, defaultCenter.lng], scale);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'GuiGomcha FamQuest powered by OpenStreetMap',
@@ -173,13 +176,13 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
                 mapRef.current.addLayer(circle);
             })
            .on('locationerror', function(e){
-                console.log(e);
+                console.info(e);
                 alert("Live location access denied.");
             });
 
       // Create overlay controls
       const overlays = {
-        "Spots Guille": guilleSpotsGroup.current,
+        "Spots": guilleSpotsGroup.current,
         "Mask map": featureGroup.current
       };
       L.control.layers(null, overlays, { collapsed: false }).addTo(mapRef.current);

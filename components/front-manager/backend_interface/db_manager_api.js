@@ -6,6 +6,7 @@
 //   ];
 // };
 
+const API_URL = "https://api.famquest.REPLACE";
 const isLocal = true;
 
 export const fetchCoordinates = async () => {
