@@ -38,8 +38,8 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
     if (mapRef.current && locs.current && fogLayer.current) {
       locs.current.forEach((location) => {
         console.info("checking coordinate: "+ JSON.stringify(location))
-        if (location.refId == 0) {
-          console.info("Ignoring location from spot: ");
+        if (location.refId != 0) {
+          console.info("Ignoring location from spot: ", location);
           return;
         }
         //Uncover new area in fog
