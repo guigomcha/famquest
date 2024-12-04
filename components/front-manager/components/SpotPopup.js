@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import '../css/SpotPopup.css';
 import TaskForm from './TaskForm';
 import Images from './Images';
 import Audio from './Audio';
