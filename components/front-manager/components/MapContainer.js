@@ -28,6 +28,7 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
   const guilleSpotsGroup   = useRef(null);
   const featureGroup = useRef(null);
   const locs = useRef(null);
+  const loadedSpots = useRef(null);
   const markers = useRef(null);
   const fogLayer = useRef(null);
   const fogGeoJson = useRef(null);
@@ -72,8 +73,8 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
     return true;
   }
   const displaySpots = () => {
-    if (mapRef.current && spots) {
-      spots.forEach((spot) => {
+    if (mapRef.current && loadedSpots.current) {
+      loadedSpots.current.forEach((spot) => {
         let visible = true;
         let markerRef = null;
         markers.current.forEach((mark) => {
@@ -147,7 +148,7 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
         console.info("Right click detected: "+ JSON.stringify(e.latlng)+ "from ", e);
         console.info("Layers has: ", mapRef.current.hasLayer(featureGroup.current));
 
-        if (isVisible({"longitude": e.latlng.lng, "latitude": e.latlng.lat})){
+        if (!isVisible({"longitude": e.latlng.lng, "latitude": e.latlng.lat})){
           return;
         }
         data = {
@@ -202,6 +203,7 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
   
   // Add the markers in the spots
   useEffect(() => {
+    loadedSpots.current = spots;
     if (!markers.current) {
       markers.current = []
     }
