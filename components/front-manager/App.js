@@ -79,7 +79,7 @@ export default function App() {
         <Container >
           <Row>
             <Card style={{ width: '18rem' }}>
-              <Card.Img variant="top" src="assets/marker-icon.png" />
+              <Card.Img variant="top" src="assets/famquest-logo.png" />
               <Card.Body>
                 <Card.Title>This is an intro to the FamQuest App</Card.Title>
                 <Card.Text>
