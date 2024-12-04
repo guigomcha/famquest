@@ -4,6 +4,8 @@ import {renderEmptyState} from '../utils/render_message';
 import Audio from './Audio';
 import Carousel from 'react-bootstrap/Carousel';
 import Container from 'react-bootstrap/Container';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
@@ -18,13 +20,10 @@ const Images = ( {refId, refType} ) => {
   const videoRef = useRef(null); // For real-time preview
   const canvasRef = useRef(null); // To capture still images
   const cameraRef = useRef(null); // To keep track of the camera stream
-  // 
-  const [statusMessage, setStatusMessage] = useState('');
-  const [imageName, setImageName] = useState('');
-  const [imageDescription, setImageDescription] = useState('');
+
   const [file, setFile] = useState(null);
   const [selectedImages, setSelectedImages] = useState([]);
-
+  const [validated, setValidated] = useState(false);
 
   const stopCameraPreview = () => {
     mediaStream?.getTracks().forEach((track) => track.stop());
@@ -121,26 +120,30 @@ const Images = ( {refId, refType} ) => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    const dataToUpload = file || imageBlob;
-    if (!dataToUpload || !imageName || !imageDescription) {
-      setStatusMessage("Please fill out all fields.");
+  const handleSubmit = async (event) => {
+    const form = event.currentTarget;
+    event.preventDefault();
+    event.stopPropagation();
+    if (form.checkValidity() === false) {
+      console.info("not valid");
       return;
     }
-
-    const attachment = await uploadAttachment(dataToUpload, imageName, imageDescription);
+    const formDataObj = new FormData(form);
+    // Convert FormData to a plain object
+    const formValues = {};
+    formDataObj.forEach((value, key) => {
+      formValues[key] = value;
+    });
+    
+    const attachment = await uploadAttachment(dataToUpload, formDataObj.name, formDataObj.description);
 
     if (attachment) {
       // Add reference to current spot
       await addReferenceToAttachment(attachment.id, refId, refType);
       callFetchAttachmentsForSpot(refId, refType)
     } else {
-      setStatusMessage("Unable to send image.");
+      console.info("Unable to send image.");
     }
-    setImageName('');
-    setImageDescription('');
     setFile('');
 
   };
@@ -154,113 +157,115 @@ const Images = ( {refId, refType} ) => {
   
   return (
     <Container>
-      <Row>
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
-        <div className="attachment-container">
-          <input 
-            type="text" 
-            value={imageName} 
-            onChange={(e) => setImageName(e.target.value)} 
-            placeholder="Image Name" 
-            required 
-          />
-          <textarea 
-            value={imageDescription} 
-            onChange={(e) => setImageDescription(e.target.value)} 
-            placeholder="Image Description" 
-            required 
-          />
-        </div>
-        <div className="form-row">
-          <div className="form-cell">
-            <label htmlFor="fileUpload" style={{
-                display: "inline-block",
-                padding: "10px 20px",
-                backgroundColor: "#007BFF", // Button color
-                color: "#FFFFFF",          // Text color
-                border: "none",
-                borderRadius: "4px",
-                textAlign: "center",
-                cursor: "pointer",
-                fontSize: "16px",
-                fontWeight: "bold",
-                textDecoration: "none",    // Remove underline
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", // Optional shadow
-                transition: "background-color 0.3s ease",
-            }}>Upload from Device</label>
-            <input 
-              type="file" 
-              id="fileUpload" 
-              name="fileUpload" 
-              accept="image/*" 
-              style={{ display: "none" }} 
-              onChange={handleFileChange} 
-            />
-          </div>
-          <div className="form-cell">
-            <button onClick={toggleCamera}>Open/Close Camera</button>
-            {cameraOpened && (
-              <div>
-                <button onClick={toggleVideoRecording}>Start/Stop Video Recording</button>
-                <button onClick={captureImage}>Capture Image</button>
-              </div>
-            )}
-            {(cameraOpened || file != null) && (
-              <div style={{ position: "relative", zIndex: 1000000000 }}>
-                <h3>Camera Preview</h3>
-                <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
-                {cameraOpened && (                       
-                  <video
-                    name="videoPreview"
-                    ref={videoRef}
-                    style={{ width: "300px" }}
-                    autoPlay
-                    muted
-                  ></video>
-                )}
-                {isRecording && (
-                  <label 
-                    htmlFor="videoPreview"
-                    style={{
-                      backgroundColor: "red",
-                      color: "white",
-                      padding: "5px 10px",
-                      borderRadius: "5px",
-                      fontWeight: "bold",
-                      zIndex: 10,
-                    }}
-                  >
-                    Recording
-                  </label>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-        {imageBlob && (
-          <div className="form-row">
-            <div className="form-row">
-              <h3>Loaded Content</h3>
-            </div>
-            <div className="form-row">
-              <img
-                src={URL.createObjectURL(imageBlob)}
-                alt="Captured"
-                style={{ width: "200px", marginTop: "10px" }}
+      <Card>
+        <Form noValidate onSubmit={handleSubmit} encType="multipart/form-data">
+          <Row className="mb-3">
+            <Form.Group as={Col} controlId="formGridName">
+              <Form.Label>Name</Form.Label>
+              <Form.Control 
+                required
+                type="text"
+                name="name"
+                placeholder="Add a new name" 
               />
-              {videoBlob && (
-                <video controls width="300" src={URL.createObjectURL(videoBlob)}></video>
+            </Form.Group>
+
+            <Form.Group as={Col} controlId="formGridDescription">
+              <Form.Label>Description</Form.Label>
+              <Form.Control 
+                required
+                type="text"
+                name="description"
+                placeholder="Add an initial description" 
+              />
+            </Form.Group>
+          </Row>
+          <Row className="mb-3">
+            <Row>
+              <Col>
+                <Form.Label>Select from device</Form.Label>
+                <Form.Control 
+                  type="file" 
+                  name="fileUpload" 
+                  accept="image/*" 
+                  onChange={handleFileChange}
+                  />
+              </Col>
+              <Col>
+              <button onClick={toggleCamera}>Open/Close Camera</button>
+              {cameraOpened && (
+                <>
+                  <Col>
+                    <button onClick={toggleVideoRecording}>Start/Stop Video Recording</button>
+                  </Col>
+                  <Col>
+                    <button onClick={captureImage}>Capture Image</button>
+                  </Col>
+                </>
               )}
-            </div>
-          </div>
-        )}
-        <div className="form-row">
-          <button type="submit">Upload</button>
-          {statusMessage && <p>{statusMessage}</p>}
-        </div>
-      </form>
-      </Row>
-      <Row>
+              </Col>
+              
+            </Row>
+            <Row>
+              <Col>
+              {(cameraOpened || file != null) && (
+                <div style={{ position: "relative", zIndex: 1000000000 }}>
+                  <h3>Camera Preview</h3>
+                  <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
+                  {cameraOpened && (                       
+                    <video
+                      name="videoPreview"
+                      ref={videoRef}
+                      style={{ width: "300px" }}
+                      autoPlay
+                      muted
+                    ></video>
+                  )}
+                  {isRecording && (
+                    <label 
+                      htmlFor="videoPreview"
+                      style={{
+                        backgroundColor: "red",
+                        color: "white",
+                        padding: "5px 10px",
+                        borderRadius: "5px",
+                        fontWeight: "bold",
+                        zIndex: 10,
+                      }}
+                    >
+                      Recording
+                    </label>
+                  )}
+                </div>
+              )}
+              </Col>
+              <Col>
+              {imageBlob && (
+                <div className="form-row">
+                  <div className="form-row">
+                    <h3>Loaded Content</h3>
+                  </div>
+                  <div className="form-row">
+                    <img
+                      src={URL.createObjectURL(imageBlob)}
+                      alt="Captured"
+                      style={{ width: "200px", marginTop: "10px" }}
+                    />
+                    {videoBlob && (
+                      <video controls width="300" src={URL.createObjectURL(videoBlob)}></video>
+                    )}
+                  </div>
+                </div>
+              )}
+              </Col>
+            </Row>
+          </Row>
+        <Button variant="primary" type="submit">
+          Submit
+        </Button>
+        </Form>
+      </Card>
+      <Card>
       {selectedImages.length > 0 ? (
         <Carousel slide={false} data-bs-theme="dark" pause="hover" controls={true}> 
           {selectedImages.map((image, index) => (
@@ -279,7 +284,7 @@ const Images = ( {refId, refType} ) => {
       ) : (
         renderEmptyState("Create new to see it")
       )}
-      </Row>
+      </Card>
 
     </Container>
   );

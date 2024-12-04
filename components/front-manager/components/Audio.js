@@ -3,6 +3,7 @@ import { uploadAttachment, addReferenceToAttachment, fetchAttachments } from '..
 import {renderEmptyState} from '../utils/render_message';
 import Card from 'react-bootstrap/Card';
 import Carousel from 'react-bootstrap/Carousel';
+import Container from "react-bootstrap/esm/Container";
 
 const Audio = ({ refId, refType }) => {
   const [audioBlob, setAudioBlob] = useState(null);
@@ -73,10 +74,9 @@ const Audio = ({ refId, refType }) => {
     callFetchAttachmentsForSpot(refId, refType)
   }, [refId]);
   return (
-    <div>
-      {/* Audio Recording */}
-      <div>
-        <h3>Record your audio</h3>
+    <Container>
+      <Card>
+      <h3>Record your audio</h3>
         <button onClick={toggleAudioRecording}>
           Start/Stop Audio Recording
           {audioOpened && (
@@ -96,13 +96,12 @@ const Audio = ({ refId, refType }) => {
         {audioBlob && (
           <audio controls src={URL.createObjectURL(audioBlob)}></audio>
         )}
-      </div>
-
-      {/* Audio Upload Form */}
-      <div>
+      </Card>
+      <Card>
         <button onClick={handleSubmit}>Upload Audio</button>
         {statusMessage && <p>{statusMessage}</p>}
-      </div>
+      </Card>
+      <Card>
       {selectedAudios.length > 0 ? (
           <Carousel slide={false} data-bs-theme="dark" pause="hover" controls={true}> 
           {selectedAudios.map((audio, index) => (
@@ -128,7 +127,9 @@ const Audio = ({ refId, refType }) => {
       ) : (
         renderEmptyState("Create new to see it")
       )}
-    </div>
+      </Card>
+    </Container>
+
   );
 };
 
