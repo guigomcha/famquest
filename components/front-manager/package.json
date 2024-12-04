@@ -8,6 +8,19 @@
     "ios": "expo run:ios",
     "web": "expo start --web"
   },
+  "homepage": "https://portal.famquest.REPLACE_BASE_DOMAIN",
+  "bugs": {
+    "url": "https://github.com/guigomcha/famquest/issues"
+  },
+  "license": "GPL-3.0-only",
+  "author": {
+    "name": "Guillermo Gomez Chavez",
+    "email": "guillermo.gc1994@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guigomcha/famquest.git"
+  },
   "dependencies": {
     "-": "~0.0.1",
     "@expo/metro-runtime": "~3.2.3",

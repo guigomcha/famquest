@@ -20,6 +20,7 @@ const OAuth2Login = ({ onUserChange }) => {
       })
       .catch(() => {
         setUser(null);
+        console.info("did not find userinfo");
         onUserChange(null); // Notify parent component
       });
   }, []);
@@ -35,6 +36,13 @@ const OAuth2Login = ({ onUserChange }) => {
     fetch("https://auth.famquest.REPLACE_BASE_DOMAIN/oauth2/sign_out", { method: "GET", credentials: "include" })
       .then(() => {
         setUser(null);
+        onUserChange(null); // Notify parent component
+        console.info("Logout ok");
+      })
+      .catch(() => {
+        setUser(null);
+        onUserChange(null); // Notify parent component
+        console.info("Logout errpr");
       });
     window.location.reload();
   };
