@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import Button from 'react-bootstrap/Button';
+
+const isLocal = true;
 
 const OAuth2Login = ({ onUserChange }) => {
   const [user, setUser] = useState(null); // User information
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch user info to check if logged in
@@ -18,9 +20,9 @@ const OAuth2Login = ({ onUserChange }) => {
       })
       .catch(() => {
         setUser(null);
+        console.info("did not find userinfo");
         onUserChange(null); // Notify parent component
-      })
-      .finally(() => setLoading(false));
+      });
   }, []);
 
   const login = () => {
@@ -34,64 +36,25 @@ const OAuth2Login = ({ onUserChange }) => {
     fetch("https://auth.famquest.REPLACE_BASE_DOMAIN/oauth2/sign_out", { method: "GET", credentials: "include" })
       .then(() => {
         setUser(null);
+        onUserChange(null); // Notify parent component
+        console.info("Logout ok");
+      })
+      .catch(() => {
+        setUser(null);
+        onUserChange(null); // Notify parent component
+        console.info("Logout errpr");
       });
     window.location.reload();
   };
-
-  if (loading) return <div>Loading...</div>;
-
   return (
-    <div>
-      <div style={styles.navbar}>
-        {user ? (
-          <>
-            <span style={styles.user}>Hello, {user.name}</span>
-            <button onClick={logout} style={styles.button}>Logout</button>
-          </>
+      <div >
+        {(user || isLocal) ? (
+          <Button variant="primary" onClick={logout}>Logout</Button>
         ) : (
-          <button onClick={login} style={styles.button}>Login</button>
+          <Button variant="primary" onClick={login}>Login</Button>
         )}
       </div>
-      <div style={styles.content}>
-        {user ? (
-          <div>
-            <h1>Welcome, {user.name}!</h1>
-            <p>Email: {user.email}</p>
-            <p>fullinfo: {JSON.stringify(user)}</p>
-          </div>
-        ) : (
-          <h1>You need to log in.</h1>
-        )}
-      </div>
-    </div>
   );
-};
-
-const styles = {
-  navbar: {
-    position: "fixed",
-    top: 0,
-    right: 0,
-    backgroundColor: "#282c34",
-    color: "white",
-    padding: "10px",
-    display: "flex",
-    gap: "10px",
-    alignItems: "center",
-  },
-  button: {
-    backgroundColor: "#61dafb",
-    border: "none",
-    padding: "10px",
-    cursor: "pointer",
-  },
-  user: {
-    marginRight: "10px",
-  },
-  content: {
-    marginTop: "50px",
-    textAlign: "center",
-  },
 };
 
 export default OAuth2Login;

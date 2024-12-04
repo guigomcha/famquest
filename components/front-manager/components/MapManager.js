@@ -1,6 +1,4 @@
-import '../node_modules/leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility';
-import '../node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet/dist/leaflet.css';
 import MapContainer from './MapContainer';
 import SlideMenu from './SlideMenu';
@@ -16,9 +14,11 @@ const debugSpots = [
   {
     "id": "1",
     "location": { latitude: 37.31942002016036, longitude: -6.0678988062297465 }, 
+    "refId": 0, 
   },
   {
     "id": "2",
+    "refId": 1, 
     "location": { latitude: 37.35942002016036, longitude: -6.0678988062297465 }, 
   }
 ]

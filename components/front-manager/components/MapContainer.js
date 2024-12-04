@@ -2,7 +2,6 @@ import '../node_modules/leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility';
 import '../node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet/dist/leaflet.css';
-import '../css/leaflet-custom.css';
 import * as L from 'leaflet';
 import React, { useEffect, useRef, useState } from "react";
 import SpotForm from './SpotForm';
@@ -29,6 +28,7 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
   const guilleSpotsGroup   = useRef(null);
   const featureGroup = useRef(null);
   const locs = useRef(null);
+  const loadedSpots = useRef(null);
   const markers = useRef(null);
   const fogLayer = useRef(null);
   const fogGeoJson = useRef(null);
@@ -73,8 +73,8 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
     return true;
   }
   const displaySpots = () => {
-    if (mapRef.current && spots) {
-      spots.forEach((spot) => {
+    if (mapRef.current && loadedSpots.current) {
+      loadedSpots.current.forEach((spot) => {
         let visible = true;
         let markerRef = null;
         markers.current.forEach((mark) => {
@@ -111,11 +111,17 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
   useEffect(() => {
     if (!mapRef.current) {
       console.log("Creating the map");
-      mapRef.current = L.map('mapId').setView([defaultCenter.lat, defaultCenter.lng], scale);
+      const mapDiv = document.getElementById("mapId");
+      mapRef.current = L.map(mapDiv).setView([defaultCenter.lat, defaultCenter.lng], scale);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'GuiGomcha FamQuest powered by OpenStreetMap',
       }).addTo(mapRef.current);
-  
+      // // To support map inside of tab
+      const resizeObserver = new ResizeObserver(() => {
+        mapRef.current.invalidateSize();
+      });      
+      resizeObserver.observe(mapDiv);
+      
       // Add layer group to host the spots from 1 user
       guilleSpotsGroup.current = L.layerGroup().addTo(mapRef.current);
       // guilleSpotsGroup.current.bringToBack();
@@ -148,7 +154,7 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
         console.info("Right click detected: "+ JSON.stringify(e.latlng)+ "from ", e);
         console.info("Layers has: ", mapRef.current.hasLayer(featureGroup.current));
 
-        if (isVisible({"longitude": e.latlng.lng, "latitude": e.latlng.lat})){
+        if (!isVisible({"longitude": e.latlng.lng, "latitude": e.latlng.lat})){
           return;
         }
         data = {
@@ -203,6 +209,7 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
   
   // Add the markers in the spots
   useEffect(() => {
+    loadedSpots.current = spots;
     if (!markers.current) {
       markers.current = []
     }
