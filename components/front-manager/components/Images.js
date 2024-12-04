@@ -134,8 +134,15 @@ const Images = ( {refId, refType} ) => {
     formDataObj.forEach((value, key) => {
       formValues[key] = value;
     });
+    console.info("Form data", formValues);
     
-    const attachment = await uploadAttachment(dataToUpload, formDataObj.name, formDataObj.description);
+    const dataToUpload = formDataObj.file || imageBlob;
+    if (!dataToUpload) {
+      console.info("You need to select at file or photo");
+      return;
+    }
+    
+    const attachment = await uploadAttachment(dataToUpload, formValues.name, formValues.description);
 
     if (attachment) {
       // Add reference to current spot
@@ -186,7 +193,7 @@ const Images = ( {refId, refType} ) => {
                 <Form.Label>Select from device</Form.Label>
                 <Form.Control 
                   type="file" 
-                  name="fileUpload" 
+                  name="file" 
                   accept="image/*" 
                   onChange={handleFileChange}
                   />

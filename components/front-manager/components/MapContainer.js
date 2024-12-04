@@ -111,11 +111,17 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
   useEffect(() => {
     if (!mapRef.current) {
       console.log("Creating the map");
-      mapRef.current = L.map('mapId').setView([defaultCenter.lat, defaultCenter.lng], scale);
+      const mapDiv = document.getElementById("mapId");
+      mapRef.current = L.map(mapDiv).setView([defaultCenter.lat, defaultCenter.lng], scale);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'GuiGomcha FamQuest powered by OpenStreetMap',
       }).addTo(mapRef.current);
-  
+      // // To support map inside of tab
+      const resizeObserver = new ResizeObserver(() => {
+        mapRef.current.invalidateSize();
+      });      
+      resizeObserver.observe(mapDiv);
+      
       // Add layer group to host the spots from 1 user
       guilleSpotsGroup.current = L.layerGroup().addTo(mapRef.current);
       // guilleSpotsGroup.current.bringToBack();

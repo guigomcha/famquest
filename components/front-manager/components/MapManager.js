@@ -1,6 +1,4 @@
-import '../node_modules/leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility';
-import '../node_modules/leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import 'leaflet/dist/leaflet.css';
 import MapContainer from './MapContainer';
 import SlideMenu from './SlideMenu';
@@ -27,8 +25,8 @@ const debugSpots = [
 
 // This is the main component of the Map which should connect with APIs to get the required info to feed it down
 const MapManager = () => {  
-  const [locations, setLocations] = useState(debugLocations)
-  const [spots, setSpots] = useState(debugSpots)
+  const [locations, setLocations] = useState([])
+  const [spots, setSpots] = useState([])
   const [component, setComponent] = useState(null);
 
   const { 
