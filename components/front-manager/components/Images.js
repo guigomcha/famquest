@@ -6,6 +6,8 @@ import Carousel from 'react-bootstrap/Carousel';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Dropdown from 'react-bootstrap/Dropdown';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
@@ -14,6 +16,7 @@ const Images = ( {refId, refType} ) => {
   const [imageBlob, setImageBlob] = useState(null);
   const [videoBlob, setVideoBlob] = useState(null);
   const [cameraOpened, setCameraOpened] = useState(false);
+  const [cameraOption, setCameraOption] = useState("front");
   const [isRecording, setIsRecording] = useState(false); // State for recording label
   const videoRecorder = useRef(null);
   const [mediaStream, setMediaStream] = useState(null);
@@ -42,7 +45,9 @@ const Images = ( {refId, refType} ) => {
       return;
     }
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
+      video: {
+        facingMode: (cameraOption == "front")? "user" : "environment"
+      },
       audio: true,
     });
     setMediaStream(stream);
@@ -88,8 +93,15 @@ const Images = ( {refId, refType} ) => {
   };
 
 
+  const handleCameraOptionEvent = (e) => {
+    e.preventDefault();  // Prevent form submission
+    e.stopPropagation(); // Stop event propagation to parent form
+    setCameraOption(e.target.name);
+  }
   // Handle file selection and show the image on the canvas
   const handleFileChange = (e) => {
+    e.preventDefault();  // Prevent form submission
+    e.stopPropagation(); // Stop event propagation to parent form
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
 
@@ -121,9 +133,9 @@ const Images = ( {refId, refType} ) => {
   };
 
   const handleSubmit = async (event) => {
-    const form = event.currentTarget;
     event.preventDefault();
     event.stopPropagation();
+    const form = event.currentTarget;
     if (form.checkValidity() === false) {
       console.info("not valid");
       return;
@@ -199,14 +211,21 @@ const Images = ( {refId, refType} ) => {
                   />
               </Col>
               <Col>
-              <button onClick={toggleCamera}>Open/Close Camera</button>
+              <Dropdown as={ButtonGroup}>
+                <Button variant="primary" onClick={toggleCamera}>Open/Close<br></br>{cameraOption} Camera</Button>
+                <Dropdown.Toggle split variant="primary" id="dropdown-split-basic" />
+                <Dropdown.Menu>
+                  <Dropdown.Item onClick={handleCameraOptionEvent} name="front">Front</Dropdown.Item>
+                  <Dropdown.Item onClick={handleCameraOptionEvent} name="back">Back</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
               {cameraOpened && (
                 <>
                   <Col>
-                    <button onClick={toggleVideoRecording}>Start/Stop Video Recording</button>
+                    <Button variant="primary" onClick={toggleVideoRecording} size="sm">Start/Stop Video Recording</Button>
                   </Col>
                   <Col>
-                    <button onClick={captureImage}>Capture Image</button>
+                    <Button variant="primary" onClick={captureImage} size="sm">Capture Image</Button>
                   </Col>
                 </>
               )}
