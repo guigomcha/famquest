@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Drawer } from "antd";
+import { ColumnHeightOutlined } from '@ant-design/icons';
 
 const SlideMenu = ({ component }) => {
   const [open, setOpen] = useState(true);
@@ -12,23 +13,28 @@ const SlideMenu = ({ component }) => {
   };
 
   const startDragging = (e) => {
-    const initialY = e.clientY;
+    const initialY = e.clientY || e.touches[0].clientY;
     const initialHeight = height;
 
-    const onMouseMove = (event) => {
-      const newHeight = initialHeight - (event.clientY - initialY);
+    const onMove = (event) => {
+      const currentY = event.clientY || event.touches[0].clientY;
+      const newHeight = initialHeight - (currentY - initialY);
       if (newHeight >= 100 && newHeight <= window.innerHeight - 50) {
         setHeight(newHeight);
       }
     };
 
-    const onMouseUp = () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
+    const onEnd = () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onEnd);
+      document.removeEventListener("touchmove", onMove);
+      document.removeEventListener("touchend", onEnd);
     };
 
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onEnd);
+    document.addEventListener("touchmove", onMove);
+    document.addEventListener("touchend", onEnd);
   };
 
   useEffect(() => {
@@ -44,22 +50,26 @@ const SlideMenu = ({ component }) => {
         open={open}
         closable={false}
         styles={{
-          body: { position: "relative", width: "100%", height: "100%", background: "green", padding: 0}
+          body: { position: "relative", width: "100%", height: "100%", padding: 0}
         }}
       >
         <div
           ref={dragRef}
           onMouseDown={startDragging}
+          onTouchStart={startDragging} // Handle touch interactions
           style={{
-            height: "70%",
-            background: "red",
+            height: "15px",
             cursor: "row-resize",
-            top: 0,
             width: "100%",
             padding: 0,
-            zIndex: 10,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
-        >{component}</div>
+        >
+          <ColumnHeightOutlined style={{height: "10px"}}/>
+        </div>
+        <div>{component}</div>
       </Drawer>
     </>
   );
