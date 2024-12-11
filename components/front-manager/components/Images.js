@@ -298,15 +298,13 @@ const Images = ( {refId, refType} ) => {
       <Card>
       {selectedImages.length > 0 ? (
         <Container>
-        <Carousel activeIndex={activeIndex} onSelect={handleSelect} slide={true} data-bs-theme="dark" pause="hover" controls={true}> 
+        <Carousel activeIndex={activeIndex} onSelect={handleSelect} slide={false} interval={null} data-bs-theme="dark" controls={true}> 
           {selectedImages.map((image, index) => (
             <Carousel.Item>
               <Card className="bg-dark text-black">
                 <Card.Img src={image.url} alt={`Attachment ${index + 1}`} className="center-block" />
-                <Card.ImgOverlay>
-                  <Card.Title>{image.name}</Card.Title>
-                  <Card.Text>{image.description}</Card.Text>
-                </Card.ImgOverlay>
+                <Card.Title>{image.name}</Card.Title>
+                <Card.Text>{image.description}</Card.Text>
               </Card>
             </Carousel.Item>
           ))}

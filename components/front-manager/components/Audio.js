@@ -107,19 +107,17 @@ const Audio = ({ refId, refType }) => {
           {selectedAudios.map((audio, index) => (
             <Carousel.Item>
               <Card className="bg-dark text-white">
-                <Card.Body>
-                  <Card.ImgOverlay>
-                    <Card.Title>{index}:{audio.name}</Card.Title>
-                    <Card.Text>{audio.description}</Card.Text>
-                  </Card.ImgOverlay>
-                  <Card.Text style={{
-                      "display": "flex",
-                      "justify-content": "center",
-                      "align-items": "center" 
+                <Card.Body style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                        margin: "auto",
                     }}>
                     <audio controls src={audio.url}></audio>
-                  </Card.Text>
                 </Card.Body>
+                <Card.Footer>
+                    <Card.Title>{index}:{audio.name}</Card.Title>
+                    <Card.Text>{audio.description}</Card.Text>
+                </Card.Footer>
               </Card>
             </Carousel.Item>
           ))}
