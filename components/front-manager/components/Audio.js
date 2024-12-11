@@ -112,7 +112,7 @@ const Audio = ({ refId, refType }) => {
                         alignItems: "center",
                         margin: "auto",
                     }}>
-                    <audio controls src={audio.url}></audio>
+                    <audio controls src={audio.url} style={{width: "200px", height: "50px"}}></audio>
                 </Card.Body>
                 <Card.Footer>
                     <Card.Title>{index}:{audio.name}</Card.Title>
