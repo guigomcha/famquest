@@ -23,10 +23,14 @@ const Images = ( {refId, refType} ) => {
   const videoRef = useRef(null); // For real-time preview
   const canvasRef = useRef(null); // To capture still images
   const cameraRef = useRef(null); // To keep track of the camera stream
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const [file, setFile] = useState(null);
   const [selectedImages, setSelectedImages] = useState([]);
-  const [validated, setValidated] = useState(false);
+
+  const handleSelect = (selectedIndex) => {
+    setActiveIndex(selectedIndex);
+  };
 
   const stopCameraPreview = () => {
     mediaStream?.getTracks().forEach((track) => track.stop());
@@ -235,7 +239,7 @@ const Images = ( {refId, refType} ) => {
             <Row>
               <Col>
               {(cameraOpened || file != null) && (
-                <div style={{ position: "relative", zIndex: 1000000000 }}>
+                <Card>
                   <h3>Camera Preview</h3>
                   <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
                   {cameraOpened && (                       
@@ -262,16 +266,16 @@ const Images = ( {refId, refType} ) => {
                       Recording
                     </label>
                   )}
-                </div>
+                </Card>
               )}
               </Col>
               <Col>
               {imageBlob && (
-                <div className="form-row">
-                  <div className="form-row">
+                <Row>
+                  <Col>
                     <h3>Loaded Content</h3>
-                  </div>
-                  <div className="form-row">
+                  </Col>
+                  <Col className="form-row">
                     <img
                       src={URL.createObjectURL(imageBlob)}
                       alt="Captured"
@@ -280,8 +284,8 @@ const Images = ( {refId, refType} ) => {
                     {videoBlob && (
                       <video controls width="300" src={URL.createObjectURL(videoBlob)}></video>
                     )}
-                  </div>
-                </div>
+                  </Col>
+                </Row>
               )}
               </Col>
             </Row>
@@ -293,20 +297,20 @@ const Images = ( {refId, refType} ) => {
       </Card>
       <Card>
       {selectedImages.length > 0 ? (
-        <Carousel slide={false} data-bs-theme="dark" pause="hover" controls={true}> 
+        <Container>
+        <Carousel activeIndex={activeIndex} onSelect={handleSelect} slide={false} interval={null} data-bs-theme="dark" controls={true}> 
           {selectedImages.map((image, index) => (
             <Carousel.Item>
               <Card className="bg-dark text-black">
                 <Card.Img src={image.url} alt={`Attachment ${index + 1}`} className="center-block" />
-                <Card.ImgOverlay>
-                  <Card.Title>{image.name}</Card.Title>
-                  <Card.Text>{image.description}</Card.Text>
-                </Card.ImgOverlay>
+                <Card.Title>{image.name}</Card.Title>
+                <Card.Text>{image.description}</Card.Text>
               </Card>
-                <Audio refId={image.id} refType={'attachment'} />
             </Carousel.Item>
           ))}
         </Carousel>
+          <Audio refId={selectedImages[activeIndex].id} refType={'attachment'} />
+        </Container>
       ) : (
         renderEmptyState("Create new to see it")
       )}
