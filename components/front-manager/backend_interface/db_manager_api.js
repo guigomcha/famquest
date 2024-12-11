@@ -24,7 +24,6 @@ export const fetchCoordinates = async () => {
     // Use response.json() to parse the JSON body
     const coordinates = await response.json();
 
-    // Assuming the API returns { coordinates: [{ lat: ..., lng: ... }] }
     // console.info("Fetched locations "+ JSON.stringify(coordinates))
     return coordinates;  // Returning the coordinates array
   } catch (error) {
