@@ -13,11 +13,15 @@ const debugLocations = [
 const debugSpots = [
   {
     "id": "1",
+    "name": "first",
+    "description": "first description",
     "location": { latitude: 37.31942002016036, longitude: -6.0678988062297465 }, 
     "refId": 0, 
   },
   {
     "id": "2",
+    "name": "first",
+    "description": "first description",
     "refId": 1, 
     "location": { latitude: 37.35942002016036, longitude: -6.0678988062297465 }, 
   }

@@ -5,7 +5,7 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 
 // This request the baseline info to create a new Spot in DB
-const SpotForm = ({ onSubmit }) => {
+const SpotForm = ({ initialData, onSubmit }) => {
   const [validated, setValidated] = useState(false);
 
   const handleSubmit = (event) => {
@@ -25,11 +25,19 @@ const SpotForm = ({ onSubmit }) => {
     console.info("this is :", formValues);
     setValidated(true);
     onSubmit( formValues );
+    console.info("should come back here");
+    
   };
 
 
   return (
     <Form noValidate onSubmit={handleSubmit}>
+      {initialData?.id && <Row className="mb-3">
+        <Form.Group as={Col} controlId="formGridId">
+          <Form.Label>Id (readOnly)</Form.Label>
+          <Form.Control type="text" name="id" defaultValue={initialData?.id} readOnly />
+        </Form.Group>
+      </Row>}
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formGridName">
           <Form.Label>Name</Form.Label>
@@ -37,7 +45,8 @@ const SpotForm = ({ onSubmit }) => {
             required
             type="text"
             name="name"
-            placeholder="Add a new name" 
+            placeholder="Add a new name"
+            defaultValue={initialData?.name} 
           />
         </Form.Group>
 
@@ -45,9 +54,12 @@ const SpotForm = ({ onSubmit }) => {
           <Form.Label>Description</Form.Label>
           <Form.Control 
             required
-            type="text"
+            type="textarea"
+            rows={10}
             name="description"
+            style={{ resize: "none", overflowY: "scroll", maxHeight: "150px" }}
             placeholder="Add an initial description" 
+            defaultValue={initialData?.description}
           />
         </Form.Group>
       </Row>

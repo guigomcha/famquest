@@ -115,11 +115,39 @@ export const uploadSpot = async (body) => {
       const data = await response.json();
       return data; // return the URL or data if needed
     } else {
-      console.error('Failed to upload the spot');
+      console.error('Failed to upload the spot:', response.text());
       return null;
     }
   } catch (error) {
     console.error('Error uploading spot:', error);
+    return null;
+  }
+};
+export const updateSpot = async (body) => {
+
+  const updateSpotObject = { ...body };
+  delete updateSpotObject.id;
+  try {
+    const response = await fetch(`${API_URL}/spot/${body.id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateSpotObject),
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data; // return the URL or data if needed
+    } else {
+      console.error('Failed to update the spot:', response.text());
+      return null;
+    }
+  } catch (error) {
+    console.error('Error updating spot:', error);
     return null;
   }
 };
