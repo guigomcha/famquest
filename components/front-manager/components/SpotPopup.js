@@ -4,7 +4,6 @@ import Audio from './Audio';
 import Card from 'react-bootstrap/Card';
 import { EditOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import SlideMenu from './SlideMenu';
 import SpotForm from './SpotForm';
 import { SpotFromForm } from '../backend_interface/components_helper';
 
@@ -27,9 +26,6 @@ const SpotPopup = ({ spot }) => {
           <Card.Text>{spot.description}</Card.Text>
           <Button trigger="click"
             type="default"
-            style={{
-              insetInlineEnd: 24,
-            }}
             icon={<EditOutlined />}
             onClick={handleRequestEdit}
             >Edit</Button>
@@ -42,10 +38,9 @@ const SpotPopup = ({ spot }) => {
       </Card> 
       <Card>
         <Card.Title>Images in the Spot</Card.Title> 
-        <Images refId={spot.id} refType={'spot'} />
+        <Images refId={spot.id} refType={'spot'} handleMenuChange={handleNestedRequestEdit}/>
       </Card> 
     </Card>
-    (component && <SlideMenu component={component}></SlideMenu> )
     </>   
   );
 };

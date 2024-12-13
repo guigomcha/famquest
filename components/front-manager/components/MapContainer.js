@@ -192,7 +192,7 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
         "Mask map": featureGroup.current
       };
       L.control.layers(null, overlays, { collapsed: false }).addTo(mapRef.current);
-      // mapRef.current.removeLayer(featureGroup.current);
+      mapRef.current.removeLayer(featureGroup.current);
     }
   
   }, []);
