@@ -55,7 +55,7 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
                         <audio controls src={audio.url} style={{width: "200px", height: "50px"}}></audio>
                     </Card.Body>
                     <Card.Footer>
-                        <Card.Title>{index}:{audio.name}</Card.Title>
+                        <Card.Title>{audio.name}</Card.Title>
                         <Card.Text>{audio.description}</Card.Text>
                     </Card.Footer>
                   </Card>

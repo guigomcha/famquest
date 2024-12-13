@@ -12,7 +12,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 
-const Images = ( {refId, refType} ) => {
+const Images = ( {refId, refType, handleMenuChange} ) => {
   const [imageBlob, setImageBlob] = useState(null);
   const [videoBlob, setVideoBlob] = useState(null);
   const [cameraOpened, setCameraOpened] = useState(false);
@@ -309,7 +309,10 @@ const Images = ( {refId, refType} ) => {
             </Carousel.Item>
           ))}
         </Carousel>
-          <Audio refId={selectedImages[activeIndex].id} refType={'attachment'} />
+        <Card>
+          <Card.Title>Audios in the image</Card.Title> 
+          <Audio refId={selectedImages[activeIndex].id} refType={'attachment'} handleMenuChange={handleMenuChange}/> 
+        </Card>
         </Container>
       ) : (
         renderEmptyState("Create new to see it")
