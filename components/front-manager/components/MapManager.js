@@ -29,10 +29,12 @@ const debugSpots = [
 
 // This is the main component of the Map which should connect with APIs to get the required info to feed it down
 const MapManager = () => {  
+  const [component, setComponent] = useState(null);
+  
+  // const [locations, setLocations] = useState(debugLocations)
+  // const [spots, setSpots] = useState(debugSpots)
   const [locations, setLocations] = useState([])
   const [spots, setSpots] = useState([])
-  const [component, setComponent] = useState(null);
-
   const { 
     isLoadingLocations, 
     errorLocations, 
