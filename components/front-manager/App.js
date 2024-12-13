@@ -91,8 +91,8 @@ export default function App() {
                   <Card.Body>
                     <Card.Title>Welcome to the FamQuest App</Card.Title>
                     <Card.Text>
-                    "FamQuest" is born as the 1-year birthday present for my first nephew. 
-                    A map guiding users on an adventure to uncover family memories and carry out a gamified quest to resolve adulting tasks.
+                    "FamQuest" is born as the 1-year-old birthday present for my first nephew. 
+                    It is a map which guides users on an adventure to uncover family memories and carry out a gamified quest to resolve adulting tasks.
                     <br></br>
                     In short, it is a location-based media-storage service with a few differences from other apps and keeping it very clear that <b>this is not another social network</b>. 
                     Instead, it aims to be more similar to a very private gamified family photo album and journal shared between family members:

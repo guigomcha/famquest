@@ -2,11 +2,20 @@ import React, { useState } from 'react';
 import '../css/UserInfo.css'; // Import your CSS for styling
 import { UserOutlined } from '@ant-design/icons';
 import { FloatButton } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
+import { Button } from 'antd';
+
 const UserInfo = ({ user, spots, tasks }) => {
   const [isTasksExpanded, setIsTasksExpanded] = useState(false);
 
   const toggleTasks = () => {
     setIsTasksExpanded(!isTasksExpanded);
+  };
+
+  const handleReload = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    window.location.reload();
   };
 
   const renderProgressBar = ({ title, visible, total }) => {
@@ -33,6 +42,11 @@ const UserInfo = ({ user, spots, tasks }) => {
       >
         <div className="user-info">
           <h3>User Profile</h3>
+          <Button trigger="click"
+          type="default"
+          icon={<ReloadOutlined />}
+          onClick={handleReload}
+          >Reload</Button>
           <p>Welcome, {user?.preferredUsername}!</p>
           <p>Email: {user?.email}</p>
           <h3>User Progress</h3>

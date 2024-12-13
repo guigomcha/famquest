@@ -13,11 +13,15 @@ const debugLocations = [
 const debugSpots = [
   {
     "id": "1",
+    "name": "first",
+    "description": "first description",
     "location": { latitude: 37.31942002016036, longitude: -6.0678988062297465 }, 
     "refId": 0, 
   },
   {
     "id": "2",
+    "name": "first",
+    "description": "first description",
     "refId": 1, 
     "location": { latitude: 37.35942002016036, longitude: -6.0678988062297465 }, 
   }
@@ -25,10 +29,12 @@ const debugSpots = [
 
 // This is the main component of the Map which should connect with APIs to get the required info to feed it down
 const MapManager = () => {  
+  const [component, setComponent] = useState(null);
+  
+  // const [locations, setLocations] = useState(debugLocations)
+  // const [spots, setSpots] = useState(debugSpots)
   const [locations, setLocations] = useState([])
   const [spots, setSpots] = useState([])
-  const [component, setComponent] = useState(null);
-
   const { 
     isLoadingLocations, 
     errorLocations, 

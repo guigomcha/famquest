@@ -6,7 +6,7 @@ import * as L from 'leaflet';
 import React, { useEffect, useRef, useState } from "react";
 import SpotForm from './SpotForm';
 import SpotPopup from './SpotPopup';
-import { CreateSpotFromForm } from '../backend_interface/components_helper';
+import { SpotFromForm } from '../backend_interface/components_helper';
 import { worldPolygon, uncoverFog, locationVisible } from '../backend_interface/fog_functions';
 
 const scale = 13;
@@ -59,7 +59,7 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
     if (e.target.data.componentType == "SpotPopup") {
       handleMenuChange(<SpotPopup spot={e.target.data} />);
     } else {
-      handleMenuChange(<SpotForm onSubmit={async (data) => CreateSpotFromForm(data, e.target.data)} />);
+      handleMenuChange(<SpotForm onSubmit={async (data) => SpotFromForm(data, e.target.data)} />);
     }
   };
 
@@ -192,7 +192,7 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
         "Mask map": featureGroup.current
       };
       L.control.layers(null, overlays, { collapsed: false }).addTo(mapRef.current);
-      // mapRef.current.removeLayer(featureGroup.current);
+      mapRef.current.removeLayer(featureGroup.current);
     }
   
   }, []);

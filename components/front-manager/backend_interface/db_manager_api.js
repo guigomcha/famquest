@@ -115,11 +115,40 @@ export const uploadSpot = async (body) => {
       const data = await response.json();
       return data; // return the URL or data if needed
     } else {
-      console.error('Failed to upload the spot');
+      console.error('Failed to upload the spot:', response.text());
       return null;
     }
   } catch (error) {
     console.error('Error uploading spot:', error);
+    return null;
+  }
+};
+
+export const updateSpot = async (body) => {
+
+  const updateSpotObject = { ...body };
+  delete updateSpotObject.id;
+  try {
+    const response = await fetch(`${API_URL}/spot/${body.id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateSpotObject),
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data; // return the URL or data if needed
+    } else {
+      console.error('Failed to update the spot:', response.text());
+      return null;
+    }
+  } catch (error) {
+    console.error('Error updating spot:', error);
     return null;
   }
 };
@@ -153,12 +182,8 @@ export const uploadLocation = async (body) => {
   }
 };
 
-
-export const uploadAttachment = async (data, name, description) => {
-  const formData = new FormData();
-  formData.append('name', name);
-  formData.append('description', description);
-
+export const uploadAttachment = async (data, formData) => {
+  console.info("Uploading attahment");
   if (data instanceof Blob) {
     // If it's a Blob (image from the camera or audio fromthe mic), append it with a filename of the right type
     if (name == "audio") {
@@ -191,6 +216,35 @@ export const uploadAttachment = async (data, name, description) => {
     }
   } catch (error) {
     console.error('Error uploading attachment:', error);
+    return null;
+  }
+};
+
+export const updateAttachment = async (body) => {
+
+  const updateAttachmentObject = { ...body };
+  delete updateAttachmentObject.id;
+  try {
+    const response = await fetch(`${API_URL}/attachment/${body.id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateAttachmentObject),
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data; // return the URL or data if needed
+    } else {
+      console.error('Failed to update the attachment:', response.text());
+      return null;
+    }
+  } catch (error) {
+    console.error('Error updating attachment:', error);
     return null;
   }
 };

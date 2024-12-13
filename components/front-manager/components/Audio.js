@@ -1,40 +1,27 @@
 import React, { useState, useRef, useEffect } from "react";
-import { uploadAttachment, addReferenceToAttachment, fetchAttachments } from '../backend_interface/db_manager_api';
+import { fetchAttachments } from '../backend_interface/db_manager_api';
 import {renderEmptyState} from '../utils/render_message';
 import Card from 'react-bootstrap/Card';
 import Carousel from 'react-bootstrap/Carousel';
-import Container from "react-bootstrap/esm/Container";
+import { Button } from 'antd';
+import { EditOutlined, AudioOutlined } from '@ant-design/icons';
+import AudioForm from './AudioForm';
 
-const Audio = ({ refId, refType }) => {
-  const [audioBlob, setAudioBlob] = useState(null);
-  const [audioOpened, setAudioOpened] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
-  const audioRecorder = useRef(null);
-  const [audioStream, setAudioStream] = useState(null);
+const Audio = ({ refId, refType, handleMenuChange }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
   const [selectedAudios, setSelectedAudios] = useState([]);
-
-  // Start recording audio
-  const toggleAudioRecording = async (e) => {
-    e.preventDefault();  // Prevent form submission
-    e.stopPropagation(); // Stop event propagation to parent form
-    setAudioOpened(!audioOpened);
-
-    // If already recording, stop the recording
-    if (audioOpened) {
-      audioRecorder.current?.stop();
-      audioStream?.getTracks().forEach((track) => track.stop());
-      return;
-    }
-
-    // Start recording audio
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const recorder = new MediaRecorder(stream);
-    audioRecorder.current = recorder;
-    setAudioStream(stream);
-
-    recorder.ondataavailable = (e) => setAudioBlob(e.data);
-    recorder.start();
+  
+  const handleSelect = (selectedIndex) => {
+    setActiveIndex(selectedIndex);
   };
+
+  const handleRequestNew = (e) => {
+    handleMenuChange(<AudioForm refId={refId} refType={refType} />);
+  }; 
+  
+  const handleRequestEdit = (e) => {
+    handleMenuChange(<AudioForm initialData={selectedAudios[activeIndex]} refId={refId} refType={refType} />); 
+  }; 
 
   const callFetchAttachmentsForSpot = async (refId, refType) => {
     setSelectedAudios([]); 
@@ -47,87 +34,52 @@ const Audio = ({ refId, refType }) => {
     });
   };
 
-  // Handle form submission and send audio file
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!audioBlob) {
-      setStatusMessage("Please record an audio first.");
-      return;
-    }
-
-    const attachment = await uploadAttachment(audioBlob, "default", "default");
-
-    if (attachment) {
-      // Add reference to current spot
-      await addReferenceToAttachment(attachment.id, refId, refType);
-      callFetchAttachmentsForSpot(refId, refType);
-    } else {
-      setStatusMessage("Unable to send audio.");
-    }
-    setAudioBlob('');
-    
-  };
-
   // fetch the attachments for this spot
   useEffect(() => {
     callFetchAttachmentsForSpot(refId, refType)
   }, [refId]);
-  return (
-    <Container>
-      <Card>
-      <h3>Record your audio</h3>
-        <button onClick={toggleAudioRecording}>
-          Start/Stop Audio Recording
-          {audioOpened && (
-            <div
-              style={{
-                backgroundColor: "red",
-                color: "white",
-                padding: "5px 10px",
-                borderRadius: "5px",
-                fontWeight: "bold",
-              }}
-            >
-              Recording
-            </div>
-          )}
-        </button>
-        {audioBlob && (
-          <audio controls src={URL.createObjectURL(audioBlob)}></audio>
-        )}
-      </Card>
-      <Card>
-        <button onClick={handleSubmit}>Upload Audio</button>
-        {statusMessage && <p>{statusMessage}</p>}
-      </Card>
-      <Card>
-      {selectedAudios.length > 0 ? (
-          <Carousel slide={false} data-bs-theme="dark" pause="hover" controls={true}> 
-          {selectedAudios.map((audio, index) => (
-            <Carousel.Item>
-              <Card className="bg-dark text-white">
-                <Card.Body style={{
-                        justifyContent: "center",
-                        alignItems: "center",
-                        margin: "auto",
-                    }}>
-                    <audio controls src={audio.url} style={{width: "200px", height: "50px"}}></audio>
-                </Card.Body>
-                <Card.Footer>
-                    <Card.Title>{index}:{audio.name}</Card.Title>
-                    <Card.Text>{audio.description}</Card.Text>
-                </Card.Footer>
-              </Card>
-            </Carousel.Item>
-          ))}
-        </Carousel>
-      ) : (
-        renderEmptyState("Create new to see it")
-      )}
-      </Card>
-    </Container>
 
+  return (
+      <>
+        <Card.Body>
+          {selectedAudios.length > 0 ? (
+              <Carousel activeIndex={activeIndex} onSelect={handleSelect} slide={false} interval={null} data-bs-theme="dark" controls={true}> 
+              {selectedAudios.map((audio, index) => (
+                <Carousel.Item>
+                  <Card className="bg-dark text-white">
+                    <Card.Body style={{
+                            justifyContent: "center",
+                            alignItems: "center",
+                            margin: "auto",
+                        }}>
+                        <audio controls src={audio.url} style={{width: "200px", height: "50px"}}></audio>
+                    </Card.Body>
+                    <Card.Footer>
+                        <Card.Title>{audio.name}</Card.Title>
+                        <Card.Text>{audio.description}</Card.Text>
+                    </Card.Footer>
+                  </Card>
+                </Carousel.Item>
+              ))}
+            </Carousel>
+          ) : (
+            renderEmptyState("Create new to see it")
+          )}
+        </Card.Body>
+        <Card.Footer>
+          <Button trigger="click"
+            type="default"
+            icon={<AudioOutlined />}
+            onClick={handleRequestNew}
+            >New</Button>
+
+          {selectedAudios.length > 0 && <Button trigger="click"
+            type="default"
+            icon={<EditOutlined />}
+            onClick={handleRequestEdit}
+            >Edit</Button>}
+        </Card.Footer>
+      </>
   );
 };
 
