@@ -22,10 +22,9 @@ const iconStyle = {
   iconAnchor: [12, 36],
 };
 
-const MapContainer = ( {locations, spots, handleMenuChange } ) => {
-  // const canvasRef = useRef(null);
+const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => {
   const mapRef = useRef(null);
-  const guilleSpotsGroup   = useRef(null);
+  const guilleSpotsGroup = useRef(null);
   const featureGroup = useRef(null);
   const locs = useRef(null);
   const loadedSpots = useRef(null);
@@ -116,6 +115,7 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'GuiGomcha FamQuest powered by OpenStreetMap',
       }).addTo(mapRef.current);
+      handleMapRef(mapRef);
       // // To support map inside of tab
       const resizeObserver = new ResizeObserver(() => {
         mapRef.current.invalidateSize();
@@ -165,27 +165,6 @@ const MapContainer = ( {locations, spots, handleMenuChange } ) => {
         sendBackComponent(data);
       }); 
       
-      // Get user location
-      mapRef.current.locate({setView: false, watch: true})
-            // Probably better to try to save the location if it does not exist something close and the get the markers
-            .on('locationfound', function(e){
-                var marker = L.marker([e.latitude, e.longitude], {
-                  icon: L.icon(iconStyle),
-                }).bindPopup('Your are here :)'); 
-                var circle = L.circle([e.latitude, e.longitude], Math.min(e.accuracy/2, 100), {
-                    weight: 1,
-                    color: 'blue',
-                    fillColor: '#cacaca',
-                    fillOpacity: 0.2
-                });
-                mapRef.current.addLayer(marker);
-                mapRef.current.addLayer(circle);
-            })
-           .on('locationerror', function(e){
-                console.info(e);
-                alert("Live location access denied.");
-            });
-
       // Create overlay controls
       const overlays = {
         "Spots": guilleSpotsGroup.current,

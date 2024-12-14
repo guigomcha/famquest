@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import '../css/UserInfo.css'; // Import your CSS for styling
+import React, { useState, useRef, useEffect } from 'react';
+import '../css/UserInfo.css'; 
+import * as L from 'leaflet';
 import { UserOutlined } from '@ant-design/icons';
 import { FloatButton } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 
-const UserInfo = ({ user, spots, tasks }) => {
+const UserInfo = ({ user, spots, tasks, mapRef }) => {
   const [isTasksExpanded, setIsTasksExpanded] = useState(false);
 
   const toggleTasks = () => {
@@ -29,6 +30,36 @@ const UserInfo = ({ user, spots, tasks }) => {
       </div>
     );
   };
+  useEffect(() => {
+    if (!mapRef.current) {
+      return;
+    } 
+    console.info("User mapRef: ", mapRef.current);
+    // Get user location
+    mapRef.current.locate({setView: false, watch: true})
+          // Probably better to try to save the location if it does not exist something close and the get the markers
+          .on('locationfound', function(e){
+              var marker = L.marker([e.latitude, e.longitude], {
+                icon: L.icon({
+                  iconUrl: 'assets/marker-icon.png',
+                  iconSize: [24, 36],
+                  iconAnchor: [12, 36],
+                }),
+              }).bindPopup('Your are here :)'); 
+              var circle = L.circle([e.latitude, e.longitude], Math.min(e.accuracy/2, 100), {
+                  weight: 1,
+                  color: 'blue',
+                  fillColor: '#light-blue',
+                  fillOpacity: 0.2
+              });
+              mapRef.current.addLayer(marker);
+              mapRef.current.addLayer(circle);
+          })
+         .on('locationerror', function(e){
+            // Replace with message
+          });
+  }, [mapRef.current]);
+  
 
   return (
     <>
