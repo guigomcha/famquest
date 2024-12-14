@@ -1,19 +1,19 @@
 import { View } from 'react-native';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools';
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import 'leaflet/dist/leaflet.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 
 
 import MapManager from './components/MapManager';
+import UserButton from './components/UserButton';
 import UserInfo from './components/UserInfo';
 import OAuth2 from './components/Oauth2';
 
@@ -35,17 +35,21 @@ const tasks = {
     technology: { visible: 1, total: 2 },
   },
 };
-const isLocal = false;
+const isLocal = true;
 
 export default function App() { 
   const [user, setUser] = useState(null);
   const [key, setKey] = useState('home');
+  const mapRef = useRef(null);
   const handleUserChange = (userInfo) => {
     setUser(userInfo); // Transfer data from compoennt to component
   };
+  const transferHandleMapRef = (map) => {
+    mapRef.current = map.current;
+  };
   
   const selectTab = (key) => {
-    if (key == "map") {
+    if (key == "map" || key == "user") {
       if (user || isLocal) {
         setKey(key);
       }
@@ -122,13 +126,18 @@ export default function App() {
           </Tab>
           <Tab eventKey="map" title="Map">
             <Container fluid>
-              <UserInfo user={user} spots={spots} tasks={tasks} />
               <QueryClientProvider client={queryClient}>
               <View >
-                <MapManager/>
+                <MapManager handleMapRef={transferHandleMapRef}/>
               </View>
+              <UserButton user={user} spots={spots} tasks={tasks} mapRef={mapRef}/>
               <ReactQueryDevtools initialIsOpen={true} />
               </QueryClientProvider>
+            </Container>
+          </Tab>
+          <Tab eventKey="user" title="User Info">
+            <Container fluid>
+              <UserInfo user={user} spots={spots} tasks={tasks} mapRef={mapRef}/>
             </Container>
           </Tab>
         </Tabs>

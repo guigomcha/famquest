@@ -28,11 +28,12 @@ const debugSpots = [
 ]
 
 // This is the main component of the Map which should connect with APIs to get the required info to feed it down
-const MapManager = () => {  
+const MapManager = ( {handleMapRef} ) => {  
   const [component, setComponent] = useState(null);
   
   // const [locations, setLocations] = useState(debugLocations)
   // const [spots, setSpots] = useState(debugSpots)
+
   const [locations, setLocations] = useState([])
   const [spots, setSpots] = useState([])
   const { 
@@ -63,9 +64,12 @@ const MapManager = () => {
   const handleMenuChange = (comp) => {
     setComponent(comp); // Trigger show slideMenu
   }; 
+  const transferHandleMapRef = (map) => {
+    handleMapRef(map); 
+  }; 
   return (
     <div>
-      <MapContainer locations={locations} spots={spots} handleMenuChange={handleMenuChange}/>
+      <MapContainer locations={locations} spots={spots} handleMenuChange={handleMenuChange} handleMapRef={transferHandleMapRef}/>
         {component && <SlideMenu component={component} ></SlideMenu>}
     </div>
   );
