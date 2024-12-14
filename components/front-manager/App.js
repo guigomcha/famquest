@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { QueryClient, QueryClientProvider, useQuery } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools';
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import 'leaflet/dist/leaflet.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Container from 'react-bootstrap/Container';
@@ -40,8 +40,12 @@ const isLocal = false;
 export default function App() { 
   const [user, setUser] = useState(null);
   const [key, setKey] = useState('home');
+  const mapRef = useRef(null);
   const handleUserChange = (userInfo) => {
     setUser(userInfo); // Transfer data from compoennt to component
+  };
+  const transferHandleMapRef = (map) => {
+    mapRef.current = map.current;
   };
   
   const selectTab = (key) => {
@@ -122,11 +126,11 @@ export default function App() {
           </Tab>
           <Tab eventKey="map" title="Map">
             <Container fluid>
-              <UserInfo user={user} spots={spots} tasks={tasks} />
               <QueryClientProvider client={queryClient}>
               <View >
-                <MapManager/>
+                <MapManager handleMapRef={transferHandleMapRef}/>
               </View>
+              <UserInfo user={user} spots={spots} tasks={tasks} mapRef={mapRef}/>
               <ReactQueryDevtools initialIsOpen={true} />
               </QueryClientProvider>
             </Container>

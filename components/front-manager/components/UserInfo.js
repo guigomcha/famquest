@@ -1,7 +1,4 @@
-import React, { useState } from 'react';
-import '../css/UserInfo.css'; // Import your CSS for styling
 import React, { useState, useRef, useEffect } from 'react';
-import '../css/UserInfo.css'; 
 import * as L from 'leaflet';
 import { message, Space } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
@@ -9,7 +6,7 @@ import { FloatButton } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 
-const UserInfo = ({ user, spots, tasks }) => {
+const UserInfo = ({ user, spots, tasks, mapRef }) => {
   const [isTasksExpanded, setIsTasksExpanded] = useState(false);
   const userLocationsLayer = useRef(null);
   const [messageApi, contextHolder] = message.useMessage();
