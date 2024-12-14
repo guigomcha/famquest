@@ -7,7 +7,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
@@ -35,7 +34,7 @@ const tasks = {
     technology: { visible: 1, total: 2 },
   },
 };
-const isLocal = false;
+const isLocal = true;
 
 export default function App() { 
   const [user, setUser] = useState(null);

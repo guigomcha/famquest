@@ -1,19 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import * as L from 'leaflet';
 import { message, Space } from 'antd';
+import Card from 'react-bootstrap/Card';
 import { UserOutlined } from '@ant-design/icons';
 import { FloatButton } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
+import { Flex, Progress } from 'antd';
 
 const UserInfo = ({ user, spots, tasks, mapRef }) => {
-  const [isTasksExpanded, setIsTasksExpanded] = useState(false);
   const userLocationsLayer = useRef(null);
   const [messageApi, contextHolder] = message.useMessage();
-
-  const toggleTasks = () => {
-    setIsTasksExpanded(!isTasksExpanded);
-  };
 
   const handleReload = (event) => {
     event.preventDefault();
@@ -28,17 +25,10 @@ const UserInfo = ({ user, spots, tasks, mapRef }) => {
     });
   };
 
-  const renderProgressBar = ({ title, visible, total }) => {
-    const progress = (visible / total) * 100 || 0; // Calculate progress
-    return (
-      <div className="progress-bar" key={title}>
-        <label>{title}: {visible}/{total}</label>
-        <div className="progress">
-          <div className="progress-fill" style={{ width: `${progress}%` }}></div>
-        </div>
-      </div>
-    );
+  const progressBarPercentage = ({ visible, total }) => {
+    return (visible / total) * 100 || 0; // Calculate progress
   };
+
   useEffect(() => {
     if (!mapRef.current) {
       return;
@@ -93,46 +83,42 @@ const UserInfo = ({ user, spots, tasks, mapRef }) => {
       <FloatButton.Group
         trigger="click"
         type="primary"
-        style={{
-          insetInlineEnd: 24,
-        }}
         icon={<UserOutlined />}
+        tooltip={<div>User Info</div>}
       >
-        <div className="user-info">
-          <h3>User Profile</h3>
-          <Button trigger="click"
-            type="default"
-            icon={<ReloadOutlined />}
-            onClick={handleReload}
-          >Reload</Button>
-          <p>Welcome, {user?.preferredUsername}!</p>
-          <p>Email: {user?.email}</p>
-          <h3>User Progress</h3>
-          {renderProgressBar(spots)}
-          <div className="progress-bar">
-            <label onClick={toggleTasks} className="collapsible-label">
-              Tasks: {tasks.visible}/{tasks.total} {isTasksExpanded ? '▼' : '▲'}
-            </label>
-            <div className="progress">
-              <div className="progress-fill" style={{ width: `${(tasks.visible / tasks.total) * 100 || 0}%` }}></div>
-            </div>
-            {isTasksExpanded && (
-              <div className="subtask-container">
-                {renderProgressBar({ title: 'Movies', visible: tasks.subtasks.movies.visible, total: tasks.subtasks.movies.total })}
-                {renderProgressBar({ title: 'Adulting', visible: tasks.subtasks.adulting.visible, total: tasks.subtasks.adulting.total })}
-                {renderProgressBar({ title: 'Technology', visible: tasks.subtasks.technology.visible, total: tasks.subtasks.technology.total })}
-              </div>
-            )}
-          </div>
-          <div className="progress-bar">
-            <label>Te falta calle</label>
-            <div className="progress">
-              <div className="progress-fill" style={{ width: '0%' }}></div>
-            </div>
-          </div>
-  
-        </div>
-      </FloatButton.Group>
+        <Card style={{
+          position: "fixed",
+          bottom: "40px",
+          right: "70px",
+          border: "1px solid #ddd",
+          padding: "15px",
+          width: "250px",
+        }}>
+          <Card.Title>User Profile</Card.Title>
+          <Card.Body>
+            <Card.Text>Welcome, {user?.preferredUsername}!</Card.Text>
+            <Card.Text>Email: {user?.email}</Card.Text>
+            <Flex
+              vertical
+              gap="small"
+              style={{
+                width: 180,
+              }}
+            >
+              <Progress percent={progressBarPercentage(tasks.visible, tasks.total)} size="small" status="active" />
+              <Progress percent={40} size="small" status="active" />
+              <Progress percent={100} size="small" status="active" />
+            </Flex>
+          </Card.Body>
+          <Card.Footer>
+            <Button trigger="click"
+              type="default"
+              icon={<ReloadOutlined />}
+              onClick={handleReload}
+            >Reload</Button>
+          </Card.Footer>
+        </Card>
+       </FloatButton.Group>
     </>
   );
 };
