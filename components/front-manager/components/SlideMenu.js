@@ -58,6 +58,9 @@ const SlideMenu = ({ component }) => {
           onMouseDown={startDragging}
           onTouchStart={startDragging} // Handle touch interactions
           style={{
+            position: "sticky", // Keeps it floating at the top of the Drawer
+            top: 0, // Adjust as needed for placement
+            zIndex: 10, // Ensures it stays above content
             height: "15px",
             cursor: "row-resize",
             width: "100%",
