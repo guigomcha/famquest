@@ -13,6 +13,7 @@ import Tabs from 'react-bootstrap/Tabs';
 
 
 import MapManager from './components/MapManager';
+import UserButton from './components/UserButton';
 import UserInfo from './components/UserInfo';
 import OAuth2 from './components/Oauth2';
 
@@ -48,7 +49,7 @@ export default function App() {
   };
   
   const selectTab = (key) => {
-    if (key == "map") {
+    if (key == "map" || key == "user") {
       if (user || isLocal) {
         setKey(key);
       }
@@ -129,9 +130,14 @@ export default function App() {
               <View >
                 <MapManager handleMapRef={transferHandleMapRef}/>
               </View>
-              <UserInfo user={user} spots={spots} tasks={tasks} mapRef={mapRef}/>
+              <UserButton user={user} spots={spots} tasks={tasks} mapRef={mapRef}/>
               <ReactQueryDevtools initialIsOpen={true} />
               </QueryClientProvider>
+            </Container>
+          </Tab>
+          <Tab eventKey="user" title="User Info">
+            <Container fluid>
+              <UserInfo user={user} spots={spots} tasks={tasks} mapRef={mapRef}/>
             </Container>
           </Tab>
         </Tabs>

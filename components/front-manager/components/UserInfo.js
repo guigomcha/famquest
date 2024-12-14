@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import * as L from 'leaflet';
-import { message, Space } from 'antd';
+import { message } from 'antd';
 import Card from 'react-bootstrap/Card';
-import { UserOutlined } from '@ant-design/icons';
-import { FloatButton } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { Flex, Progress } from 'antd';
@@ -80,45 +78,38 @@ const UserInfo = ({ user, spots, tasks, mapRef }) => {
   return (
     <>
       {contextHolder}
-      <FloatButton.Group
-        trigger="click"
-        type="primary"
-        icon={<UserOutlined />}
-        tooltip={<div>User Info</div>}
-      >
-        <Card style={{
-          position: "fixed",
-          bottom: "40px",
-          right: "70px",
-          border: "1px solid #ddd",
-          padding: "15px",
-          width: "250px",
-        }}>
-          <Card.Title>User Profile</Card.Title>
-          <Card.Body>
-            <Card.Text>Welcome, {user?.preferredUsername}!</Card.Text>
-            <Card.Text>Email: {user?.email}</Card.Text>
-            <Flex
-              vertical
-              gap="small"
-              style={{
-                width: 180,
-              }}
-            >
-              <Progress percent={progressBarPercentage(tasks.visible, tasks.total)} size="small" status="active" />
-              <Progress percent={40} size="small" status="active" />
-              <Progress percent={100} size="small" status="active" />
-            </Flex>
-          </Card.Body>
-          <Card.Footer>
-            <Button trigger="click"
-              type="default"
-              icon={<ReloadOutlined />}
-              onClick={handleReload}
-            >Reload</Button>
-          </Card.Footer>
-        </Card>
-       </FloatButton.Group>
+      <Card style={{
+        position: "fixed",
+        bottom: "40px",
+        right: "70px",
+        border: "1px solid #ddd",
+        padding: "15px",
+        width: "250px",
+      }}>
+        <Card.Title>User Profile</Card.Title>
+        <Card.Body>
+          <Card.Text>Welcome, {user?.preferredUsername}!</Card.Text>
+          <Card.Text>Email: {user?.email}</Card.Text>
+          <Flex
+            vertical
+            gap="small"
+            style={{
+              width: 180,
+            }}
+          >
+            <Progress percent={progressBarPercentage(tasks.visible, tasks.total)} size="small" status="active" />
+            <Progress percent={40} size="small" status="active" />
+            <Progress percent={100} size="small" status="active" />
+          </Flex>
+        </Card.Body>
+        <Card.Footer>
+          <Button trigger="click"
+            type="default"
+            icon={<ReloadOutlined />}
+            onClick={handleReload}
+          >Reload</Button>
+        </Card.Footer>
+      </Card>
     </>
   );
 };

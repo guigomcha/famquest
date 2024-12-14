@@ -33,6 +33,7 @@ const MapManager = ( {handleMapRef} ) => {
   
   // const [locations, setLocations] = useState(debugLocations)
   // const [spots, setSpots] = useState(debugSpots)
+
   const [locations, setLocations] = useState([])
   const [spots, setSpots] = useState([])
   const { 
