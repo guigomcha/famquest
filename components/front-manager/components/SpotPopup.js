@@ -6,6 +6,7 @@ import { EditOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import SpotForm from './SpotForm';
 import { SpotFromForm } from '../backend_interface/components_helper';
+import SlideMenu from './SlideMenu';
 
 const SpotPopup = ({ spot }) => {
   const [component, setComponent] = useState(null);
@@ -41,6 +42,7 @@ const SpotPopup = ({ spot }) => {
         <Images refId={spot.id} refType={'spot'} handleMenuChange={handleNestedRequestEdit}/>
       </Card> 
     </Card>
+    {component && <SlideMenu component={component} ></SlideMenu>}
     </>   
   );
 };
