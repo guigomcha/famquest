@@ -31,6 +31,7 @@ export const fetchCoordinates = async () => {
     return [];
   }
 };
+
 export const fetchSpots = async () => {
   try {
     const response = await fetch(`${API_URL}/spot`, {
@@ -95,7 +96,6 @@ export const addLocationToSpot = async (spot) => {
   //console.info(spot)
   return spot; // Combine original spot with additional data
 };
-
 
 export const uploadSpot = async (body) => {
 
