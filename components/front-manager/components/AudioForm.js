@@ -7,7 +7,7 @@ import { Spin, Alert } from 'antd';
 import { uploadAttachment, addReferenceToAttachment, updateAttachment } from '../backend_interface/db_manager_api';
 import '../css/classes.css';
 
-const AudioForm = ({ initialData, refId, refType }) => {
+const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioOpened, setAudioOpened] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
@@ -88,7 +88,7 @@ const AudioForm = ({ initialData, refId, refType }) => {
     }
     setAudioBlob('');
     setIsLoading(false);
-    
+    handledFinished("done");
   };
   
   return (

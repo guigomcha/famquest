@@ -16,11 +16,11 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
   };
 
   const handleRequestNew = (e) => {
-    handleMenuChange(<AudioForm refId={refId} refType={refType} />);
+    handleMenuChange(<AudioForm refId={refId} refType={refType} handledFinished={handleMenuChange}/>);
   }; 
   
   const handleRequestEdit = (e) => {
-    handleMenuChange(<AudioForm initialData={selectedAudios[activeIndex]} refId={refId} refType={refType} />); 
+    handleMenuChange(<AudioForm initialData={selectedAudios[activeIndex]} refId={refId} refType={refType} handledFinished={handleMenuChange}/>); 
   }; 
 
   const callFetchAttachmentsForSpot = async (refId, refType) => {

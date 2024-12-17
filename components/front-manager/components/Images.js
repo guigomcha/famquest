@@ -18,11 +18,11 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
   };
 
   const handleRequestNew = (e) => {
-    handleMenuChange(<ImagesForm refId={refId} refType={refType} />);
+    handleMenuChange(<ImagesForm refId={refId} refType={refType} handledFinished={handleMenuChange}/>);
   }; 
   
   const handleRequestEdit = (e) => {
-    handleMenuChange(<ImagesForm initialData={selectedImages[activeIndex]} refId={refId} refType={refType} />); 
+    handleMenuChange(<ImagesForm initialData={selectedImages[activeIndex]} refId={refId} refType={refType} handledFinished={handleMenuChange}/>); 
   }; 
  
   const callFetchAttachmentsForSpot = async (refId, refType) => {

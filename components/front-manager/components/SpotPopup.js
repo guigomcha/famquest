@@ -11,10 +11,14 @@ import SlideMenu from './SlideMenu';
 const SpotPopup = ({ spot }) => {
   const [component, setComponent] = useState(null);
   const handleRequestEdit = (e) => {
-    setComponent(<SpotForm initialData={spot} onSubmit={async (data) => SpotFromForm(data, e.target.data)} />); // Trigger show slideMenu
+    setComponent(<SpotForm initialData={spot} onSubmit={async (data) => SpotFromForm(data, e.target.data)} handledFinished={handleNestedRequestEdit}/>); // Trigger show slideMenu
   }; 
   const handleNestedRequestEdit = (comp) => {
-    setComponent(comp); // Trigger show slideMenu
+    if (comp == "done"){
+      setComponent(null);  
+    } else {
+      setComponent(comp); // Trigger show slideMenu
+    }
   }; 
 
   return (
