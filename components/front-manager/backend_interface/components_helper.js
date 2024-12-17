@@ -5,7 +5,7 @@ export async function SpotFromForm(data, latlng) {
   if (data?.id) {
     const spotDb = await updateSpot(data);
     console.info("Received response put: ", spotDb);
-    window.location.reload();
+    // window.location.reload();
     return;
   }
   // Add to DB
@@ -20,7 +20,7 @@ export async function SpotFromForm(data, latlng) {
     const spotDb = await uploadSpot(data);
     if (spotDb) {
       await addReferenceToLocation(locationDb.id, spotDb.id, "spot");    
-      window.location.reload();
+      // window.location.reload();
     }
   }    
 };

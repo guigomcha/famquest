@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { uploadAttachment, updateAttachment, addReferenceToAttachment } from '../backend_interface/db_manager_api';
+import '../css/classes.css';
 import Form from 'react-bootstrap/Form';
 import { CameraOutlined, VideoCameraAddOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
@@ -8,6 +9,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
+import { Spin, Alert } from 'antd';
 
 const ImagesForm = ( {initialData, refId, refType} ) => {
   const [imageBlob, setImageBlob] = useState(null);
@@ -20,7 +22,7 @@ const ImagesForm = ( {initialData, refId, refType} ) => {
   const videoRef = useRef(null); // For real-time preview
   const canvasRef = useRef(null); // To capture still images
   const cameraRef = useRef(null); // To keep track of the camera stream
-
+  const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState(null);
 
   const stopCameraPreview = () => {
@@ -119,11 +121,13 @@ const ImagesForm = ( {initialData, refId, refType} ) => {
   };
 
   const handleSubmit = async (event) => {
+    setIsLoading(true);
     event.preventDefault();
     event.stopPropagation();
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
       console.info("not valid");
+      setIsLoading(false);
       return;
     }
     
@@ -146,27 +150,38 @@ const ImagesForm = ( {initialData, refId, refType} ) => {
       if (!attachment) {
         console.info("error updating attachment");
       }
-      console.info("Request sent: ", attachment)
+      console.info("Updated: ", attachment)
+      setIsLoading(false);
       return;
     }
     console.info("new image to be sent")
     if (!dataToUpload) {
       setStatusMessage("Please record an image first.");
+      setIsLoading(false);
       return;
     }
     const attachment = await uploadAttachment(dataToUpload, formDataObj);
-
+    
     if (attachment) {
       // Add reference to current spot
       await addReferenceToAttachment(attachment.id, refId, refType);
     } else {
       console.info("Unable to send image.");
     }
-    setFile('');
 
+    setFile('');
+    console.info("isLoading is: ", isLoading);
+    await new Promise(r => setTimeout(r, 5000));
+    setIsLoading(false);
+    
   };
-  
   return (
+    <>
+      {(isLoading) && (
+        <div className="spin-overlay">
+          <Spin tip="Loading"></Spin>
+        </div>
+      )}
       <Form noValidate onSubmit={handleSubmit} encType="multipart/form-data">
         {initialData?.id && <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridId">
@@ -298,6 +313,7 @@ const ImagesForm = ( {initialData, refId, refType} ) => {
         Submit
       </Button>
       </Form>
+    </>
   );
 };
 export default ImagesForm;

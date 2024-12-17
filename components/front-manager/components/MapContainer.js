@@ -8,6 +8,7 @@ import SpotForm from './SpotForm';
 import SpotPopup from './SpotPopup';
 import { SpotFromForm } from '../backend_interface/components_helper';
 import { worldPolygon, uncoverFog, locationVisible } from '../backend_interface/fog_functions';
+import { Spin, Alert } from 'antd';
 
 const scale = 13;
 
@@ -31,6 +32,7 @@ const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => 
   const markers = useRef(null);
   const fogLayer = useRef(null);
   const fogGeoJson = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const prepareMap = () => {
     // After the map is loaded, reveal the area around each marker
@@ -109,7 +111,8 @@ const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => 
   // Create and configure the map
   useEffect(() => {
     if (!mapRef.current) {
-      console.log("Creating the map");
+      setIsLoading(true);
+      console.log("Creating the map:", isLoading);
       const mapDiv = document.getElementById("mapId");
       mapRef.current = L.map(mapDiv).setView([defaultCenter.lat, defaultCenter.lng], scale);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -146,8 +149,6 @@ const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => 
         });
         
       }
-
-
       // Right click to create a new spot
       mapRef.current.on('contextmenu', (e) => {
         // check if the location is within the fog or not
@@ -172,6 +173,8 @@ const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => 
       };
       L.control.layers(null, overlays, { collapsed: false }).addTo(mapRef.current);
       mapRef.current.removeLayer(featureGroup.current);
+      setIsLoading(false);
+      console.log("created the map:", isLoading);
     }
   
   }, []);
@@ -195,9 +198,9 @@ const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => 
     displaySpots();      
   }, [spots]);
 
-
   return (
     <div style={{ position: "relative", width: "100%", height: "100%"}}>
+      {(isLoading) &&<Spin>Loading</Spin>}
       <div id="mapId" style={{ height: '100vh', width: '100vw' }}>
       </div>
     </div>
