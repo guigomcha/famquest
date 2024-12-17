@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { uploadAttachment, addReferenceToAttachment, updateAttachment } from '../backend_interface/db_manager_api';
 import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
+import { Spin, Alert } from 'antd';
+import { uploadAttachment, addReferenceToAttachment, updateAttachment } from '../backend_interface/db_manager_api';
+import '../css/classes.css';
 
 const AudioForm = ({ initialData, refId, refType }) => {
   const [audioBlob, setAudioBlob] = useState(null);
@@ -11,6 +13,7 @@ const AudioForm = ({ initialData, refId, refType }) => {
   const [statusMessage, setStatusMessage] = useState("");
   const audioRecorder = useRef(null);
   const [audioStream, setAudioStream] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Start recording audio
   const toggleAudioRecording = async (e) => {
@@ -38,11 +41,13 @@ const AudioForm = ({ initialData, refId, refType }) => {
 
   // Handle form submission and send audio file
   const handleSubmit = async (event) => {
+    setIsLoading(true);
     const form = event.currentTarget;
     event.preventDefault();
     event.stopPropagation();
     if (form.checkValidity() === false) {
       console.info("not valid");
+      setIsLoading(false);
       return;
     }
     console.info("submit handled: ", form);
@@ -63,16 +68,18 @@ const AudioForm = ({ initialData, refId, refType }) => {
       if (!attachment) {
         console.info("error updating attachment");
       }
-      console.info("Request sent: ", attachment)
+      console.info("Updated: ", attachment)
+      setIsLoading(false);
       return;
     }
     console.info("new audio to be sent")
     if (!audioBlob) {
       setStatusMessage("Please record an audio first.");
+      setIsLoading(false);
       return;
     }
     const attachment = await uploadAttachment(audioBlob, formDataObj);
-
+    
     if (attachment) {
       // Add reference to current spot
       await addReferenceToAttachment(attachment.id, refId, refType);
@@ -80,68 +87,75 @@ const AudioForm = ({ initialData, refId, refType }) => {
       setStatusMessage("Unable to send audio.");
     }
     setAudioBlob('');
+    setIsLoading(false);
     
   };
-
+  
   return (
-    <Form noValidate onSubmit={handleSubmit}>
-    {initialData?.id && <Row className="mb-3">
-      <Form.Group as={Col} controlId="formGridId">
-        <Form.Label>Id (readOnly)</Form.Label>
-        <Form.Control type="text" name="id" defaultValue={initialData?.id} readOnly />
-      </Form.Group>
-    </Row>}
-    <Row className="mb-3">
-        <Form.Group as={Col} controlId="formGridName">
-          <Form.Label>Name</Form.Label>
-          <Form.Control 
-            required
-            type="text"
-            name="name"
-            placeholder="Add a new name"
-            defaultValue={initialData?.name} 
-          />
+    <>
+      {(isLoading) && (
+        <div className="spin-overlay">
+          <Spin tip="Loading"></Spin>
+        </div>
+      )}
+      <Form noValidate onSubmit={handleSubmit}>
+      {initialData?.id && <Row className="mb-3">
+        <Form.Group as={Col} controlId="formGridId">
+          <Form.Label>Id (readOnly)</Form.Label>
+          <Form.Control type="text" name="id" defaultValue={initialData?.id} readOnly />
         </Form.Group>
+      </Row>}
+      <Row className="mb-3">
+          <Form.Group as={Col} controlId="formGridName">
+            <Form.Label>Name</Form.Label>
+            <Form.Control 
+              required
+              type="text"
+              name="name"
+              placeholder="Add a new name"
+              defaultValue={initialData?.name} 
+            />
+          </Form.Group>
 
-        <Form.Group as={Col} controlId="formGridDescription">
-          <Form.Label>Description</Form.Label>
-          <Form.Control 
-            required
-            type="textarea"
-            rows={10}
-            name="description"
-            style={{ resize: "none", overflowY: "scroll", maxHeight: "150px" }}
-            placeholder="Add an initial description" 
-            defaultValue={initialData?.description}
-          />
-        </Form.Group>
-      </Row>
-      <Row>
-        { !initialData?.id &&
-        <Button onClick={toggleAudioRecording} variant="primary">
-            Start/Stop Audio Recording
-            {audioOpened && (
-                <div
-                  style={{
-                    backgroundColor: "red",
-                    color: "white",
-                    padding: "5px 10px",
-                    borderRadius: "5px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Recording
-                </div>
-              )}
-            </Button>}          
-            {audioBlob && (
-              <audio controls src={URL.createObjectURL(audioBlob)}></audio>
-            )}
+          <Form.Group as={Col} controlId="formGridDescription">
+            <Form.Label>Description</Form.Label>
+            <Form.Control 
+              required
+              type="textarea"
+              rows={10}
+              name="description"
+              style={{ resize: "none", overflowY: "scroll", maxHeight: "150px" }}
+              placeholder="Add an initial description" 
+              defaultValue={initialData?.description}
+            />
+          </Form.Group>
         </Row>
-        <Button variant="primary" type="submit">{initialData?.id ? ("Update Audio") : ("Upload Audio")}</Button>
-        {statusMessage && <p>{statusMessage}</p>}
-    </Form>
-    
+        <Row>
+          { !initialData?.id &&
+          <Button onClick={toggleAudioRecording} variant="primary">
+              Start/Stop Audio Recording
+              {audioOpened && (
+                  <div
+                    style={{
+                      backgroundColor: "red",
+                      color: "white",
+                      padding: "5px 10px",
+                      borderRadius: "5px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Recording
+                  </div>
+                )}
+              </Button>}          
+              {audioBlob && (
+                <audio controls src={URL.createObjectURL(audioBlob)}></audio>
+              )}
+          </Row>
+          <Button variant="primary" type="submit">{initialData?.id ? ("Update Audio") : ("Upload Audio")}</Button>
+          {statusMessage && <p>{statusMessage}</p>}
+      </Form>
+    </>
   );
 };
 

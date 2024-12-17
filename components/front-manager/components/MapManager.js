@@ -3,8 +3,10 @@ import 'leaflet/dist/leaflet.css';
 import MapContainer from './MapContainer';
 import SlideMenu from './SlideMenu';
 import React, { useEffect, useRef, useState } from "react";
-import { fetchCoordinates, fetchAndPrepareSpots } from "../backend_interface/db_manager_api";
 import { useQuery } from 'react-query'
+import { Spin, Alert } from 'antd';
+import { fetchCoordinates, fetchAndPrepareSpots } from "../backend_interface/db_manager_api";
+import '../css/classes.css';
 
 const debugLocations = [
   { latitude: 37.321355840986044, longitude: -6.056325106677641 }, // Sample coordinates (Blue Padel)
@@ -37,41 +39,68 @@ const MapManager = ( {handleMapRef} ) => {
   const [locations, setLocations] = useState([])
   const [spots, setSpots] = useState([])
   const { 
-    isLoadingLocations, 
-    errorLocations, 
+    isLoading: isLoadingLocations, 
+    error: errorLocations , 
     data: dataLocations 
   } = useQuery('locations', fetchCoordinates, {
     keepPreviousData: true,
     onSettled: (data, error) => {
+      if (error) {
+        console.info("error fetching locations", error);
+      }
       setLocations(data);
     }
   });
   const { 
-    isLoadingSpots, 
-    errorSpots, 
+    isLoading: isLoadingSpots, 
+    error: errorSpots, 
     data: dataSpots 
   } = useQuery('spots', fetchAndPrepareSpots, {
     keepPreviousData: true,
     onSettled: (data, error) => {
+      if (error) {
+        console.info("error fetching spots", error);
+      }
       setSpots(data);
     }
   });
-  if (isLoadingLocations || isLoadingSpots ) {
-    return <p>Loading...</p>;
-  } else if (errorLocations || errorSpots ) {
-    return <p>Error Location {errorLocations.message}<br>Error spots {errorSpots.message}</br></p>;
-  }
   const handleMenuChange = (comp) => {
     setComponent(comp); // Trigger show slideMenu
   }; 
   const transferHandleMapRef = (map) => {
     handleMapRef(map); 
   }; 
+  if (isLoadingLocations || isLoadingSpots){
+    return (<Spin>Loading</Spin>);
+  } else if (errorLocations || errorSpots){
+    return (<Alert
+      message="Unable to load spots or locations."
+      description="check console logs"
+      type="error"
+    /> );
+  } 
+  
   return (
-    <div>
-      <MapContainer locations={locations} spots={spots} handleMenuChange={handleMenuChange} handleMapRef={transferHandleMapRef}/>
+    <>
+      {(isLoadingLocations || isLoadingSpots) && (
+        <div className="spin-overlay">
+        <Spin tip="Loading"></Spin>
+        </div>
+      )}
+      {(errorLocations || errorSpots) && (
+        <div className="spin-overlay">
+          <Alert
+            message="Unable to load spots or locations."
+            description="check console logs"
+            type="error"
+          />  
+        </div>
+      )}
+      <div>
+        <MapContainer locations={locations} spots={spots} handleMenuChange={handleMenuChange} handleMapRef={transferHandleMapRef}/>
         {component && <SlideMenu component={component} ></SlideMenu>}
-    </div>
+      </div>
+    </>
   );
 };
   
