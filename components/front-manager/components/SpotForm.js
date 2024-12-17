@@ -7,7 +7,7 @@ import { Spin, Alert } from 'antd';
 import '../css/classes.css';
 
 // This request the baseline info to create a new Spot in DB
-const SpotForm = ({ initialData, onSubmit }) => {
+const SpotForm = ({ initialData, onSubmit, handledFinished }) => {
   const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -32,6 +32,7 @@ const SpotForm = ({ initialData, onSubmit }) => {
     onSubmit( formValues );
     console.info("should come back here");
     setIsLoading(false);
+    handledFinished("done");
   };
  
   return (

@@ -15,12 +15,18 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
     setActiveIndex(selectedIndex);
   };
 
+  const handledFinished = (msg) => {
+    callFetchAttachmentsForSpot(refId, refType);
+    handleMenuChange(msg);
+  };
+
+
   const handleRequestNew = (e) => {
-    handleMenuChange(<AudioForm refId={refId} refType={refType} />);
+    handleMenuChange(<AudioForm refId={refId} refType={refType} handledFinished={handledFinished}/>);
   }; 
   
   const handleRequestEdit = (e) => {
-    handleMenuChange(<AudioForm initialData={selectedAudios[activeIndex]} refId={refId} refType={refType} />); 
+    handleMenuChange(<AudioForm initialData={selectedAudios[activeIndex]} refId={refId} refType={refType} handledFinished={handledFinished}/>); 
   }; 
 
   const callFetchAttachmentsForSpot = async (refId, refType) => {

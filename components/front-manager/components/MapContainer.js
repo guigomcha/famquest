@@ -57,10 +57,12 @@ const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => 
   };
   
   const sendBackComponent = (e) => {
-    if (e.target.data.componentType == "SpotPopup") {
+    if (e == "done") {
+      handleMenuChange(null);
+    } else if (e?.target.data.componentType == "SpotPopup") {
       handleMenuChange(<SpotPopup spot={e.target.data} />);
     } else {
-      handleMenuChange(<SpotForm onSubmit={async (data) => SpotFromForm(data, e.target.data)} />);
+      handleMenuChange(<SpotForm onSubmit={async (data) => SpotFromForm(data, e.target.data)} handledFinished={sendBackComponent}/>);
     }
   };
 

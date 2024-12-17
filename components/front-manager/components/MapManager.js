@@ -70,15 +70,6 @@ const MapManager = ( {handleMapRef} ) => {
   const transferHandleMapRef = (map) => {
     handleMapRef(map); 
   }; 
-  if (isLoadingLocations || isLoadingSpots){
-    return (<Spin>Loading</Spin>);
-  } else if (errorLocations || errorSpots){
-    return (<Alert
-      message="Unable to load spots or locations."
-      description="check console logs"
-      type="error"
-    /> );
-  } 
   
   return (
     <>

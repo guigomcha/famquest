@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
-import { uploadAttachment, updateAttachment, addReferenceToAttachment } from '../backend_interface/db_manager_api';
-import '../css/classes.css';
+import { useQuery, useQueryClient } from 'react-query';
 import Form from 'react-bootstrap/Form';
 import { CameraOutlined, VideoCameraAddOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
@@ -10,8 +9,10 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import { Spin, Alert } from 'antd';
+import { uploadAttachment, updateAttachment, addReferenceToAttachment } from '../backend_interface/db_manager_api';
+import '../css/classes.css';
 
-const ImagesForm = ( {initialData, refId, refType} ) => {
+const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
   const [imageBlob, setImageBlob] = useState(null);
   const [videoBlob, setVideoBlob] = useState(null);
   const [cameraOpened, setCameraOpened] = useState(false);
@@ -121,6 +122,7 @@ const ImagesForm = ( {initialData, refId, refType} ) => {
   };
 
   const handleSubmit = async (event) => {
+    
     setIsLoading(true);
     event.preventDefault();
     event.stopPropagation();
@@ -152,6 +154,7 @@ const ImagesForm = ( {initialData, refId, refType} ) => {
       }
       console.info("Updated: ", attachment)
       setIsLoading(false);
+      handledFinished("done");
       return;
     }
     console.info("new image to be sent")
@@ -170,11 +173,10 @@ const ImagesForm = ( {initialData, refId, refType} ) => {
     }
 
     setFile('');
-    console.info("isLoading is: ", isLoading);
-    await new Promise(r => setTimeout(r, 5000));
     setIsLoading(false);
-    
+    handledFinished("done");
   };
+
   return (
     <>
       {(isLoading) && (
