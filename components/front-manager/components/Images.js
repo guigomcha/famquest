@@ -17,12 +17,17 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
     setActiveIndex(selectedIndex);
   };
 
+  const handledFinished = (msg) => {
+    callFetchAttachmentsForSpot(refId, refType);
+    handleMenuChange(msg);
+  };
+
   const handleRequestNew = (e) => {
-    handleMenuChange(<ImagesForm refId={refId} refType={refType} handledFinished={handleMenuChange}/>);
+    handleMenuChange(<ImagesForm refId={refId} refType={refType} handledFinished={handledFinished}/>);
   }; 
   
   const handleRequestEdit = (e) => {
-    handleMenuChange(<ImagesForm initialData={selectedImages[activeIndex]} refId={refId} refType={refType} handledFinished={handleMenuChange}/>); 
+    handleMenuChange(<ImagesForm initialData={selectedImages[activeIndex]} refId={refId} refType={refType} handledFinished={handledFinished}/>); 
   }; 
  
   const callFetchAttachmentsForSpot = async (refId, refType) => {

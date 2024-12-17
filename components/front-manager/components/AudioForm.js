@@ -70,6 +70,7 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
       }
       console.info("Updated: ", attachment)
       setIsLoading(false);
+      handledFinished("done");
       return;
     }
     console.info("new audio to be sent")

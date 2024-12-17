@@ -154,6 +154,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
       }
       console.info("Updated: ", attachment)
       setIsLoading(false);
+      handledFinished("done");
       return;
     }
     console.info("new image to be sent")

@@ -15,6 +15,7 @@ const SpotPopup = ({ spot }) => {
   }; 
   const handleNestedRequestEdit = (comp) => {
     if (comp == "done"){
+      // I need to invalidate the query for the spots show that it gets reloaded
       setComponent(null);  
     } else {
       setComponent(comp); // Trigger show slideMenu
