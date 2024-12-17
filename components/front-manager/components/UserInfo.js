@@ -5,7 +5,7 @@ import Card from 'react-bootstrap/Card';
 import { ReloadOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { Flex, Progress } from 'antd';
-
+import { uploadLocation } from '../backend_interface/db_manager_api';
 const UserInfo = ({ user, spots, tasks, mapRef }) => {
   const userLocationsLayer = useRef(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -16,10 +16,10 @@ const UserInfo = ({ user, spots, tasks, mapRef }) => {
     window.location.reload();
   };
   
-  const warning = () => {
+  const warning = (msg) => {
     messageApi.open({
       type: 'warning',
-      content: 'Live location error',
+      content: msg,
     });
   };
 
@@ -44,13 +44,13 @@ const UserInfo = ({ user, spots, tasks, mapRef }) => {
     // Get user location
     mapRef.current.locate({setView: false, watch: true})
           // Probably better to try to save the location if it does not exist something close and the get the markers
-          .on('locationfound', function(e){
+          .on('locationfound', async function(e){
             // Chekc if the position was already loaded
             const matches = userLocationsLayer.current.getLayers().filter(layer => layer.getLatLng().lat === e.latitude && layer.getLatLng().lng === e.longitude);
             if (matches.length > 0) {
               console.log("Current location exists:", matches);
               return;
-            } 
+            }
             console.info("Live location found ", e, userLocationsLayer.current.getLayers());
             var marker = L.marker([e.latitude, e.longitude], {
               icon: L.icon({
@@ -67,9 +67,21 @@ const UserInfo = ({ user, spots, tasks, mapRef }) => {
             });
             userLocationsLayer.current.addLayer(marker);
             userLocationsLayer.current.addLayer(circle);
+            // Add to DB
+            var locationBody = {
+              "name": "live location",
+              "longitude": e.longitude,
+              "latitude": e.latitude
+            }
+            // It is a new one
+            const locationDb = await uploadLocation(locationBody);
+            if (!locationDb){
+              console.info("unable to push live location");
+            }
+            console.info("sent location", locationDb)
           })
          .on('locationerror', function(e){
-            warning();
+            warning('Live location error');
             console.info("live location error", e);
           });
   }, [mapRef.current]);
