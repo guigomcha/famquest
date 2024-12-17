@@ -87,7 +87,6 @@ const AudioForm = ({ initialData, refId, refType }) => {
       setStatusMessage("Unable to send audio.");
     }
     setAudioBlob('');
-    await new Promise(r => setTimeout(r, 5000));
     setIsLoading(false);
     
   };
