@@ -34,7 +34,7 @@ proxy:
     namespace: famquest
     port: 4180
     secretCookie: "REPLACE"
-    realmUrl: https://keycloak.evidenresearch.eu/realms/bdsrdspain-sns 
+    realmUrl: REPLACE 
     client: traefikha
     secret: "REPLACE"
   # Extra configurations for the reverse proxy (NGINX syntax)
@@ -65,5 +65,5 @@ common:
 # Configure the Exposure layer
 ingress:
   tls: true
-  email: guillermo.gomezchavez@eviden.com
+  email: REPLACE
   exporters: false # indirectly 

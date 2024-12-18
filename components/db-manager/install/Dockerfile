@@ -1,4 +1,4 @@
-FROM registry.atosresearch.eu:18488/golang:latest-alpine as builder
+FROM ghcr.io/guigomcha/proxy/golang:latest-alpine as builder
 
 # Use to skip tests and binary builds to be able to use deploy/local/dev.docker-compose.yml 
 ARG DEV
@@ -22,7 +22,7 @@ RUN if [ -z "$DEV" ]; then \
     fi
 
 # Reduce final image tag as much as possible
-FROM registry.atosresearch.eu:18520/library/alpine
+FROM ghcr.io/guigomcha/proxy/alpine
 
 WORKDIR /root/
 COPY --from=builder /go/src/famquest/components/db-manager/dbmanager ./dbmanager

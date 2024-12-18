@@ -318,5 +318,5 @@ metadata:
     fullapp: famquest
   name: gateway-cm
   namespace: famquest
-  resourceVersion: "6264498"
-  uid: 71fbe634-d372-4e0b-aced-99b1a078a1dc
+  # resourceVersion: "6264498"
+  # uid: 71fbe634-d372-4e0b-aced-99b1a078a1dc

@@ -17,7 +17,7 @@ spec:
         image: dpage/pgadmin4:6.15
         env:
           - name: PGADMIN_DEFAULT_EMAIL
-            value: "myuseradmin@pgadmin.com"
+            value: "REPLACE_USER@pgadmin.com"
           - name: PGADMIN_DEFAULT_PASSWORD
             value: "REPLACE_PASSWORD"
           - name: PGADMIN_LISTEN_PORT
