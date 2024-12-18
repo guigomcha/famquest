@@ -2,7 +2,37 @@
 
 ## Pre-requisites
 
-If needed, make sure the cert-manager has 
+You will need a k8s cluster to deploy everything. My setup has:
+- semi-static public IP provided by DIGI (+1€/month)
+  - Port forwarding for 80 (needed for TLS challenge), 443 (HTTPS), 16443 (K8s control plane)
+- Old HP laptop with a Ubuntu Desktop 24.04.1 LTS from a bootable USB https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview
+- Free domain using https://dynv6.com/
+  - wildcard A record in my zone to redirect all subdomains to my zone (my k8s ingress is the one that does the redirecting)
+  - TODO: Implement the hook to automatically update the IP if anything changes
+
+## Deploy 
+
+- Search and replace:
+  + REPLACE_USER
+  + REPLACE_PASSWORD
+  + REPLACE_BASE_DOMAIN
+
+- Get keys and tokens for auth
+
+```bash
+# e.g., create Oauth secretToken
+dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_';
+```
+
+### K8s
+
+
+```bash
+kubectl create secret docker-registry guigomchasecrets --docker-server=https://ghcr.io --docker-username=REPLACE --docker-password=REPLACE -n famquest
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.1.1/cert-manager.yaml
+```
+If your cluster cannot resolve public DNS, make sure the cert-manager has this config
+```yaml
     hostAliases:
       - hostnames:
         - api.famquest.REPLACE_BASE_DOMAIN
@@ -12,15 +42,7 @@ If needed, make sure the cert-manager has
         - minioapi.famquest.REPLACE_BASE_DOMAIN
         - monitoring.famquest.REPLACE_BASE_DOMAIN
         - auth.famquest.REPLACE_BASE_DOMAIN
-        ip: REPLACE
-
-
-## Deploy 
-
-### K8s
-
-```bash
-kubectl create secret docker-registry guigomchasecrets --docker-server=https://ghcr.io --docker-username=REPLACE --docker-password=REPLACE -n famquest
+        ip: REPLACE_YOUR_PRIVATE_IP
 ```
 
 kubectl apply -f deploy/k8s/dbs/minio.yaml -n famquest
@@ -31,9 +53,15 @@ kubectl apply -f deploy/k8s/components/frontmanager.yaml -n famquest
 helm install gateway  OCI://ghcr.io/guigomcha/famquest --version 1.3.0 -n famquest -f deploy/k8s/gateway/values.yaml
 kubectl apply -f deploy/k8s/gateway/gateway-cm.yaml -n famquest
 
+Refs:
+- https://dev.to/ileriayo/adding-free-ssltls-on-kubernetes-using-certmanager-and-letsencrypt-a1l#:~:text=Install%20Cert-manager%20onto%20your%20cluster%20Add%20LetsEncrypt%20as,by%20checking%20the%20cert-manager%20namespace%20for%20running%20pods
+
 ### Local (OUTDATED)
 
 Docker-compose 
 
 Refs:
 - https://github.com/oauth2-proxy/oauth2-proxy/tree/master/contrib/local-environment
+
+## Monitoring
+
