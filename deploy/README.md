@@ -44,14 +44,20 @@ If your cluster cannot resolve public DNS, make sure the cert-manager has this c
         - auth.famquest.REPLACE_BASE_DOMAIN
         ip: REPLACE_YOUR_PRIVATE_IP
 ```
-
+Install the core workloads
+```bash
 kubectl apply -f deploy/k8s/dbs/minio.yaml -n famquest
 kubectl apply -f deploy/k8s/dbs/postgresql.yaml -n famquest
 kubectl apply -f deploy/k8s/dbs/pgadmin.yaml -n famquest
 kubectl apply -f deploy/k8s/components/dbmanager.yaml -n famquest
 kubectl apply -f deploy/k8s/components/frontmanager.yaml -n famquest
+```
+Expose it to the outside
+```bash
+# Note: the current values and confimap overlay expect to have the monitoring stack already installed
 helm install gateway  OCI://ghcr.io/guigomcha/famquest --version 1.3.0 -n famquest -f deploy/k8s/gateway/values.yaml
 kubectl apply -f deploy/k8s/gateway/gateway-cm.yaml -n famquest
+```
 
 Refs:
 - https://dev.to/ileriayo/adding-free-ssltls-on-kubernetes-using-certmanager-and-letsencrypt-a1l#:~:text=Install%20Cert-manager%20onto%20your%20cluster%20Add%20LetsEncrypt%20as,by%20checking%20the%20cert-manager%20namespace%20for%20running%20pods
@@ -65,3 +71,21 @@ Refs:
 
 ## Monitoring
 
+There is a monitoring stack automatically available
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install promstack -n monitoring --create-namespace prometheus-community/kube-prometheus-stack
+```
+Expose UIs privately (Else use gateway to expose by ingress)
+```bash
+kubectl apply -f deploy/gateway/prom-svc-nodeports.yaml -n monitoring
+```
+
+(Optional as it is not used but it is helpful)
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+
+Refs:
+- https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/README.md
