@@ -102,7 +102,7 @@ export default function App() {
                     Instead, it aims to be more similar to a very private gamified family photo album and journal shared between family members:
                     <ul>
                       <li>Your family members pre-populate your world with memories and tasks.</li>
-                      <li>You have to physically be in a place to post something (or proof it via google-maps). The map of the world is not fully visible, you have to discover it "fog-of-war-style" (age-of-empire).</li>
+                      <li>The target user has to physically be in a place to visualize something (or proof it via google-maps). The map of the world is not fully visible, you have to discover it "fog-of-war-style" (age-of-empire).</li>
                       <li>It is a way to share memories and pass them down in this new era of technology, lack of family time and globalization.</li>
                     </ul>
                     </Card.Text>

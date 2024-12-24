@@ -15,15 +15,18 @@ spec:
       containers:
       - name: postgresql
         image: postgres:latest
-        env:
-          - name: POSTGRES_DB
-            value: "famquest"
-          - name: POSTGRES_USER
-            value: "REPLACE_USER"
-          - name: POSTGRES_PASSWORD
-            value: "REPLACE_PASSWORD"
+        envFrom:
+          - secretRef:
+              name: postgres-credentials
         ports:
         - containerPort: 5432
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -37,3 +40,13 @@ spec:
       port: 5432
       targetPort: 5432
   type: ClusterIP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-credentials
+type: Opaque
+stringData:
+  POSTGRES_USER: REPLACE_PASSWORD
+  POSTGRES_PASSWORD: REPLACE_USER
+  POSTGRES_DB: keycloak

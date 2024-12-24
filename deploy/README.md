@@ -35,7 +35,7 @@ kubectl create secret docker-registry guigomchasecrets --docker-server=https://g
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.2/cert-manager.yaml
 # install the monitoring stack
 ```
-If your cluster cannot resolve public DNS, make sure the cert-manager has this config
+If your cluster cannot resolve public DNS, make sure the cert-manager and the oauth container in the gateway pod have this config
 ```yaml
     hostAliases:
       - hostnames:
@@ -46,13 +46,21 @@ If your cluster cannot resolve public DNS, make sure the cert-manager has this c
         - minioapi.REPLACE_BASE_DOMAIN
         - monitoring.REPLACE_BASE_DOMAIN
         - auth.REPLACE_BASE_DOMAIN
+        - grafana.REPLACE_BASE_DOMAIN
+        - prometheus.REPLACE_BASE_DOMAIN
+        - keycloak.REPLACE_BASE_DOMAIN
         ip: REPLACE_YOUR_PRIVATE_IP
 ```
 Install the core workloads
 ```bash
+kubectl apply -f deploy/k8s/dbs/storage.yaml -n famquest
 kubectl apply -f deploy/k8s/dbs/minio.yaml -n famquest 
 kubectl apply -f deploy/k8s/dbs/postgresql.yaml -n famquest
 kubectl apply -f deploy/k8s/dbs/pgadmin.yaml -n famquest
+# go inside and create also the famquest db. TODO: Ensure both DBs are created automatically
+kubectl apply -f deploy/k8s/gateway/keycloak.yaml -n famquest
+kubectl apply -f deploy/k8s/gateway/keycloak-ingress.yaml -n famquest
+# Create the realm, openid connect client with an "audience" mapper in a custom scope
 kubectl apply -f deploy/k8s/components/dbmanager.yaml -n famquest
 kubectl apply -f deploy/k8s/components/frontmanager.yaml -n famquest
 ```
@@ -60,7 +68,6 @@ Expose it to the outside
 ```bash
 # Note: the current values and confimap overlay expect to have the monitoring stack already installed
 helm install gateway  OCI://ghcr.io/guigomcha/famquest/gateway --version 1.3.0 -n famquest -f deploy/k8s/gateway/values.yaml
-helm uninstall gateway -n famquest
 kubectl apply -f deploy/k8s/gateway/gateway-cm.yaml -n famquest
 ```
 

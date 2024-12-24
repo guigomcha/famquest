@@ -13,20 +13,27 @@ spec:
         app: minio
     spec:
       containers:
-      - name: minio
-        image: docker.io/bitnami/minio:2022
-        env:
-          - name: MINIO_ROOT_USER
-            value: "REPLACE_USER"
-          - name: MINIO_ROOT_PASSWORD
-            value: "REPLACE_PASSWORD"
-          - name: MINIO_API_PORT_NUMBER
-            value: "9000"
-          - name: MINIO_CONSOLE_PORT_NUMBER
-            value: "9001"
-        ports:
-        - containerPort: 9000
-        - containerPort: 9001
+        - name: minio
+          image: docker.io/bitnami/minio:2022
+          env:
+            - name: MINIO_ROOT_USER
+              value: "REPLACE_USER"
+            - name: MINIO_ROOT_PASSWORD
+              value: "REPLACE_PASSWORD"
+            - name: MINIO_API_PORT_NUMBER
+              value: "9000"
+            - name: MINIO_CONSOLE_PORT_NUMBER
+              value: "9001"
+          ports:
+          - containerPort: 9000
+          - containerPort: 9001
+          volumeMounts:
+          - name: minio-storage
+            mountPath: /data
+      volumes:
+      - name: minio-storage
+        persistentVolumeClaim:
+          claimName: minio-pvc
 ---
 apiVersion: v1
 kind: Service

@@ -28,7 +28,7 @@ spec:
                 {
                   "Name": "Famquest DB",
                   "Group": "Servers",
-                  "Host": "famquest-db",
+                  "Host": "postgresql-svc",
                   "Port": 5432,
                   "Username": "REPLACE_USER",
                   "SSLMode": "prefer"
