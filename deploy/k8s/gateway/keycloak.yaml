@@ -94,8 +94,8 @@ metadata:
   name: keycloak-secrets
 type: Opaque
 stringData:
-  KEYCLOAK_ADMIN: myuseradmin
-  KEYCLOAK_ADMIN_PASSWORD: mypassword
+  KEYCLOAK_ADMIN: REPLACE_USER
+  KEYCLOAK_ADMIN_PASSWORD: REPLACE_PASSWORD
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
