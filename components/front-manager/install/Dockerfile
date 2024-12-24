@@ -1,4 +1,4 @@
-FROM node:18.20.4 as builder
+FROM ghcr.io/guigomcha/proxy/node:18.20.4 as builder
 
 WORKDIR /usr/src/famquest/components/front-manager
 
@@ -18,7 +18,7 @@ COPY components/front-manager/css ./css
 RUN npx expo export --platform web
 
 # Stage 2: Create the final image with Nginx
-FROM  registry.atosresearch.eu:18488/nginx:latest
+FROM  ghcr.io/guigomcha/proxy/nginx:latest
 
 # Copy the generated HTML files from the previous stage
 COPY --from=builder /usr/src/famquest/components/front-manager/dist /usr/share/nginx/html

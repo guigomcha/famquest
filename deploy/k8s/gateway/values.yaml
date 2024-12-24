@@ -34,21 +34,30 @@ proxy:
     namespace: famquest
     port: 4180
     secretCookie: "REPLACE"
-    realmUrl: https://keycloak.evidenresearch.eu/realms/bdsrdspain-sns 
-    client: traefikha
+    realmUrl: https://keycloak.famquest.REPLACE_BASE_DOMAIN/realms/jaime 
+    client: famquest-backend
     secret: "REPLACE"
   # Extra configurations for the reverse proxy (NGINX syntax)
   extraServerConfig:
     enabled: true
     extraServerHosts:  # for the Ingress
-      - routingKey: monitoring
+      - routingKey: prometheus
+      - routingKey: grafana
     content: |
       server {
         listen 80;
-        server_name monitoring.famquest.REPLACE_BASE_DOMAIN;
+        server_name prometheus.famquest.REPLACE_BASE_DOMAIN;
         resolver kube-dns.kube-system.svc.cluster.local valid=10s;
         location / {
           proxy_pass http://promstack-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090;
+        }
+      }
+      server {
+        listen 80;
+        server_name grafana.famquest.REPLACE_BASE_DOMAIN;
+        resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+        location / {
+          proxy_pass http://promstack-grafana.monitoring.svc.cluster.local:80;
         }
       }
 
@@ -65,5 +74,5 @@ common:
 # Configure the Exposure layer
 ingress:
   tls: true
-  email: guillermo.gomezchavez@eviden.com
+  email: REPLACE
   exporters: false # indirectly 

@@ -305,18 +305,29 @@ data:
       }
 
     }
+    server {
+        listen 80;
+        server_name prometheus.famquest.REPLACE_BASE_DOMAIN;
+        resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+        location / {
+          proxy_pass http://promstack-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090;
+        }
+      }
+      server {
+        listen 80;
+        server_name grafana.famquest.REPLACE_BASE_DOMAIN;
+        resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+        location / {
+          proxy_pass http://promstack-grafana.monitoring.svc.cluster.local:80;
+        }
+      }
 
 kind: ConfigMap
 metadata:
   annotations:
     meta.helm.sh/release-name: gateway
-    meta.helm.sh/release-namespace: famquest
-  creationTimestamp: "2024-11-28T16:12:38Z"
   labels:
     app: gateway
     app.kubernetes.io/managed-by: Helm
     fullapp: famquest
   name: gateway-cm
-  namespace: famquest
-  resourceVersion: "6264498"
-  uid: 71fbe634-d372-4e0b-aced-99b1a078a1dc

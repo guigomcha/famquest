@@ -1,0 +1,61 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: postgresql-pv
+  labels:
+    type: local
+    app: postgresql
+spec:
+  storageClassName: local-path
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/mnt/famquest-postgresql"
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: minio-pv
+  labels:
+    type: local
+    app: minio
+spec:
+  storageClassName: local-path
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/mnt/famquest-minio"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  labels:
+    app: postgresql
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-pvc
+  labels:
+    app: minio
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

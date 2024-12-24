@@ -78,5 +78,3 @@ Personal Public License to ensure that the project grows and receives contributi
  of this license document, but changing it is not allowed.
 
 ```
-
-https://roadmap.sh/

@@ -51,11 +51,7 @@ npx expo install react-native-web react-dom @expo/metro-runtime
 
 ### Installation
 
-- Adapt the API URL in components/front-manager/backend_interface/db_manager_api.js (process.env not working)
-- Search and replace:
-  + myuseradmin
-  + mypassword
-  + REPLACE_BASE_DOMAIN
+- Adapt the env variables manually (process.env not working) search for REPLACE
 
 #### Local deployment via docker-compose and vscode dev containers 
 

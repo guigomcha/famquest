@@ -14,9 +14,6 @@ import (
 )
 
 const (
-	DB_USER             = "REPLACE_USER"
-	DB_PASSWORD         = "REPLACE_PASSWORD"
-	DB_NAME             = "famquest"
 	ErrorIdDoesNotExits = "id does not exist"
 )
 
@@ -24,7 +21,7 @@ var DB *sqlx.DB
 
 func ConnectToPostgreSQL() (*sqlx.DB, error) {
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable",
-		DB_USER, DB_PASSWORD, DB_NAME, os.Getenv("POSTGRES_DB_HOST"), os.Getenv("POSTGRES_DB_PORT"))
+		os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("POSTGRES_DB_HOST"), os.Getenv("POSTGRES_DB_PORT"))
 	logger.Log.Infof("Connecting to Postgress '%s'", connStr)
 	return sqlx.Connect("postgres", connStr)
 }

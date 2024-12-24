@@ -49,10 +49,11 @@ spec:
             value: "postgresql-svc"
           - name: POSTGRES_DB_PORT
             value: "5432"
-          - name: POSTGRES_DB_USER
-            value: "REPLACE_USER"
-          - name: POSTGRES_DB_PASSWORD
-            value: "REPLACE_PASSWORD"
+          - name: DB_NAME
+            value: famquest
+        envFrom:
+          - secretRef:
+              name: postgres-credentials
 ---
 apiVersion: v1
 kind: Service
