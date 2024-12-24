@@ -8,8 +8,9 @@ You will need a k8s cluster to deploy everything. My setup has:
 - Old HP laptop with a Ubuntu Desktop 24.04.1 LTS from a bootable USB https://ubuntu.com/tutorials/install-ubuntu-desktop#1-overview
 - Free domain using https://dynv6.com/
   - wildcard A record in my zone to redirect all subdomains to my zone (my k8s ingress is the one that does the redirecting)
-  - TODO: Implement the hook to automatically update the IP if anything changes
-
+  - TODO: Implement the hook to automaticlly update the IP if anything changes
+  -  TODO: add the k3s command used once the tls works in the home lab
+    - Had to configure coredns to follow 8.8.8.8 instead of /etc/resolv.conf
 ## Deploy 
 
 - Search and replace:
@@ -28,25 +29,28 @@ dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+
 
 
 ```bash
+kubectl create ns famquest
+kubectl create secret docker-registry gatewaysecrets --docker-server=https://registry.atosresearch.eu:18488 --docker-username=REPLACE --docker-password=REPLACE -n famquest
 kubectl create secret docker-registry guigomchasecrets --docker-server=https://ghcr.io --docker-username=REPLACE --docker-password=REPLACE -n famquest
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.1.1/cert-manager.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.2/cert-manager.yaml
+# install the monitoring stack
 ```
 If your cluster cannot resolve public DNS, make sure the cert-manager has this config
 ```yaml
     hostAliases:
       - hostnames:
-        - api.famquest.REPLACE_BASE_DOMAIN
-        - portal.famquest.REPLACE_BASE_DOMAIN
-        - pgadmin.famquest.REPLACE_BASE_DOMAIN
-        - minio.famquest.REPLACE_BASE_DOMAIN
-        - minioapi.famquest.REPLACE_BASE_DOMAIN
-        - monitoring.famquest.REPLACE_BASE_DOMAIN
-        - auth.famquest.REPLACE_BASE_DOMAIN
+        - api.REPLACE_BASE_DOMAIN
+        - portal.REPLACE_BASE_DOMAIN
+        - pgadmin.REPLACE_BASE_DOMAIN
+        - minio.REPLACE_BASE_DOMAIN
+        - minioapi.REPLACE_BASE_DOMAIN
+        - monitoring.REPLACE_BASE_DOMAIN
+        - auth.REPLACE_BASE_DOMAIN
         ip: REPLACE_YOUR_PRIVATE_IP
 ```
 Install the core workloads
 ```bash
-kubectl apply -f deploy/k8s/dbs/minio.yaml -n famquest
+kubectl apply -f deploy/k8s/dbs/minio.yaml -n famquest 
 kubectl apply -f deploy/k8s/dbs/postgresql.yaml -n famquest
 kubectl apply -f deploy/k8s/dbs/pgadmin.yaml -n famquest
 kubectl apply -f deploy/k8s/components/dbmanager.yaml -n famquest
@@ -55,7 +59,8 @@ kubectl apply -f deploy/k8s/components/frontmanager.yaml -n famquest
 Expose it to the outside
 ```bash
 # Note: the current values and confimap overlay expect to have the monitoring stack already installed
-helm install gateway  OCI://ghcr.io/guigomcha/famquest --version 1.3.0 -n famquest -f deploy/k8s/gateway/values.yaml
+helm install gateway  OCI://ghcr.io/guigomcha/famquest/gateway --version 1.3.0 -n famquest -f deploy/k8s/gateway/values.yaml
+helm uninstall gateway -n famquest
 kubectl apply -f deploy/k8s/gateway/gateway-cm.yaml -n famquest
 ```
 
@@ -69,7 +74,7 @@ Docker-compose
 Refs:
 - https://github.com/oauth2-proxy/oauth2-proxy/tree/master/contrib/local-environment
 
-## Monitoring
+## Monitoring stack
 
 There is a monitoring stack automatically available
 ```bash
@@ -79,7 +84,8 @@ helm install promstack -n monitoring --create-namespace prometheus-community/kub
 ```
 Expose UIs privately (Else use gateway to expose by ingress)
 ```bash
-kubectl apply -f deploy/gateway/prom-svc-nodeports.yaml -n monitoring
+kubectl apply -f deploy/k8s/gateway/prom-svc-nodeports.yaml -n monitoring
+kubectl get secret promstack-grafana -o jsonpath="{.data.admin-password}" -n monitoring  | base64 --decode ; echo
 ```
 
 (Optional as it is not used but it is helpful)
