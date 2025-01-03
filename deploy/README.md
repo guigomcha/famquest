@@ -18,15 +18,7 @@ You will need a k8s cluster to deploy everything. My setup has:
   + REPLACE_PASSWORD
   + REPLACE_BASE_DOMAIN
 
-- Get keys and tokens for auth
-
-```bash
-# e.g., create Oauth secretToken
-dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_';
-```
-
 ### K8s
-
 
 ```bash
 kubectl create ns famquest
@@ -60,7 +52,18 @@ kubectl apply -f deploy/k8s/dbs/pgadmin.yaml -n famquest
 # go inside and create also the famquest db. TODO: Ensure both DBs are created automatically
 kubectl apply -f deploy/k8s/gateway/keycloak.yaml -n famquest
 kubectl apply -f deploy/k8s/gateway/keycloak-ingress.yaml -n famquest
-# Create the realm, openid connect client with an "audience" mapper in a custom scope
+```
+- Create the realm, openid connect client with an "audience" mapper in a custom scope
+- Get keys and tokens for auth
+
+```bash
+# e.g., create Oauth secretToken
+dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_';
+```
+
+- Adapt the remaining manifests
+
+```bash
 kubectl apply -f deploy/k8s/components/dbmanager.yaml -n famquest
 kubectl apply -f deploy/k8s/components/frontmanager.yaml -n famquest
 ```
@@ -69,10 +72,18 @@ Expose it to the outside
 # Note: the current values and confimap overlay expect to have the monitoring stack already installed
 helm install gateway  OCI://ghcr.io/guigomcha/famquest/gateway --version 1.3.0 -n famquest -f deploy/k8s/gateway/values.yaml
 kubectl apply -f deploy/k8s/gateway/gateway-cm.yaml -n famquest
+kubectl edit deployments.apps -n famquest gateway-deployment
+# add the hostAliases to the manifest if needed
+kubectl rollout restart deployment -n famquest gateway-deployment
 ```
+
+- go inside and create also the famquest db (https://pgadmin.REPLACE_BASE_DOMAIN). TODO: Ensure both DBs are created automatically
+- go inside minio (https://minio.REPLACE_BASE_DOMAIN) and create a user "demo" with password "REPLACE_PASSWORD" and read/write permission
+
 
 Refs:
 - https://dev.to/ileriayo/adding-free-ssltls-on-kubernetes-using-certmanager-and-letsencrypt-a1l#:~:text=Install%20Cert-manager%20onto%20your%20cluster%20Add%20LetsEncrypt%20as,by%20checking%20the%20cert-manager%20namespace%20for%20running%20pods
+- https://fullstackdeveloper.guru/2022/03/16/how-to-set-up-keycloak-for-oauth2-client-credentials-flow/#:~:text=Below%20is%20the%20algorithm%20to%20set%20up%20client,7%3A%20Test%20You%20can%20download%20keycloak%20from%20here
 
 ### Local (OUTDATED)
 
@@ -102,3 +113,16 @@ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/late
 
 Refs:
 - https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/README.md
+
+## Manual Backups
+
+postgres famquest DB 
+```bash
+kubectl exec -it -n famquest postgresql-deployment-REPLACE -- sh -c "mkdir -p backups && pg_dump -U REPLACE_USER -h localhost famquest > backups/backup-$(date +"%m-%d-%Y-%H-%M").sql"
+kubectl cp --retries=-1 famquest/postgresql-deployment-REPLACE:backups backups
+```
+minio DB
+```bash
+kubectl exec -it minio-deployment-7cf8ff6b7c-gh5mt -n famquest -- sh -c "mkdir -p /opt/bitnami/minio-client/backups && tar -czf /opt/bitnami/minio-client/backups/data-$(date +"%m-%d-%Y-%H-%M").tar.gz /data"
+kubectl cp --retries=-1 famquest/minio-deployment-7cf8ff6b7c-gh5mt:/opt/bitnami/minio-client/backups backups
+```
