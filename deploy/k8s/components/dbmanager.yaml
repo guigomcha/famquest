@@ -25,7 +25,7 @@ spec:
         - name: guigomchasecrets
       containers:
       - name: dbmanager
-        image: ghcr.io/guigomcha/famquest/dbmanager:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         command: ["/bin/sh"]

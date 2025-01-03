@@ -22,18 +22,6 @@ spec:
             value: "REPLACE_PASSWORD"
           - name: PGADMIN_LISTEN_PORT
             value: "80"
-          - name: PGADMIN_SERVER_JSON
-            value: |
-              [
-                {
-                  "Name": "Famquest DB",
-                  "Group": "Servers",
-                  "Host": "postgresql-svc",
-                  "Port": 5432,
-                  "Username": "REPLACE_USER",
-                  "SSLMode": "prefer"
-                }
-              ]
         ports:
         - containerPort: 80
 ---

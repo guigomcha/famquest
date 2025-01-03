@@ -25,7 +25,7 @@ spec:
         - name: guigomchasecrets
       containers:
       - name: frontmanager
-        image: ghcr.io/guigomcha/famquest/frontmanager:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
 ---
