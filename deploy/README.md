@@ -11,6 +11,7 @@ You will need a k8s cluster to deploy everything. My setup has:
   - TODO: Implement the hook to automaticlly update the IP if anything changes
   -  TODO: add the k3s command used once the tls works in the home lab
     - Had to configure coredns to follow 8.8.8.8 instead of /etc/resolv.conf
+
 ## Deploy 
 
 - Search and replace:
@@ -45,11 +46,9 @@ If your cluster cannot resolve public DNS, make sure the cert-manager and the oa
 ```
 Install the core workloads
 ```bash
-kubectl apply -f deploy/k8s/dbs/storage.yaml -n famquest
 kubectl apply -f deploy/k8s/dbs/minio.yaml -n famquest 
 kubectl apply -f deploy/k8s/dbs/postgresql.yaml -n famquest
 kubectl apply -f deploy/k8s/dbs/pgadmin.yaml -n famquest
-# go inside and create also the famquest db. TODO: Ensure both DBs are created automatically
 kubectl apply -f deploy/k8s/gateway/keycloak.yaml -n famquest
 kubectl apply -f deploy/k8s/gateway/keycloak-ingress.yaml -n famquest
 ```
@@ -77,8 +76,8 @@ kubectl edit deployments.apps -n famquest gateway-deployment
 kubectl rollout restart deployment -n famquest gateway-deployment
 ```
 
-- go inside and create also the famquest db (https://pgadmin.REPLACE_BASE_DOMAIN). TODO: Ensure both DBs are created automatically
-- go inside minio (https://minio.REPLACE_BASE_DOMAIN) and create a user "demo" with password "REPLACE_PASSWORD" and read/write permission
+- Create also the famquest db (https://pgadmin.REPLACE_BASE_DOMAIN). TODO: Ensure both DBs are created automatically
+- Go inside minio (https://minio.REPLACE_BASE_DOMAIN) and create a user "demo" with password "REPLACE_PASSWORD" and read/write permission
 
 
 Refs:

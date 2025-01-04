@@ -95,25 +95,20 @@ export default function App() {
                   <Card.Body>
                     <Card.Title>Welcome to the FamQuest App</Card.Title>
                     <Card.Text>
-                    "FamQuest" is born as the 1-year-old birthday present for my first nephew. 
-                    It is a map which guides users on an adventure to uncover family memories and carry out a gamified quest to resolve adulting tasks.
+                    <b>"FamQuest"</b> is born as the 1-year bday present for my first nephew, Jaime, with the initial objective of telling my story in his city as he discovers it (I live in a different city now).
+                    It has eventually grown out to host the story of the whole family around the world, <b>as a location-based media-storage application</b> that is similar to a very private family photo album
+                    and journal shared between family members, keeping it very clear that <b>this is not another social network</b>. 
+                    It is a way to share memories and pass them down in this new era of technology, lack of family time and globalization.
                     <br></br>
-                    In short, it is a location-based media-storage service with a few differences from other apps and keeping it very clear that <b>this is not another social network</b>. 
-                    Instead, it aims to be more similar to a very private gamified family photo album and journal shared between family members:
-                    <ul>
-                      <li>Your family members pre-populate your world with memories and tasks.</li>
-                      <li>The target user has to physically be in a place to visualize something (or proof it via google-maps). The map of the world is not fully visible, you have to discover it "fog-of-war-style" (age-of-empire).</li>
-                      <li>It is a way to share memories and pass them down in this new era of technology, lack of family time and globalization.</li>
-                    </ul>
                     </Card.Text>
                     <Card.Text>
-                    In the long term I want it to transition into a gamified-adulting app which provides the required knowledge to live in the modern world, focusing on those issues that
-                    the traditional schools do not provide (unfortunately):
+                    Some of the core objectives:
                     <ul>
-                      <li>Goverment-related tasks.</li>
-                      <li>Take benefit of your city offers and sourrounding.</li>
-                      <li>Do not fall for the same issues that have already happened in the history.</li>
-                      <li>Family-related nice-to-know and lessons learnt.</li>
+                      <li>Your family members pre-populate your world with memories from their past. E.g., old family house, school, important trips, where the parents met...</li>
+                      <li>The target user has to physically be in a spot to visualize something (or proof it via google-maps). The map of the world is not fully visible, you have to discover it "fog-of-war-style" (age-of-empire). E.g., A notification alerts the user of a new spot found.</li>
+                      <li>Older generations have a way to quickly record an audio describing a spot or photo so that their voices are can be heard by future generations of the family.</li>
+                      <li>Keep lists of things that would be nice to be shared in a later time. E.g., Important movies, tips and tricks...</li>
+                      <li>Each family will be able to host their own instance of the application in an old laptop/miniPC without the need to sell of of their private memories to a big tech.</li>
                     </ul>
                     </Card.Text>
                   </Card.Body>
