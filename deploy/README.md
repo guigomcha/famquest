@@ -10,6 +10,7 @@
     + REPLACE_PASSWORD
     + REPLACE_BASE_DOMAIN
     + REPLACE_TARGET_USER
+2. Build the images of all components (check their readmes.)
 
 ### K8s
 
