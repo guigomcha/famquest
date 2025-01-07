@@ -1,0 +1,44 @@
+# Configures the NGINX reverse proxy redirects 
+proxy:
+  routing: subdomain # location or subdomain
+  services:
+    - routingKey: minio
+      dropRoutingKey: false
+      svcName: minio-svc
+      namespace: famquest
+      port: 9001
+    - routingKey: minioapi
+      dropRoutingKey: false
+      svcName: minio-svc
+      namespace: famquest
+      port: 9000
+  auth: # They have their own auth
+    enabled: false
+    routingKey: empty
+    svcName:  empty
+    namespace: empty
+    port: 8080
+    secretCookie: "empty"
+    realmUrl: empty
+    client: empty
+    secret: "empty"
+  # Extra configurations for the reverse proxy (NGINX syntax)
+  extraServerConfig:
+    enabled: false
+    extraServerHosts:  []
+    content: ""
+
+# Configures the K8s manifests
+common:
+  labels:
+    # Useful to link to other deployments
+    app: gateway
+    fullapp: famquest
+  baseDomain: famquest.REPLACE_BASE_DOMAIN
+  pullSecret: gatewaysecrets
+
+# Configure the Exposure layer
+ingress:
+  tls: true
+  email: guillermo.gc1994@gmail.com
+  exporters: false # indirectly 

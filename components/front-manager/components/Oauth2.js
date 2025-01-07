@@ -8,7 +8,7 @@ const OAuth2Login = ({ onUserChange }) => {
 
   useEffect(() => {
     // Fetch user info to check if logged in
-    fetch("https://auth.famquest.REPLACE_BASE_DOMAIN/oauth2/userinfo", { credentials: "include" })
+    fetch("https://auth.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN/oauth2/userinfo", { credentials: "include" })
       .then((res) => {
         if (res.ok) return res.json();
         throw new Error("Not logged in");
@@ -27,13 +27,13 @@ const OAuth2Login = ({ onUserChange }) => {
 
   const login = () => {
     const frontendUrl = window.location.origin; // Get current frontend URL
-    const loginUrl = `https://auth.famquest.REPLACE_BASE_DOMAIN/oauth2/sign_in?rd=${encodeURIComponent(frontendUrl)}`;
+    const loginUrl = `https://auth.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN/oauth2/sign_in?rd=${encodeURIComponent(frontendUrl)}`;
     window.location.href = loginUrl;
   };
 
 
   const logout = () => {
-    fetch("https://auth.famquest.REPLACE_BASE_DOMAIN/oauth2/sign_out", { method: "GET", credentials: "include" })
+    fetch("https://auth.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN/oauth2/sign_out", { method: "GET", credentials: "include" })
       .then(() => {
         setUser(null);
         onUserChange(null); // Notify parent component

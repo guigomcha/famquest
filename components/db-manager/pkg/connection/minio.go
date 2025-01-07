@@ -24,7 +24,7 @@ func ConnectToMinio() (*minio.Client, error) {
 	// Create buckets if needed
 	// Check if the bucket exists, and create it if not
 	logger.Log.Infof("Creating buckets")
-	bucketNames := []string{"image", "audio"} // match with contentType
+	bucketNames := []string{os.Getenv("DB_NAME") + "-image", os.Getenv("DB_NAME") + "-audio"} // match with contentType
 	for _, bucketName := range bucketNames {
 		bucketExists, err := minioClient.BucketExists(context.Background(), bucketName)
 		if err != nil {
