@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dynv6-updater
+spec:
+  schedule: "* * * * *"  # This sets the CronJob to run every minute
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: dynv6-updater
+              image: rfuehrer/dynv6-updater
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: DYNV6_TOKEN
+                  value: REPLACE_DDNS_TOKEN
+                - name: DYNV6_ZONES
+                  value: REPLACE_BASE_DOMAIN
+              command: ["/bin/sh"]
+              args: ["-c", "/code/dynv6_updater.sh"]
+            
+          restartPolicy: OnFailure  # Retry on failure
+          # Set the logging retention
+          terminationGracePeriodSeconds: 30

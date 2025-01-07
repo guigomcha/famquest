@@ -10,6 +10,8 @@
     + REPLACE_PASSWORD
     + REPLACE_BASE_DOMAIN
     + REPLACE_TARGET_USER
+    + REPLACE_DDNS_TOKEN (Optional, use if dynv6 as DDNS)
+
 2. Build the images of all components (check their readmes.)
 
 ### K8s
@@ -47,6 +49,9 @@ kubectl apply -f deploy/k8s/common/postgresql.yaml -n common
 kubectl apply -f deploy/k8s/common/keycloak.yaml -n common
 kubectl apply -f deploy/k8s/common/pgadmin.yaml -n common
 helm install gateway  OCI://ghcr.io/guigomcha/famquest/gateway --version 1.3.0 -n common -f deploy/k8s/common/values.yaml
+# If you use dynv6 (see pre-requisites) as DDNS, then also deploy
+kubectl apply -f deploy/k8s/common/dynv6-cronjob.yaml -n common
+
 ```
 
 Install the backends
@@ -110,7 +115,7 @@ My setup is (something similar might work):
     
     + In blue -> REPLACE_BASE_DOMAIN
     + In green -> REPLACE_TARGET_USER
-  - TODO: Implement the hook to automaticlly update the IP if anything changes
+  - There is a cronjob that makes sure that the DDNS is updated (1 per minute)
 - Standard single-node k3s installation 
     
     ```bash
