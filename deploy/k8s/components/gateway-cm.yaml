@@ -140,11 +140,11 @@ data:
             add_header Access-Control-Allow-Origin $http_origin always;
             add_header Access-Control-Allow-Credentials "true" always;
 
-            proxy_pass http://gateway-svc.jaime.svc.cluster.local:4180;
+            proxy_pass http://gateway-svc.REPLACE_TARGET_USER.svc.cluster.local:4180;
         }
 
         location /oauth2/ {
-            proxy_pass http://gateway-svc.jaime.svc.cluster.local:4180;
+            proxy_pass http://gateway-svc.REPLACE_TARGET_USER.svc.cluster.local:4180;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Scheme https;
@@ -156,7 +156,7 @@ data:
         }
 
         location /oauth2/auth {
-            proxy_pass http://gateway-svc.jaime.svc.cluster.local:4180;
+            proxy_pass http://gateway-svc.REPLACE_TARGET_USER.svc.cluster.local:4180;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Scheme https;
@@ -186,7 +186,7 @@ data:
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Origin $http_origin;
-        proxy_pass http://frontmanager-svc.jaime.svc.cluster.local:8081;
+        proxy_pass http://frontmanager-svc.REPLACE_TARGET_USER.svc.cluster.local:8081;
       }
 
     }
@@ -228,11 +228,11 @@ data:
         # add_header Access-Control-Allow-Origin $http_origin always;
         add_header Access-Control-Allow-Credentials "true" always;
         proxy_set_header Origin $http_origin;
-        proxy_pass http://dbmanager-svc.jaime.svc.cluster.local:8080;
+        proxy_pass http://dbmanager-svc.REPLACE_TARGET_USER.svc.cluster.local:8080;
       }
 
       location /oauth2/ {
-        proxy_pass http://gateway-svc.jaime.svc.cluster.local:4180;
+        proxy_pass http://gateway-svc.REPLACE_TARGET_USER.svc.cluster.local:4180;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Scheme https;

@@ -25,7 +25,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "famquest.jaime"
+      "package": "famquest.REPLACE_TARGET_USER"
     },
     "web": {
       "bundler": "metro",
