@@ -2,41 +2,26 @@
 proxy:
   routing: subdomain # location or subdomain
   services:
-    - routingKey: portal
-      dropRoutingKey: false
-      svcName: frontmanager-svc
-      namespace: famquest
-      port: 8081
     - routingKey: pgadmin
       dropRoutingKey: false
       svcName: pgadmin-svc
-      namespace: famquest
+      namespace: common
       port: 15432
-    - routingKey: api
+    - routingKey: keycloak
       dropRoutingKey: false
-      svcName: dbmanager-svc
-      namespace: famquest
+      svcName: keycloak-svc
+      namespace: common
       port: 8080
-    - routingKey: minio
-      dropRoutingKey: false
-      svcName: minio-svc
-      namespace: famquest
-      port: 9001
-    - routingKey: minioapi
-      dropRoutingKey: false
-      svcName: minio-svc
-      namespace: famquest
-      port: 9000
-  auth:
-    enabled: true
-    routingKey: auth
-    svcName:  gateway-svc
-    namespace: famquest
-    port: 4180
-    secretCookie: "REPLACE"
-    realmUrl: https://keycloak.famquest.REPLACE_BASE_DOMAIN/realms/jaime 
-    client: famquest-backend
-    secret: "REPLACE"
+  auth: # This is the auth to provide a keycloak for the rest of the testbed
+    enabled: false
+    routingKey: empty
+    svcName:  empty
+    namespace: empty
+    port: 8080
+    secretCookie: "empty"
+    realmUrl: empty
+    client: empty
+    secret: "empty"
   # Extra configurations for the reverse proxy (NGINX syntax)
   extraServerConfig:
     enabled: true
@@ -46,7 +31,7 @@ proxy:
     content: |
       server {
         listen 80;
-        server_name prometheus.famquest.REPLACE_BASE_DOMAIN;
+        server_name prometheus.REPLACE_BASE_DOMAIN;
         resolver kube-dns.kube-system.svc.cluster.local valid=10s;
         location / {
           proxy_pass http://promstack-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090;
@@ -54,7 +39,7 @@ proxy:
       }
       server {
         listen 80;
-        server_name grafana.famquest.REPLACE_BASE_DOMAIN;
+        server_name grafana.REPLACE_BASE_DOMAIN;
         resolver kube-dns.kube-system.svc.cluster.local valid=10s;
         location / {
           proxy_pass http://promstack-grafana.monitoring.svc.cluster.local:80;
@@ -66,13 +51,13 @@ proxy:
 common:
   labels:
     # Useful to link to other deployments
-    app: gateway
-    fullapp: famquest
-  baseDomain: famquest.REPLACE_BASE_DOMAIN
+    app: common
+    fullapp: testbed
+  baseDomain: REPLACE_BASE_DOMAIN
   pullSecret: gatewaysecrets
 
 # Configure the Exposure layer
 ingress:
   tls: true
-  email: REPLACE
+  email: guillermo.gc1994@gmail.com
   exporters: false # indirectly 

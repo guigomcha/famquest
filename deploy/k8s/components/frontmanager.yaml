@@ -12,19 +12,19 @@ spec:
       labels:
         app: frontmanager
     spec:
-      hostAliases:
-        - ip: "192.168.137.35"
-          hostnames:
-            - "api.famquest.REPLACE_BASE_DOMAIN"
-            - "portal.famquest.REPLACE_BASE_DOMAIN"
-            - "minio.famquest.REPLACE_BASE_DOMAIN"
-            - "minioapi.famquest.REPLACE_BASE_DOMAIN"
-            - "monitoring.famquest.REPLACE_BASE_DOMAIN"
+      # hostAliases:
+      #   - ip: "192.168.137.35"
+      #     hostnames:
+      #       - "api.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN"
+      #       - "minio.famquest.REPLACE_BASE_DOMAIN"
+      #       - "minioapi.famquest.REPLACE_BASE_DOMAIN"
+      #       - "portal.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN"
       imagePullSecrets:
         - name: gatewaysecrets
         - name: guigomchasecrets
       containers:
       - name: frontmanager
+        image: ghcr.io/guigomcha/famquest/frontmanager:staging
         imagePullPolicy: Always
         ports:
         - containerPort: 80

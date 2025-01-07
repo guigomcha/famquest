@@ -12,14 +12,13 @@ spec:
       labels:
         app: dbmanager
     spec:
-      hostAliases:
-        - ip: "192.168.137.35"
-          hostnames:
-            - "api.famquest.REPLACE_BASE_DOMAIN"
-            - "minio.famquest.REPLACE_BASE_DOMAIN"
-            - "minioapi.famquest.REPLACE_BASE_DOMAIN"
-            - "portal.famquest.REPLACE_BASE_DOMAIN"
-            - "monitoring.famquest.REPLACE_BASE_DOMAIN"
+      # hostAliases:
+      #   - ip: "192.168.137.35"
+      #     hostnames:
+      #       - "api.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN"
+      #       - "minio.famquest.REPLACE_BASE_DOMAIN"
+      #       - "minioapi.famquest.REPLACE_BASE_DOMAIN"
+      #       - "portal.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN"
       imagePullSecrets:
         - name: gatewaysecrets
         - name: guigomchasecrets
@@ -32,7 +31,7 @@ spec:
         args: ["-c", "./dbmanager"]
         env:
           - name: SWAGGER_URL
-            value: "api.famquest.REPLACE_BASE_DOMAIN"
+            value: "api.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN"
           - name: SWAGGER_SCHEMA
             value: "https"
           - name: SWAGGER_BASE_PATH
@@ -42,15 +41,15 @@ spec:
           - name: MINIO_URL
             value: "minioapi.famquest.REPLACE_BASE_DOMAIN"
           - name: MINIO_USER
-            value: "demo"
+            value: "REPLACE_TARGET_USER"
           - name: MINIO_PASSWORD
             value: "REPLACE_PASSWORD"
           - name: POSTGRES_DB_HOST
-            value: "postgresql-svc"
+            value: "postgresql-svc.famquest"
           - name: POSTGRES_DB_PORT
             value: "5432"
           - name: DB_NAME
-            value: famquest
+            value: REPLACE_TARGET_USER
         envFrom:
           - secretRef:
               name: postgres-credentials
@@ -67,3 +66,13 @@ spec:
       port: 8080
       targetPort: 8080
   type: ClusterIP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-credentials
+type: Opaque
+stringData:
+  POSTGRES_USER: REPLACE_USER
+  POSTGRES_PASSWORD: REPLACE_PASSWORD
+  POSTGRES_DB: REPLACE_TARGET_USER
