@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -58,7 +59,7 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.Log.Infof("Metadata received: %+v", attachment)
 	urlId := (uuid.New()).String()
-	_, err = connection.Minio.PutObject(context.Background(), strings.Split(attachment.ContentType, "/")[0], urlId, data, -1, minio.PutObjectOptions{ContentType: attachment.ContentType})
+	_, err = connection.Minio.PutObject(context.Background(), os.Getenv("DB_NAME")+"-"+strings.Split(attachment.ContentType, "/")[0], urlId, data, -1, minio.PutObjectOptions{ContentType: attachment.ContentType})
 	if err != nil {
 		http.Error(w, "Failed to upload to minio: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -116,8 +117,8 @@ func AttachmentGetAll(w http.ResponseWriter, r *http.Request) {
 		if att, ok := dest.(*models.Attachments); ok {
 			// Set request parameters
 			reqHeaders := make(http.Header)
-			// reqHeaders.Set("Host", "host.docker.internal")
-			presignedURL, err := connection.Minio.PresignHeader(context.Background(), http.MethodGet, strings.Split(att.ContentType, "/")[0], att.URL, time.Hour, make(url.Values), reqHeaders)
+
+			presignedURL, err := connection.Minio.PresignHeader(context.Background(), http.MethodGet, os.Getenv("DB_NAME")+"-"+strings.Split(att.ContentType, "/")[0], att.URL, time.Hour, make(url.Values), reqHeaders)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -152,8 +153,7 @@ func AttachmentGet(w http.ResponseWriter, r *http.Request) {
 	if att, ok := dest.(*models.Attachments); ok {
 		// Set request parameters
 		reqHeaders := make(http.Header)
-		// reqHeaders.Set("Host", "host.docker.internal")
-		presignedURL, err := connection.Minio.PresignHeader(context.Background(), http.MethodGet, strings.Split(att.ContentType, "/")[0], att.URL, time.Hour, make(url.Values), reqHeaders)
+		presignedURL, err := connection.Minio.PresignHeader(context.Background(), http.MethodGet, os.Getenv("DB_NAME")+"-"+strings.Split(att.ContentType, "/")[0], att.URL, time.Hour, make(url.Values), reqHeaders)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
