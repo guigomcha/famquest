@@ -84,7 +84,6 @@ func main() {
 		"http://localhost:8081",
 		"http://localhost:8080",
 		"https://portal.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN",
-		"https://portal.staging.famquest.REPLACE_BASE_DOMAIN",
 	}
 	allowedMethods := []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	allowedHeaders := []string{"Content-Type", "Accept"}

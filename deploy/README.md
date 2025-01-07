@@ -11,6 +11,8 @@
     + REPLACE_BASE_DOMAIN
     + REPLACE_TARGET_USER
     + REPLACE_DDNS_TOKEN (Optional, use if dynv6 as DDNS)
+    + REPLACE (for the keycloak details)
+    + const isLocal = true; -> set to false
 
 2. Build the images of all components (check their readmes.)
 
@@ -78,6 +80,7 @@ kubectl apply -f deploy/k8s/components/frontmanager.yaml -n REPLACE_TARGET_USER
 # Note: the current values and confimap overlay expect to have the monitoring stack already installed
 helm install gateway  OCI://ghcr.io/guigomcha/famquest/gateway --version 1.3.0 -n REPLACE_TARGET_USER -f deploy/k8s/components/values.yaml
 kubectl apply -f deploy/k8s/components/gateway-cm.yaml -n REPLACE_TARGET_USER
+kubectl rollout restart deployment -n REPLACE_TARGET_USER gateway-deployment
 ```
 
 
