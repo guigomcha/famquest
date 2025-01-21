@@ -27,7 +27,27 @@ spec:
           ports:
           - containerPort: 9000
           - containerPort: 9001
-
+          volumeMounts:
+            - mountPath: /data
+              name: minio-vol
+      volumes:
+      - name: minio-vol
+        persistentVolumeClaim:
+          claimName: minio-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # persistentVolumeReclaimPolicy: Delete (only when the pvc is deleted, not the pod)
+  storageClassName: local-path
+  resources:
+    # The capacity limit will be ignored for now. https://github.com/rancher/local-path-provisioner/blob/master/README.md#cons
+    requests: # All mediaTypes of all users
+      storage: 100Gi
 ---
 apiVersion: v1
 kind: Service

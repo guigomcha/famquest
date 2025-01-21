@@ -20,7 +20,27 @@ spec:
               name: postgres-credentials
         ports:
         - containerPort: 5432
-
+        volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            name: postgresql-vol
+      volumes:
+      - name: postgresql-vol
+        persistentVolumeClaim:
+          claimName: postgresql-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgresql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # persistentVolumeReclaimPolicy: Delete (only when the pvc is deleted, not the pod)
+  storageClassName: local-path
+  resources:
+    # The capacity limit will be ignored for now. https://github.com/rancher/local-path-provisioner/blob/master/README.md#cons
+    requests: # Only for users
+      storage: 10Gi
 ---
 apiVersion: v1
 kind: Service
@@ -44,3 +64,4 @@ stringData:
   POSTGRES_USER: REPLACE_USER
   POSTGRES_PASSWORD: REPLACE_PASSWORD
   POSTGRES_DB: keycloak
+  PGDATA: /var/lib/postgresql/data/k8s
