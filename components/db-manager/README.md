@@ -1,11 +1,11 @@
-  - [Description](#description)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installation](#installation)
-  - [Documentation](#documentation)
-  - [API documentation](#api-documentation)
-
 # DB Manager
+
+- [Description](#description)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Documentation](#documentation)
+- [API documentation](#api-documentation)
 
 ## Description
 
@@ -23,7 +23,7 @@ Golang 1.22
 
 Adapt `install/.env-tests`
 
-#### Local deployment via docker-compose and vscode dev containers 
+#### Local deployment via docker-compose and vscode dev containers
 
 It has been configured to use volumes to develop inside of the container.
 
@@ -31,6 +31,7 @@ It has been configured to use volumes to develop inside of the container.
 cd ../..
 docker-compose -f deploy/local/docker-compose.yaml up -d
 ```
+
 Connect via vscode dev container to /go/src/famquest/components/db-manager
 
 ```bash
@@ -52,7 +53,9 @@ a) Build the binary
 GOOS=linux  GARCH=amd64 CGO_ENABLED=0 go build -v -a -installsuffix cgo -o dbmanager . 
 ./dbmanager 
 ```
-b) Run directly 
+
+b) Run directly
+
 ```bash
 go run main.go
 ```
@@ -67,7 +70,7 @@ cd components/db-manager
 
 ## Documentation
 
-- https://www.alexedwards.net/blog/using-postgresql-jsonb
+- <https://www.alexedwards.net/blog/using-postgresql-jsonb>
 
 ## API documentation
 
