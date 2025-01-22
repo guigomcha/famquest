@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import * as L from 'leaflet';
 import { message } from 'antd';
 import Card from 'react-bootstrap/Card';
-import { ReloadOutlined } from '@ant-design/icons';
+import { ReloadOutlined, AimOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { Flex, Progress } from 'antd';
 import { uploadLocation } from '../backend_interface/db_manager_api';
@@ -14,6 +14,19 @@ const UserInfo = ({ user, spots, tasks, mapRef }) => {
     event.preventDefault();
     event.stopPropagation();
     window.location.reload();
+  };
+
+  const handleLocate = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const locations = userLocationsLayer.current.getLayers();
+    if (locations.length > 0) {
+      console.info("traveling to last known location: ", locations[locations.length -1].getLatLng());
+      mapRef.current.flyTo([locations[locations.length -1].getLatLng().lat, locations[locations.length -1].getLatLng().lng], 13);
+    } else {
+      console.info("No previous locations known: ", locations);
+      warning('No previous locations known');
+    }
   };
   
   const warning = (msg) => {
@@ -45,7 +58,7 @@ const UserInfo = ({ user, spots, tasks, mapRef }) => {
     mapRef.current.locate({setView: false, watch: true})
           // Probably better to try to save the location if it does not exist something close and the get the markers
           .on('locationfound', async function(e){
-            // Chekc if the position was already loaded
+            // Check if the position was already loaded
             const matches = userLocationsLayer.current.getLayers().filter(layer => layer.getLatLng().lat === e.latitude && layer.getLatLng().lng === e.longitude);
             if (matches.length > 0) {
               console.log("Current location exists:", matches);
@@ -120,6 +133,11 @@ const UserInfo = ({ user, spots, tasks, mapRef }) => {
             icon={<ReloadOutlined />}
             onClick={handleReload}
           >Reload</Button>
+          <Button trigger="click"
+            type="default"
+            icon={<AimOutlined />}
+            onClick={handleLocate}
+          >Location</Button>
         </Card.Footer>
       </Card>
     </>

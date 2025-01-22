@@ -1,12 +1,12 @@
-  - [Description](#description)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installation](#installation)
-    - [Run tests](#run-tests)
-  - [Documentation](#documentation)
-  - [API documentation](#api-documentation)
-
 # Frontend
+
+- [Description](#description)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Run tests](#run-tests)
+- [Documentation](#documentation)
+- [API documentation](#api-documentation)
 
 ## Description
 
@@ -15,13 +15,12 @@ The admins (family members) will have acess to the entire map to register everyt
 
 The objective is to have a close-to-native app by releasing a Progresive Web App
 
-
 ## Getting Started
-
 
 ### Prerequisites
 
 React JS
+
 - node -v v18.20.4
 - npm -v 10.7.0
 
@@ -53,7 +52,7 @@ npx expo install react-native-web react-dom @expo/metro-runtime
 
 - Adapt the env variables manually (process.env not working) search for REPLACE
 
-#### Local deployment via docker-compose and vscode dev containers 
+#### Local deployment via docker-compose and vscode dev containers
 
 It has been configured to use volumes to develop inside of the container.
 
@@ -61,6 +60,7 @@ It has been configured to use volumes to develop inside of the container.
 cd ../..
 docker-compose -f deploy/local/docker-compose.yaml up -d
 ```
+
 Connect via vscode dev container to /usr/src/famquest/components/front-manager
 
 ```bash
@@ -81,30 +81,29 @@ cd components/front-manager
 
 ### Run tests
 
-
 ## Documentation
 
 React documentation used:
 
-- https://www.freecodecamp.org/news/what-are-progressive-web-apps/
-- https://www.youtube.com/watch?v=4XT23X0Fjfk&list=PL4cUxeGkcC9gTxqJBcDmoi5Q2pzDusSL7
-- https://www.freecodecamp.org/news/how-work-with-restful-apis-in-react-simplified-steps-and-practical-examples/
-- https://blog.logrocket.com/complete-guide-react-native-web/
+- <https://www.freecodecamp.org/news/what-are-progressive-web-apps/>
+- <https://www.youtube.com/watch?v=4XT23X0Fjfk&list=PL4cUxeGkcC9gTxqJBcDmoi5Q2pzDusSL7>
+- <https://www.freecodecamp.org/news/how-work-with-restful-apis-in-react-simplified-steps-and-practical-examples/>
+- <https://blog.logrocket.com/complete-guide-react-native-web/>
 
 Pending things to implement
 
-- https://user-images.githubusercontent.com/23381975/229468456-36d01223-2820-46d6-86a5-441aef5a1640.mp4
-- https://github.com/leahbanks/BE-through-the-fog
-- https://github.com/Mburnand-tech/Through-the-fog/tree/master
-- https://snack.expo.dev/
-- https://dev.to/ghost/running-exporeact-native-in-docker-4hme
+- <https://user-images.githubusercontent.com/23381975/229468456-36d01223-2820-46d6-86a5-441aef5a1640.mp4>
+- <https://github.com/leahbanks/BE-through-the-fog>
+- <https://github.com/Mburnand-tech/Through-the-fog/tree/master>
+- <https://snack.expo.dev/>
+- <https://dev.to/ghost/running-exporeact-native-in-docker-4hme>
 
 Trying to run android emulator (Android studio has to be on the wondows side and can only interact with backends running also on the windows side or deployed with docker in WSL.) :
-- https://gist.github.com/sushant-at-nitor/30ca1185f2501f55fff61752d18387cc
-- https://atekihcan.com/blog/codeorrandom/how-to-setup-android-sdk-on-wsl/
-- https://medium.com/@danielrauhut/running-expo-dev-builds-from-wsl-on-your-windows-virtual-devices-android-emulator-bd7cc7e29418
 
+- <https://gist.github.com/sushant-at-nitor/30ca1185f2501f55fff61752d18387cc>
+- <https://atekihcan.com/blog/codeorrandom/how-to-setup-android-sdk-on-wsl/>
+- <https://medium.com/@danielrauhut/running-expo-dev-builds-from-wsl-on-your-windows-virtual-devices-android-emulator-bd7cc7e29418>
 
 ## API documentation
 
-Relies on the DB Manager's APIs 
+Relies on the DB Manager's APIs
