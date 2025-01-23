@@ -67,8 +67,8 @@ func Get(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
 		err := db.Get(&received, model.GetSelectOneQuery(), id)
 		return &received, err
 
-	case *models.Tasks:
-		received := models.Tasks{}
+	case *models.Users:
+		received := models.Users{}
 		err := db.Get(&received, model.GetSelectOneQuery(), id)
 		return &received, err
 
@@ -77,9 +77,6 @@ func Get(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
 		err := db.Get(&received, model.GetSelectOneQuery(), id)
 		if received.Attachments == nil {
 			received.Attachments = pq.Int64Array{}
-		}
-		if received.Tasks == nil {
-			received.Tasks = pq.Int64Array{}
 		}
 		return &received, err
 
@@ -118,8 +115,9 @@ func GetAll(db *sqlx.DB, model DbInterface, filter string) ([]DbInterface, error
 		}
 		logger.Log.Debug("objects casted to dbinterface")
 
-	case *models.Tasks:
-		received := []models.Tasks{}
+	case *models.Users:
+		received := []models.Users{}
+		logger.Log.Debugf("initial filter '%s'", m.GetSelectAllQuery())
 		err := db.Select(&received, m.GetSelectAllQuery()+" "+filter)
 		logger.Log.Debugf("objects obtained '%+v'", received)
 		if err != nil {

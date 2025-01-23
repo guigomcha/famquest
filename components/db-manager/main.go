@@ -58,19 +58,18 @@ func main() {
 	r.HandleFunc("/spot/{id}", api.SpotPut).Methods("PUT", "OPTIONS")
 	r.HandleFunc("/spot/{id}", api.SpotDelete).Methods("DELETE", "OPTIONS")
 
+	r.HandleFunc("/user", api.UserPost).Methods("POST", "OPTIONS")
+	r.HandleFunc("/user", api.UserGetAll).Methods("GET", "OPTIONS")
+	r.HandleFunc("/user/{id}", api.UserGet).Methods("GET", "OPTIONS")
+	r.HandleFunc("/user/{id}", api.UserPut).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/user/{id}", api.UserDelete).Methods("DELETE", "OPTIONS")
+
 	r.HandleFunc("/location", api.LocationPost).Methods("POST", "OPTIONS")
 	r.HandleFunc("/location", api.LocationGetAll).Methods("GET", "OPTIONS")
 	r.HandleFunc("/location/{id}", api.LocationGet).Methods("GET", "OPTIONS")
 	r.HandleFunc("/location/{id}", api.LocationPut).Methods("PUT", "OPTIONS")
 	r.HandleFunc("/location/{id}/ref", api.LocationPutRef).Methods("PUT", "OPTIONS")
 	r.HandleFunc("/location/{id}", api.LocationDelete).Methods("DELETE", "OPTIONS")
-
-	r.HandleFunc("/task", api.TaskPost).Methods("POST", "OPTIONS")
-	r.HandleFunc("/task", api.TaskGetAll).Methods("GET", "OPTIONS")
-	r.HandleFunc("/task/{id}", api.TaskGet).Methods("GET", "OPTIONS")
-	r.HandleFunc("/task/{id}/ref", api.TaskPutRef).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/task/{id}", api.TaskPut).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/task/{id}", api.TaskDelete).Methods("DELETE", "OPTIONS")
 
 	// Start the server
 	port := os.Getenv("SWAGGER_PORT")
@@ -83,7 +82,7 @@ func main() {
 		"http://localhost:3000",
 		"http://localhost:8081",
 		"http://localhost:8080",
-		"https://portal.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN",
+		"https://portal.staging.famquest.guigomcha.dynv6.net",
 	}
 	allowedMethods := []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	allowedHeaders := []string{"Content-Type", "Accept"}

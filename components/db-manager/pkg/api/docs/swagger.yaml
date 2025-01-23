@@ -25,15 +25,15 @@ definitions:
       name:
         type: string
     type: object
-  models.APITasks:
+  models.APIUsers:
     properties:
-      description:
-        description: Description
+      email:
+        type: string
+      extRef:
         type: string
       name:
         type: string
-      url:
-        description: Url
+      role:
         type: string
     type: object
   models.Attachments:
@@ -50,6 +50,8 @@ definitions:
         type: integer
       name:
         type: string
+      refUserUploader:
+        type: integer
       updatedAt:
         description: Automatically managed by trigger
         type: string
@@ -77,6 +79,8 @@ definitions:
       refType:
         description: Db + json
         type: string
+      refUserUploader:
+        type: integer
       updatedAt:
         description: Automatically managed by trigger
         type: string
@@ -100,25 +104,27 @@ definitions:
         type: integer
       name:
         type: string
-      tasks:
-        items:
-          type: integer
-        type: array
+      refUserUploader:
+        type: integer
       updatedAt:
         description: Automatically managed by trigger
         type: string
     type: object
-  models.Tasks:
+  models.Users:
     properties:
       createdAt:
         description: Automatically generated
         type: string
-      description:
+      email:
+        type: string
+      extRef:
         type: string
       id:
-        description: Db + Json
+        description: db + json
         type: integer
       name:
+        type: string
+      role:
         type: string
       updatedAt:
         description: Automatically managed by trigger
@@ -546,9 +552,9 @@ paths:
       summary: Update a spot by ID
       tags:
       - spot
-  /task:
+  /user:
     get:
-      description: Get a list of all tasks
+      description: Get a list of all users
       produces:
       - application/json
       responses:
@@ -556,37 +562,37 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Tasks'
+              $ref: '#/definitions/models.Users'
             type: array
-      summary: Retrieve all tasks
+      summary: Retrieve all users
       tags:
-      - task
+      - user
     post:
       consumes:
       - application/json
-      description: Create a new task
+      description: Create a new user
       parameters:
-      - description: Task data
+      - description: User data
         in: body
-        name: task
+        name: user
         required: true
         schema:
-          $ref: '#/definitions/models.APITasks'
+          $ref: '#/definitions/models.APIUsers'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Tasks'
-      summary: Create a task
+            $ref: '#/definitions/models.Users'
+      summary: Create a user
       tags:
-      - task
-  /task/{id}:
+      - user
+  /user/{id}:
     delete:
-      description: Delete a task and nullify its references in spots
+      description: Delete a user and nullify its references in users
       parameters:
-      - description: Task ID
+      - description: User ID
         in: path
         name: id
         required: true
@@ -598,13 +604,13 @@ paths:
           description: No Content
           schema:
             type: string
-      summary: Delete a task by ID
+      summary: Delete a user by ID
       tags:
-      - task
+      - user
     get:
-      description: Get task details by ID
+      description: Get user details by ID
       parameters:
-      - description: Task ID
+      - description: User ID
         in: path
         name: id
         required: true
@@ -615,65 +621,34 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Tasks'
-      summary: Retrieve a task by ID
+            $ref: '#/definitions/models.Users'
+      summary: Retrieve a user by ID
       tags:
-      - task
+      - user
     put:
       consumes:
       - application/json
-      description: Update task details by ID
+      description: Update user details by ID
       parameters:
-      - description: Task ID
+      - description: User ID
         in: path
         name: id
         required: true
         type: integer
-      - description: Task data
+      - description: User data
         in: body
-        name: task
+        name: user
         required: true
         schema:
-          $ref: '#/definitions/models.APITasks'
+          $ref: '#/definitions/models.APIUsers'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Tasks'
-      summary: Update a task by ID
+            $ref: '#/definitions/models.Users'
+      summary: Update a user by ID
       tags:
-      - task
-  /task/{id}/ref:
-    put:
-      description: Update the ref in a task details by ID
-      parameters:
-      - description: Task ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Reference ID (optional)
-        in: query
-        name: ref
-        required: true
-        type: integer
-      - description: Reference Type
-        enum:
-        - spot
-        in: query
-        name: refType
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Tasks'
-      summary: Update the ref
-      tags:
-      - task
+      - user
 swagger: "2.0"

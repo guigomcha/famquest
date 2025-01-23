@@ -19,14 +19,15 @@ type KnownLocations struct {
 	// Only db
 	UUID uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
 	// Db + json
-	RefType   string    `db:"ref_type" json:"refType"`
-	RefId     int       `db:"ref_id" json:"refId"`
-	ID        int       `db:"id" json:"id,omitempty"` // Auto-incremented integer ID
-	Name      string    `db:"name" json:"name"`
-	Longitude float64   `db:"longitude" json:"longitude"`            // Longitude as signed float
-	Latitude  float64   `db:"latitude" json:"latitude"`              // Latitude as signed float
-	CreatedAt time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
-	UpdatedAt time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
+	RefType         string    `db:"ref_type" json:"refType"`
+	RefId           int       `db:"ref_id" json:"refId"`
+	ID              int       `db:"id" json:"id,omitempty"` // Auto-incremented integer ID
+	Name            string    `db:"name" json:"name"`
+	Longitude       float64   `db:"longitude" json:"longitude"` // Longitude as signed float
+	Latitude        float64   `db:"latitude" json:"latitude"`   // Latitude as signed float
+	RefUserUploader int       `db:"ref_user_uploader" json:"refUserUploader"`
+	CreatedAt       time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
+	UpdatedAt       time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 }
 
 func (m *KnownLocations) GetTableName() string {
@@ -43,20 +44,20 @@ func (m *KnownLocations) GetSelectAllQuery() string {
 
 func (m *KnownLocations) GetInsertQuery() string {
 	return fmt.Sprintf(`
-		INSERT INTO %s (name, longitude, latitude)
-		VALUES (:name, :longitude, :latitude) RETURNING id`, m.GetTableName())
+		INSERT INTO %s (name, longitude, latitude, ref_user_uploader)
+		VALUES (:name, :longitude, :latitude, :ref_user_uploader) RETURNING id`, m.GetTableName())
 }
 
 func (m *KnownLocations) GetQuery() string {
 	return fmt.Sprintf(`
-		INSERT INTO %s (name, longitude, latitude)
-		VALUES (:name, :longitude, :latitude) RETURNING id`, m.GetTableName())
+		INSERT INTO %s (name, longitude, latitude, ref_user_uploader)
+		VALUES (:name, :longitude, :latitude, :ref_user_uploader) RETURNING id`, m.GetTableName())
 }
 
 func (m *KnownLocations) GetUpdateQuery() string {
 	return fmt.Sprintf(`
 			UPDATE %s
-			SET name = :name, longitude = :longitude, latitude = :latitude
+			SET name = :name, longitude = :longitude, latitude = :latitude, ref_user_uploader = :ref_user_uploader
 			WHERE id = :id`, m.GetTableName())
 }
 

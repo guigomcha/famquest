@@ -2,17 +2,40 @@ package api
 
 import (
 	"famquest/components/db-manager/pkg/connection"
+	"famquest/components/db-manager/pkg/models"
 	"famquest/components/go-common/logger"
+	"fmt"
 	"net/http"
 	"strconv"
 )
 
 // Generic operations used by all endpoints
-func setCORSHeaders(w http.ResponseWriter, r *http.Request) {
-	// w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
-	// w.Header().Set("Access-Control-Allow-Credentials", "true")
-	// w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+func handleHeaders(w http.ResponseWriter, r *http.Request) map[string]interface{} {
 	logger.Log.Debug("CORS managed by NGINX")
+	logger.Log.Debug("headers: %+v", r.Header)
+	// r.Header["X-User"] = []string{"dc6ad4ad-52cd-4dbf-bc26-759472d063a6"}
+	// Checking if the user and roles are available in the headers
+	info := make(map[string]interface{})
+	info["user"] = 0
+
+	if values, ok := r.Header["X-User"]; ok && len(values) > 0 {
+		logger.Log.Debugf("User info in header: %+v\n", values)
+		userRef := values[0] // The value of the X-User header
+		logger.Log.Debugf("Created filter: WHERE ext_ref = '%s'", userRef)
+		dest, _, _ := crudGetAll(&models.Users{}, fmt.Sprintf("WHERE ext_ref = '%s'", userRef))
+		// Check if a user was found
+		if len(dest) != 1 {
+			logger.Log.Debugf("Should have found the user: %+v\n", dest)
+		} else {
+			if usr, ok := dest[0].(*models.Users); ok {
+				logger.Log.Debugf("User found: %+v\n", usr)
+				info["user"] = usr.ID
+			} else {
+				logger.Log.Debug("User not casted correctly")
+			}
+		}
+	}
+	return info
 }
 
 func parseId(stringId string) (int, error) {
