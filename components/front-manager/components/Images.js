@@ -4,7 +4,7 @@ import Container from 'react-bootstrap/Container';
 import Card from 'react-bootstrap/Card';
 import { Button } from 'antd';
 import { EditOutlined, FileAddOutlined } from '@ant-design/icons';
-import { fetchAttachments } from '../backend_interface/db_manager_api';
+import { fetchAttachments, getUserName } from '../backend_interface/db_manager_api';
 import {renderEmptyState} from '../utils/render_message';
 import Audio from './Audio';
 import ImagesForm from './ImagesForm';
@@ -12,6 +12,7 @@ import ImagesForm from './ImagesForm';
 const Images = ( {refId, refType, handleMenuChange} ) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [info, setInfo] = useState({"userName": "unknown"});
 
   const handleSelect = (selectedIndex) => {
     setActiveIndex(selectedIndex);
@@ -39,14 +40,31 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
         setSelectedImages((prevImages) => [...prevImages, attachment]);
       }
     });
+    fetchRelatedInfo(attachments[0]);
   };
+
+  // fetch the additional info for this spot
+  const fetchRelatedInfo = async (model) => {
+    console.info("fetching info for ", model);
+    if (!model){
+      return;
+    }
+    const name = await getUserName(model.refUserUploader);
+    setInfo({
+      "userName": name
+    }); 
+  }
 
   // fetch the attachments for this spot
   useEffect(() => {
     callFetchAttachmentsForSpot(refId, refType)
   }, [refId]);
-
   
+  useEffect(() => {
+    fetchRelatedInfo(selectedImages[activeIndex]);
+  }, [activeIndex]);
+
+
   return (
     <>
       <Card.Body>
@@ -59,6 +77,7 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
                   <Card.Img src={image.url} alt={`Attachment ${index + 1}`} className="center-block" />
                   <Card.Title>{image.name}</Card.Title>
                   <Card.Text>{image.description}</Card.Text>
+                  <Card.Text>Uploader: {info.userName}</Card.Text>
                 </Card>
               </Carousel.Item>
             ))}

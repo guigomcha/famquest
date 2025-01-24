@@ -17,7 +17,6 @@ import (
 // @Router /configure [get]
 func Configure(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("initiating db manager backend")
-	setCORSHeaders(w, r)
 	db, err := connection.ConnectToPostgreSQL()
 	if err != nil {
 		logger.Log.Error(err.Error())

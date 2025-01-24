@@ -31,7 +31,7 @@ import (
 // @Router /attachment [post]
 func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentPost")
-	setCORSHeaders(w, r)
+	info := handleHeaders(w, r)
 	// Parse multipart form data with a maximum file size of 10MB
 	err := r.ParseMultipartForm(500 << 20) // 500 MB
 	if err != nil {
@@ -49,9 +49,10 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer data.Close()
 	attachment := models.Attachments{
-		Name:        r.FormValue("name"),
-		Description: r.FormValue("description"),
-		ContentType: header.Header.Get("Content-Type"),
+		Name:            r.FormValue("name"),
+		Description:     r.FormValue("description"),
+		ContentType:     header.Header.Get("Content-Type"),
+		RefUserUploader: info["user"].(int),
 	}
 	if strings.HasPrefix(attachment.ContentType, "image/") && strings.HasPrefix(attachment.ContentType, "audio/") {
 		http.Error(w, "ContentType not supported", http.StatusBadRequest)
@@ -87,7 +88,7 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 // @Router /attachment [get]
 func AttachmentGetAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentGetAll")
-	setCORSHeaders(w, r)
+	handleHeaders(w, r)
 	// Create the filter
 	filter := ""
 	if r.URL.Query().Get("refId") != "" {
@@ -143,7 +144,7 @@ func AttachmentGetAll(w http.ResponseWriter, r *http.Request) {
 // @Router /attachment/{id} [get]
 func AttachmentGet(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentGet")
-	setCORSHeaders(w, r)
+	handleHeaders(w, r)
 	var dest connection.DbInterface
 	dest, httpStatus, err := crudGet(&models.Attachments{}, mux.Vars(r))
 	if err != nil {
@@ -175,7 +176,7 @@ func AttachmentGet(w http.ResponseWriter, r *http.Request) {
 // @Router /attachment/{id} [delete]
 func AttachmentDelete(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentDelete")
-	setCORSHeaders(w, r)
+	handleHeaders(w, r)
 	intId, err := parseId(mux.Vars(r)["id"])
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -221,7 +222,7 @@ func AttachmentDelete(w http.ResponseWriter, r *http.Request) {
 // @Router /attachment/{id} [put]
 func AttachmentPut(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentPut")
-	setCORSHeaders(w, r)
+	info := handleHeaders(w, r)
 	var attachment models.Attachments
 	var dest connection.DbInterface
 	err := json.NewDecoder(r.Body).Decode(&attachment)
@@ -239,6 +240,8 @@ func AttachmentPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	attachment.ID = intId
+	attachment.RefUserUploader = info["user"].(int)
+
 	// Update the attachment
 	logger.Log.Debug("Decoded object")
 	dest, httpStatus, err := crudPut(&attachment, mux.Vars(r))
@@ -262,7 +265,7 @@ func AttachmentPut(w http.ResponseWriter, r *http.Request) {
 // @Router /attachment/{id}/ref [put]
 func AttachmentPutRef(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func AttachmentPutRef")
-	setCORSHeaders(w, r)
+	info := handleHeaders(w, r)
 	// first ensure ref is ok
 	intId, err := parseId(r.URL.Query().Get("refId"))
 	if err != nil || intId == 0 {
@@ -274,8 +277,6 @@ func AttachmentPutRef(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Query().Get("refType") {
 	case "spot":
 		_, httpStatus, err = crudGet(&models.Spots{}, map[string]string{"id": fmt.Sprint(intId)})
-	case "task":
-		_, httpStatus, err = crudGet(&models.Tasks{}, map[string]string{"id": fmt.Sprint(intId)})
 	case "attachment":
 		_, httpStatus, err = crudGet(&models.Attachments{}, map[string]string{"id": fmt.Sprint(intId)})
 	default:
@@ -300,6 +301,7 @@ func AttachmentPutRef(w http.ResponseWriter, r *http.Request) {
 	}
 	attachment.RefId = intId
 	attachment.RefType = r.URL.Query().Get("refType")
+	attachment.RefUserUploader = info["user"].(int)
 	// Update the attachment which will trigger the GetInsertExtraQueries
 	logger.Log.Debug("Decoded object")
 	dest, httpStatus, err = crudPut(dest, mux.Vars(r))

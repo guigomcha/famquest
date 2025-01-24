@@ -22,7 +22,7 @@ import (
 // @Router /location [post]
 func LocationPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationPost")
-	setCORSHeaders(w, r)
+	info := handleHeaders(w, r)
 	var location models.KnownLocations
 	var dest connection.DbInterface
 	if err := json.NewDecoder(r.Body).Decode(&location); err != nil {
@@ -37,6 +37,7 @@ func LocationPost(w http.ResponseWriter, r *http.Request) {
 			location.RefType = r.URL.Query().Get("refType")
 		}
 	}
+	location.RefUserUploader = info["user"].(int)
 	dest, httpStatus, err := crudPost(&location)
 	if err != nil {
 		logger.Log.Error(err.Error())
@@ -56,7 +57,7 @@ func LocationPost(w http.ResponseWriter, r *http.Request) {
 // @Router /location [get]
 func LocationGetAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationGetAll")
-	setCORSHeaders(w, r)
+	handleHeaders(w, r)
 	dest, httpStatus, err := crudGetAll(&models.KnownLocations{}, "")
 	logger.Log.Debugf("objects obtained '%d'", len(dest))
 	if err != nil {
@@ -82,7 +83,7 @@ func LocationGetAll(w http.ResponseWriter, r *http.Request) {
 // @Router /location/{id} [get]
 func LocationGet(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationGet")
-	setCORSHeaders(w, r)
+	handleHeaders(w, r)
 	var dest connection.DbInterface
 	dest, httpStatus, err := crudGet(&models.KnownLocations{}, mux.Vars(r))
 	if err != nil {
@@ -103,7 +104,7 @@ func LocationGet(w http.ResponseWriter, r *http.Request) {
 // @Router /location/{id} [delete]
 func LocationDelete(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationDelete")
-	setCORSHeaders(w, r)
+	handleHeaders(w, r)
 	// First delete the location
 	var location models.KnownLocations
 	httpStatus, err := crudDelete(&location, mux.Vars(r))
@@ -127,6 +128,7 @@ func LocationDelete(w http.ResponseWriter, r *http.Request) {
 // @Router /location/{id} [put]
 func LocationPut(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationPut")
+	info := handleHeaders(w, r)
 	var location models.KnownLocations
 	var dest connection.DbInterface
 	err := json.NewDecoder(r.Body).Decode(&location)
@@ -148,6 +150,7 @@ func LocationPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	location.ID = intId
+	location.RefUserUploader = info["user"].(int)
 	// Update the location
 	logger.Log.Debug("Decoded object")
 	dest, httpStatus, err := crudPut(&location, mux.Vars(r))
@@ -172,6 +175,7 @@ func LocationPut(w http.ResponseWriter, r *http.Request) {
 // @Router /location/{id}/ref [put]
 func LocationPutRef(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func LocationPutRef")
+	info := handleHeaders(w, r)
 	// first ensure ref is ok
 	intId, err := parseId(r.URL.Query().Get("refId"))
 	if err != nil || intId == 0 {
@@ -204,6 +208,7 @@ func LocationPutRef(w http.ResponseWriter, r *http.Request) {
 	}
 	location.RefId = intId
 	location.RefType = r.URL.Query().Get("refType")
+	location.RefUserUploader = info["user"].(int)
 	// Update the location which will trigger the GetInsertExtraQueries
 	logger.Log.Debug("Decoded object")
 	dest, httpStatus, err = crudPut(dest, mux.Vars(r))

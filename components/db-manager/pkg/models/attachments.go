@@ -20,13 +20,14 @@ type Attachments struct {
 	RefType string    `db:"ref_type" json:"-"`
 	RefId   int       `db:"ref_id" json:"-"`
 	// DB + JSON
-	ID          int       `db:"id" json:"id"` // Auto-incremented integer ID
-	Name        string    `db:"name" json:"name"`
-	ContentType string    `db:"content_type" json:"contentType"`
-	Description string    `db:"description" json:"description"`
-	URL         string    `db:"url" json:"url"`
-	CreatedAt   time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
-	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
+	ID              int       `db:"id" json:"id"` // Auto-incremented integer ID
+	Name            string    `db:"name" json:"name"`
+	ContentType     string    `db:"content_type" json:"contentType"`
+	Description     string    `db:"description" json:"description"`
+	URL             string    `db:"url" json:"url"`
+	RefUserUploader int       `db:"ref_user_uploader" json:"refUserUploader"`
+	CreatedAt       time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
+	UpdatedAt       time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 }
 
 func (m *Attachments) GetTableName() string {
@@ -43,20 +44,20 @@ func (m *Attachments) GetSelectAllQuery() string {
 
 func (m *Attachments) GetInsertQuery() string {
 	return fmt.Sprintf(`
-		INSERT INTO %s (name, description, url, content_type)
-		VALUES (:name, :description, :url, :content_type) RETURNING id`, m.GetTableName())
+		INSERT INTO %s (name, description, url, content_type, ref_user_uploader)
+		VALUES (:name, :description, :url, :content_type, :ref_user_uploader) RETURNING id`, m.GetTableName())
 }
 
 func (m *Attachments) GetQuery() string {
 	return fmt.Sprintf(`
-		INSERT INTO %s (name, description, url, content_type)
-		VALUES (:name, :description, :url, :content_type) RETURNING id`, m.GetTableName())
+		INSERT INTO %s (name, description, url, content_type, ref_user_uploader)
+		VALUES (:name, :description, :url, :content_type, :ref_user_uploader) RETURNING id`, m.GetTableName())
 }
 
 func (m *Attachments) GetUpdateQuery() string {
 	return fmt.Sprintf(`
 			UPDATE %s
-			SET name = :name, description = :description
+			SET name = :name, description = :description, ref_user_uploader=:ref_user_uploader
 			WHERE id = :id`, m.GetTableName())
 }
 

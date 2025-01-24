@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Button from 'react-bootstrap/Button';
+import { registerUser } from '../backend_interface/db_manager_api';
 
 const isLocal = true;
 
@@ -16,6 +17,9 @@ const OAuth2Login = ({ onUserChange }) => {
       .then((data) => {
         setUser(data);
         console.info(JSON.stringify(data));
+        // Register the user in the backend if it does not exist
+        const resp = registerUser(data);
+        console.info("Response from registerUser: ", resp)
         onUserChange(data); // Notify parent component
       })
       .catch(() => {

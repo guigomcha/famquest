@@ -639,30 +639,30 @@ const docTemplate = `{
                 }
             }
         },
-        "/task": {
+        "/user": {
             "get": {
-                "description": "Get a list of all tasks",
+                "description": "Get a list of all users",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "task"
+                    "user"
                 ],
-                "summary": "Retrieve all tasks",
+                "summary": "Retrieve all users",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Tasks"
+                                "$ref": "#/definitions/models.Users"
                             }
                         }
                     }
                 }
             },
             "post": {
-                "description": "Create a new task",
+                "description": "Create a new user",
                 "consumes": [
                     "application/json"
                 ],
@@ -670,17 +670,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "task"
+                    "user"
                 ],
-                "summary": "Create a task",
+                "summary": "Create a user",
                 "parameters": [
                     {
-                        "description": "Task data",
-                        "name": "task",
+                        "description": "User data",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.APITasks"
+                            "$ref": "#/definitions/models.APIUsers"
                         }
                     }
                 ],
@@ -688,26 +688,26 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Tasks"
+                            "$ref": "#/definitions/models.Users"
                         }
                     }
                 }
             }
         },
-        "/task/{id}": {
+        "/user/{id}": {
             "get": {
-                "description": "Get task details by ID",
+                "description": "Get user details by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "task"
+                    "user"
                 ],
-                "summary": "Retrieve a task by ID",
+                "summary": "Retrieve a user by ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Task ID",
+                        "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -717,13 +717,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Tasks"
+                            "$ref": "#/definitions/models.Users"
                         }
                     }
                 }
             },
             "put": {
-                "description": "Update task details by ID",
+                "description": "Update user details by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -731,24 +731,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "task"
+                    "user"
                 ],
-                "summary": "Update a task by ID",
+                "summary": "Update a user by ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Task ID",
+                        "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Task data",
-                        "name": "task",
+                        "description": "User data",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.APITasks"
+                            "$ref": "#/definitions/models.APIUsers"
                         }
                     }
                 ],
@@ -756,24 +756,24 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Tasks"
+                            "$ref": "#/definitions/models.Users"
                         }
                     }
                 }
             },
             "delete": {
-                "description": "Delete a task and nullify its references in spots",
+                "description": "Delete a user and nullify its references in users",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "task"
+                    "user"
                 ],
-                "summary": "Delete a task by ID",
+                "summary": "Delete a user by ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Task ID",
+                        "description": "User ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -784,52 +784,6 @@ const docTemplate = `{
                         "description": "No Content",
                         "schema": {
                             "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/task/{id}/ref": {
-            "put": {
-                "description": "Update the ref in a task details by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "task"
-                ],
-                "summary": "Update the ref",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Task ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Reference ID (optional)",
-                        "name": "ref",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "enum": [
-                            "spot"
-                        ],
-                        "type": "string",
-                        "description": "Reference Type",
-                        "name": "refType",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Tasks"
                         }
                     }
                 }
@@ -876,18 +830,19 @@ const docTemplate = `{
                 }
             }
         },
-        "models.APITasks": {
+        "models.APIUsers": {
             "type": "object",
             "properties": {
-                "description": {
-                    "description": "Description",
+                "email": {
+                    "type": "string"
+                },
+                "extRef": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "url": {
-                    "description": "Url",
+                "role": {
                     "type": "string"
                 }
             }
@@ -911,6 +866,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "refUserUploader": {
+                    "type": "integer"
                 },
                 "updatedAt": {
                     "description": "Automatically managed by trigger",
@@ -950,6 +908,9 @@ const docTemplate = `{
                     "description": "Db + json",
                     "type": "string"
                 },
+                "refUserUploader": {
+                    "type": "integer"
+                },
                 "updatedAt": {
                     "description": "Automatically managed by trigger",
                     "type": "string"
@@ -983,11 +944,8 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "tasks": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                "refUserUploader": {
+                    "type": "integer"
                 },
                 "updatedAt": {
                     "description": "Automatically managed by trigger",
@@ -995,21 +953,27 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Tasks": {
+        "models.Users": {
             "type": "object",
             "properties": {
                 "createdAt": {
                     "description": "Automatically generated",
                     "type": "string"
                 },
-                "description": {
+                "email": {
+                    "type": "string"
+                },
+                "extRef": {
                     "type": "string"
                 },
                 "id": {
-                    "description": "Db + Json",
+                    "description": "db + json",
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "role": {
                     "type": "string"
                 },
                 "updatedAt": {

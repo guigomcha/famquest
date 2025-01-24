@@ -9,6 +9,91 @@
 const API_URL = "https://api.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN";
 const isLocal = true;
 
+export const registerUser = async (data) => {
+  console.info("URL: "+ API_URL + "user connected" + JSON.stringify(data));
+  try {
+    const response = await fetch(`${API_URL}/user`, {
+      headers: {
+        'accept': 'application/json',
+      },
+      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const users = await response.json();
+    console.info("Fetched users "+ JSON.stringify(users))
+    const matches = users.filter(user => user.extRef === data.user);
+    if (matches.length > 0) {
+      console.log("Current user exists:", matches);
+      return;
+    }
+    console.log("Registering new user");
+    // Register
+    var role = "contributor"
+    for (let r of ["contributor", "owner", "hybrid", "admin"]) {
+      if (data.groups.some(group => group.includes(r))) {
+        role = r;
+      }
+    }
+    try {
+      const response = await fetch(`${API_URL}/user`, {
+        method: 'POST',
+        body: JSON.stringify({
+          "extRef": data.user,
+          "name": data.preferredUsername,
+          "email": data.email,
+          "role": role
+        }
+        ),
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+        // mode: 'cors',
+      });
+  
+      if (response.ok) {
+        const finalUser = await response.json();
+        return finalUser; // return the URL or data if needed
+      } else {
+        console.error('Failed to upload the user:', response.text());
+        return null;
+      }
+    } catch (error) {
+      console.error('Error uploading user:', error);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching initial users: ", error);
+    return null;
+  }
+};
+export const getUserName = async (refId) => {
+  console.info("URL: "+ API_URL + "user requested" + refId);
+  if (refId == 0) {
+    return "unknown";
+  }
+  try {
+    const response = await fetch(`${API_URL}/user/`+refId, {
+      headers: {
+        'accept': 'application/json',
+      },
+      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const user = await response.json();
+    console.info("Fetched user "+ JSON.stringify(user))
+    return user?.name || "unknown";
+  } catch (error) {
+    console.error("Error fetching user: ", error);
+    return null;
+  }
+};
+
 export const fetchCoordinates = async () => {
   console.info("URL: "+ API_URL);
   try {
