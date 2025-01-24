@@ -11,19 +11,21 @@ import SlideMenu from './SlideMenu';
 
 const SpotPopup = ({ spot }) => {
   const [component, setComponent] = useState(null);
-  const [info, setInfo] = useState({"userName": "unknown"});
+  const [info, setInfo] = useState({ "userName": "unknown" });
 
   const handleRequestEdit = (e) => {
-    setComponent(<SpotForm initialData={spot} onSubmit={async (data) => SpotFromForm(data, e.target.data)} handledFinished={handleNestedRequestEdit}/>); // Trigger show slideMenu
-  }; 
+    setComponent(<SpotForm initialData={spot} onSubmit={async (data) => SpotFromForm(data, e.target.data)} handledFinished={handleNestedRequestEdit} />);
+  };
+
   const handleNestedRequestEdit = (comp) => {
-    if (comp == "done"){
-      // I need to invalidate the query for the spots show that it gets reloaded
+    console.info("handleNested ", comp);
+    if (comp == "done" || !comp) {
       setComponent(null);  
     } else {
       setComponent(comp); // Trigger show slideMenu
     }
-  }; 
+  };
+
   // fetch the additional info for this spot
   const fetchRelatedInfo = async (model) => {
     console.info("fetching info for ", model);
@@ -33,42 +35,59 @@ const SpotPopup = ({ spot }) => {
     const name = await getUserName(model.refUserUploader);
     setInfo({
       "userName": name
-    }); 
-  }
+    });
+  };
+
   useEffect(() => {
     fetchRelatedInfo(spot);
   }, [spot]);
 
+  // Function to safely render description with line breaks
+  const renderDescription = (description) => {
+    if (!description) return null;
+    // Replace newlines with <br /> to preserve formatting
+    const formattedDescription = description.split('\n').map((line, index) => (
+      <React.Fragment key={index}>
+        {line}
+        <br />
+      </React.Fragment>
+    ));
+    return formattedDescription;
+  };
+
   return (
-    <>    
-    <Card> 
-      <Card.Title>Spot: {spot.name}</Card.Title> 
+    <>
       <Card>
-        <Card.Title>Global info</Card.Title> 
-        <Card.Body>
-          <Card.Text>{spot.description}</Card.Text>
-          <Button trigger="click"
-            type="default"
-            icon={<EditOutlined />}
-            onClick={handleRequestEdit}
-            >Edit</Button>
-    
-        </Card.Body>
-        <Card.Footer>
-          <Card.Text>Uploader: {info.userName}</Card.Text>
-        </Card.Footer>
+        <Card.Title>Spot: {spot.name}</Card.Title>
+        <Card>
+          <Card.Title>Global info</Card.Title>
+          <Card.Body>
+            {/* Render description with line breaks */}
+            <Card.Text>{renderDescription(spot.description)}</Card.Text>
+            <Button
+              trigger="click"
+              type="default"
+              icon={<EditOutlined />}
+              onClick={handleRequestEdit}
+            >
+              Edit
+            </Button>
+          </Card.Body>
+          <Card.Footer>
+            <Card.Text>Uploader: {info.userName}</Card.Text>
+          </Card.Footer>
+        </Card>
+        <Card>
+          <Card.Title>Audios in the Spot</Card.Title>
+          <Audio refId={spot.id} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
+        </Card>
+        <Card>
+          <Card.Title>Images in the Spot</Card.Title>
+          <Images refId={spot.id} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
+        </Card>
       </Card>
-      <Card>
-        <Card.Title>Audios in the Spot</Card.Title> 
-        <Audio refId={spot.id} refType={'spot'} handleMenuChange={handleNestedRequestEdit}/> 
-      </Card> 
-      <Card>
-        <Card.Title>Images in the Spot</Card.Title> 
-        <Images refId={spot.id} refType={'spot'} handleMenuChange={handleNestedRequestEdit}/>
-      </Card> 
-    </Card>
-    {component && <SlideMenu component={component} ></SlideMenu>}
-    </>   
+      <SlideMenu component={component} handledFinished={handleNestedRequestEdit}/>
+    </>
   );
 };
 
