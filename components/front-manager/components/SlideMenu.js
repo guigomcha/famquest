@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Drawer } from "antd";
 import { ColumnHeightOutlined } from '@ant-design/icons';
 
-const SlideMenu = ({ component }) => {
+const SlideMenu = ({ component, handledFinished }) => {
   const [open, setOpen] = useState(true);
   const [height, setHeight] = useState(300); // Initial height of the Drawer
   const dragRef = useRef(null);
@@ -10,6 +10,8 @@ const SlideMenu = ({ component }) => {
   const onClose = () => {
     setOpen(false);
     component = null;
+    handledFinished(null);
+    console.info("should have closed it")
   };
 
   const startDragging = (e) => {
@@ -61,7 +63,7 @@ const SlideMenu = ({ component }) => {
             position: "sticky", // Keeps it floating at the top of the Drawer
             top: 0, // Adjust as needed for placement
             zIndex: 10, // Ensures it stays above content
-            height: "15px",
+            height: "30px",
             cursor: "row-resize",
             width: "100%",
             padding: 0,
@@ -70,7 +72,7 @@ const SlideMenu = ({ component }) => {
             justifyContent: "center",
           }}
         >
-          <ColumnHeightOutlined style={{height: "10px"}}/>
+          <ColumnHeightOutlined style={{height: "30px"}}/>
         </div>
         <div>{component}</div>
       </Drawer>
