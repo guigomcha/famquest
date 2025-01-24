@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS attachments (
 CREATE TABLE IF NOT EXISTS users (
     uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- UUID as primary key
     id SERIAL UNIQUE NOT NULL,                         -- Auto-incremented integer ID
-    ext_ref UUID NOT NULL,                                -- User UUID from keycloak
+    ext_ref TEXT NOT NULL,                                -- User UUID from keycloak
     email TEXT NOT NULL,                               -- Email of the user
     role TEXT CHECK (role IN ('owner', 'contributor', 'admin', 'target', 'hybrid')),  -- Role with constraints
     name TEXT NOT NULL,                  -- Preferred Username in keycloak

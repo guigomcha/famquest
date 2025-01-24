@@ -21,10 +21,9 @@ func handleHeaders(w http.ResponseWriter, r *http.Request) map[string]interface{
 	if values, ok := r.Header["X-User"]; ok && len(values) > 0 {
 		logger.Log.Debugf("User info in header: %+v\n", values)
 		userRef := values[0] // The value of the X-User header
-		logger.Log.Debugf("Created filter: WHERE ext_ref = '%s'", userRef)
 		dest, _, _ := crudGetAll(&models.Users{}, fmt.Sprintf("WHERE ext_ref = '%s'", userRef))
 		// Check if a user was found
-		if len(dest) != 1 {
+		if len(dest) == 0 {
 			logger.Log.Debugf("Should have found the user: %+v\n", dest)
 		} else {
 			if usr, ok := dest[0].(*models.Users); ok {

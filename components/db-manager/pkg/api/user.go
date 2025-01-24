@@ -22,7 +22,6 @@ import (
 // @Router /user [post]
 func UserPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func UserPost")
-	handleHeaders(w, r)
 	var user models.Users
 	var dest connection.DbInterface
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -47,9 +46,6 @@ func UserPost(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {array} models.Users
 // @Router /user [get]
 func UserGetAll(w http.ResponseWriter, r *http.Request) {
-	//Allow CORS here By * or specific origin
-	// w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	handleHeaders(w, r)
 	logger.Log.Info("Called to func UserGetAll")
 	dest, httpStatus, err := crudGetAll(&models.Users{}, "")
 	logger.Log.Debugf("objects obtained '%d'", len(dest))
@@ -75,7 +71,6 @@ func UserGetAll(w http.ResponseWriter, r *http.Request) {
 // @Router /user/{id} [get]
 func UserGet(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func UserGet")
-	handleHeaders(w, r)
 	var dest connection.DbInterface
 	dest, httpStatus, err := crudGet(&models.Users{}, mux.Vars(r))
 	if err != nil {
@@ -95,7 +90,6 @@ func UserGet(w http.ResponseWriter, r *http.Request) {
 // @Router /user/{id} [delete]
 func UserDelete(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func UserDelete")
-	handleHeaders(w, r)
 	// First delete the user
 	var user models.Users
 	httpStatus, err := crudDelete(&user, mux.Vars(r))
@@ -118,7 +112,6 @@ func UserDelete(w http.ResponseWriter, r *http.Request) {
 // @Router /user/{id} [put]
 func UserPut(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func UserPut")
-	handleHeaders(w, r)
 	var user models.Users
 	var dest connection.DbInterface
 	err := json.NewDecoder(r.Body).Decode(&user)

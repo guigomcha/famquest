@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { fetchAttachments } from '../backend_interface/db_manager_api';
+import { fetchAttachments, getUserName } from '../backend_interface/db_manager_api';
 import {renderEmptyState} from '../utils/render_message';
 import Card from 'react-bootstrap/Card';
 import Carousel from 'react-bootstrap/Carousel';
@@ -10,7 +10,8 @@ import AudioForm from './AudioForm';
 const Audio = ({ refId, refType, handleMenuChange }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedAudios, setSelectedAudios] = useState([]);
-  
+  const [info, setInfo] = useState({"userName": "unknown"});
+
   const handleSelect = (selectedIndex) => {
     setActiveIndex(selectedIndex);
   };
@@ -38,12 +39,29 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
         setSelectedAudios((prevImages) => [...prevImages, attachment]);
       }
     });
+    fetchRelatedInfo(attachments[0]);
   };
 
   // fetch the attachments for this spot
   useEffect(() => {
     callFetchAttachmentsForSpot(refId, refType)
   }, [refId]);
+
+  // fetch the additional info for this audio
+  const fetchRelatedInfo = async (model) => {
+    console.info("fetching info for ", model);
+    if (!model){
+      return;
+    }
+    const name = await getUserName(model.refUserUploader);
+    setInfo({
+      "userName": name
+    }); 
+  }
+
+  useEffect(() => {
+    fetchRelatedInfo(selectedAudios[activeIndex]);
+  }, [activeIndex]);
 
   return (
       <>
@@ -63,6 +81,7 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
                     <Card.Footer>
                         <Card.Title>{audio.name}</Card.Title>
                         <Card.Text>{audio.description}</Card.Text>
+                        <Card.Text>Uploader: {info.userName}</Card.Text>
                     </Card.Footer>
                   </Card>
                 </Carousel.Item>
