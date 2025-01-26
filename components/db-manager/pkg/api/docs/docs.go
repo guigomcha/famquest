@@ -489,6 +489,156 @@ const docTemplate = `{
                 }
             }
         },
+        "/note": {
+            "get": {
+                "description": "Get a list of all notes",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "note"
+                ],
+                "summary": "Retrieve all notes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Notes"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new note",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "note"
+                ],
+                "summary": "Create a note",
+                "parameters": [
+                    {
+                        "description": "Note data",
+                        "name": "note",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APINotes"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Notes"
+                        }
+                    }
+                }
+            }
+        },
+        "/note/{id}": {
+            "get": {
+                "description": "Get note details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "note"
+                ],
+                "summary": "Retrieve a note by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Note ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Notes"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update note details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "note"
+                ],
+                "summary": "Update a note by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Note ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Note data",
+                        "name": "note",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APINotes"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Notes"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a note and nullify its references in notes",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "note"
+                ],
+                "summary": "Delete a note by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Note ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/spot": {
             "get": {
                 "description": "Get a list of all spots",
@@ -819,6 +969,20 @@ const docTemplate = `{
                 }
             }
         },
+        "models.APINotes": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "models.APISpots": {
             "type": "object",
             "properties": {
@@ -906,6 +1070,45 @@ const docTemplate = `{
                 },
                 "refType": {
                     "description": "Db + json",
+                    "type": "string"
+                },
+                "refUserUploader": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "description": "Automatically managed by trigger",
+                    "type": "string"
+                }
+            }
+        },
+        "models.Notes": {
+            "type": "object",
+            "properties": {
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "category": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "description": "Automatically generated",
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "db + json",
+                    "type": "integer"
+                },
+                "location": {
+                    "description": "only json -\u003e Need to create the parse the json  to and from db",
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 },
                 "refUserUploader": {

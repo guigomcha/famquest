@@ -27,10 +27,21 @@ CREATE TABLE IF NOT EXISTS spots (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
 );
 
+CREATE TABLE IF NOT EXISTS notes (
+    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
+    id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
+    name TEXT NOT NULL,
+    description TEXT,
+    category TEXT,
+    ref_user_uploader INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
+);
+
 CREATE TABLE IF NOT EXISTS attachments (
     uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
     id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
-    ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot', 'task', 'attachment' )), -- Constraint for ref_type
+    ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot', 'note', 'attachment' )), -- Constraint for ref_type
     ref_id INT DEFAULT 0,
     name TEXT NOT NULL,
     description TEXT,
@@ -76,5 +87,9 @@ FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE OR REPLACE TRIGGER update_users_updated_at
 BEFORE UPDATE ON users
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE OR REPLACE TRIGGER update_users_updated_at
+BEFORE UPDATE ON notes
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 `
