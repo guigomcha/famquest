@@ -639,6 +639,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/note/{id}/ref": {
+            "put": {
+                "description": "Update the ref in a note details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "note"
+                ],
+                "summary": "Update the ref",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Note ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Reference ID (optional)",
+                        "name": "refId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "spot",
+                            "user"
+                        ],
+                        "type": "string",
+                        "description": "Reference Type",
+                        "name": "refType",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Notes"
+                        }
+                    }
+                }
+            }
+        },
         "/spot": {
             "get": {
                 "description": "Get a list of all spots",
@@ -997,6 +1044,12 @@ const docTemplate = `{
         "models.APIUsers": {
             "type": "object",
             "properties": {
+                "bio": {
+                    "type": "string"
+                },
+                "birthday": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -1085,6 +1138,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "attachments": {
+                    "description": "only json -\u003e Need to create the parse the json  to and from db",
                     "type": "array",
                     "items": {
                         "type": "integer"
@@ -1102,10 +1156,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "db + json",
-                    "type": "integer"
-                },
-                "location": {
-                    "description": "only json -\u003e Need to create the parse the json  to and from db",
                     "type": "integer"
                 },
                 "name": {
@@ -1159,6 +1209,12 @@ const docTemplate = `{
         "models.Users": {
             "type": "object",
             "properties": {
+                "bio": {
+                    "type": "string"
+                },
+                "birthday": {
+                    "type": "string"
+                },
                 "createdAt": {
                     "description": "Automatically generated",
                     "type": "string"

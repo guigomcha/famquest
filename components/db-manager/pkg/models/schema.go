@@ -59,6 +59,8 @@ CREATE TABLE IF NOT EXISTS users (
     email TEXT NOT NULL,                               -- Email of the user
     role TEXT CHECK (role IN ('owner', 'contributor', 'admin', 'target', 'hybrid')),  -- Role with constraints
     name TEXT NOT NULL,                  -- Preferred Username in keycloak
+    bio TEXT,                  -- Bio for the user
+    birthday TEXT NOT NULL,                  -- birthday of the user
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
 );

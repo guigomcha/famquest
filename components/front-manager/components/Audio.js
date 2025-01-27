@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { fetchAttachments, getUserName } from '../backend_interface/db_manager_api';
+import { getInDBWithFilter, getUserInfo } from '../backend_interface/db_manager_api';
 import {renderEmptyState} from '../utils/render_message';
 import Card from 'react-bootstrap/Card';
 import Carousel from 'react-bootstrap/Carousel';
@@ -32,7 +32,7 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
 
   const callFetchAttachmentsForSpot = async (refId, refType) => {
     setSelectedAudios([]); 
-    const attachments = await fetchAttachments(refId, refType);
+    const attachments = await getInDBWithFilter(refId, refType, 'attachment');
 
     attachments.forEach(attachment => {
       if (attachment.contentType.startsWith("audio/")) {
@@ -53,9 +53,9 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
     if (!model){
       return;
     }
-    const name = await getUserName(model.refUserUploader);
+    const userInfo = await getUserInfo(model.refUserUploader);
     setInfo({
-      "userName": name
+      "userName": userInfo?.name || "unknown"
     }); 
   }
 

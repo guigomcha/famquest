@@ -1,9 +1,9 @@
-import { uploadLocation, uploadSpot, addReferenceToLocation, updateSpot } from '../backend_interface/db_manager_api';
+import { createInDB, addReferenceInDB, updateInDB } from '../backend_interface/db_manager_api';
 
 export async function SpotFromForm(data, latlng) {
   // It is a PUT
   if (data?.id) {
-    const spotDb = await updateSpot(data);
+    const spotDb = await updateInDB(data, 'spot');
     console.info("Received response put: ", spotDb);
     return;
   }
@@ -14,11 +14,13 @@ export async function SpotFromForm(data, latlng) {
     "latitude": latlng.lat
   }
   // It is a new one
-  const locationDb = await uploadLocation(locationBody);
+  const locationDb = await createInDB(locationBody, 'location');
   if (locationDb) {
-    const spotDb = await uploadSpot(data);
+    const spotDb = await createInDB(data, "spot");
     if (spotDb) {
-      await addReferenceToLocation(locationDb.id, spotDb.id, "spot");
+      await addReferenceInDB(locationDb.id, spotDb.id, "spot", "location");
     }
   }    
 };
+
+export const findById = (list, id) => list.find(item => item.id === id);

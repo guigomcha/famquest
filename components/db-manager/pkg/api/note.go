@@ -148,3 +148,63 @@ func NotePut(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(dest)
 }
+
+// NotePut
+// @Summary Update the ref
+// @Description Update the ref in a note details by ID
+// @Tags note
+// @Produce json
+// @Param id path int true "Note ID"
+// @Param refId query int true "Reference ID (optional)"
+// @Param refType query string true "Reference Type" Enums(spot,user)
+// @Success 200 {object} models.Notes
+// @Router /note/{id}/ref [put]
+func NotePutRef(w http.ResponseWriter, r *http.Request) {
+	logger.Log.Info("Called to func NotePutRef")
+	info := handleHeaders(w, r)
+	// first ensure ref is ok
+	intId, err := parseId(r.URL.Query().Get("refId"))
+	if err != nil || intId == 0 {
+		http.Error(w, fmt.Sprintf("Ref error or cero: %+v", err), http.StatusBadRequest)
+		return
+	}
+	var dest connection.DbInterface
+	var httpStatus int
+	switch r.URL.Query().Get("refType") {
+	case "spot":
+		_, httpStatus, err = crudGet(&models.Spots{}, map[string]string{"id": fmt.Sprint(intId)})
+	case "user":
+		_, httpStatus, err = crudGet(&models.Users{}, map[string]string{"id": fmt.Sprint(intId)})
+	default:
+		err = fmt.Errorf("reftype '%s' not implemented", r.URL.Query().Get("refType"))
+		httpStatus = http.StatusBadRequest
+	}
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	logger.Log.Debug("Ref seems ok")
+	// Now bring the original Note
+	dest, httpStatus, err = crudGet(&models.Notes{}, mux.Vars(r))
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	note, ok := dest.(*models.Notes)
+	if !ok {
+		http.Error(w, fmt.Sprintf("Unable to cast the struct correctly from %+v", dest), http.StatusInternalServerError)
+		return
+	}
+	note.RefId = intId
+	note.RefType = r.URL.Query().Get("refType")
+	note.RefUserUploader = info["user"].(int)
+	// Update the note which will trigger the GetInsertExtraQueries
+	logger.Log.Debug("Decoded object")
+	dest, httpStatus, err = crudPut(dest, mux.Vars(r))
+	if err != nil {
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(dest)
+}

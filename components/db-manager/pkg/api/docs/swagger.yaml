@@ -36,6 +36,10 @@ definitions:
     type: object
   models.APIUsers:
     properties:
+      bio:
+        type: string
+      birthday:
+        type: string
       email:
         type: string
       extRef:
@@ -97,6 +101,7 @@ definitions:
   models.Notes:
     properties:
       attachments:
+        description: only json -> Need to create the parse the json  to and from db
         items:
           type: integer
         type: array
@@ -109,9 +114,6 @@ definitions:
         type: string
       id:
         description: db + json
-        type: integer
-      location:
-        description: only json -> Need to create the parse the json  to and from db
         type: integer
       name:
         type: string
@@ -148,6 +150,10 @@ definitions:
     type: object
   models.Users:
     properties:
+      bio:
+        type: string
+      birthday:
+        type: string
       createdAt:
         description: Automatically generated
         type: string
@@ -586,6 +592,38 @@ paths:
           schema:
             $ref: '#/definitions/models.Notes'
       summary: Update a note by ID
+      tags:
+      - note
+  /note/{id}/ref:
+    put:
+      description: Update the ref in a note details by ID
+      parameters:
+      - description: Note ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Reference ID (optional)
+        in: query
+        name: refId
+        required: true
+        type: integer
+      - description: Reference Type
+        enum:
+        - spot
+        - user
+        in: query
+        name: refType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Notes'
+      summary: Update the ref
       tags:
       - note
   /spot:

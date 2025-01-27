@@ -4,7 +4,7 @@ import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { Spin, Alert } from 'antd';
-import { uploadAttachment, addReferenceToAttachment, updateAttachment } from '../backend_interface/db_manager_api';
+import { uploadAttachment, addReferenceInDB, updateInDB } from '../backend_interface/db_manager_api';
 import '../css/classes.css';
 
 const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
@@ -64,7 +64,7 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
       if (audioBlob) {
         console.info("audio is not updated, only name and description");
       }  
-      const attachment = await updateAttachment(formValues);
+      const attachment = await updateInDB(formValues, 'attachment');
       if (!attachment) {
         console.info("error updating attachment");
       }
@@ -83,7 +83,7 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
     
     if (attachment) {
       // Add reference to current spot
-      await addReferenceToAttachment(attachment.id, refId, refType);
+      await addReferenceInDB(attachment.id, refId, refType, 'attachment');
     } else {
       setStatusMessage("Unable to send audio.");
     }
