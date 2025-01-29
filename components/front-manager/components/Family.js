@@ -26,7 +26,7 @@ const FamilyTab = ({ user }) => {
   };
 
   const handleRequestNew = (e) => {
-    setComponent(<NoteForm handledFinished={handleNestedRequestEdit} />);
+    setComponent(<NoteForm handledFinished={handleNestedRequestEdit} userId={user.id}/>);
   }; 
 
   const handleRequestEdit = (e) => {

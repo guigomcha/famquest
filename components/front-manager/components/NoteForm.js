@@ -5,7 +5,7 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { Spin } from 'antd';
 import '../css/classes.css';
-import { updateInDB, createInDB } from '../backend_interface/db_manager_api';
+import { updateInDB, createInDB, addReferenceInDB } from '../backend_interface/db_manager_api';
 
 // This request the baseline info to create a new Note in DB
 const NoteForm = ({ initialData, handledFinished, userId }) => {
@@ -34,8 +34,8 @@ const NoteForm = ({ initialData, handledFinished, userId }) => {
       newNote = await updateInDB(formValues, 'note');
     } else {
       newNote = await createInDB(formValues, 'note');
-      withRef = await addReferenceInDB(newNote.id, userId, 'user', 'note');
-      console.info("after ref update");
+      //withRef = await addReferenceInDB(newNote.id, userId, 'user', 'note');
+      //console.info("after ref update");
     }
     console.info("Received new note ", newNote);
     setIsLoading(false);

@@ -195,7 +195,8 @@ paths:
       - description: Reference Type (optional)
         enum:
         - spot
-        - task
+        - attachment
+        - note
         in: query
         name: refType
         type: string
@@ -321,8 +322,8 @@ paths:
       - description: Reference Type
         enum:
         - spot
-        - task
         - attachment
+        - note
         in: query
         name: refType
         required: true

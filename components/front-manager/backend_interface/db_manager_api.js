@@ -153,16 +153,16 @@ export const addLocationToSpot = async (spot) => {
   return spot; // Combine original spot with additional data
 };
 
-export const createInDB = async (body, endpoint) => {
+export const createInDB = async (body, endpoint, extra={"headers": {
+      'accept': 'application/json',
+      'Content-Type': 'application/json'
+    }}) => {
 
   try {
     const response = await fetch(`${API_URL}/`+endpoint, {
       method: 'POST',
       body: JSON.stringify(body),
-      headers: {
-        'accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
+      ...extra,
       ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
       // mode: 'cors',
     });
@@ -171,7 +171,7 @@ export const createInDB = async (body, endpoint) => {
       const data = await response.json();
       return data; // return the URL or data if needed
     } else {
-      console.error(`Failed to post the ${endpoint}:`, response.text());
+      console.error(`Failed to post the ${endpoint}:`, await response.text());
       return null;
     }
   } catch (error) {
@@ -223,10 +223,32 @@ export const uploadAttachment = async (data, formData) => {
     // If it's a file selected via the file input
     formData.append("file", data);
   }
-  createInDB(formData, 'attachment')
+  try {
+    const response = await fetch(`${API_URL}/attachment`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'accept': 'application/json',
+      },
+      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data; // return the URL or data if needed
+    } else {
+      console.error('Failed to upload the attachment');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error uploading attachment:', error);
+    return null;
+  }
 };
 
 export const addReferenceInDB = async (targetId, refId, refType, endpoint) => {
+  console.info(`Trying to add ${refType} and id ${refId} reference to ${endpoint}`);
   try {
     const response = await fetch(`${API_URL}/${endpoint}/${targetId}/ref?refId=${refId}&refType=${refType}`, {
       method: 'PUT',
@@ -235,10 +257,11 @@ export const addReferenceInDB = async (targetId, refId, refType, endpoint) => {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to add spot reference to ${endpoint}`);
+      console.info("response not ok: ", await response.text());
+      throw new Error(`Failed to add ${refType} and id ${refId} reference to ${endpoint}`);
     }
   } catch (error) {
-    console.error(`Error adding reference to ${endpoint}:`, error);
+    console.error(`Error to add ${refType} and id ${refId} reference to ${endpoint}`, error);
   }
 };
 

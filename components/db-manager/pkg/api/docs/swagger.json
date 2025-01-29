@@ -35,7 +35,8 @@
                     {
                         "enum": [
                             "spot",
-                            "task"
+                            "attachment",
+                            "note"
                         ],
                         "type": "string",
                         "description": "Reference Type (optional)",
@@ -223,8 +224,8 @@
                     {
                         "enum": [
                             "spot",
-                            "task",
-                            "attachment"
+                            "attachment",
+                            "note"
                         ],
                         "type": "string",
                         "description": "Reference Type",

@@ -166,7 +166,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
     const attachment = await uploadAttachment(dataToUpload, formDataObj);
     
     if (attachment) {
-      // Add reference to current spot
+      // Add reference to current parent
       await addReferenceInDB(attachment.id, refId, refType, 'attachment');
     } else {
       console.info("Unable to send image.");
