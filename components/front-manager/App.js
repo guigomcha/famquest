@@ -1,16 +1,13 @@
+
 import { View } from 'react-native';
-import { QueryClient, QueryClientProvider, useQuery } from 'react-query'
-import { ReactQueryDevtools } from 'react-query/devtools';
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import 'leaflet/dist/leaflet.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
-import Row from 'react-bootstrap/Row';
 import Card from 'react-bootstrap/Card';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
-
 
 import MapManager from './components/MapManager';
 import UserButton from './components/UserButton';
@@ -27,7 +24,8 @@ export default function App() {
   const mapRef = useRef(null);
 
   const handleUserChange = (userInfo) => {
-    setUser(userInfo); // Transfer data from compoennt to component
+    setUser(userInfo);
+    console.info("updating app.js to ", userInfo);
   };
   const transferHandleMapRef = (map) => {
     mapRef.current = map.current;
@@ -42,9 +40,7 @@ export default function App() {
       setKey(key);
     }
   };
-
-  // Fetch all users available
-
+  
   return (   
     <>
       <Navbar className="bg-body-tertiary">
@@ -55,7 +51,7 @@ export default function App() {
             {(user || isLocal ) ?
               (
                 <Navbar.Text>
-                  Signed in as: {user?.preferredUsername}
+                  Signed in as: {user?.name}
                   <OAuth2 onUserChange={handleUserChange} />
                 </Navbar.Text>
               ):
@@ -112,7 +108,7 @@ export default function App() {
           </Tab>
           <Tab eventKey="user" title="Family">
             <Container fluid>
-              <FamilyTab userId={1}></FamilyTab>
+              <FamilyTab user={user}></FamilyTab>
             </Container>
           </Tab>
         </Tabs>

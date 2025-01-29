@@ -22,5 +22,3 @@ export async function SpotFromForm(data, latlng) {
     }
   }    
 };
-
-export const findById = (list, id) => list.find(item => item.id === id);

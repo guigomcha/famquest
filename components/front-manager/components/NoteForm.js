@@ -8,11 +8,11 @@ import '../css/classes.css';
 import { updateInDB, createInDB } from '../backend_interface/db_manager_api';
 
 // This request the baseline info to create a new Note in DB
-const NoteForm = ({ initialData, handledFinished }) => {
+const NoteForm = ({ initialData, handledFinished, userId }) => {
   const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     setIsLoading(true);
     const form = event.currentTarget;
     event.preventDefault();
@@ -31,9 +31,11 @@ const NoteForm = ({ initialData, handledFinished }) => {
     console.info("form content ", formValues);
     let newNote = {}
     if (formValues['id']) {
-      newNote = updateInDB(formValues, 'note');
+      newNote = await updateInDB(formValues, 'note');
     } else {
-      newNote = createInDB(formValues, 'note');
+      newNote = await createInDB(formValues, 'note');
+      withRef = await addReferenceInDB(newNote.id, userId, 'user', 'note');
+      console.info("after ref update");
     }
     console.info("Received new note ", newNote);
     setIsLoading(false);

@@ -1,11 +1,21 @@
 import React, { useState, useEffect } from "react";
 import Button from 'react-bootstrap/Button';
-import { registerUser } from '../backend_interface/db_manager_api';
+import { registerUser, getUserInfo } from '../backend_interface/db_manager_api';
 
 const isLocal = true;
 
 const OAuth2Login = ({ onUserChange }) => {
   const [user, setUser] = useState(null); // User information
+  
+  const transformToDBUser = async (data) => {
+    console.info("fetching users to find", data);
+    const tempUsers = await getUserInfo(0);
+    console.info("obtained tempUsers ", tempUsers);
+    const foundUser = tempUsers.find(item => item.extRef === data.user);
+    console.info("connected as ", foundUser);
+    setUser(foundUser);
+    return foundUser;
+  }
 
   useEffect(() => {
     // Fetch user info to check if logged in
@@ -14,13 +24,14 @@ const OAuth2Login = ({ onUserChange }) => {
         if (res.ok) return res.json();
         throw new Error("Not logged in");
       })
-      .then((data) => {
+      .then(async (data) => {
         setUser(data);
         console.info(JSON.stringify(data));
         // Register the user in the backend if it does not exist
-        const resp = registerUser(data);
+        const resp = await registerUser(data);
         console.info("Response from registerUser: ", resp)
-        onUserChange(data); // Notify parent component
+        const userInfo = await transformToDBUser(data);
+        onUserChange(userInfo); // Notify parent component
       })
       .catch(() => {
         setUser(null);
@@ -46,10 +57,11 @@ const OAuth2Login = ({ onUserChange }) => {
       .catch(() => {
         setUser(null);
         onUserChange(null); // Notify parent component
-        console.info("Logout errpr");
+        console.info("Logout error");
       });
     window.location.reload();
   };
+  
   return (
       <div >
         {(user || isLocal) ? (
