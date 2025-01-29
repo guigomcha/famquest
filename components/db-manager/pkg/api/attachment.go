@@ -83,7 +83,7 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 // @Tags attachment
 // @Produce json
 // @Param refId query int false "Reference ID (optional)"
-// @Param refType query string false "Reference Type (optional)" Enums(spot,task)
+// @Param refType query string false "Reference Type (optional)" Enums(spot,attachment,note)
 // @Success 200 {array} models.Attachments
 // @Router /attachment [get]
 func AttachmentGetAll(w http.ResponseWriter, r *http.Request) {
@@ -260,7 +260,7 @@ func AttachmentPut(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id path int true "Attachment ID"
 // @Param refId query int true "Reference ID (optional)"
-// @Param refType query string true "Reference Type" Enums(spot,task,attachment)
+// @Param refType query string true "Reference Type" Enums(spot,attachment,note)
 // @Success 200 {object} models.Attachments
 // @Router /attachment/{id}/ref [put]
 func AttachmentPutRef(w http.ResponseWriter, r *http.Request) {
@@ -279,6 +279,8 @@ func AttachmentPutRef(w http.ResponseWriter, r *http.Request) {
 		_, httpStatus, err = crudGet(&models.Spots{}, map[string]string{"id": fmt.Sprint(intId)})
 	case "attachment":
 		_, httpStatus, err = crudGet(&models.Attachments{}, map[string]string{"id": fmt.Sprint(intId)})
+	case "note":
+		_, httpStatus, err = crudGet(&models.Notes{}, map[string]string{"id": fmt.Sprint(intId)})
 	default:
 		err = fmt.Errorf("reftype '%s' not implemented", r.URL.Query().Get("refType"))
 		httpStatus = http.StatusBadRequest

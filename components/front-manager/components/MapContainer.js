@@ -9,6 +9,7 @@ import SpotPopup from './SpotPopup';
 import { SpotFromForm } from '../backend_interface/components_helper';
 import { worldPolygon, uncoverFog, locationVisible } from '../backend_interface/fog_functions';
 import { Spin, Alert } from 'antd';
+import { getInDB, fetchAndPrepareSpots } from "../backend_interface/db_manager_api";
 
 const scale = 13;
 
@@ -23,22 +24,31 @@ const iconStyle = {
   iconAnchor: [12, 36],
 };
 
-const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => {
+const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
   const mapRef = useRef(null);
   const guilleSpotsGroup = useRef(null);
   const featureGroup = useRef(null);
-  const locs = useRef(null);
-  const loadedSpots = useRef(null);
   const markers = useRef(null);
   const fogLayer = useRef(null);
   const fogGeoJson = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [locations, setLocations] = useState([]);
+  const [spots, setSpots] = useState([]);
+
+
+  const fetchData = async () => {
+    const tempLocations = await getInDB('location');
+    console.info("Fetched initial locations ", tempLocations);
+    setLocations(tempLocations);
+    const tempSpots = await fetchAndPrepareSpots();
+    console.info("Fetched initial spots ", tempSpots);
+    setSpots(tempSpots);
+  };
 
   const prepareMap = () => {
     // After the map is loaded, reveal the area around each marker
-    if (mapRef.current && locs.current && fogLayer.current) {
-      locs.current.forEach((location) => {
-        console.info("checking coordinate: "+ JSON.stringify(location))
+    if (mapRef.current && locations.length>0 && fogLayer.current) {
+      locations.forEach((location, index) => {
         if (location.refId != 0) {
           console.info("Ignoring location from spot: ", location);
           return;
@@ -59,6 +69,7 @@ const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => 
   const sendBackComponent = (e) => {
     if (e == "done") {
       handleMenuChange(null);
+      fetchData();
     } else if (e?.target.data.componentType == "SpotPopup") {
       handleMenuChange(<SpotPopup spot={e.target.data} />);
     } else {
@@ -68,7 +79,7 @@ const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => 
 
   const isVisible = (location) => {
     if (!mapRef.current.hasLayer(featureGroup.current)){
-      console.info("mask disabled: "+ JSON.stringify(location));
+      // console.info("mask disabled: "+ JSON.stringify(location));
     } else if (!locationVisible(location, fogGeoJson.current)){
       console.info("can only right click and see outside of fog");
       return false;
@@ -76,8 +87,8 @@ const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => 
     return true;
   }
   const displaySpots = () => {
-    if (mapRef.current && loadedSpots.current) {
-      loadedSpots.current.forEach((spot) => {
+    if (mapRef.current && spots.length>0) {
+      spots.forEach((spot) => {
         let visible = true;
         let markerRef = null;
         markers.current.forEach((mark) => {
@@ -114,6 +125,7 @@ const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => 
   useEffect(() => {
     if (!mapRef.current) {
       setIsLoading(true);
+      fetchData();
       console.log("Creating the map:", isLoading);
       const mapDiv = document.getElementById("mapId");
       mapRef.current = L.map(mapDiv).setView([defaultCenter.lat, defaultCenter.lng], scale);
@@ -183,7 +195,6 @@ const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => 
 
   // Add the reveal locations
   useEffect(() => {
-    locs.current = locations;
     if (!fogGeoJson.current){
       return;
     }
@@ -193,7 +204,6 @@ const MapContainer = ( {locations, spots, handleMenuChange, handleMapRef } ) => 
   
   // Add the markers in the spots
   useEffect(() => {
-    loadedSpots.current = spots;
     if (!markers.current) {
       markers.current = []
     }

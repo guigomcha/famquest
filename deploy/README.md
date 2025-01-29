@@ -159,7 +159,9 @@ Refs:
 
 + <https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/README.md>
 
-## Manual Backups
+## Backups
+
+### Manual generation
 
 postgres famquest DB
 
@@ -174,3 +176,28 @@ minio DB
 kubectl exec -it minio-deployment-7cf8ff6b7c-gh5mt -n famquest -- sh -c "mkdir -p /opt/bitnami/minio-client/backups && tar -czf /opt/bitnami/minio-client/backups/data-$(date +"%m-%d-%Y-%H-%M").tar.gz /data"
 kubectl cp --retries=-1 famquest/minio-deployment-7cf8ff6b7c-gh5mt:/opt/bitnami/minio-client/backups backups
 ```
+
+### Load the backup manually
+
+```bash
+docker cp backups/backup-staging-01-23-2025-18-29.sql postgresql:/var/lib/postgresql
+docker exec -it postgresql bash
+psql -U myuseradmin -d staging -f /var/lib/postgresql/backup-staging-01-23-2025-18-29.sql 
+```
+
+## Upgrades
+
+### v0.1.0 -> v0.2.0
+
+0. DB and Front replicas to 0
+  
+    ```bash
+    kubectl scale --replicas=1 deployment -n staging dbmanager-deployment 
+    kubectl scale --replicas=1 deployment -n staging frontmanager-deployment 
+    ```
+
+1. Backup of postgresql
+2. Access to pgadmin, delete the tasks table and apply the sql script in components/db-manager/tools/v0.2.0-migrations.sql
+3. Push the new docker image for db and front manager
+4. Scale to 1
+5. Execute the /configure endpoint in the db-manager swagger

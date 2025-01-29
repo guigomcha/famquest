@@ -9,11 +9,15 @@ import (
 
 // For swagger input
 type APIUsers struct {
-	ExtRef string `db:"ext_ref" json:"extRef"`
-	Email  string `db:"email" json:"email"`
-	Role   string `db:"role" json:"role"`
-	Name   string `db:"name" json:"name"`
+	ExtRef   string `db:"ext_ref" json:"extRef"`
+	Email    string `db:"email" json:"email"`
+	Role     string `db:"role" json:"role"`
+	Name     string `db:"name" json:"name"`
+	Bio      string `db:"bio" json:"bio"`
+	Birthday string `db:"birthday" json:"birthday"`
 }
+
+// Add bio + birthday
 
 // `db:"users"`
 type Users struct {
@@ -25,6 +29,8 @@ type Users struct {
 	Name      string    `db:"name" json:"name"`
 	Email     string    `db:"email" json:"email"`
 	Role      string    `db:"role" json:"role"`
+	Bio       string    `db:"bio" json:"bio"`
+	Birthday  string    `db:"birthday" json:"birthday"`
 	CreatedAt time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
 	UpdatedAt time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 }
@@ -43,20 +49,20 @@ func (m *Users) GetSelectAllQuery() string {
 
 func (m *Users) GetInsertQuery() string {
 	return fmt.Sprintf(`
-		INSERT INTO %s (name, ext_ref, email, role)
-		VALUES (:name, :ext_ref, :email, :role) RETURNING id`, m.GetTableName())
+		INSERT INTO %s (name, ext_ref, email, role, bio, birthday)
+		VALUES (:name, :ext_ref, :email, :role, :bio, :birthday) RETURNING id`, m.GetTableName())
 }
 
 func (m *Users) GetQuery() string {
 	return fmt.Sprintf(`
-		INSERT INTO %s (name, ext_ref, email, role)
-		VALUES (:name, :ext_ref, :email, :role) RETURNING id`, m.GetTableName())
+		INSERT INTO %s (name, ext_ref, email, role, bio, birthday)
+		VALUES (:name, :ext_ref, :email, :role, :bio, :birthday) RETURNING id`, m.GetTableName())
 }
 
 func (m *Users) GetUpdateQuery() string {
 	return fmt.Sprintf(`
 			UPDATE %s
-			SET name = :name, email = :email, ext_ref = :ext_ref, role = :role
+			SET name = :name, email = :email, ext_ref = :ext_ref, role = :role, bio = :bio, birthday = :birthday
 			WHERE id = :id`, m.GetTableName())
 }
 

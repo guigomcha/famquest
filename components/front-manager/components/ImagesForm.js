@@ -9,7 +9,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import { Spin, Alert } from 'antd';
-import { uploadAttachment, updateAttachment, addReferenceToAttachment } from '../backend_interface/db_manager_api';
+import { uploadAttachment, updateInDB, addReferenceInDB } from '../backend_interface/db_manager_api';
 import '../css/classes.css';
 
 const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
@@ -148,7 +148,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
       if (dataToUpload) {
         console.info("image is not updated, only name and description");
       }  
-      const attachment = await updateAttachment(formValues);
+      const attachment = await updateInDB(formValues, 'attachment');
       if (!attachment) {
         console.info("error updating attachment");
       }
@@ -166,8 +166,8 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
     const attachment = await uploadAttachment(dataToUpload, formDataObj);
     
     if (attachment) {
-      // Add reference to current spot
-      await addReferenceToAttachment(attachment.id, refId, refType);
+      // Add reference to current parent
+      await addReferenceInDB(attachment.id, refId, refType, 'attachment');
     } else {
       console.info("Unable to send image.");
     }

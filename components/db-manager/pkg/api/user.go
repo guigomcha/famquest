@@ -119,6 +119,7 @@ func UserPut(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	logger.Log.Info("received payload %+v", user)
 	intId, err := parseId(mux.Vars(r)["id"])
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

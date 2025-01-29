@@ -4,7 +4,7 @@ import Container from 'react-bootstrap/Container';
 import Card from 'react-bootstrap/Card';
 import { Button } from 'antd';
 import { EditOutlined, FileAddOutlined } from '@ant-design/icons';
-import { fetchAttachments, getUserName } from '../backend_interface/db_manager_api';
+import { getInDBWithFilter, getUserInfo } from '../backend_interface/db_manager_api';
 import {renderEmptyState} from '../utils/render_message';
 import Audio from './Audio';
 import ImagesForm from './ImagesForm';
@@ -33,7 +33,7 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
  
   const callFetchAttachmentsForSpot = async (refId, refType) => {
     setSelectedImages([]); 
-    const attachments = await fetchAttachments(refId, refType);
+    const attachments = await getInDBWithFilter(refId, refType, 'attachment');
 
     attachments.forEach(attachment => {
       if (attachment.contentType.startsWith("image/")) {
@@ -49,10 +49,10 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
     if (!model){
       return;
     }
-    const name = await getUserName(model.refUserUploader);
+    const userInfo = await getUserInfo(model.refUserUploader);
     setInfo({
-      "userName": name
-    }); 
+      "userName": userInfo?.name || "unknown"
+    });
   }
 
   // fetch the attachments for this spot

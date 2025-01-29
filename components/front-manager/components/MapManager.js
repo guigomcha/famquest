@@ -5,7 +5,7 @@ import SlideMenu from './SlideMenu';
 import React, { useEffect, useRef, useState } from "react";
 import { useQuery } from 'react-query'
 import { Spin, Alert } from 'antd';
-import { fetchCoordinates, fetchAndPrepareSpots } from "../backend_interface/db_manager_api";
+
 import '../css/classes.css';
 
 const debugLocations = [
@@ -32,64 +32,18 @@ const debugSpots = [
 // This is the main component of the Map which should connect with APIs to get the required info to feed it down
 const MapManager = ( {handleMapRef} ) => {  
   const [component, setComponent] = useState(null);
-  
-  // const [locations, setLocations] = useState(debugLocations)
-  // const [spots, setSpots] = useState(debugSpots)
 
-  const [locations, setLocations] = useState([])
-  const [spots, setSpots] = useState([])
-  const { 
-    isLoading: isLoadingLocations, 
-    error: errorLocations , 
-    data: dataLocations 
-  } = useQuery('locations', fetchCoordinates, {
-    keepPreviousData: true,
-    onSettled: (data, error) => {
-      if (error) {
-        console.info("error fetching locations", error);
-      }
-      setLocations(data);
-    }
-  });
-  const { 
-    isLoading: isLoadingSpots, 
-    error: errorSpots, 
-    data: dataSpots 
-  } = useQuery('spots', fetchAndPrepareSpots, {
-    keepPreviousData: true,
-    onSettled: (data, error) => {
-      if (error) {
-        console.info("error fetching spots", error);
-      }
-      setSpots(data);
-    }
-  });
   const handleMenuChange = (comp) => {
     setComponent(comp); // Trigger show slideMenu
   }; 
   const transferHandleMapRef = (map) => {
     handleMapRef(map); 
-  }; 
-  
+  };   
   return (
     <>
-      {(isLoadingLocations || isLoadingSpots) && (
-        <div className="spin-overlay">
-        <Spin tip="Loading"></Spin>
-        </div>
-      )}
-      {(errorLocations || errorSpots) && (
-        <div className="spin-overlay">
-          <Alert
-            message="Unable to load spots or locations."
-            description="check console logs"
-            type="error"
-          />  
-        </div>
-      )}
       <div>
-        <MapContainer locations={locations} spots={spots} handleMenuChange={handleMenuChange} handleMapRef={transferHandleMapRef}/>
-        {component && <SlideMenu component={component} ></SlideMenu>}
+        <MapContainer handleMenuChange={handleMenuChange} handleMapRef={transferHandleMapRef}/>
+        {component && <SlideMenu component={component} handledFinished={handleMenuChange}></SlideMenu>}
       </div>
     </>
   );

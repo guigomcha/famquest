@@ -1,11 +1,3 @@
-// export const fetchCoordinates = async () => {
-//   // Simulate API call
-//   return [
-//     { lat: 37.321355840986044, lng: -6.056325106677641 }, // Sample coordinates (Blue Padel)
-//     { lat: 37.31942002016036, lng: -6.0678988062297465 }, // Sample coordinates (Palomares)
-//   ];
-// };
-
 const API_URL = "https://api.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN";
 const isLocal = true;
 
@@ -70,13 +62,16 @@ export const registerUser = async (data) => {
     return null;
   }
 };
-export const getUserName = async (refId) => {
+
+export const getUserInfo = async (refId) => {
   console.info("URL: "+ API_URL + "user requested" + refId);
-  if (refId == 0) {
-    return "unknown";
+  let prefix = ""; 
+  if (refId > 0 ) {
+    prefix = "/"+ refId;
   }
   try {
-    const response = await fetch(`${API_URL}/user/`+refId, {
+    console.info("users with prefix ", prefix);
+    const response = await fetch(`${API_URL}/user`+prefix, {
       headers: {
         'accept': 'application/json',
       },
@@ -87,17 +82,17 @@ export const getUserName = async (refId) => {
     }
     const user = await response.json();
     console.info("Fetched user "+ JSON.stringify(user))
-    return user?.name || "unknown";
+    return user;
   } catch (error) {
     console.error("Error fetching user: ", error);
-    return null;
+    return {};
   }
 };
 
-export const fetchCoordinates = async () => {
+export const getInDB = async (endpoint) => {
   console.info("URL: "+ API_URL);
   try {
-    const response = await fetch(`${API_URL}/location`, {
+    const response = await fetch(`${API_URL}/${endpoint}`, {
       headers: {
         'accept': 'application/json',
       },
@@ -106,36 +101,11 @@ export const fetchCoordinates = async () => {
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    // Use response.json() to parse the JSON body
-    const coordinates = await response.json();
+    const notes = await response.json();
 
-    // console.info("Fetched locations "+ JSON.stringify(coordinates))
-    return coordinates;  // Returning the coordinates array
+    return notes;  // Returning the notes array
   } catch (error) {
-    console.error("Error fetching coordinates: ", error);
-    return [];
-  }
-};
-
-export const fetchSpots = async () => {
-  try {
-    const response = await fetch(`${API_URL}/spot`, {
-      headers: {
-        'accept': 'application/json',
-      },
-      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      // mode: 'cors',
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    // Use response.json() to parse the JSON body
-    const spots = await response.json();
-    // Return location + info about task for the markers
-    // console.info(spots)
-    return spots;  // Returning the spots array
-  } catch (error) {
-    console.error("Error fetching spots: ", error);
+    console.error(`Error fetching ${endpoint}: `, error);
     return [];
   }
 };
@@ -143,11 +113,11 @@ export const fetchSpots = async () => {
 export const fetchAndPrepareSpots = async () => {
   try {
     // Fetch spots data
-    const spotsData = await fetchSpots();
-
+    const spotsData = await getInDB('spot');
     // Wait for all spots to be updated with location
     const spotsWithLocation = await Promise.all(
       spotsData.map(async (spot) => {
+        // console.info("spot without location:", spot); // Log each updated spot
         const updatedSpot = await addLocationToSpot(spot);
         // console.info("Updated spot with location:", updatedSpot); // Log each updated spot
         return updatedSpot;
@@ -158,6 +128,7 @@ export const fetchAndPrepareSpots = async () => {
     return spotsWithLocation;
   } catch (err) {
     console.error("Error fetching spots with location:", err);
+    return [];
   }
 };
 
@@ -182,16 +153,16 @@ export const addLocationToSpot = async (spot) => {
   return spot; // Combine original spot with additional data
 };
 
-export const uploadSpot = async (body) => {
+export const createInDB = async (body, endpoint, extra={"headers": {
+      'accept': 'application/json',
+      'Content-Type': 'application/json'
+    }}) => {
 
   try {
-    const response = await fetch(`${API_URL}/spot`, {
+    const response = await fetch(`${API_URL}/`+endpoint, {
       method: 'POST',
       body: JSON.stringify(body),
-      headers: {
-        'accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
+      ...extra,
       ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
       // mode: 'cors',
     });
@@ -200,23 +171,24 @@ export const uploadSpot = async (body) => {
       const data = await response.json();
       return data; // return the URL or data if needed
     } else {
-      console.error('Failed to upload the spot:', response.text());
+      console.error(`Failed to post the ${endpoint}:`, await response.text());
       return null;
     }
   } catch (error) {
-    console.error('Error uploading spot:', error);
+    console.error(`Error posting ${endpoint}:`, error);
     return null;
   }
 };
 
-export const updateSpot = async (body) => {
+export const updateInDB = async (body, endpoint) => {
 
-  const updateSpotObject = { ...body };
-  delete updateSpotObject.id;
+  const updateObject = { ...body };
+  delete updateObject.id;
+  console.info(`puting ${endpoint} with ${updateObject}`, updateObject);
   try {
-    const response = await fetch(`${API_URL}/spot/${body.id}`, {
+    const response = await fetch(`${API_URL}/${endpoint}/${body.id}`, {
       method: 'PUT',
-      body: JSON.stringify(updateSpotObject),
+      body: JSON.stringify(updateObject),
       headers: {
         'accept': 'application/json',
         'Content-Type': 'application/json'
@@ -229,40 +201,11 @@ export const updateSpot = async (body) => {
       const data = await response.json();
       return data; // return the URL or data if needed
     } else {
-      console.error('Failed to update the spot:', response.text());
+      console.error(`Failed to update the ${endpoint}:`, await response.text());
       return null;
     }
   } catch (error) {
-    console.error('Error updating spot:', error);
-    return null;
-  }
-};
-
-export const uploadLocation = async (body) => {
-
-  try {
-    console.info("using location data for post: "+ JSON.stringify(body))
-    const response = await fetch(`${API_URL}/location`, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers: {
-        'accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      // mode: 'cors',
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return data; // return the URL or data if needed
-    } else {
-      console.error('Failed to upload the location');
-      console.error(response.text());
-      return null;
-    }
-  } catch (error) {
-    console.error('Error uploading location:', error);
+    console.error(`Error updating ${endpoint}:`, error);
     return null;
   }
 };
@@ -280,7 +223,6 @@ export const uploadAttachment = async (data, formData) => {
     // If it's a file selected via the file input
     formData.append("file", data);
   }
-
   try {
     const response = await fetch(`${API_URL}/attachment`, {
       method: 'POST',
@@ -305,99 +247,31 @@ export const uploadAttachment = async (data, formData) => {
   }
 };
 
-export const updateAttachment = async (body) => {
-
-  const updateAttachmentObject = { ...body };
-  delete updateAttachmentObject.id;
+export const addReferenceInDB = async (targetId, refId, refType, endpoint) => {
+  console.info(`Trying to add ${refType} and id ${refId} reference to ${endpoint}`);
   try {
-    const response = await fetch(`${API_URL}/attachment/${body.id}`, {
-      method: 'PUT',
-      body: JSON.stringify(updateAttachmentObject),
-      headers: {
-        'accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      // mode: 'cors',
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return data; // return the URL or data if needed
-    } else {
-      console.error('Failed to update the attachment:', response.text());
-      return null;
-    }
-  } catch (error) {
-    console.error('Error updating attachment:', error);
-    return null;
-  }
-};
-
-export const addReferenceToAttachment = async (attachmentId, refId, refType) => {
-  try {
-    const response = await fetch(`${API_URL}/attachment/${attachmentId}/ref?refId=${refId}&refType=${refType}`, {
+    const response = await fetch(`${API_URL}/${endpoint}/${targetId}/ref?refId=${refId}&refType=${refType}`, {
       method: 'PUT',
       ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
       // mode: 'cors',
     });
 
     if (!response.ok) {
-      throw new Error('Failed to add spot reference to attachment');
+      console.info("response not ok: ", await response.text());
+      throw new Error(`Failed to add ${refType} and id ${refId} reference to ${endpoint}`);
     }
   } catch (error) {
-    console.error('Error adding reference to attachment:', error);
+    console.error(`Error to add ${refType} and id ${refId} reference to ${endpoint}`, error);
   }
 };
 
-export const addReferenceToLocation = async (locationId, refId, refType) => {
-  try {
-    const response = await fetch(`${API_URL}/location/${locationId}/ref?refId=${refId}&refType=${refType}`, {
-      method: 'PUT',
-      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      // mode: 'cors',
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to add spot reference to location');
-    }
-  } catch (error) {
-    console.error('Error adding reference to spot:', error);
-  }
-};
-
-
-export const fetchAttachment = async (attachmentId) => {
-  try {
-    const response = await fetch(`${API_URL}/attachment/${attachmentId}`, {
-      method: 'GET',
-      headers: {
-        'accept': 'application/json'
-      },
-      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      // mode: 'cors',
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      console.info("Received attachment: "+ JSON.stringify(data))
-      return data; // return attachment data if needed
-    } else {
-      throw new Error('Failed to fetch attachment');
-    }
-  } catch (error) {
-    console.error('Error fetching attachment:', error);
-    return null;
-  }
-};
-
-export const fetchAttachments = async (refId, refType) => {
+export const getInDBWithFilter = async (refId, refType, endpoint) => {
   try {
     var filter = "";
     if (refId > 0) {
       filter = `?refId=${refId}&refType=${refType}`
     }
-    const response = await fetch(`${API_URL}/attachment${filter}`, {
+    const response = await fetch(`${API_URL}/${endpoint}${filter}`, {
       method: 'GET',
       headers: {
         'accept': 'application/json'
@@ -408,13 +282,13 @@ export const fetchAttachments = async (refId, refType) => {
 
     if (response.ok) {
       const data = await response.json();
-      console.info("Received attachments: "+ JSON.stringify(data))
+      console.info(`Received ${endpoint}: `+ JSON.stringify(data))
       return data; // return attachment data if needed
     } else {
-      throw new Error('Failed to fetch attachments');
+      throw new Error(`Failed to fetch ${endpoint}`);
     }
   } catch (error) {
-    console.error('Error fetching attachment:', error);
+    console.error(`Error fetching ${endpoint}:`, error);
     return [];
   }
 };

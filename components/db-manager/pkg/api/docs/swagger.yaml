@@ -18,6 +18,15 @@ definitions:
       name:
         type: string
     type: object
+  models.APINotes:
+    properties:
+      category:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+    type: object
   models.APISpots:
     properties:
       description:
@@ -27,6 +36,10 @@ definitions:
     type: object
   models.APIUsers:
     properties:
+      bio:
+        type: string
+      birthday:
+        type: string
       email:
         type: string
       extRef:
@@ -85,6 +98,31 @@ definitions:
         description: Automatically managed by trigger
         type: string
     type: object
+  models.Notes:
+    properties:
+      attachments:
+        description: only json -> Need to create the parse the json  to and from db
+        items:
+          type: integer
+        type: array
+      category:
+        type: string
+      createdAt:
+        description: Automatically generated
+        type: string
+      description:
+        type: string
+      id:
+        description: db + json
+        type: integer
+      name:
+        type: string
+      refUserUploader:
+        type: integer
+      updatedAt:
+        description: Automatically managed by trigger
+        type: string
+    type: object
   models.Spots:
     properties:
       attachments:
@@ -112,6 +150,10 @@ definitions:
     type: object
   models.Users:
     properties:
+      bio:
+        type: string
+      birthday:
+        type: string
       createdAt:
         description: Automatically generated
         type: string
@@ -153,7 +195,8 @@ paths:
       - description: Reference Type (optional)
         enum:
         - spot
-        - task
+        - attachment
+        - note
         in: query
         name: refType
         type: string
@@ -279,8 +322,8 @@ paths:
       - description: Reference Type
         enum:
         - spot
-        - task
         - attachment
+        - note
         in: query
         name: refType
         required: true
@@ -453,6 +496,137 @@ paths:
       summary: Update the ref
       tags:
       - location
+  /note:
+    get:
+      description: Get a list of all notes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Notes'
+            type: array
+      summary: Retrieve all notes
+      tags:
+      - note
+    post:
+      consumes:
+      - application/json
+      description: Create a new note
+      parameters:
+      - description: Note data
+        in: body
+        name: note
+        required: true
+        schema:
+          $ref: '#/definitions/models.APINotes'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Notes'
+      summary: Create a note
+      tags:
+      - note
+  /note/{id}:
+    delete:
+      description: Delete a note and nullify its references in notes
+      parameters:
+      - description: Note ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+      summary: Delete a note by ID
+      tags:
+      - note
+    get:
+      description: Get note details by ID
+      parameters:
+      - description: Note ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Notes'
+      summary: Retrieve a note by ID
+      tags:
+      - note
+    put:
+      consumes:
+      - application/json
+      description: Update note details by ID
+      parameters:
+      - description: Note ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Note data
+        in: body
+        name: note
+        required: true
+        schema:
+          $ref: '#/definitions/models.APINotes'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Notes'
+      summary: Update a note by ID
+      tags:
+      - note
+  /note/{id}/ref:
+    put:
+      description: Update the ref in a note details by ID
+      parameters:
+      - description: Note ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Reference ID (optional)
+        in: query
+        name: refId
+        required: true
+        type: integer
+      - description: Reference Type
+        enum:
+        - spot
+        - user
+        in: query
+        name: refType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Notes'
+      summary: Update the ref
+      tags:
+      - note
   /spot:
     get:
       description: Get a list of all spots
