@@ -184,6 +184,7 @@ export const updateInDB = async (body, endpoint) => {
 
   const updateObject = { ...body };
   delete updateObject.id;
+  console.info(`puting ${endpoint} with ${updateObject}`, updateObject);
   try {
     const response = await fetch(`${API_URL}/${endpoint}/${body.id}`, {
       method: 'PUT',
@@ -200,7 +201,7 @@ export const updateInDB = async (body, endpoint) => {
       const data = await response.json();
       return data; // return the URL or data if needed
     } else {
-      console.error(`Failed to update the ${endpoint}:`, response.text());
+      console.error(`Failed to update the ${endpoint}:`, await response.text());
       return null;
     }
   } catch (error) {

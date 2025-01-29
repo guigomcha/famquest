@@ -6,6 +6,7 @@ import Row from 'react-bootstrap/Row';
 import { Spin } from 'antd';
 import '../css/classes.css';
 import { updateInDB } from '../backend_interface/db_manager_api';
+import { DatePicker, Space } from 'antd';
 
 
 // This request the baseline info to create a new User in DB
@@ -24,7 +25,11 @@ const UserForm = ({ initialData, handledFinished }) => {
     }
     const formDataObj = new FormData(form);
     // Convert FormData to a plain object
-    const formValues = {};
+    const formValues = {
+      "email": initialData.email,
+      "extRef": initialData.extRef,
+      "role": initialData.role,
+    };
     formDataObj.forEach((value, key) => {
       formValues[key] = value;
     });
@@ -53,35 +58,33 @@ const UserForm = ({ initialData, handledFinished }) => {
         )}
         <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridName">
-            <Form.Label>Name</Form.Label>
+            <Form.Label>Name (readOnly)</Form.Label>
             <Form.Control
-              required
+              readOnly
               type="text"
               name="name"
-              placeholder="Add a new name"
               defaultValue={initialData?.name}
             />
           </Form.Group>
-          <Form.Group as={Col} controlId="formGridCategory">
-            <Form.Label>Category</Form.Label>
+          <Form.Group as={Col} controlId="formGridBirthday">
+            <Form.Label>Birthday</Form.Label>
             <Form.Control
               required
-              type="text"
-              name="category"
-              placeholder="Add a new category"
-              defaultValue={initialData?.category}
+              type="date"
+              name="birthday"
+              defaultValue={initialData?.birthday}
             />
           </Form.Group>
 
-          <Form.Group as={Col} controlId="formGridDescription">
-            <Form.Label>Description</Form.Label>
+          <Form.Group as={Col} controlId="formGridBio">
+            <Form.Label>Biography</Form.Label>
             <Form.Control
               required
               as="textarea"
               rows={10}
-              name="description"
-              placeholder="Add an initial description"
-              defaultValue={initialData?.description}
+              name="bio"
+              placeholder="Add an biography for the user"
+              defaultValue={initialData?.bio}
               style={{
                 resize: 'none',
                 overflowY: 'scroll',
