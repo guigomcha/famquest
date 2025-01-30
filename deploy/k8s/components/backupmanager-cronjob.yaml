@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backup-service-account
+  namespace: REPLACE_TARGET_USER
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: backup-clusterrole
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/exec"]
+  verbs: ["get", "list", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: backup-rolebinding
+  namespace: famquest
+subjects:
+- kind: ServiceAccount
+  name: backup-service-account
+  namespace: REPLACE_TARGET_USER
+roleRef:
+  kind: ClusterRole
+  name: backup-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-manager-cronjob
+  namespace: REPLACE_TARGET_USER
+spec:
+  schedule: "30 * * * *"  # This sets the CronJob to run every minute
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: backup-service-account # Use the Kubernetes SA
+          imagePullSecrets:
+            - name: guigomchasecrets
+          containers:
+          - name: postgresbackup
+            imagePullPolicy: Always
+            image: ghcr.io/guigomcha/famquest/backupmanager:REPLACE_TARGET_USER
+            envFrom:
+              - secretRef:
+                  name: backup-manager-credentials
+            command: ["sh"]
+            args: ["-c", "./main.sh famquest /backups/backups-postgresql postgresql;"]
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backups
+          - name: miniobackup
+            imagePullPolicy: Always
+            image: ghcr.io/guigomcha/famquest/backupmanager:REPLACE_TARGET_USER
+            envFrom:
+              - secretRef:
+                  name: backup-manager-credentials
+            command: ["sh"]
+            args: ["-c", "./main.sh famquest /backups/backups-minio minio;"]
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backups
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim:
+              claimName: backupmanager-pvc
+          restartPolicy: OnFailure  # Retry on failure
+          # Set the logging retention
+          terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backup-manager-credentials
+  namespace: REPLACE_TARGET_USER
+type: Opaque
+stringData:
+  DB_USER: REPLACE_PASSWORD
+  DB_NAME: REPLACE_TARGET_USER
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: REPLACE_TARGET_USER
+  name: backupmanager-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # persistentVolumeReclaimPolicy: Delete (only when the pvc is deleted, not the pod)
+  storageClassName: local-path
+  resources:
+    # The capacity limit will be ignored for now. https://github.com/rancher/local-path-provisioner/blob/master/README.md#cons
+    requests: # Only for compressed files
+      storage: 1Gi
