@@ -31,11 +31,11 @@ if [ -f "$HASH_FILE" ]; then
         rm -f $BACKUP_FILE
     else
         echo "Backup file has changed. Updates detected. Pushing to Dropbox."
-        bash dropbox_uploader.sh -f $DROPBOX_CONFIG_FILE upload $BACKUP_FILE $BACKUP_FILE
+        ./dropbox_uploader.sh -f $DROPBOX_CONFIG_FILE upload $BACKUP_FILE $BACKUP_FILE
     fi
 else
     echo "No previous backup hash found. Assuming this is the first backup. Pushing to Dropbox."
-    bash dropbox_uploader.sh -f $DROPBOX_CONFIG_FILE upload $BACKUP_FILE $BACKUP_FILE 
+    ./dropbox_uploader.sh -f $DROPBOX_CONFIG_FILE upload $BACKUP_FILE $BACKUP_FILE 
 fi
 
 echo "$NEW_HASH" > $HASH_FILE
