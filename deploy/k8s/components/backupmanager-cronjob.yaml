@@ -83,6 +83,9 @@ type: Opaque
 stringData:
   DB_USER: REPLACE_PASSWORD
   DB_NAME: REPLACE_TARGET_USER
+  OAUTH_APP_KEY: REPLACE
+  OAUTH_APP_SECRET: REPLACE
+  OAUTH_REFRESH_TOKEN: REPLACE
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
