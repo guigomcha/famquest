@@ -25,6 +25,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
   const cameraRef = useRef(null); // To keep track of the camera stream
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState(null);
+  const [statusMessage, setStatusMessage] = useState("");
 
   const stopCameraPreview = () => {
     mediaStream?.getTracks().forEach((track) => track.stop());
@@ -122,7 +123,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
   };
 
   const handleSubmit = async (event) => {
-    
+    setStatusMessage("");
     setIsLoading(true);
     event.preventDefault();
     event.stopPropagation();
@@ -314,6 +315,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
       <Button type="primary" htmlType="submit">
         Submit
       </Button>
+      {statusMessage && <p>{statusMessage}</p>}
       </Form>
     </>
   );
