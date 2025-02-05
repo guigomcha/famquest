@@ -6,11 +6,13 @@ import Carousel from 'react-bootstrap/Carousel';
 import { Button } from 'antd';
 import { EditOutlined, AudioOutlined } from '@ant-design/icons';
 import AudioForm from './AudioForm';
+import { useTranslation } from "react-i18next";
 
 const Audio = ({ refId, refType, handleMenuChange }) => {
+  const { t, i18n } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedAudios, setSelectedAudios] = useState([]);
-  const [info, setInfo] = useState({"userName": "unknown"});
+  const [info, setInfo] = useState({"name": "unknown"});
 
   const handleSelect = (selectedIndex) => {
     setActiveIndex(selectedIndex);
@@ -54,9 +56,7 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
       return;
     }
     const userInfo = await getUserInfo(model.refUserUploader);
-    setInfo({
-      "userName": userInfo?.name || "unknown"
-    }); 
+    setInfo(userInfo); 
   }
 
   useEffect(() => {
@@ -81,14 +81,14 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
                     <Card.Footer>
                         <Card.Title>{audio.name}</Card.Title>
                         <Card.Text>{audio.description}</Card.Text>
-                        <Card.Text>Uploader: {info.userName}</Card.Text>
+                        <Card.Text>{t('signedAs')}: {info.name}</Card.Text>
                     </Card.Footer>
                   </Card>
                 </Carousel.Item>
               ))}
             </Carousel>
           ) : (
-            renderEmptyState("Create new to see it")
+            renderEmptyState(t('empty'))
           )}
         </Card.Body>
         <Card.Footer>
@@ -96,13 +96,13 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
             type="default"
             icon={<AudioOutlined />}
             onClick={handleRequestNew}
-            >New</Button>
+            >{t('new')}</Button>
 
           {selectedAudios.length > 0 && <Button trigger="click"
             type="default"
             icon={<EditOutlined />}
             onClick={handleRequestEdit}
-            >Edit</Button>}
+            >{t('edit')}</Button>}
         </Card.Footer>
       </>
   );

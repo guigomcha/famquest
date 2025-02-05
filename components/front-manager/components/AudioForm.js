@@ -6,8 +6,11 @@ import Row from 'react-bootstrap/Row';
 import { Spin, Alert } from 'antd';
 import { uploadAttachment, addReferenceInDB, updateInDB } from '../backend_interface/db_manager_api';
 import '../css/classes.css';
+import { useTranslation } from "react-i18next";
+
 
 const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
+  const { t, i18n } = useTranslation();
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioOpened, setAudioOpened] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
@@ -76,7 +79,7 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
     }
     console.info("new audio to be sent")
     if (!audioBlob) {
-      setStatusMessage("Please record an audio first.");
+      setStatusMessage(t('formNotValid'));
       setIsLoading(false);
       return;
     }
@@ -86,7 +89,7 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
       // Add reference to current spot
       await addReferenceInDB(attachment.id, refId, refType, 'attachment');
     } else {
-      setStatusMessage("Unable to send audio.");
+      setStatusMessage(t('formFailed'));
     }
     setAudioBlob('');
     setIsLoading(false);
@@ -97,7 +100,7 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
     <>
       {(isLoading) && (
         <div className="spin-overlay">
-          <Spin tip="Loading"></Spin>
+          <Spin tip={t('loading')}></Spin>
         </div>
       )}
       <Form noValidate onSubmit={handleSubmit}>
@@ -109,25 +112,25 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
       </Row>}
       <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridName">
-            <Form.Label>Name</Form.Label>
+            <Form.Label>{t('name')}</Form.Label>
             <Form.Control 
               required
               type="text"
               name="name"
-              placeholder="Add a new name"
+              placeholder={t('editName')}
               defaultValue={initialData?.name} 
             />
           </Form.Group>
 
           <Form.Group as={Col} controlId="formGridDescription">
-            <Form.Label>Description</Form.Label>
+            <Form.Label>{t('description')}</Form.Label>
             <Form.Control 
               required
               type="textarea"
               rows={10}
               name="description"
               style={{ resize: "none", overflowY: "scroll", maxHeight: "150px" }}
-              placeholder="Add an initial description" 
+              placeholder={t('editDescription')} 
               defaultValue={initialData?.description}
             />
           </Form.Group>
@@ -135,7 +138,7 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
         <Row>
           { !initialData?.id &&
           <Button onClick={toggleAudioRecording} variant="primary">
-              Start/Stop Audio Recording
+              {t('audioControl')}
               {audioOpened && (
                   <div
                     style={{
@@ -146,7 +149,7 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
                       fontWeight: "bold",
                     }}
                   >
-                    Recording
+                    {t('recording')}
                   </div>
                 )}
               </Button>}          
@@ -154,7 +157,7 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
                 <audio controls src={URL.createObjectURL(audioBlob)}></audio>
               )}
           </Row>
-          <Button variant="primary" type="submit">{initialData?.id ? ("Update Audio") : ("Upload Audio")}</Button>
+          <Button variant="primary" type="submit">{initialData?.id ? (t('update')) : (t('upload'))}</Button>
           {statusMessage && <p>{statusMessage}</p>}
       </Form>
     </>

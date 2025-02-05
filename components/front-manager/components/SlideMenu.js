@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Drawer } from "antd";
 import { ColumnHeightOutlined } from '@ant-design/icons';
+import { useTranslation } from "react-i18next";
+
 
 const SlideMenu = ({ component, handledFinished }) => {
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(true);
   const [height, setHeight] = useState(300); // Initial height of the Drawer
   const dragRef = useRef(null);

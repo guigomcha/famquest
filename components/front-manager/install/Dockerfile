@@ -22,5 +22,6 @@ FROM  ghcr.io/guigomcha/proxy/nginx:latest
 
 # Copy the generated HTML files from the previous stage
 COPY --from=builder /usr/src/famquest/components/front-manager/dist /usr/share/nginx/html
+COPY --from=builder /usr/src/famquest/components/front-manager/public /usr/share/nginx/html/public
 COPY --from=builder /usr/src/famquest/components/front-manager/assets /usr/share/nginx/html/assets
 

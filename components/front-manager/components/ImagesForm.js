@@ -11,8 +11,10 @@ import Card from 'react-bootstrap/Card';
 import { Spin, Alert } from 'antd';
 import { uploadAttachment, updateInDB, addReferenceInDB } from '../backend_interface/db_manager_api';
 import '../css/classes.css';
+import { useTranslation } from "react-i18next";
 
 const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
+  const { t, i18n } = useTranslation();
   const [imageBlob, setImageBlob] = useState(null);
   const [videoBlob, setVideoBlob] = useState(null);
   const [cameraOpened, setCameraOpened] = useState(false);
@@ -160,7 +162,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
     }
     console.info("new image to be sent")
     if (!dataToUpload) {
-      setStatusMessage("Please record an image first.");
+      setStatusMessage(t('formNotValid'));
       setIsLoading(false);
       return;
     }
@@ -170,7 +172,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
       // Add reference to current parent
       await addReferenceInDB(attachment.id, refId, refType, 'attachment');
     } else {
-      console.info("Unable to send image.");
+      console.info(t('formFailed'));
     }
 
     setFile('');
@@ -182,35 +184,35 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
     <>
       {(isLoading) && (
         <div className="spin-overlay">
-          <Spin tip="Loading"></Spin>
+          <Spin tip={t('loading')}></Spin>
         </div>
       )}
       <Form noValidate onSubmit={handleSubmit} encType="multipart/form-data">
         {initialData?.id && <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridId">
-            <Form.Label>Id (readOnly)</Form.Label>
+            <Form.Label>Id ({t('readOnly')})</Form.Label>
             <Form.Control type="text" name="id" defaultValue={initialData?.id} readOnly />
           </Form.Group>
         </Row>}
         <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridName">
-            <Form.Label>Name</Form.Label>
+            <Form.Label>{t('name')}</Form.Label>
             <Form.Control 
               required
               type="text"
               name="name"
-              placeholder="Add a new name"
+              placeholder={t('editName')}
               defaultValue={initialData?.name}  
             />
           </Form.Group>
 
           <Form.Group as={Col} controlId="formGridDescription">
-            <Form.Label>Description</Form.Label>
+            <Form.Label>{t('description')}</Form.Label>
             <Form.Control 
               required
               type="text"
               name="description"
-              placeholder="Add an initial description"
+              placeholder={t('editDescription')}
               defaultValue={initialData?.description}  
             />
           </Form.Group>
@@ -218,7 +220,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
         {!initialData?.id && <Row className="mb-3">
           <Row>
             <Col>
-              <Form.Label>Select from device</Form.Label>
+              <Form.Label>{t('selectFromDevice')}</Form.Label>
               <Form.Control 
                 type="file" 
                 name="file" 
@@ -231,28 +233,28 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
               <Button trigger="click"
                 type="default"
                 onClick={toggleCamera}
-                >Open/Close<br></br>{cameraOption} Camera</Button>
+                >{t('cameraControl')}<br></br>{cameraOption} {t('camera')}</Button>
               <Dropdown.Toggle split variant="default" id="dropdown-split-basic" />
               <Dropdown.Menu>
-                <Dropdown.Item onClick={handleCameraOptionEvent} name="front">Front</Dropdown.Item>
-                <Dropdown.Item onClick={handleCameraOptionEvent} name="back">Back</Dropdown.Item>
+                <Dropdown.Item onClick={handleCameraOptionEvent} name="front">{t('front')}</Dropdown.Item>
+                <Dropdown.Item onClick={handleCameraOptionEvent} name="back">{t('back')}</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
             {cameraOpened && (
               <Row className="mb-2">
-                <Col>
+                {/* <Col>
                   <Button trigger="click"
                     type="primary"
                     icon={<VideoCameraAddOutlined />}
                     onClick={toggleVideoRecording}
                     >Start/Stop <br></br>Video Recording</Button>
-                </Col>
+                </Col> */}
                 <Col>
                   <Button trigger="click"
                     type="primary"
                     icon={<CameraOutlined />}
                     onClick={captureImage}
-                    >Capture Image</Button>
+                    >{t('cameraTakePhoto')}</Button>
                 </Col>
               </Row>
             )}
@@ -263,7 +265,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
             <Col>
             {(cameraOpened || file != null) && (
               <Card>
-                <Card.Title>Camera Preview</Card.Title>
+                <Card.Title>{t('cameraPreview')}</Card.Title>
                 <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
                 {cameraOpened && (                       
                   <video
@@ -286,7 +288,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
                       zIndex: 10,
                     }}
                   >
-                    Recording
+                    {t('recording')}
                   </label>
                 )}
               </Card>
@@ -295,7 +297,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
             <Col>
               <Card>
               {(imageBlob || videoBlob) &&
-                <Card.Title>Loaded Content</Card.Title>
+                <Card.Title>{t('preview')}</Card.Title>
               }
                 {imageBlob &&
                 <img
@@ -312,9 +314,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
           </Row>
         </Row>
         }
-      <Button type="primary" htmlType="submit">
-        Submit
-      </Button>
+      <Button variant="primary" type="submit">{initialData?.id ? (t('update')) : (t('upload'))}</Button>
       {statusMessage && <p>{statusMessage}</p>}
       </Form>
     </>

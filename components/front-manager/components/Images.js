@@ -8,11 +8,13 @@ import { getInDBWithFilter, getUserInfo } from '../backend_interface/db_manager_
 import {renderEmptyState} from '../utils/render_message';
 import Audio from './Audio';
 import ImagesForm from './ImagesForm';
+import { useTranslation } from "react-i18next";
 
 const Images = ( {refId, refType, handleMenuChange} ) => {
+  const { t, i18n } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedImages, setSelectedImages] = useState([]);
-  const [info, setInfo] = useState({"userName": "unknown"});
+  const [info, setInfo] = useState({"name": "unknown"});
 
   const handleSelect = (selectedIndex) => {
     setActiveIndex(selectedIndex);
@@ -50,9 +52,7 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
       return;
     }
     const userInfo = await getUserInfo(model.refUserUploader);
-    setInfo({
-      "userName": userInfo?.name || "unknown"
-    });
+    setInfo(userInfo);
   }
 
   // fetch the attachments for this spot
@@ -77,18 +77,18 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
                   <Card.Img src={image.url} alt={`Attachment ${index + 1}`} className="center-block" />
                   <Card.Title>{image.name}</Card.Title>
                   <Card.Text>{image.description}</Card.Text>
-                  <Card.Text>Uploader: {info.userName}</Card.Text>
+                  <Card.Text>{t('signedAs')}: {info.name}</Card.Text>
                 </Card>
               </Carousel.Item>
             ))}
           </Carousel>
           <Card>
-            <Card.Title>Audios in the image</Card.Title> 
+            <Card.Title>{t('audiosInImage')}</Card.Title> 
             <Audio refId={selectedImages[activeIndex].id} refType={'attachment'} handleMenuChange={handleMenuChange}/> 
           </Card>
           </Container>
         ) : (
-          renderEmptyState("Create new to see it")
+          renderEmptyState(t('empty'))
         )}
       </Card.Body>
       <Card.Footer>
@@ -96,13 +96,13 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
             type="default"
             icon={<FileAddOutlined />}
             onClick={handleRequestNew}
-            >New</Button>
+            >{t('new')}</Button>
 
           {selectedImages.length > 0 && <Button trigger="click"
             type="default"
             icon={<EditOutlined />}
             onClick={handleRequestEdit}
-            >Edit</Button>}
+            >{t('edit')}</Button>}
         </Card.Footer>
       </>
 

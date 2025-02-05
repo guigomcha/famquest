@@ -10,7 +10,7 @@ import { SpotFromForm } from '../backend_interface/components_helper';
 import { worldPolygon, uncoverFog, locationVisible } from '../backend_interface/fog_functions';
 import { Spin, Alert } from 'antd';
 import { getInDB, fetchAndPrepareSpots } from "../backend_interface/db_manager_api";
-
+import { useTranslation } from "react-i18next";
 const scale = 13;
 
 const defaultCenter = {
@@ -25,6 +25,7 @@ const iconStyle = {
 };
 
 const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
+  const { t, i18n } = useTranslation();
   const mapRef = useRef(null);
   const guilleSpotsGroup = useRef(null);
   const featureGroup = useRef(null);
@@ -130,7 +131,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
       const mapDiv = document.getElementById("mapId");
       mapRef.current = L.map(mapDiv).setView([defaultCenter.lat, defaultCenter.lng], scale);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'GuiGomcha FamQuest powered by OpenStreetMap',
+        attribution: 'GuiGomcha FamQuest App',
       }).addTo(mapRef.current);
       handleMapRef(mapRef);
       // // To support map inside of tab
@@ -212,7 +213,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%"}}>
-      {(isLoading) &&<Spin>Loading</Spin>}
+      {(isLoading) &&<Spin>{t('loading')}</Spin>}
       <div id="mapId" style={{ height: '100vh', width: '100vw' }}>
       </div>
     </div>

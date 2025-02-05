@@ -9,10 +9,13 @@ import { SpotFromForm } from '../backend_interface/components_helper';
 import { renderDescription } from '../utils/render_message';
 import { getUserInfo } from '../backend_interface/db_manager_api';
 import SlideMenu from './SlideMenu';
+import { useTranslation } from "react-i18next";
+
 
 const SpotPopup = ({ spot }) => {
+  const { t, i18n } = useTranslation();
   const [component, setComponent] = useState(null);
-  const [info, setInfo] = useState({ "userName": "unknown" });
+  const [info, setInfo] = useState({ "name": "unknown" });
 
   const handleRequestEdit = (e) => {
     setComponent(<SpotForm initialData={spot} onSubmit={async (data) => SpotFromForm(data, e.target.data)} handledFinished={handleNestedRequestEdit} />);
@@ -34,9 +37,7 @@ const SpotPopup = ({ spot }) => {
       return;
     }
     const userInfo = await getUserInfo(model.refUserUploader);
-    setInfo({
-      "userName": userInfo?.name || "unknown"
-    });
+    setInfo(userInfo);
   };
 
   useEffect(() => {
@@ -46,9 +47,8 @@ const SpotPopup = ({ spot }) => {
   return (
     <>
       <Card>
-        <Card.Title>Spot: {spot.name}</Card.Title>
+        <Card.Title>{t('spot')}: {spot.name}</Card.Title>
         <Card>
-          <Card.Title>Global info</Card.Title>
           <Card.Body>
             {/* Render description with line breaks */}
             <Card.Text>{renderDescription(spot.description)}</Card.Text>
@@ -58,19 +58,19 @@ const SpotPopup = ({ spot }) => {
               icon={<EditOutlined />}
               onClick={handleRequestEdit}
             >
-              Edit
+              {t('edit')}
             </Button>
           </Card.Body>
           <Card.Footer>
-            <Card.Text>Uploader: {info.userName}</Card.Text>
+            <Card.Text>{t('owner')}: {info.name}</Card.Text>
           </Card.Footer>
         </Card>
         <Card>
-          <Card.Title>Audios in the Spot</Card.Title>
+          <Card.Title>{t('audiosInSpot')}</Card.Title>
           <Audio refId={spot.id} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
         </Card>
         <Card>
-          <Card.Title>Images in the Spot</Card.Title>
+          <Card.Title>{t('imagesInSpot')}</Card.Title>
           <Images refId={spot.id} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
         </Card>
       </Card>

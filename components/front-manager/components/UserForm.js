@@ -7,10 +7,12 @@ import { Spin } from 'antd';
 import '../css/classes.css';
 import { updateInDB } from '../backend_interface/db_manager_api';
 import { DatePicker, Space } from 'antd';
+import { useTranslation } from "react-i18next";
 
 
 // This request the baseline info to create a new User in DB
 const UserForm = ({ initialData, handledFinished }) => {
+  const { t, i18n } = useTranslation();
   const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,21 +46,21 @@ const UserForm = ({ initialData, handledFinished }) => {
     <>
       {isLoading && (
         <div className="spin-overlay">
-          <Spin tip="Loading" />
+          <Spin tip={t('loading')} />
         </div>
       )}
       <Form noValidate onSubmit={handleSubmit}>
         {initialData?.id && (
           <Row className="mb-3">
             <Form.Group as={Col} controlId="formGridId">
-              <Form.Label>Id (readOnly)</Form.Label>
+              <Form.Label>Id ({t('readOnly')})</Form.Label>
               <Form.Control type="text" name="id" defaultValue={initialData?.id} readOnly />
             </Form.Group>
           </Row>
         )}
         <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridName">
-            <Form.Label>Name (readOnly)</Form.Label>
+            <Form.Label>{t('name')} ({t('readOnly')})</Form.Label>
             <Form.Control
               readOnly
               type="text"
@@ -67,7 +69,7 @@ const UserForm = ({ initialData, handledFinished }) => {
             />
           </Form.Group>
           <Form.Group as={Col} controlId="formGridBirthday">
-            <Form.Label>Birthday</Form.Label>
+            <Form.Label>{t('birthday')}</Form.Label>
             <Form.Control
               required
               type="date"
@@ -77,13 +79,13 @@ const UserForm = ({ initialData, handledFinished }) => {
           </Form.Group>
 
           <Form.Group as={Col} controlId="formGridBio">
-            <Form.Label>Biography</Form.Label>
+            <Form.Label>{t('biography')}</Form.Label>
             <Form.Control
               required
               as="textarea"
               rows={10}
               name="bio"
-              placeholder="Add an biography for the user"
+              placeholder={t('editBiography')}
               defaultValue={initialData?.bio}
               style={{
                 resize: 'none',
@@ -94,7 +96,7 @@ const UserForm = ({ initialData, handledFinished }) => {
           </Form.Group>
         </Row>
         <Button variant="primary" type="submit">
-          Submit
+          {t('submit')}
         </Button>
       </Form>
     </>
