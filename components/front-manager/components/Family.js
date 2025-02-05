@@ -12,10 +12,12 @@ import SlideMenu from './SlideMenu';
 import UserForm from './UserForm';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
+import { useTranslation } from "react-i18next";
 
 // Shows the user info and all the notes from other family members
 const FamilyTab = ({ user }) => {
   const [component, setComponent] = useState(null);
+  const { t, i18n } = useTranslation();
   // const [info, setInfo] = useState({});
   const [notes, setNotes] = useState([]);
   const [users, setUsers] = useState([]);
@@ -72,7 +74,7 @@ const FamilyTab = ({ user }) => {
             <Tab eventKey={u.name} title={u.name}>
               <Card>
                 <Card>
-                  <Card.Title>User info</Card.Title>
+                  <Card.Title> {t('userInfo')}</Card.Title>
                   <Card.Body>
                     <Card.Text>{renderDescription(u.bio)}</Card.Text>
                   </Card.Body>
@@ -91,7 +93,7 @@ const FamilyTab = ({ user }) => {
                   </Card.Footer>
                 </Card>
                 <Card>
-                  <Card.Title>Notes</Card.Title>
+                  <Card.Title>{t('notes')}</Card.Title>
                   <Card.Body>
                     {notes.length > 0 ? ( 
                       <ListGroup as="ol" numbered>
@@ -107,7 +109,7 @@ const FamilyTab = ({ user }) => {
                           ))}
                       </ListGroup>
                       ) : (
-                        renderEmptyState("Create new to see it")
+                        renderEmptyState(t('empty'))
                       )}
                   </Card.Body>
                   <Card.Footer>
@@ -116,11 +118,11 @@ const FamilyTab = ({ user }) => {
                     type="default"
                     icon={<AppstoreAddOutlined />}
                     onClick={handleRequestNew}
-                    >New</Button>}
+                    >{t('new')}</Button>}
                   </Card.Footer>
                 </Card>
                 <Card.Footer>
-                  Connected as: {user.name}
+                  {t('signedAs')}: {user.name}
                 </Card.Footer>
               </Card>
             </Tab>

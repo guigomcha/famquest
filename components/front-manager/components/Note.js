@@ -8,10 +8,12 @@ import NoteForm from './NoteForm';
 import { renderDescription } from '../utils/render_message';
 import { getUserInfo } from '../backend_interface/db_manager_api';
 import SlideMenu from './SlideMenu';
+import { useTranslation } from "react-i18next";
 
 const Note = ({ initialData, userId, handledFinished }) => {
+  const { t, i18n } = useTranslation();
   const [component, setComponent] = useState(null);
-  const [info, setInfo] = useState({ "userName": "unknown" });
+  const [info, setInfo] = useState({ "name": "unknown" });
 
   const handleRequestEdit = (e) => {
     setComponent(<NoteForm initialData={initialData} handledFinished={handleNestedRequestEdit} />);
@@ -34,9 +36,7 @@ const Note = ({ initialData, userId, handledFinished }) => {
       return;
     }
     const userInfo = await getUserInfo(model.refUserUploader);
-    setInfo({
-      "userName": userInfo?.name || "unknown"
-    });
+    setInfo(userInfo);
   };
 
   useEffect(() => {
@@ -47,29 +47,28 @@ const Note = ({ initialData, userId, handledFinished }) => {
   return (
     <>
       <Card>
-        <Card.Title>Note: {initialData.name}</Card.Title>
+        <Card.Title>{t('note')}: {initialData.name}</Card.Title>
         <Card>
-          <Card.Title>Global info</Card.Title>
           <Card.Body>
             <Card.Text>{renderDescription(initialData.description)}</Card.Text>
           </Card.Body>
           <Card.Footer>
-            <Card.Text>Uploader: {info.userName}</Card.Text>
+            <Card.Text>{t('owner')}: {info.name}</Card.Text>
             {(userId == initialData.refUserUploader) &&
             (<Button trigger="click"
               type="default"
               icon={<EditOutlined />}
               onClick={handleRequestEdit}
-              >Edit
+              >{t('edit')}
             </Button>)}
           </Card.Footer>
         </Card>
         <Card>
-          <Card.Title>Audios in the Note</Card.Title>
+          <Card.Title>{t('audiosInNote')}</Card.Title>
           <Audio refId={initialData.id} refType={'note'} handleMenuChange={handleNestedRequestEdit} />
         </Card>
         <Card>
-          <Card.Title>Images in the Note</Card.Title>
+          <Card.Title>{t('imagesInNote')}</Card.Title>
           <Images refId={initialData.id} refType={'note'} handleMenuChange={handleNestedRequestEdit} />
         </Card>
       </Card>

@@ -5,9 +5,12 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { Spin } from 'antd';
 import '../css/classes.css';
+import { useTranslation } from "react-i18next";
+
 
 // This request the baseline info to create a new Spot in DB
 const SpotForm = ({ initialData, onSubmit, handledFinished }) => {
+  const { t, i18n } = useTranslation();
   const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,38 +39,38 @@ const SpotForm = ({ initialData, onSubmit, handledFinished }) => {
     <>
       {isLoading && (
         <div className="spin-overlay">
-          <Spin tip="Loading" />
+          <Spin tip={t('loading')} />
         </div>
       )}
       <Form noValidate onSubmit={handleSubmit}>
         {initialData?.id && (
           <Row className="mb-3">
             <Form.Group as={Col} controlId="formGridId">
-              <Form.Label>Id (readOnly)</Form.Label>
+              <Form.Label>Id ({t('readOnly')})</Form.Label>
               <Form.Control type="text" name="id" defaultValue={initialData?.id} readOnly />
             </Form.Group>
           </Row>
         )}
         <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridName">
-            <Form.Label>Name</Form.Label>
+            <Form.Label>{t('name')}</Form.Label>
             <Form.Control
               required
               type="text"
               name="name"
-              placeholder="Add a new name"
+              placeholder={t('editName')}
               defaultValue={initialData?.name}
             />
           </Form.Group>
 
           <Form.Group as={Col} controlId="formGridDescription">
-            <Form.Label>Description</Form.Label>
+            <Form.Label>{t('description')}</Form.Label>
             <Form.Control
               required
               as="textarea"
               rows={10}
               name="description"
-              placeholder="Add an initial description"
+              placeholder={t('editDescription')}
               defaultValue={initialData?.description}
               style={{
                 resize: 'none',
@@ -78,7 +81,7 @@ const SpotForm = ({ initialData, onSubmit, handledFinished }) => {
           </Form.Group>
         </Row>
         <Button variant="primary" type="submit">
-          Submit
+          {t('submit')}
         </Button>
       </Form>
     </>

@@ -4,8 +4,10 @@ import { message, Button, FloatButton } from 'antd';
 import Card from 'react-bootstrap/Card';
 import { UserOutlined, ReloadOutlined, AimOutlined } from '@ant-design/icons';
 import { createInDB } from '../backend_interface/db_manager_api';
+import { useTranslation } from "react-i18next";
 
 const UserButton = ({ user,  mapRef }) => {
+  const { t, i18n } = useTranslation();
   const userLocationsLayer = useRef(null);
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -24,7 +26,7 @@ const UserButton = ({ user,  mapRef }) => {
       mapRef.current.flyTo([locations[locations.length -1].getLatLng().lat, locations[locations.length -1].getLatLng().lng], 13);
     } else {
       console.info("No previous locations known: ", locations);
-      warning('No previous locations known');
+      warning(t('noPreviousLocation'));
     }
   };
   
@@ -67,7 +69,7 @@ const UserButton = ({ user,  mapRef }) => {
                 iconSize: [24, 36],
                 iconAnchor: [12, 36],
               }),
-            }).bindPopup('Your were here at '+ Date()); 
+            }).bindPopup(t('liveLocationInfo')+' '+ Date()); 
             var circle = L.circle([e.latitude, e.longitude], Math.min(e.accuracy/2, 100), {
                 weight: 1,
                 color: 'blue',
@@ -90,7 +92,7 @@ const UserButton = ({ user,  mapRef }) => {
             console.info("sent location", locationDb)
           })
          .on('locationerror', function(e){
-            warning('Live location error');
+            warning(t('liveLocationError'));
             console.info("live location error", e);
           });
   }, [mapRef.current]);
@@ -100,7 +102,7 @@ const UserButton = ({ user,  mapRef }) => {
         trigger="click"
         type="primary"
         icon={<UserOutlined />}
-        tooltip={<div>User Info</div>}
+        tooltip={<div>{t('userInfo')}</div>}
       >
       <>
         {contextHolder}
@@ -112,22 +114,22 @@ const UserButton = ({ user,  mapRef }) => {
           padding: "15px",
           width: "250px",
         }}>
-          <Card.Title>User Info</Card.Title>
+          <Card.Title>{t('userInfo')}</Card.Title>
           <Card.Body>
-            <Card.Text>Welcome: {user?.name}!</Card.Text>
-            <Card.Text>Email: {user?.email}</Card.Text>
+            <Card.Text>{t('welcome')}: {user?.name}!</Card.Text>
+            <Card.Text>{t('email')}: {user?.email}</Card.Text>
           </Card.Body>
           <Card.Footer>
             <Button trigger="click"
               type="default"
               icon={<ReloadOutlined />}
               onClick={handleReload}
-            >Reload</Button>
+            >{t('reload')}</Button>
             <Button trigger="click"
               type="default"
               icon={<AimOutlined />}
               onClick={handleLocate}
-            >Location</Button>
+            >{t('location')}</Button>
           </Card.Footer>
         </Card>
       </> 

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Button from 'react-bootstrap/Button';
 import { registerUser, getUserInfo } from '../backend_interface/db_manager_api';
+import { useTranslation } from "react-i18next";
 
 const isLocal = true;
 
 const OAuth2Login = ({ onUserChange }) => {
+  const { t, i18n } = useTranslation();
   const [user, setUser] = useState(null); // User information
   
   const transformToDBUser = async (data) => {
@@ -65,9 +67,9 @@ const OAuth2Login = ({ onUserChange }) => {
   return (
       <div >
         {(user || isLocal) ? (
-          <Button variant="primary" onClick={logout}>Logout</Button>
+          <Button variant="primary" onClick={logout}>{t('logout')}</Button>
         ) : (
-          <Button variant="primary" onClick={login}>Login</Button>
+          <Button variant="primary" onClick={login}>{t('login')}</Button>
         )}
       </div>
   );
