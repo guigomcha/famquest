@@ -42,6 +42,7 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
   // Handle form submission and send audio file
   const handleSubmit = async (event) => {
     setIsLoading(true);
+    setStatusMessage("");
     const form = event.currentTarget;
     event.preventDefault();
     event.stopPropagation();

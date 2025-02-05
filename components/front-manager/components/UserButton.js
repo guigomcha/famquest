@@ -114,7 +114,7 @@ const UserButton = ({ user,  mapRef }) => {
         }}>
           <Card.Title>User Info</Card.Title>
           <Card.Body>
-            <Card.Text>Welcome, {user?.preferredUsername}!</Card.Text>
+            <Card.Text>Welcome: {user?.name}!</Card.Text>
             <Card.Text>Email: {user?.email}</Card.Text>
           </Card.Body>
           <Card.Footer>
