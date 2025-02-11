@@ -17,8 +17,6 @@ type APIUsers struct {
 	Birthday string `db:"birthday" json:"birthday"`
 }
 
-// Add bio + birthday
-
 // `db:"users"`
 type Users struct {
 	// Only DB

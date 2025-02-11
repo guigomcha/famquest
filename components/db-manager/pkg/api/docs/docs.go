@@ -273,6 +273,205 @@ const docTemplate = `{
                 }
             }
         },
+        "/discovered": {
+            "get": {
+                "description": "Get a list of all discovereds",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discovered"
+                ],
+                "summary": "Retrieve all discovereds",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Discovered"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new discovered",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discovered"
+                ],
+                "summary": "Create a discovered",
+                "parameters": [
+                    {
+                        "description": "Discovered data",
+                        "name": "discovered",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APIDiscovered"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Discovered"
+                        }
+                    }
+                }
+            }
+        },
+        "/discovered/{id}": {
+            "get": {
+                "description": "Get discovered details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discovered"
+                ],
+                "summary": "Retrieve a discovered by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Discovered ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Discovered"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update discovered details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discovered"
+                ],
+                "summary": "Update a discovered by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Discovered ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Discovered data",
+                        "name": "discovered",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APIDiscovered"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Discovered"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a discovered entry",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discovered"
+                ],
+                "summary": "Delete a discovered by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Discovered ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/discovered/{id}/ref": {
+            "put": {
+                "description": "Update the ref in a discovered details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discovered"
+                ],
+                "summary": "Update the ref",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Discovered ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Reference ID (optional)",
+                        "name": "refId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "spot",
+                            "location",
+                            "note",
+                            "attachment"
+                        ],
+                        "type": "string",
+                        "description": "Reference Type",
+                        "name": "refType",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Discovered"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Check the health of the service",
@@ -1001,6 +1200,22 @@ const docTemplate = `{
                 }
             }
         },
+        "models.APIDiscovered": {
+            "type": "object",
+            "properties": {
+                "condition": {
+                    "description": "this will hold a JSONB in postgresql with the condition",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "show": {
+                    "description": "condition was met",
+                    "type": "boolean"
+                }
+            }
+        },
         "models.APIKnownLocations": {
             "type": "object",
             "properties": {
@@ -1093,6 +1308,34 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Discovered": {
+            "type": "object",
+            "properties": {
+                "condition": {
+                    "description": "db + json",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "createdAt": {
+                    "description": "Automatically generated",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Auto-incremented integer ID",
+                    "type": "integer"
+                },
+                "show": {
+                    "description": "condition was met",
+                    "type": "boolean"
+                },
+                "updatedAt": {
+                    "description": "Automatically managed by trigger",
                     "type": "string"
                 }
             }

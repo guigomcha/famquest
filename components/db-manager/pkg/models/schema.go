@@ -65,6 +65,17 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
 );
 
+CREATE TABLE IF NOT EXISTS discovered (
+    id SERIAL PRIMARY KEY, -- Auto-incremented integer ID (primary key)
+    uuid UUID NOT NULL UNIQUE, -- UUID as a unique identifier
+    condition JSONB NOT NULL, -- JSONB to store the condition map
+    show BOOLEAN NOT NULL, -- Boolean field for the "show" value
+    ref_type TEXT NOT NULL, -- Text field for the reference type
+    ref_id INT NOT NULL, -- Integer field for the reference ID
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- Automatically set on creation
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP -- Automatically updated on modification
+);
+
 -- Trigger functions to update timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -93,5 +104,9 @@ FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE OR REPLACE TRIGGER update_users_updated_at
 BEFORE UPDATE ON notes
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE OR REPLACE TRIGGER update_users_updated_at
+BEFORE UPDATE ON discovered
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 `

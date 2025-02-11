@@ -7,6 +7,17 @@ definitions:
       name:
         type: string
     type: object
+  models.APIDiscovered:
+    properties:
+      condition:
+        additionalProperties:
+          type: string
+        description: this will hold a JSONB in postgresql with the condition
+        type: object
+      show:
+        description: condition was met
+        type: boolean
+    type: object
   models.APIKnownLocations:
     properties:
       latitude:
@@ -69,6 +80,26 @@ definitions:
         description: Automatically managed by trigger
         type: string
       url:
+        type: string
+    type: object
+  models.Discovered:
+    properties:
+      condition:
+        additionalProperties:
+          type: string
+        description: db + json
+        type: object
+      createdAt:
+        description: Automatically generated
+        type: string
+      id:
+        description: Auto-incremented integer ID
+        type: integer
+      show:
+        description: condition was met
+        type: boolean
+      updatedAt:
+        description: Automatically managed by trigger
         type: string
     type: object
   models.KnownLocations:
@@ -352,6 +383,139 @@ paths:
       summary: Configure
       tags:
       - Configure
+  /discovered:
+    get:
+      description: Get a list of all discovereds
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Discovered'
+            type: array
+      summary: Retrieve all discovereds
+      tags:
+      - discovered
+    post:
+      consumes:
+      - application/json
+      description: Create a new discovered
+      parameters:
+      - description: Discovered data
+        in: body
+        name: discovered
+        required: true
+        schema:
+          $ref: '#/definitions/models.APIDiscovered'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Discovered'
+      summary: Create a discovered
+      tags:
+      - discovered
+  /discovered/{id}:
+    delete:
+      description: Delete a discovered entry
+      parameters:
+      - description: Discovered ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+      summary: Delete a discovered by ID
+      tags:
+      - discovered
+    get:
+      description: Get discovered details by ID
+      parameters:
+      - description: Discovered ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Discovered'
+      summary: Retrieve a discovered by ID
+      tags:
+      - discovered
+    put:
+      consumes:
+      - application/json
+      description: Update discovered details by ID
+      parameters:
+      - description: Discovered ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Discovered data
+        in: body
+        name: discovered
+        required: true
+        schema:
+          $ref: '#/definitions/models.APIDiscovered'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Discovered'
+      summary: Update a discovered by ID
+      tags:
+      - discovered
+  /discovered/{id}/ref:
+    put:
+      description: Update the ref in a discovered details by ID
+      parameters:
+      - description: Discovered ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Reference ID (optional)
+        in: query
+        name: refId
+        required: true
+        type: integer
+      - description: Reference Type
+        enum:
+        - spot
+        - location
+        - note
+        - attachment
+        in: query
+        name: refType
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Discovered'
+      summary: Update the ref
+      tags:
+      - discovered
   /health:
     get:
       description: Check the health of the service
