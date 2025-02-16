@@ -262,3 +262,13 @@ func performMultipleNamedQueries(db *sqlx.DB, m DbInterface, queries []string) e
 
 	return nil
 }
+
+func ExecuteCustom(db *sqlx.DB, query string, dest interface{}) error {
+	logger.Log.Debugf("Executing query '%s'", query)
+	err := db.Select(dest, query)
+	logger.Log.Debugf("objects obtained '%+v'", dest)
+	if err != nil {
+		logger.Log.Debugf("unable to execute query: `%s`", err.Error())
+	}
+	return err
+}

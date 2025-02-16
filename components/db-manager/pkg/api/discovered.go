@@ -2,13 +2,15 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"strings"
+
+	"github.com/gorilla/mux"
+
 	"famquest/components/db-manager/pkg/connection"
 	"famquest/components/db-manager/pkg/models"
 	"famquest/components/go-common/logger"
-	"fmt"
-	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 // DiscoveredPost creates a new discovered
@@ -46,12 +48,24 @@ func DiscoveredPost(w http.ResponseWriter, r *http.Request) {
 // @Description Get a list of all discovereds
 // @Tags discovered
 // @Produce json
+// @Param refId query int false "Reference ID (optional)"
+// @Param refType query string false "Reference Type (optional)" Enums(spot,attachment,note)
 // @Success 200 {array} models.Discovered
 // @Router /discovered [get]
 func DiscoveredGetAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func DiscoveredGetAll")
 	handleHeaders(w, r)
-	dest, httpStatus, err := crudGetAll(&models.Discovered{}, "")
+	filter := ""
+	if r.URL.Query().Get("refId") != "" {
+		intId, err := parseId(r.URL.Query().Get("refId"))
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Ref error: %s", err.Error()), http.StatusBadRequest)
+			return
+		}
+		filter = fmt.Sprintf("WHERE ref_id = %d AND ref_type = '%s'", intId, r.URL.Query().Get("refType"))
+		logger.Log.Debugf("created filer '%s'", filter)
+	}
+	dest, httpStatus, err := crudGetAll(&models.Discovered{}, filter)
 	logger.Log.Debugf("objects obtained '%d'", len(dest))
 	if err != nil {
 		logger.Log.Error(err.Error())
@@ -64,6 +78,103 @@ func DiscoveredGetAll(w http.ResponseWriter, r *http.Request) {
 	} else {
 		json.NewEncoder(w).Encode(dest)
 	}
+}
+
+// DiscoveredUpdateAll Updates discovered based on the user
+// @Summary Updates all discovered entries for a user
+// @Description Updates discovered based on the user locations, age, etc.
+// @Tags discovered
+// @Produce json
+// @Param userId query int true "Reference ID of the user to update"
+// @Param refType query string false "Reference Type" Enums(user)
+// @Success 200 {array} int "The Ids of the discovered that were updated"
+// @Router /discovered/updateConditions [post]
+func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
+	logger.Log.Info("Called to func DiscoveredUpdateAll")
+	handleHeaders(w, r)
+	// make sure user exists
+	userDbInterface, httpStatus, err := crudGet(&models.Users{}, map[string]string{"id": r.URL.Query().Get("userId")})
+	if err != nil {
+		logger.Log.Error(err.Error())
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	if userDbInterface == nil {
+		logger.Log.Error(fmt.Sprintf("User with id '%s' not found", r.URL.Query().Get("userId")))
+		http.Error(w, "userId not valid", http.StatusBadRequest)
+		return
+	}
+	// TODO: At some point make sure that the user is "target" and allow multiple target users
+	// TODO: allow age conditions
+	targetDiscoveredsQuery := `
+	WITH spot_locations AS (
+			SELECT 
+					kl.latitude AS spot_latitude,
+					kl.longitude AS spot_longitude,
+					d.id AS discovered_id,
+					s.id AS spot_id
+			FROM 
+					discovered d
+			JOIN 
+					spots s ON d.ref_id = s.id
+			JOIN 
+					known_locations kl ON s.id = kl.ref_id AND kl.ref_type = 'spot'
+			WHERE 
+					d.ref_type = 'spot' AND d.show = false
+	)
+	SELECT 
+		sl.spot_id,
+		sl.discovered_id,
+		kl.*
+	FROM 
+			known_locations kl
+	CROSS JOIN 
+			spot_locations sl
+	WHERE 
+			kl.ref_id = 0
+			AND 6371000 * 2 * ASIN(
+					SQRT(
+							POW(SIN(RADIANS(kl.latitude - sl.spot_latitude) / 2), 2) +
+							COS(RADIANS(sl.spot_latitude)) * COS(RADIANS(kl.latitude)) *
+							POW(SIN(RADIANS(kl.longitude - sl.spot_longitude) / 2), 2)
+					)
+			) <= 50;
+	`
+	var dest []models.LocationBasedCondition
+	err = connection.ExecuteCustom(connection.DB, targetDiscoveredsQuery, &dest)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	if len(dest) == 0 {
+		logger.Log.Info("No discovered to update")
+		empty := make([]string, 0)
+		json.NewEncoder(w).Encode(empty)
+		return
+	}
+
+	// Extract discovered IDs
+	discoveredIDs := make([]int, len(dest))
+	for i, entry := range dest {
+		discoveredIDs[i] = entry.DiscoveredId
+	}
+
+	inClause := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(discoveredIDs)), ","), "[]")
+	updateDiscoveredQuery := fmt.Sprintf(`
+		UPDATE discovered
+		SET show = true
+		WHERE id IN (%s);`, inClause)
+	var updateResult []interface{}
+
+	err = connection.ExecuteCustom(connection.DB, updateDiscoveredQuery, &updateResult)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	logger.Log.Debugf("Result from update: %+v", updateResult)
+	json.NewEncoder(w).Encode(discoveredIDs)
 }
 
 // DiscoveredGet retrieves a specific discovered by ID
@@ -162,7 +273,7 @@ func DiscoveredPut(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id path int true "Discovered ID"
 // @Param refId query int true "Reference ID (optional)"
-// @Param refType query string true "Reference Type" Enums(spot,location,note,attachment)
+// @Param refType query string true "Reference Type" Enums(spot,note,attachment)
 // @Success 200 {object} models.Discovered
 // @Router /discovered/{id}/ref [put]
 func DiscoveredPutRef(w http.ResponseWriter, r *http.Request) {

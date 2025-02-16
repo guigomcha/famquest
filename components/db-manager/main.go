@@ -77,6 +77,14 @@ func main() {
 	r.HandleFunc("/location/{id}/ref", api.LocationPutRef).Methods("PUT", "OPTIONS")
 	r.HandleFunc("/location/{id}", api.LocationDelete).Methods("DELETE", "OPTIONS")
 
+	r.HandleFunc("/discovered", api.DiscoveredPost).Methods("POST", "OPTIONS")
+	r.HandleFunc("/discovered", api.DiscoveredGetAll).Methods("GET", "OPTIONS")
+	r.HandleFunc("/discovered/updateConditions", api.DiscoveredUpdateAll).Methods("POST", "OPTIONS")
+	r.HandleFunc("/discovered/{id}", api.DiscoveredGet).Methods("GET", "OPTIONS")
+	r.HandleFunc("/discovered/{id}", api.DiscoveredPut).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/discovered/{id}/ref", api.DiscoveredPutRef).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/discovered/{id}", api.DiscoveredDelete).Methods("DELETE", "OPTIONS")
+
 	// Start the server
 	port := os.Getenv("SWAGGER_PORT")
 	if port == "" {

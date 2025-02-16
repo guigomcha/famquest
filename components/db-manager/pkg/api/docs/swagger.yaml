@@ -10,10 +10,9 @@ definitions:
   models.APIDiscovered:
     properties:
       condition:
-        additionalProperties:
-          type: string
+        allOf:
+        - $ref: '#/definitions/models.JSONBMap'
         description: this will hold a JSONB in postgresql with the condition
-        type: object
       show:
         description: condition was met
         type: boolean
@@ -85,10 +84,9 @@ definitions:
   models.Discovered:
     properties:
       condition:
-        additionalProperties:
-          type: string
+        allOf:
+        - $ref: '#/definitions/models.JSONBMap'
         description: db + json
-        type: object
       createdAt:
         description: Automatically generated
         type: string
@@ -101,6 +99,10 @@ definitions:
       updatedAt:
         description: Automatically managed by trigger
         type: string
+    type: object
+  models.JSONBMap:
+    additionalProperties:
+      type: string
     type: object
   models.KnownLocations:
     properties:
@@ -386,6 +388,19 @@ paths:
   /discovered:
     get:
       description: Get a list of all discovereds
+      parameters:
+      - description: Reference ID (optional)
+        in: query
+        name: refId
+        type: integer
+      - description: Reference Type (optional)
+        enum:
+        - spot
+        - attachment
+        - note
+        in: query
+        name: refType
+        type: string
       produces:
       - application/json
       responses:
@@ -499,7 +514,6 @@ paths:
       - description: Reference Type
         enum:
         - spot
-        - location
         - note
         - attachment
         in: query
@@ -514,6 +528,33 @@ paths:
           schema:
             $ref: '#/definitions/models.Discovered'
       summary: Update the ref
+      tags:
+      - discovered
+  /discovered/updateConditions:
+    post:
+      description: Updates discovered based on the user locations, age, etc.
+      parameters:
+      - description: Reference ID of the user to update
+        in: query
+        name: userId
+        required: true
+        type: integer
+      - description: Reference Type
+        enum:
+        - user
+        in: query
+        name: refType
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The Ids of the discovered that were updated
+          schema:
+            items:
+              type: integer
+            type: array
+      summary: Updates all discovered entries for a user
       tags:
       - discovered
   /health:
