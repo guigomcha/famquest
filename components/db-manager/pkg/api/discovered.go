@@ -85,7 +85,7 @@ func DiscoveredGetAll(w http.ResponseWriter, r *http.Request) {
 // @Description Updates discovered based on the user locations, age, etc.
 // @Tags discovered
 // @Produce json
-// @Param userId query int true "Reference ID of the user to update"
+// @Param refId query int true "Reference ID of the user to update"
 // @Param refType query string false "Reference Type" Enums(user)
 // @Success 200 {array} int "The Ids of the discovered that were updated"
 // @Router /discovered/updateConditions [post]
@@ -93,15 +93,15 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func DiscoveredUpdateAll")
 	handleHeaders(w, r)
 	// make sure user exists
-	userDbInterface, httpStatus, err := crudGet(&models.Users{}, map[string]string{"id": r.URL.Query().Get("userId")})
+	userDbInterface, httpStatus, err := crudGet(&models.Users{}, map[string]string{"id": r.URL.Query().Get("refId")})
 	if err != nil {
 		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
 	if userDbInterface == nil {
-		logger.Log.Error(fmt.Sprintf("User with id '%s' not found", r.URL.Query().Get("userId")))
-		http.Error(w, "userId not valid", http.StatusBadRequest)
+		logger.Log.Error(fmt.Sprintf("User with id '%s' not found", r.URL.Query().Get("refId")))
+		http.Error(w, "refId not valid", http.StatusBadRequest)
 		return
 	}
 	// TODO: At some point make sure that the user is "target" and allow multiple target users

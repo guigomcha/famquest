@@ -536,7 +536,7 @@ paths:
       parameters:
       - description: Reference ID of the user to update
         in: query
-        name: userId
+        name: refId
         required: true
         type: integer
       - description: Reference Type

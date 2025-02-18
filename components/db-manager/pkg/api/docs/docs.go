@@ -361,7 +361,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Reference ID of the user to update",
-                        "name": "userId",
+                        "name": "refId",
                         "in": "query",
                         "required": true
                     },
