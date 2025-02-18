@@ -3,7 +3,7 @@ import * as L from 'leaflet';
 import { message, Button, FloatButton } from 'antd';
 import Card from 'react-bootstrap/Card';
 import { UserOutlined, ReloadOutlined, AimOutlined } from '@ant-design/icons';
-import { createInDB } from '../backend_interface/db_manager_api';
+import { createInDB, updateDiscoveredConditionsForUser } from '../backend_interface/db_manager_api';
 import { useTranslation } from "react-i18next";
 
 const UserButton = ({ user,  mapRef }) => {
@@ -36,7 +36,12 @@ const UserButton = ({ user,  mapRef }) => {
       content: msg,
     });
   };
-
+  const successMessage = (msg) => {
+    messageApi.open({
+      type: 'success',
+      content: msg,
+    });
+  };
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -88,8 +93,16 @@ const UserButton = ({ user,  mapRef }) => {
             const locationDb = await createInDB(locationBody, 'location');
             if (!locationDb){
               console.info("unable to push live location");
+              return;
             }
             console.info("sent location", locationDb)
+            if (user?.role == "target"){
+              const resp = await updateDiscoveredConditionsForUser(user);
+              console.info("requested discover update: ", resp);
+              if (resp.length >0) {
+                successMessage(resp.length + "x" +t('discoveredUpdate'));
+              }
+            }
           })
          .on('locationerror', function(e){
             warning(t('liveLocationError'));

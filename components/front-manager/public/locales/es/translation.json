@@ -57,5 +57,6 @@
 	"editDiscoverOptionSelect": "Selecciona cómo se descubre este lugar",
 	"editDiscoverOptionCheckbox": "Mostrar",
 	"discoverLocation": "El usuario pasa cerca del lugar",
-	"discoverDate": "El usuario alcanza una edad"
+	"discoverDate": "Fecha fija en el futuro",
+	"discoveredUpdate": "Nuevas ubicacion(es) descubiertas"
 }

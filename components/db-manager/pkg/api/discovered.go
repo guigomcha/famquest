@@ -138,7 +138,7 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 							COS(RADIANS(sl.spot_latitude)) * COS(RADIANS(kl.latitude)) *
 							POW(SIN(RADIANS(kl.longitude - sl.spot_longitude) / 2), 2)
 					)
-			) <= 50;
+			) <= 200;
 	`
 	var locCondResults []models.LocationBasedCondition
 	err = connection.ExecuteCustom(connection.DB, locationBasedDiscoveredsQuery, &locCondResults)

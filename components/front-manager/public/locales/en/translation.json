@@ -57,5 +57,6 @@
 	"editDiscoverOptionSelect": "Select what triggers the discovery of this spot",
 	"editDiscoverOptionCheckbox": "Show",
 	"discoverLocation": "User goes near the spot",
-	"discoverDate": "User reaches an age"
+	"discoverDate": "Fixed date in the future",
+	"discoveredUpdate": "New spot(s) discovered"
 }
