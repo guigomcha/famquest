@@ -4,15 +4,17 @@ export async function SpotFromForm(data, latlng) {
   // Remove everything that is not part of the spot datamodel
   let extraData = {
     "condition": "location",
-    "show": false
+    "show": false,
+    "date": ""
   };
   console.info("Received data: ", data);
-  if (data?.condition){
-    extraData.condition = data.condition;
-    extraData.show = data.show == "on";
-    delete data.condition;
-    delete data.show;
-  }
+  extraData.condition = data.condition;
+  extraData.show = data.show == "on";
+  extraData.date = data?.date || "";
+  delete data.condition;
+  delete data.show;
+  delete data.date;
+
   // It is a PUT
   if (data?.id) {
     const spotDb = await updateInDB(data, 'spot');
@@ -38,7 +40,7 @@ export async function SpotFromForm(data, latlng) {
         "condition": {
           "conformanceComparator": "eq",
           "parameterType": extraData.condition,
-          "thresholdTarget": ""
+          "thresholdTarget": extraData.date
         },
         "show": extraData.show
       }

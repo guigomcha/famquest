@@ -13,6 +13,14 @@ const SpotForm = ({ initialData, onSubmit, handledFinished }) => {
   const { t, i18n } = useTranslation();
   const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectValue, setSelectValue] = useState(initialData?.discovered.condition.parameterType || 'location');
+
+  const handleSelectValue = (event) => {
+    console.info("handle select ", event)
+    event.preventDefault();
+    event.stopPropagation();
+    setSelectValue(event.target.value);
+  };
 
   const handleSubmit = (event) => {
     setIsLoading(true);
@@ -69,12 +77,23 @@ const SpotForm = ({ initialData, onSubmit, handledFinished }) => {
                 <Form.Control
                   as="select"
                   name="condition"
-                  defaultValue={initialData?.discovered.condition.parameterType || 'location'}
+                  defaultValue={selectValue}
+                  onChange={handleSelectValue}
                 >
                   <option value="location">{t('discoverLocation')}</option>
-                  {/* <option value="date">{t('discoverDate')}</option> */}
+                  <option value="date">{t('discoverDate')}</option>
                 </Form.Control>
               </Form.Group>
+              {
+              (selectValue == "date") &&
+              <Form.Group as={Col} controlId="formGridDate">
+                <Form.Control
+                  type="date"
+                  name="date"
+                  defaultValue={new Date().toISOString().split('T')[0]}
+                />
+              </Form.Group>
+              }
             </Col>
             <Col>
                 <Form.Check

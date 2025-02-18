@@ -78,6 +78,12 @@ type LocationBasedCondition struct {
 	SpotId       int `db:"spot_id" json:"-"`
 }
 
+// Used to evaluate the condition based on date
+type DateBasedCondition struct {
+	DiscoveredId int `db:"discovered_id" json:"-"`
+	SpotId       int `db:"spot_id" json:"-"`
+}
+
 // JSONBMap is a custom type to handle map[string]string for JSONB in PostgreSQL
 type JSONBMap map[string]string
 

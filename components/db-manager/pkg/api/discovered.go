@@ -104,9 +104,9 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "refId not valid", http.StatusBadRequest)
 		return
 	}
+	// TODO: Expand to something else other than spots
 	// TODO: At some point make sure that the user is "target" and allow multiple target users
-	// TODO: allow age conditions
-	targetDiscoveredsQuery := `
+	locationBasedDiscoveredsQuery := `
 	WITH spot_locations AS (
 			SELECT 
 					kl.latitude AS spot_latitude,
@@ -120,7 +120,7 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 			JOIN 
 					known_locations kl ON s.id = kl.ref_id AND kl.ref_type = 'spot'
 			WHERE 
-					d.ref_type = 'spot' AND d.show = false
+					d.ref_type = 'spot' AND d.show = false AND condition->>'parameterType' = 'location'
 	)
 	SELECT 
 		sl.spot_id,
@@ -140,14 +140,33 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 					)
 			) <= 50;
 	`
-	var dest []models.LocationBasedCondition
-	err = connection.ExecuteCustom(connection.DB, targetDiscoveredsQuery, &dest)
+	var locCondResults []models.LocationBasedCondition
+	err = connection.ExecuteCustom(connection.DB, locationBasedDiscoveredsQuery, &locCondResults)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
-	if len(dest) == 0 {
+
+	// Find discovered to update based on date
+	dateBasedDiscoveredsQuery := `
+	SELECT 
+		s.id AS spot_id,
+		d.id AS discovered_id
+	FROM 
+		discovered d
+	JOIN 
+		spots s ON d.ref_id = s.id
+	WHERE d.ref_type = 'spot' AND condition->>'parameterType' = 'date' AND d.show = false AND (condition->>'thresholdTarget')::timestamp < CURRENT_TIMESTAMP;
+	`
+	var dateCondResults []models.DateBasedCondition
+	err = connection.ExecuteCustom(connection.DB, dateBasedDiscoveredsQuery, &dateCondResults)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		http.Error(w, err.Error(), httpStatus)
+		return
+	}
+	if len(locCondResults)+len(dateCondResults) == 0 {
 		logger.Log.Info("No discovered to update")
 		empty := make([]string, 0)
 		json.NewEncoder(w).Encode(empty)
@@ -155,11 +174,15 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract discovered IDs
-	discoveredIDs := make([]int, len(dest))
-	for i, entry := range dest {
+	discoveredIDs := make([]int, len(locCondResults)+len(dateCondResults))
+	for i, entry := range locCondResults {
+		discoveredIDs[i] = entry.DiscoveredId
+	}
+	for i, entry := range dateCondResults {
 		discoveredIDs[i] = entry.DiscoveredId
 	}
 
+	// Update the discovered
 	inClause := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(discoveredIDs)), ","), "[]")
 	updateDiscoveredQuery := fmt.Sprintf(`
 		UPDATE discovered
