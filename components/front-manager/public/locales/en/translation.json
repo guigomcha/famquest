@@ -15,6 +15,7 @@
 	"userInfo" : "User Profile Info", 
 	"signedAs" : "Signed as",
 	"loading" : "Loading",
+	"liveLocationInfo": "You were here at",
 	"new" : "New",
 	"edit" : "Edit",
 	"name" : "Name",
@@ -52,5 +53,9 @@
 	"location" : "FindMe",
 	"birthday" : "Birthday",
 	"biography" : "Biography",
-	"editBiography" : "Add a biography"
+	"editBiography" : "Add a biography",
+	"editDiscoverOptionSelect": "Select what triggers the discovery of this spot",
+	"editDiscoverOptionCheckbox": "Show",
+	"discoverLocation": "User goes near the spot",
+	"discoverDate": "User reaches an age"
 }

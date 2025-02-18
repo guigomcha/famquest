@@ -62,7 +62,33 @@ const SpotForm = ({ initialData, onSubmit, handledFinished }) => {
               defaultValue={initialData?.name}
             />
           </Form.Group>
+          <Row className="mb-3">
+            <Col>
+              <Form.Group controlId="formDiscoverSelect">
+                <Form.Label>{t('editDiscoverOptionSelect')}</Form.Label>
+                <Form.Control
+                  as="select"
+                  name="condition"
+                  defaultValue={initialData?.discovered.condition.parameterType || 'location'}
+                >
+                  <option value="location">{t('discoverLocation')}</option>
+                  {/* <option value="date">{t('discoverDate')}</option> */}
+                </Form.Control>
+              </Form.Group>
+            </Col>
+            <Col>
+                <Form.Check
+                  type="switch"
+                  name="show"
+                  label={t('editDiscoverOptionCheckbox')}
+                  defaultChecked={initialData?.discovered.show || false}
+                >
+                </Form.Check>
+            </Col>
+          </Row>
 
+          </Row>
+          <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridDescription">
             <Form.Label>{t('description')}</Form.Label>
             <Form.Control

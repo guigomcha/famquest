@@ -34,24 +34,33 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
   const fogGeoJson = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [locations, setLocations] = useState([]);
+  const allSpots = useRef(null);
+  const allLocations = useRef(null);
   const [spots, setSpots] = useState([]);
 
+  const handleTrigger = (e) => {
+    fetchData();
+  };
 
   const fetchData = async () => {
     const tempLocations = await getInDB('location');
     console.info("Fetched initial locations ", tempLocations);
-    setLocations(tempLocations);
+    // setLocations(tempLocations);
+    allLocations.current = tempLocations;
     const tempSpots = await fetchAndPrepareSpots();
     console.info("Fetched initial spots ", tempSpots);
-    setSpots(tempSpots);
+    // setSpots(tempSpots);
+    allSpots.current = tempSpots;
+    prepareMap();
+    displaySpots();
   };
 
   const prepareMap = () => {
     // After the map is loaded, reveal the area around each marker
-    if (mapRef.current && locations.length>0 && fogLayer.current) {
-      locations.forEach((location, index) => {
+    if (mapRef.current && allLocations.current && fogLayer.current) {
+      allLocations.current.forEach((location, index) => {
         if (location.refId != 0) {
-          console.info("Ignoring location from spot: ", location);
+          // console.info("Ignoring location from spot: ", location);
           return;
         }
         //Uncover new area in fog
@@ -70,15 +79,15 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
   const sendBackComponent = (e) => {
     if (e == "done") {
       handleMenuChange(null);
-      fetchData();
+      // fetchData(); // This results in a "maximum call stack size exceeded" error and does not show the new spot created or the new content of a spot ...
     } else if (e?.target.data.componentType == "SpotPopup") {
-      handleMenuChange(<SpotPopup spot={e.target.data} />);
+      handleMenuChange(<SpotPopup spot={e.target.data} handledFinished={sendBackComponent}/>);
     } else {
       handleMenuChange(<SpotForm onSubmit={async (data) => SpotFromForm(data, e.target.data)} handledFinished={sendBackComponent}/>);
     }
   };
 
-  const isVisible = (location) => {
+  const isVisibleWithFog = (location) => {
     if (!mapRef.current.hasLayer(featureGroup.current)){
       // console.info("mask disabled: "+ JSON.stringify(location));
     } else if (!locationVisible(location, fogGeoJson.current)){
@@ -87,33 +96,40 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
     }
     return true;
   }
+
   const displaySpots = () => {
-    if (mapRef.current && spots.length>0) {
-      spots.forEach((spot) => {
+    console.info("called display spots ", mapRef.current, allSpots.current);
+    if (mapRef.current && allSpots.current) {
+      allSpots.current.forEach((spot) => {
+        // console.info("Checking it should display spot: ", spot);
         let visible = true;
         let markerRef = null;
         markers.current.forEach((mark) => {
           if (mark.spotId == spot.id){
             markerRef = mark.marker;
           }
-        }) 
-        if (!isVisible(spot.location)){
+        })
+        // Visibility based on Fog
+        if (!isVisibleWithFog(spot.location)){
           visible = false;
+        }
+        // // The show condition is only for the target user (which uses the fog)
+        if (mapRef.current.hasLayer(featureGroup.current) && visible){
+          visible = spot.discovered.show;
+        }
+        // Visibility based on spot condition which is handled in the backend
+        if (!visible){
           if (markerRef) {
             guilleSpotsGroup.current.removeLayer(markerRef);
             markers.current = markers.current.filter(item => item.spotId != spot.id);
-            return;
           }
-        }
-        if (!visible || markerRef ){
           return;
         }
         // Todo: Decide the owner based on something
         // Adding a marker with custom icon
         const marker = L.marker([spot.location.latitude, spot.location.longitude], {
           icon: L.icon(iconStyle),
-        })
-        .addTo(mapRef.current);
+        }).addTo(mapRef.current);
         marker.data = {...spot, componentType: "SpotPopup"}
         marker.addEventListener("click", sendBackComponent);
         guilleSpotsGroup.current.addLayer(marker);
@@ -126,13 +142,13 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
   useEffect(() => {
     if (!mapRef.current) {
       setIsLoading(true);
-      fetchData();
       console.log("Creating the map:", isLoading);
       const mapDiv = document.getElementById("mapId");
       mapRef.current = L.map(mapDiv).setView([defaultCenter.lat, defaultCenter.lng], scale);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'GuiGomcha FamQuest App',
       }).addTo(mapRef.current);
+      L.control.scale().addTo(mapRef.current);
       handleMapRef(mapRef);
       // // To support map inside of tab
       const resizeObserver = new ResizeObserver(() => {
@@ -142,7 +158,6 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
       
       // Add layer group to host the spots from 1 user
       guilleSpotsGroup.current = L.layerGroup().addTo(mapRef.current);
-      // guilleSpotsGroup.current.bringToBack();
       if (!fogLayer.current){
         fogGeoJson.current = worldPolygon();
         fogLayer.current = L.geoJSON([fogGeoJson.current], {
@@ -170,7 +185,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
         console.info("Right click detected: "+ JSON.stringify(e.latlng)+ "from ", e);
         console.info("Layers has: ", mapRef.current.hasLayer(featureGroup.current));
 
-        if (!isVisible({"longitude": e.latlng.lng, "latitude": e.latlng.lat})){
+        if (!isVisibleWithFog({"longitude": e.latlng.lng, "latitude": e.latlng.lat})){
           return;
         }
         data = {
@@ -188,28 +203,14 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
       };
       L.control.layers(null, overlays, { collapsed: false }).addTo(mapRef.current);
       mapRef.current.removeLayer(featureGroup.current);
+      markers.current = []
+      fetchData();
       setIsLoading(false);
       console.log("created the map:", isLoading);
     }
   
   }, []);
 
-  // Add the reveal locations
-  useEffect(() => {
-    if (!fogGeoJson.current){
-      return;
-    }
-    console.info("updating map");
-    prepareMap();
-  }, [locations]);
-  
-  // Add the markers in the spots
-  useEffect(() => {
-    if (!markers.current) {
-      markers.current = []
-    }
-    displaySpots();      
-  }, [spots]);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%"}}>

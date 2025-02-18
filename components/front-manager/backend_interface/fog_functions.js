@@ -2,7 +2,7 @@ import * as turf from "@turf/turf";
 
 export function uncoverFog(location, fogPolygon) {
   //Create new circle polygon based on the user's position.
-  const circlePolygon = _createCirclePolygonFromLocation(location, 0.5, 16);
+  const circlePolygon = _createCirclePolygonFromLocation(location, 0.1, 16);
   //Extend the fog using our new circle polygon.
   const newFogPolygon = _addPolygonToFog(fogPolygon, circlePolygon);
 
@@ -83,14 +83,14 @@ export function worldPolygon() {
 
   }
 
-function  _createCirclePolygonFromLocation(location, size = 100, steps = 12) {
+function  _createCirclePolygonFromLocation(location, size = 1, steps = 12) {
   //Firstly a point polygon is required to create a circle using turf.circle()
 
   //The point polygon is generated using the user's longitude and latitude.
   const pointPolygon = turf.point([location.longitude, location.latitude]);
 
   //A circle polygon is created using the point polygon as its center.
-  const circlePolygon = turf.circle(pointPolygon, size, { steps: steps , properties:{"party": "Democrat"}});
+  const circlePolygon = turf.circle(pointPolygon, size, { steps: steps , units: 'kilometers'});
 
   return circlePolygon;
 }

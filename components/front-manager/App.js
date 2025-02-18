@@ -17,6 +17,7 @@ import UserButton from './components/UserButton';
 import FamilyTab from './components/Family';
 import OAuth2 from './components/Oauth2';
 import { renderDescription } from './utils/render_message';
+import { updateDiscoveredConditionsForUser } from './backend_interface/db_manager_api';
 import { useTranslation } from "react-i18next";
 import i18next from "./i18n";
 
@@ -31,9 +32,13 @@ export default function App() {
   const [key, setKey] = useState('home');
   const mapRef = useRef(null);
 
-  const handleUserChange = (userInfo) => {
+  const handleUserChange = async (userInfo) => {
     setUser(userInfo);
     console.info("updating app.js to ", userInfo);
+    if (userInfo?.role == "target"){
+      const resp = await updateDiscoveredConditionsForUser(userInfo);
+      console.info("requested discover update: ", resp);  
+    }
   };
   const transferHandleMapRef = (map) => {
     mapRef.current = map.current;
