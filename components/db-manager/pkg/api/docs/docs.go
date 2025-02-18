@@ -273,6 +273,264 @@ const docTemplate = `{
                 }
             }
         },
+        "/discovered": {
+            "get": {
+                "description": "Get a list of all discovereds",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discovered"
+                ],
+                "summary": "Retrieve all discovereds",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Reference ID (optional)",
+                        "name": "refId",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "spot",
+                            "attachment",
+                            "note"
+                        ],
+                        "type": "string",
+                        "description": "Reference Type (optional)",
+                        "name": "refType",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Discovered"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new discovered",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discovered"
+                ],
+                "summary": "Create a discovered",
+                "parameters": [
+                    {
+                        "description": "Discovered data",
+                        "name": "discovered",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APIDiscovered"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Discovered"
+                        }
+                    }
+                }
+            }
+        },
+        "/discovered/updateConditions": {
+            "post": {
+                "description": "Updates discovered based on the user locations, age, etc.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discovered"
+                ],
+                "summary": "Updates all discovered entries for a user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Reference ID of the user to update",
+                        "name": "refId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "user"
+                        ],
+                        "type": "string",
+                        "description": "Reference Type",
+                        "name": "refType",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The Ids of the discovered that were updated",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/discovered/{id}": {
+            "get": {
+                "description": "Get discovered details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discovered"
+                ],
+                "summary": "Retrieve a discovered by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Discovered ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Discovered"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update discovered details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discovered"
+                ],
+                "summary": "Update a discovered by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Discovered ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Discovered data",
+                        "name": "discovered",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APIDiscovered"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Discovered"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a discovered entry",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discovered"
+                ],
+                "summary": "Delete a discovered by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Discovered ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/discovered/{id}/ref": {
+            "put": {
+                "description": "Update the ref in a discovered details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "discovered"
+                ],
+                "summary": "Update the ref",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Discovered ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Reference ID (optional)",
+                        "name": "refId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "spot",
+                            "note",
+                            "attachment"
+                        ],
+                        "type": "string",
+                        "description": "Reference Type",
+                        "name": "refType",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Discovered"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Check the health of the service",
@@ -1001,6 +1259,23 @@ const docTemplate = `{
                 }
             }
         },
+        "models.APIDiscovered": {
+            "type": "object",
+            "properties": {
+                "condition": {
+                    "description": "this will hold a JSONB in postgresql with the condition",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.JSONBMap"
+                        }
+                    ]
+                },
+                "show": {
+                    "description": "condition was met",
+                    "type": "boolean"
+                }
+            }
+        },
         "models.APIKnownLocations": {
             "type": "object",
             "properties": {
@@ -1095,6 +1370,41 @@ const docTemplate = `{
                 "url": {
                     "type": "string"
                 }
+            }
+        },
+        "models.Discovered": {
+            "type": "object",
+            "properties": {
+                "condition": {
+                    "description": "db + json",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.JSONBMap"
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "description": "Automatically generated",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Auto-incremented integer ID",
+                    "type": "integer"
+                },
+                "show": {
+                    "description": "condition was met",
+                    "type": "boolean"
+                },
+                "updatedAt": {
+                    "description": "Automatically managed by trigger",
+                    "type": "string"
+                }
+            }
+        },
+        "models.JSONBMap": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
             }
         },
         "models.KnownLocations": {

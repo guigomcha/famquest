@@ -14,7 +14,7 @@ export const registerUser = async (data) => {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     const users = await response.json();
-    console.info("Fetched users "+ JSON.stringify(users))
+    // console.info("Fetched users "+ JSON.stringify(users))
     const matches = users.filter(user => user.extRef === data.user);
     if (matches.length > 0) {
       console.log("Current user exists:", matches);
@@ -23,7 +23,7 @@ export const registerUser = async (data) => {
     console.log("Registering new user");
     // Register
     var role = "contributor"
-    for (let r of ["contributor", "owner", "hybrid", "admin"]) {
+    for (let r of ["contributor", "owner", "hybrid", "admin", "target"]) {
       if (data.groups.some(group => group.includes(r))) {
         role = r;
       }
@@ -70,7 +70,7 @@ export const getUserInfo = async (refId) => {
     prefix = "/"+ refId;
   }
   try {
-    console.info("users with prefix ", prefix);
+    // console.info("users with prefix ", prefix);
     const response = await fetch(`${API_URL}/user`+prefix, {
       headers: {
         'accept': 'application/json',
@@ -81,7 +81,7 @@ export const getUserInfo = async (refId) => {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     const user = await response.json();
-    console.info("Fetched user "+ JSON.stringify(user))
+    // console.info("Fetched user "+ JSON.stringify(user))
     return user;
   } catch (error) {
     console.error("Error fetching user: ", error);
@@ -114,11 +114,27 @@ export const fetchAndPrepareSpots = async () => {
   try {
     // Fetch spots data
     const spotsData = await getInDB('spot');
-    // Wait for all spots to be updated with location
+    // Add show info to each spot
+    // We can take this directly from the location get all?
     const spotsWithLocation = await Promise.all(
       spotsData.map(async (spot) => {
         // console.info("spot without location:", spot); // Log each updated spot
-        const updatedSpot = await addLocationToSpot(spot);
+        let updatedSpot = await addLocationToSpot(spot);
+        let discovered = await getInDBWithFilter(spot.id, "spot", "discovered");
+        // console.info("Discovered: "+JSON.stringify(discovered));
+        if (discovered.length > 0) {
+          // more than one??
+          updatedSpot.discovered = discovered[0];
+        } else {
+          updatedSpot.discovered = {
+            "show": true,
+            "condition": {
+              "conformanceComparator": "eq",
+              "parameterType": "location",
+              "thresholdTarget": ""
+            }
+          }
+        }
         // console.info("Updated spot with location:", updatedSpot); // Log each updated spot
         return updatedSpot;
       })
@@ -133,7 +149,6 @@ export const fetchAndPrepareSpots = async () => {
 };
 
 export const addLocationToSpot = async (spot) => {
-  // Replace with your API call logic
   //console.info("Spot: "+spot.id)
   const response = await fetch(`${API_URL}/location/${spot.location}`, {
     method: "GET",
@@ -151,6 +166,23 @@ export const addLocationToSpot = async (spot) => {
   spot.location = location
   //console.info(spot)
   return spot; // Combine original spot with additional data
+};
+
+export const updateDiscoveredConditionsForUser = async (userInfo) => {
+  const response = await fetch(`${API_URL}/discovered/updateConditions?refId=${userInfo.id}&refType=user`, {
+    method: "POST",
+    headers: {
+      'accept': 'application/json',
+    },
+    ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+    // mode: 'cors',
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! Status: ${response.status}`);
+  }
+  const resp = await response.json();
+  console.info("updated discovered: ", resp)
+  return resp; 
 };
 
 export const createInDB = async (body, endpoint, extra={"headers": {

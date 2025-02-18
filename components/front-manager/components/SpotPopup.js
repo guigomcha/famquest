@@ -12,7 +12,7 @@ import SlideMenu from './SlideMenu';
 import { useTranslation } from "react-i18next";
 
 
-const SpotPopup = ({ spot }) => {
+const SpotPopup = ({ spot, handledFinished }) => {
   const { t, i18n } = useTranslation();
   const [component, setComponent] = useState(null);
   const [info, setInfo] = useState({ "name": "unknown" });
@@ -24,7 +24,8 @@ const SpotPopup = ({ spot }) => {
   const handleNestedRequestEdit = (comp) => {
     console.info("handleNested ", comp);
     if (comp == "done" || !comp) {
-      setComponent(null);  
+      setComponent(null);
+      handledFinished("done");  
     } else {
       setComponent(comp); // Trigger show slideMenu
     }
@@ -49,6 +50,9 @@ const SpotPopup = ({ spot }) => {
       <Card>
         <Card.Title>{t('spot')}: {spot.name}</Card.Title>
         <Card>
+          <Card.Body>
+            <Card.Text>discovered {JSON.stringify(spot.discovered)}</Card.Text>
+          </Card.Body>
           <Card.Body>
             {/* Render description with line breaks */}
             <Card.Text>{renderDescription(spot.description)}</Card.Text>

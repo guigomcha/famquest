@@ -65,6 +65,17 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
 );
 
+CREATE TABLE IF NOT EXISTS discovered (
+    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- UUID as primary key
+    id SERIAL UNIQUE NOT NULL,                         -- Auto-incremented integer ID
+    condition JSONB NOT NULL, -- JSONB to store the condition map
+    show BOOLEAN NOT NULL, -- Boolean field for the "show" value
+    ref_type TEXT NOT NULL DEFAULT 'spot' CHECK (ref_type IN ('spot', 'note', 'attachment' )), -- Constraint for ref_type
+    ref_id INT DEFAULT 0, -- Integer field for the ref_id
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
+);
+
 -- Trigger functions to update timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -74,7 +85,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create triggers for each table
+-- Create triggers for each table (base_table not working)
 CREATE OR REPLACE TRIGGER update_spots_updated_at
 BEFORE UPDATE ON spots
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -91,7 +102,11 @@ CREATE OR REPLACE TRIGGER update_users_updated_at
 BEFORE UPDATE ON users
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE OR REPLACE TRIGGER update_users_updated_at
+CREATE OR REPLACE TRIGGER update_notes_updated_at
 BEFORE UPDATE ON notes
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE OR REPLACE TRIGGER update_discovered_updated_at
+BEFORE UPDATE ON discovered
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 `
