@@ -16,7 +16,7 @@ func ConnectToMinio() (*minio.Client, error) {
 	logger.Log.Infof("Connecting to Minio '%s'", os.Getenv("MINIO_URL"))
 	minioClient, err := minio.New(os.Getenv("MINIO_URL"), &minio.Options{
 		Creds:  credentials.NewStaticV4(os.Getenv("MINIO_USER"), os.Getenv("MINIO_PASSWORD"), ""),
-		Secure: false,
+		Secure: os.Getenv("SWAGGER_SCHEMA") == "https",
 	})
 	if err != nil {
 		return nil, err
