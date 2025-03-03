@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 
@@ -183,6 +184,24 @@ func AttachmentDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	attachment := models.Attachments{}
+	// Cannot delete if there are things connected to this
+	models := []connection.DbInterface{&models.Attachments{}}
+	for _, modelType := range models {
+		filter := fmt.Sprintf("WHERE ref_id = %d AND ref_type = 'attachment'", intId)
+		destsList, httpStatus, err := crudGetAll(modelType, filter)
+		logger.Log.Debugf("objects obtained for %s: %d --- '%s'", reflect.TypeOf(modelType).Elem().Name(), len(destsList), filter)
+		if err != nil {
+			logger.Log.Debugf("Unable to search dependencies %s", err.Error())
+			http.Error(w, err.Error(), httpStatus)
+			return
+		}
+		// Check if there are linked items for the current model type
+		if len(destsList) > 0 {
+			http.Error(w, "Cannot delete if there are things linked to it", http.StatusBadRequest)
+			return
+		}
+	}
+	// Delete the attachment first from minio
 	err = connection.DB.Get(&attachment, attachment.GetSelectOneQuery(), intId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -195,9 +214,9 @@ func AttachmentDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	uuid := strings.Split(attachment.URL, "/")[len(strings.Split(attachment.URL, "/"))-1]
-	err = minioClient.RemoveObject(context.Background(), strings.Split(attachment.ContentType, "/")[0], uuid, minio.RemoveObjectOptions{})
+	err = minioClient.RemoveObject(context.Background(), os.Getenv("DB_NAME")+"-"+strings.Split(attachment.ContentType, "/")[0], uuid, minio.RemoveObjectOptions{})
 	if err != nil {
-		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	logger.Log.Info("Deleted from minio")

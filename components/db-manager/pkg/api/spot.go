@@ -99,6 +99,7 @@ func SpotDelete(w http.ResponseWriter, r *http.Request) {
 	handleHeaders(w, r)
 	// First delete the spot
 	var spot models.Spots
+	// linked location and discovered handled directly via sql GetDeleteExtraQueries
 	httpStatus, err := crudDelete(&spot, mux.Vars(r))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
