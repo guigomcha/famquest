@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import Images from './Images';
 import Audio from './Audio';
 import Card from 'react-bootstrap/Card';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import SpotForm from './SpotForm';
 import { SpotFromForm } from '../backend_interface/components_helper';
 import { renderDescription } from '../utils/render_message';
-import { getUserInfo } from '../backend_interface/db_manager_api';
+import { getUserInfo, deleteInDB } from '../backend_interface/db_manager_api';
 import SlideMenu from './SlideMenu';
 import { useTranslation } from "react-i18next";
 
@@ -20,6 +20,11 @@ const SpotPopup = ({ spot, handledFinished }) => {
   const handleRequestEdit = (e) => {
     setComponent(<SpotForm initialData={spot} onSubmit={async (data) => SpotFromForm(data, e.target.data)} handledFinished={handleNestedRequestEdit} />);
   };
+
+  const handleRequestDelete = async (e) => {
+    const deleteResponse = await deleteInDB(spot.id, 'spot');
+    console.info("delete response: ", deleteResponse);
+  }; 
 
   const handleNestedRequestEdit = (comp) => {
     console.info("handleNested ", comp);
@@ -48,14 +53,17 @@ const SpotPopup = ({ spot, handledFinished }) => {
   return (
     <>
       <Card>
+        <Card.Header>id: {spot.id}</Card.Header>
         <Card.Title>{t('spot')}: {spot.name}</Card.Title>
         <Card>
-          <Card.Body>
+          {/* <Card.Body>
             <Card.Text>discovered {JSON.stringify(spot.discovered)}</Card.Text>
-          </Card.Body>
+          </Card.Body> */}
           <Card.Body>
             {/* Render description with line breaks */}
             <Card.Text>{renderDescription(spot.description)}</Card.Text>
+          </Card.Body>
+          <Card.Footer>
             <Button
               trigger="click"
               type="default"
@@ -64,8 +72,12 @@ const SpotPopup = ({ spot, handledFinished }) => {
             >
               {t('edit')}
             </Button>
-          </Card.Body>
-          <Card.Footer>
+            <Button trigger="click"
+              type="default"
+              icon={<DeleteOutlined />}
+              onClick={handleRequestDelete}
+              >{t('delete')}
+            </Button>
             <Card.Text>{t('owner')}: {info.name}</Card.Text>
           </Card.Footer>
         </Card>

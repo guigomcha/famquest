@@ -105,7 +105,7 @@ func NoteDelete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	models := []connection.DbInterface{&models.Notes{}}
+	models := []connection.DbInterface{&models.Attachments{}}
 	for _, modelType := range models {
 		filter := fmt.Sprintf("WHERE ref_id = %d AND ref_type = 'note'", intId)
 		destsList, httpStatus, err := crudGetAll(modelType, filter)
