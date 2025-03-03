@@ -50,6 +50,8 @@
 	"welcome" : "Welcome",
 	"email" : "Email",
 	"reload" : "Reload",
+	"delete": "Delete",
+	"upload": "Upload",
 	"location" : "FindMe",
 	"birthday" : "Birthday",
 	"biography" : "Biography",

@@ -7,6 +7,7 @@ import (
 	"famquest/components/go-common/logger"
 	"fmt"
 	"net/http"
+	"reflect"
 
 	"github.com/gorilla/mux"
 )
@@ -97,8 +98,30 @@ func NoteGet(w http.ResponseWriter, r *http.Request) {
 func NoteDelete(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func NoteDelete")
 	handleHeaders(w, r)
-	// First delete the note
+	// Cannot delete if there are things connected to this
 	var note models.Notes
+	intId, err := parseId(mux.Vars(r)["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	models := []connection.DbInterface{&models.Attachments{}}
+	for _, modelType := range models {
+		filter := fmt.Sprintf("WHERE ref_id = %d AND ref_type = 'note'", intId)
+		destsList, httpStatus, err := crudGetAll(modelType, filter)
+		logger.Log.Debugf("objects obtained for %s: %d --- '%s'", reflect.TypeOf(modelType).Elem().Name(), len(destsList), filter)
+		if err != nil {
+			logger.Log.Debugf("Unable to search dependencies %s", err.Error())
+			http.Error(w, err.Error(), httpStatus)
+			return
+		}
+		// Check if there are linked items for the current model type
+		if len(destsList) > 0 {
+			http.Error(w, "Cannot delete if there are things linked to it", http.StatusBadRequest)
+			return
+		}
+	}
+	// First delete the note
 	httpStatus, err := crudDelete(&note, mux.Vars(r))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)

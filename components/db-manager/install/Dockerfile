@@ -8,6 +8,9 @@ WORKDIR /go/src/famquest/components/db-manager
 COPY components/db-manager .
 COPY components/go-common ../go-common
 
+# Needed when working behind a proxy... 
+RUN go env -w GOPROXY=direct GOINSECURE=all
+
 # Make sure that the code is up to standards and docs are updated
 # Run tests and keep report
 RUN if [ -z "$DEV" ]; then \

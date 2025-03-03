@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Images from './Images';
 import Audio from './Audio';
 import Card from 'react-bootstrap/Card';
-import { EditOutlined, AppstoreAddOutlined } from '@ant-design/icons';
+import { EditOutlined, AppstoreAddOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import NoteForm from './NoteForm';
 import { renderDescription } from '../utils/render_message';
-import { getUserInfo } from '../backend_interface/db_manager_api';
+import { getUserInfo, deleteInDB } from '../backend_interface/db_manager_api';
 import SlideMenu from './SlideMenu';
 import { useTranslation } from "react-i18next";
 
@@ -19,6 +19,11 @@ const Note = ({ initialData, userId, handledFinished }) => {
     setComponent(<NoteForm initialData={initialData} handledFinished={handleNestedRequestEdit} />);
   };
   
+  const handleRequestDelete = async (e) => {
+    const deleteResponse = await deleteInDB(initialData.id, 'note');
+    console.info("delete response: ", deleteResponse);
+  }; 
+
   const handleNestedRequestEdit = (comp) => {
     console.info("handleNested ", comp);
     if (comp == "done" || !comp) {
@@ -47,6 +52,7 @@ const Note = ({ initialData, userId, handledFinished }) => {
   return (
     <>
       <Card>
+        <Card.Header>id: {initialData.id}</Card.Header>
         <Card.Title>{t('note')}: {initialData.name}</Card.Title>
         <Card>
           <Card.Body>
@@ -55,12 +61,21 @@ const Note = ({ initialData, userId, handledFinished }) => {
           <Card.Footer>
             <Card.Text>{t('owner')}: {info.name}</Card.Text>
             {(userId == initialData.refUserUploader) &&
-            (<Button trigger="click"
-              type="default"
-              icon={<EditOutlined />}
-              onClick={handleRequestEdit}
-              >{t('edit')}
-            </Button>)}
+              <>
+                <Button trigger="click"
+                  type="default"
+                  icon={<EditOutlined />}
+                  onClick={handleRequestEdit}
+                  >{t('edit')}
+                </Button>
+                <Button trigger="click"
+                  type="default"
+                  icon={<DeleteOutlined />}
+                  onClick={handleRequestDelete}
+                  >{t('delete')}
+                </Button>
+              </>
+            }
           </Card.Footer>
         </Card>
         <Card>

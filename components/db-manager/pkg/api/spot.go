@@ -7,6 +7,7 @@ import (
 	"famquest/components/go-common/logger"
 	"fmt"
 	"net/http"
+	"reflect"
 
 	"github.com/gorilla/mux"
 )
@@ -97,8 +98,31 @@ func SpotGet(w http.ResponseWriter, r *http.Request) {
 func SpotDelete(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func SpotDelete")
 	handleHeaders(w, r)
-	// First delete the spot
 	var spot models.Spots
+	intId, err := parseId(mux.Vars(r)["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// Cannot delete if there are things connected to this
+	models := []connection.DbInterface{&models.Attachments{}}
+	for _, modelType := range models {
+		filter := fmt.Sprintf("WHERE ref_id = %d AND ref_type = 'spot'", intId)
+		destsList, httpStatus, err := crudGetAll(modelType, filter)
+		logger.Log.Debugf("objects obtained for %s: %d --- '%s'", reflect.TypeOf(modelType).Elem().Name(), len(destsList), filter)
+		if err != nil {
+			logger.Log.Debugf("Unable to search dependencies %s", err.Error())
+			http.Error(w, err.Error(), httpStatus)
+			return
+		}
+		// Check if there are linked items for the current model type
+		if len(destsList) > 0 {
+			http.Error(w, "Cannot delete if there are things linked to it", http.StatusBadRequest)
+			return
+		}
+	}
+
+	// linked location and discovered handled directly via sql GetDeleteExtraQueries
 	httpStatus, err := crudDelete(&spot, mux.Vars(r))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)

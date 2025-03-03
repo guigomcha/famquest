@@ -3,8 +3,8 @@ import Carousel from 'react-bootstrap/Carousel';
 import Container from 'react-bootstrap/Container';
 import Card from 'react-bootstrap/Card';
 import { Button } from 'antd';
-import { EditOutlined, FileAddOutlined } from '@ant-design/icons';
-import { getInDBWithFilter, getUserInfo } from '../backend_interface/db_manager_api';
+import { EditOutlined, FileAddOutlined, DeleteOutlined } from '@ant-design/icons';
+import { getInDBWithFilter, getUserInfo, deleteInDB } from '../backend_interface/db_manager_api';
 import {renderEmptyState} from '../utils/render_message';
 import Audio from './Audio';
 import ImagesForm from './ImagesForm';
@@ -24,6 +24,11 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
     callFetchAttachmentsForSpot(refId, refType);
     handleMenuChange(msg);
   };
+
+  const handleRequestDelete = async (e) => {
+    const deleteResponse = await deleteInDB(selectedImages[activeIndex].id, 'attachment');
+    console.info("delete response: ", deleteResponse);
+  }; 
 
   const handleRequestNew = (e) => {
     handleMenuChange(<ImagesForm refId={refId} refType={refType} handledFinished={handledFinished}/>);
@@ -74,6 +79,7 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
             {selectedImages.map((image, index) => (
               <Carousel.Item>
                 <Card className="bg-dark text-black">
+                  <Card.Header>id: {image.id}</Card.Header>
                   <Card.Img src={image.url} alt={`Attachment ${index + 1}`} className="center-block" />
                   <Card.Title>{image.name}</Card.Title>
                   <Card.Text>{image.description}</Card.Text>
@@ -98,11 +104,21 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
             onClick={handleRequestNew}
             >{t('new')}</Button>
 
-          {selectedImages.length > 0 && <Button trigger="click"
-            type="default"
-            icon={<EditOutlined />}
-            onClick={handleRequestEdit}
-            >{t('edit')}</Button>}
+          {selectedImages.length > 0 &&
+          <>
+            <Button trigger="click"
+              type="default"
+              icon={<EditOutlined />}
+              onClick={handleRequestEdit}
+            >{t('edit')}
+            </Button>
+            <Button trigger="click"
+              type="default"
+              icon={<DeleteOutlined />}
+              onClick={handleRequestDelete}
+              >{t('delete')}
+            </Button>
+          </>}
         </Card.Footer>
       </>
 

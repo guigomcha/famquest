@@ -110,6 +110,28 @@ export const getInDB = async (endpoint) => {
   }
 };
 
+export const deleteInDB = async (refId, endpoint) => {
+  console.info("URL: "+ API_URL);
+  try {
+    const response = await fetch(`${API_URL}/${endpoint}/${refId}`, {
+      method: 'DELETE',
+      headers: {
+        'accept': 'application/json',
+      },
+      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const resp = await response.text();
+
+    return resp;  // Returning the notes array
+  } catch (error) {
+    console.error(`Error fetching ${endpoint}: `, error);
+    return {};
+  }
+};
+
 export const fetchAndPrepareSpots = async () => {
   try {
     // Fetch spots data

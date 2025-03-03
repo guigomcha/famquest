@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { getInDBWithFilter, getUserInfo } from '../backend_interface/db_manager_api';
+import { getInDBWithFilter, getUserInfo, deleteInDB } from '../backend_interface/db_manager_api';
 import {renderEmptyState} from '../utils/render_message';
 import Card from 'react-bootstrap/Card';
 import Carousel from 'react-bootstrap/Carousel';
 import { Button } from 'antd';
-import { EditOutlined, AudioOutlined } from '@ant-design/icons';
+import { EditOutlined, AudioOutlined, DeleteOutlined } from '@ant-design/icons';
 import AudioForm from './AudioForm';
 import { useTranslation } from "react-i18next";
 
@@ -23,13 +23,17 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
     handleMenuChange(msg);
   };
 
-
   const handleRequestNew = (e) => {
     handleMenuChange(<AudioForm refId={refId} refType={refType} handledFinished={handledFinished}/>);
   }; 
   
   const handleRequestEdit = (e) => {
     handleMenuChange(<AudioForm initialData={selectedAudios[activeIndex]} refId={refId} refType={refType} handledFinished={handledFinished}/>); 
+  }; 
+
+  const handleRequestDelete = async (e) => {
+    const deleteResponse = await deleteInDB(selectedAudios[activeIndex].id, 'attachment');
+    console.info("delete response: ", deleteResponse);
   }; 
 
   const callFetchAttachmentsForSpot = async (refId, refType) => {
@@ -71,6 +75,7 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
               {selectedAudios.map((audio, index) => (
                 <Carousel.Item>
                   <Card className="bg-dark text-white">
+                    <Card.Header>id: {audio.id}</Card.Header>
                     <Card.Body style={{
                             justifyContent: "center",
                             alignItems: "center",
@@ -98,11 +103,21 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
             onClick={handleRequestNew}
             >{t('new')}</Button>
 
-          {selectedAudios.length > 0 && <Button trigger="click"
-            type="default"
-            icon={<EditOutlined />}
-            onClick={handleRequestEdit}
-            >{t('edit')}</Button>}
+          {selectedAudios.length > 0 && 
+          <>
+            <Button trigger="click"
+              type="default"
+              icon={<EditOutlined />}
+              onClick={handleRequestEdit}
+            >{t('edit')}
+            </Button>
+            <Button trigger="click"
+              type="default"
+              icon={<DeleteOutlined />}
+              onClick={handleRequestDelete}
+              >{t('delete')}
+            </Button>
+          </>}
         </Card.Footer>
       </>
   );

@@ -50,6 +50,8 @@
 	"welcome" : "Bienvenido",
 	"email" : "eMail",
 	"reload" : "Recargar",
+	"delete": "Eliminar",
+	"upload": "Enviar",
 	"location" : "Encuéntrame",
 	"birthday" : "Cumpleaños",
 	"biography" : "Biografía",

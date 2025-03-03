@@ -12,7 +12,7 @@ import (
 // Generic operations used by all endpoints
 func handleHeaders(w http.ResponseWriter, r *http.Request) map[string]interface{} {
 	logger.Log.Debug("CORS managed by NGINX")
-	// logger.Log.Debug("headers: %+v", r.Header)
+	logger.Log.Debug("headers: %+v", r.Header)
 	// r.Header["X-User"] = []string{"dc6ad4ad-52cd-4dbf-bc26-759472d063a6"}
 	// Checking if the user and roles are available in the headers
 	info := make(map[string]interface{})

@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { useQuery, useQueryClient } from 'react-query';
 import Form from 'react-bootstrap/Form';
 import { CameraOutlined, VideoCameraAddOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
+import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Row from 'react-bootstrap/Row';
@@ -314,7 +314,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
           </Row>
         </Row>
         }
-      <Button variant="primary" type="submit">{initialData?.id ? (t('update')) : (t('upload'))}</Button>
+      <Button variant="primary" type="submit">{initialData?.id ? t('update') : t('upload')}</Button>
       {statusMessage && <p>{statusMessage}</p>}
       </Form>
     </>
