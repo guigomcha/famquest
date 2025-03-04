@@ -12,7 +12,7 @@ const OAuth2Login = ({ onUserChange }) => {
   useEffect(() => {
     console.info("Should get it: ", user)
     // Fetch user info to check if logged in
-    fetch("https://auth.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN/oauth2/userinfo", { credentials: "include" })
+    fetch("https://auth.staging.famquest.guigomcha.dynv6.net/oauth2/userinfo", { credentials: "include" })
       .then((res) => {
         if (res.ok) {
           console.info("was ok at least");
@@ -65,7 +65,7 @@ const OAuth2Login = ({ onUserChange }) => {
     onUserChange(null);
     
     // Fetch does not work and ?post_logout_redirect_uri in keycloak's endpoint requires some Id to be automatic
-    const keycloakLogout = `https://keycloak.REPLACE_BASE_DOMAIN/realms/REPLACE_TARGET_USER/protocol/openid-connect/logout`;
+    const keycloakLogout = `https://keycloak.common.REPLACE_BASE_DOMAIN/realms/REPLACE_TARGET_USER/protocol/openid-connect/logout`;
     window.location.href = keycloakLogout;
   };
   

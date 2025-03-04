@@ -36,13 +36,13 @@ If your cluster cannot resolve public DNS, make sure the cert-manager and the oa
       - hostnames:
         - api.REPLACE_BASE_DOMAIN
         - portal.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN
-        - pgadmin.REPLACE_BASE_DOMAIN
+        - pgadmin.common.REPLACE_BASE_DOMAIN
         - minio.famquest.REPLACE_BASE_DOMAIN
         - minioapi.famquest.REPLACE_BASE_DOMAIN
         - auth.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN
-        - grafana.REPLACE_BASE_DOMAIN
-        - prometheus.REPLACE_BASE_DOMAIN
-        - keycloak.REPLACE_BASE_DOMAIN
+        - grafana.common.REPLACE_BASE_DOMAIN
+        - prometheus.common.REPLACE_BASE_DOMAIN
+        - keycloak.common.REPLACE_BASE_DOMAIN
         ip: REPLACE_YOUR_PRIVATE_IP
 ```
 
