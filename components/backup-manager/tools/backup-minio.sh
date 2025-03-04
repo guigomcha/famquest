@@ -18,4 +18,7 @@ echo "Copying backup file from pod to local directory"
 BACKUP_FILE="$BACKUP_DIR/$BACKUP_NAME"
 kubectl cp --retries=-1  -n $NAMESPACE $POD_NAME:/opt/bitnami/minio-client/backups/$BACKUP_NAME $BACKUP_FILE
 
+echo "Cleanup MINIO backup in pod: $POD_NAME"
+kubectl exec -n $NAMESPACE $POD_NAME -- sh -c "rm -r /opt/bitnami/minio-client/backups"
+
 echo "$BACKUP_FILE"  # Return the backup file name

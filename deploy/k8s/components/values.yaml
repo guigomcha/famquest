@@ -19,7 +19,7 @@ proxy:
     namespace: REPLACE_TARGET_USER
     port: 4180
     secretCookie: "REPLACE"
-    realmUrl: https://keycloak.REPLACE_BASE_DOMAIN/realms/REPLACE_TARGET_USER 
+    realmUrl: https://keycloak.common.REPLACE_BASE_DOMAIN/realms/REPLACE_TARGET_USER 
     client: famquest-backend
     secret: "REPLACE"
   # Extra configurations for the reverse proxy (NGINX syntax)

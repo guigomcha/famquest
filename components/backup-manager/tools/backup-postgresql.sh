@@ -19,5 +19,8 @@ kubectl exec -n $NAMESPACE $POD_NAME -- sh -c "mkdir -p /backups && pg_dump -U $
 echo "Copying backup file from pod to local directory"
 kubectl cp -n $NAMESPACE $POD_NAME:/backups/$BACKUP_NAME $BACKUP_DIR/$BACKUP_NAME
 
+echo "Cleanup PostgreSQL backup in pod: $POD_NAME"
+kubectl exec -n $NAMESPACE $POD_NAME -- sh -c "rm -r /backups"
+
 BACKUP_FILE="$BACKUP_DIR/$BACKUP_NAME"
 echo "$BACKUP_FILE"  # Return the backup file name

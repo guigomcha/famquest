@@ -31,7 +31,7 @@ proxy:
     content: |
       server {
         listen 80;
-        server_name prometheus.REPLACE_BASE_DOMAIN;
+        server_name prometheus.common.REPLACE_BASE_DOMAIN;
         resolver kube-dns.kube-system.svc.cluster.local valid=10s;
         location / {
           proxy_pass http://promstack-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090;
@@ -39,7 +39,7 @@ proxy:
       }
       server {
         listen 80;
-        server_name grafana.REPLACE_BASE_DOMAIN;
+        server_name grafana.common.REPLACE_BASE_DOMAIN;
         resolver kube-dns.kube-system.svc.cluster.local valid=10s;
         location / {
           proxy_pass http://promstack-grafana.monitoring.svc.cluster.local:80;
