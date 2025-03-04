@@ -35,7 +35,7 @@ common:
     app: gateway
     fullapp: famquest
   baseDomain: famquest.REPLACE_BASE_DOMAIN
-  pullSecret: gatewaysecrets
+  pullSecret: guigomchasecrets
 
 # Configure the Exposure layer
 ingress:

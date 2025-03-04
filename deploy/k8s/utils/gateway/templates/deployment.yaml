@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
         - name: exporter-advanced
-          image: registry.atosresearch.eu:18488/fluentd-nginx-exporter:develop
+          image: ghcr.io/guigomcha/famquest/fluentd-nginx-exporter:develop
           ports: 
             - containerPort: 24231
           command:

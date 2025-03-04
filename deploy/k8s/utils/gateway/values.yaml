@@ -47,7 +47,7 @@ common:
     # Add more to link to other deployments
     app: gateway
   baseDomain: MY.BASE.DOMAIN
-  pullSecret: TMT_NEXUS_SECRET_IN_GATEWAY_NAMESPACE
+  pullSecret: SECRET
 # Configure the Exposure layer
 ingress:
   tls: true

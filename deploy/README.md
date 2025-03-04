@@ -23,9 +23,8 @@ Create the baseline secrets in the ns:
 - famquest
 - REPLACE_TARGET_USER
 ```bash
-kubectl create ns famquest
-kubectl create secret docker-registry gatewaysecrets --docker-server=https://registry.atosresearch.eu:18488 --docker-username=REPLACE --docker-password=REPLACE -n famquest
-kubectl create secret docker-registry guigomchasecrets --docker-server=https://ghcr.io --docker-username=REPLACE --docker-password=REPLACE -n famquest
+kubectl create ns $namespace
+kubectl create secret docker-registry guigomchasecrets --docker-server=https://ghcr.io --docker-username=REPLACE_USER --docker-password=REPLACE_PAT -n common
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.2/cert-manager.yaml
 # install the monitoring stack
 ```
