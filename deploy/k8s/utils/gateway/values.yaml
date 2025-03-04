@@ -1,0 +1,60 @@
+# Configures the NGINX reverse proxy redirects 
+proxy:
+  routing: location # location or subdomain
+  services:
+    - routingKey: MY_SUBDOMAIN_SVC1 # will be a subdomain or a prefix path
+      dropRoutingKey: true # only makes sense if routing is of type location
+      svcName: SVC1_NAME_IN_K8s
+      namespace: SVC1_DOMAIN_IN_K8s
+      port: 8080 #SVC1_PORT_IN_K8s
+  # Configure the Auth layer
+  auth:
+    enabled: true
+    routingKey: auth
+    svcName:  gateway-svc
+    namespace: GATEWAY_NAMESPACE
+    port: 4180
+    secretCookie: REPLACE
+    realmUrl: REPLACE 
+    client: REPLACE
+    secret: REPLACE
+  # Dynamically add more metrics to the fluentd exporter base on this log format
+  # '$remote_addr - $remote_user [$time_local] $host "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" $upstream_response_time';
+  # Alredy exporting {{ include "gateway.fullname" . }}_size_bytes_total {{ include "gateway.fullname" . }}_request_status_code_total {{ include "gateway.fullname" . }}_http_request_elapsed_time_seconds 
+  extraMonitoring:
+    enabled: false
+    content: |
+      # more metrics
+  # Extra configurations for the reverse proxy (NGINX syntax)
+  extraServerConfig:
+    enabled: false
+    extraServerHosts:  # for the Ingress. It has to be of type subdomain
+      - routingKey: monitoring
+    content: |
+      # Full NGINX server
+      # E.g expose monitoring for 
+      server {
+        listen 80;
+        server_name monitoring.$MY.BASE.DOMAIN;
+        resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+        location / {
+          proxy_pass http://promstack-kube-prometheus-prometheus.namespace.svc.cluster.local:9090;
+        }
+      }
+# Configures the K8s manifests
+common:
+  labels:
+    # Add more to link to other deployments
+    app: gateway
+  baseDomain: MY.BASE.DOMAIN
+  pullSecret: TMT_NEXUS_SECRET_IN_GATEWAY_NAMESPACE
+# Configure the Exposure layer
+ingress:
+  tls: true
+  email: REPLACE
+  # expose directly the exporters in the subdomains. 
+  #   - "metrics-oauth.{{ .Values.common.baseDomain }}" # port 44180 in svc {{ include "gateway.fullname" . }}-svc
+  #   - "metrics-nginx.{{ .Values.common.baseDomain }}" # port 9113 in svc {{ include "gateway.fullname" . }}-svc
+  #   - "metrics-fluentd.{{ .Values.common.baseDomain }}" # port 24231 in svc {{ include "gateway.fullname" . }}-svc
+  # Else collect locally or expose prometheus as described in deploy/README.md         
+  exporters: false

@@ -1,0 +1,280 @@
+{{ $services := .Values.proxy.services }}
+{{ $common := .Values.common }}
+{{ $auth := .Values.proxy.auth }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "gateway.fullname" . }}-cm
+  labels:
+    {{- with $common.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+data:
+  nginx.conf: |
+    user  nginx;
+    worker_processes  auto;
+
+    error_log  /var/log/nginx/error.log notice;
+    pid        /var/run/nginx.pid;
+
+
+    events {
+        worker_connections  1024;
+    }
+
+
+    http {
+        #  open() "/etc/nginx/mime.types" failed (2: No such file or directory)
+        # include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+
+        server_names_hash_bucket_size 128;
+
+        log_format custom_format '$remote_addr - $remote_user [$time_local] '
+              '$host "$request" $status $body_bytes_sent '
+              '"$http_referer" "$http_user_agent" '
+              '$upstream_response_time';
+
+        access_log /var/log/nginx/access.log custom_format;
+        access_log /dev/stdout custom_format;           
+
+        sendfile        on;
+        #tcp_nopush     on;
+
+        keepalive_timeout  65;
+
+        #gzip  on;
+
+        include /etc/nginx/conf.d/*.conf;
+        server {
+          listen 9000;
+          server_name _;
+
+          location = /stub_status {
+            stub_status;
+            allow 127.0.0.1;
+            deny all;
+          }
+        }
+    }
+  services.conf: |
+    #----/etc/nginx/conf.d/services.conf
+    {{- if $auth.enabled }}
+    # auth is always going to be a subdomain
+    server {
+      listen 80; #ssl http2;
+      server_name {{ $auth.routingKey }}.{{ $common.baseDomain }};
+      resolver kube-dns.kube-system.svc.cluster.local valid=5s;
+
+      fastcgi_buffers 16 16k;
+      fastcgi_buffer_size 32k;
+      proxy_buffer_size   128k;
+      proxy_buffers   4 256k;
+      proxy_busy_buffers_size   256k;     
+
+
+      location /oauth2/ {
+          proxy_pass http://{{ $auth.svcName }}.{{ $auth.namespace }}.svc.cluster.local:{{ $auth.port }};
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Scheme $scheme;
+          proxy_set_header X-Auth-Request-Redirect $scheme://$host$request_uri;
+      }
+      location /oauth2/auth {
+        proxy_pass http://{{ $auth.svcName }}.{{ $auth.namespace }}.svc.cluster.local:{{ $auth.port }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Scheme $scheme;
+        proxy_set_header Content-Length   "";
+        proxy_pass_request_body off;
+      }
+      location / {
+        try_files $uri $uri/ =404;
+        auth_request /oauth2/auth;
+        error_page 401 = /oauth2/sign_in?rd=https://$host$request_uri;
+        auth_request_set $user   $upstream_http_x_auth_request_user;
+        auth_request_set $email  $upstream_http_x_auth_request_email;
+        proxy_set_header X-User  $user;
+        proxy_set_header X-Email $email;
+        auth_request_set $auth_cookie $upstream_http_set_cookie;
+        add_header Set-Cookie $auth_cookie;
+        proxy_set_header Origin $http_origin;
+      }
+    }
+    {{- end }}
+    {{- if eq $.Values.proxy.routing "location" }}
+    # location based
+    server {
+      listen 80;
+      server_name {{ $common.baseDomain }};
+      resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+      fastcgi_buffers 16 16k;
+      fastcgi_buffer_size 32k;
+      proxy_buffer_size   128k;
+      proxy_buffers   4 256k;
+      proxy_busy_buffers_size   256k;     
+    {{- range $services }}      
+      location /{{ .routingKey }}/ {
+        {{- if .dropRoutingKey }}
+        rewrite ^/{{ .routingKey }}/(.*)$ /$1 break;
+        proxy_pass http://{{ .svcName }}.{{ .namespace }}.svc.cluster.local:{{ .port }}$uri$is_args$args;
+        {{- else }}
+        proxy_pass http://{{ .svcName }}.{{ .namespace }}.svc.cluster.local:{{ .port }};
+        {{- end }}
+        # Valid for both routings
+        proxy_set_header Host $host;
+        #proxy_redirect off;
+        #proxy_http_version 1.1;        
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Origin $http_origin;
+        {{- if .dropRoutingKey }}
+        proxy_redirect ~^(/)(.*)$ /{{ .routingKey }}/$2;
+        {{- end }}
+        {{- if $auth.enabled }}        
+        proxy_set_header X-Auth-Request-Re  $request_uri;
+        auth_request /oauth2/auth;
+        error_page 401 = /oauth2/sign_in?rd=https://$host$request_uri;
+        auth_request_set $user   $upstream_http_x_auth_request_user;
+        auth_request_set $email  $upstream_http_x_auth_request_email;
+        proxy_set_header X-User  $user;
+        proxy_set_header X-Email $email;
+        auth_request_set $token  $upstream_http_x_auth_request_access_token;
+        proxy_set_header X-Access-Token $token;
+       
+        {{- end }}
+      }
+      {{- end }}
+      {{- if $auth.enabled }}
+      location /{{ .routingKey }}/oauth2/ {
+        proxy_pass http://{{ $auth.svcName }}.{{ $auth.namespace }}.svc.cluster.local:{{ $auth.port }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Scheme $scheme;
+        proxy_set_header X-Auth-Request-Redirect $request_uri;
+      }
+      {{- end }}
+    }
+    {{- else }}
+    # Subdomain based
+    {{- range $services }}
+    server {
+      listen 80;
+      server_name {{ .routingKey }}.{{ $common.baseDomain }};
+      resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+      fastcgi_buffers 16 16k;
+      fastcgi_buffer_size 32k;
+      proxy_buffer_size   128k;
+      proxy_buffers   4 256k;
+      proxy_busy_buffers_size   256k;     
+    
+      location / {
+        proxy_pass http://{{ .svcName }}.{{ .namespace }}.svc.cluster.local:{{ .port }};
+      
+        # Valid for both routings
+        proxy_set_header Host $host;
+        #proxy_redirect off;
+        #proxy_http_version 1.1;        
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Origin $http_origin;
+        
+        {{- if $auth.enabled }}        
+        proxy_set_header X-Auth-Request-Re  $request_uri;
+        auth_request /oauth2/auth;
+        error_page 401 = /oauth2/sign_in?rd=https://$host$request_uri;
+        auth_request_set $user   $upstream_http_x_auth_request_user;
+        auth_request_set $email  $upstream_http_x_auth_request_email;
+        proxy_set_header X-User  $user;
+        proxy_set_header X-Email $email;
+        auth_request_set $token  $upstream_http_x_auth_request_access_token;
+        proxy_set_header X-Access-Token $token;
+        {{- end }}
+      }
+      {{- if $auth.enabled }}
+      location /oauth2/ {
+        proxy_pass http://{{ $auth.svcName }}.{{ $auth.namespace }}.svc.cluster.local:{{ $auth.port }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Scheme $scheme;
+        proxy_set_header X-Auth-Request-Redirect $request_uri;
+      }
+      {{- end }}
+    }
+    {{- end }}    
+    {{- end }}
+
+    {{- if $.Values.proxy.extraServerConfig.enabled }}
+    {{ $.Values.proxy.extraServerConfig.content | nindent 4 }}
+    {{- end }}
+  fluent.conf: | 
+    <source>
+      @type prometheus_tail_monitor
+    </source>
+
+    <source>
+      @type prometheus
+    </source>
+
+    <source>
+        @type tail
+        <parse>
+        @type regexp
+        expression /^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) \[(?<time>[^\]]*)\] (?<server_name>[^ ]*) \"(?<method>\w+)(?:\s+(?<path>[^\"]*?)(?:\s+\S*)?)?\" (?<status_code>[^ ]*) (?<bytes_sent>[^ ]*)(?:\s"(?<referer>[^\"]*)") "(?<agent>[^\"]*)" (?<elapsed_time>[^ ]*)$/
+            time_format %d/%b/%Y:%H:%M:%S %z
+            keep_time_key true
+            types bytes_sent:integer,reqtime:float,uct:float,uht:float,elapsed_time:float
+        </parse>
+        tag {{ include "gateway.fullname" . }}
+        path /var/log/nginx/access.log
+        pos_file /tmp/fluent_nginx.pos
+    </source>
+    <filter {{ include "gateway.fullname" . }}>
+        @type prometheus
+
+      <metric>
+        name {{ include "gateway.fullname" . }}_size_bytes_total
+        type counter
+        desc {{ include "gateway.fullname" . }} bytes sent
+        key bytes_sent
+        <labels>
+          method ${method}
+          path ${path}
+          status_code ${status_code}
+          server_name ${server_name}
+        </labels>
+      </metric>
+
+      <metric>
+        name {{ include "gateway.fullname" . }}_request_status_code_total
+        type counter
+        desc {{ include "gateway.fullname" . }} request status code
+        <labels>
+          method ${method}
+          path ${path}
+          status_code ${status_code}
+          server_name ${server_name}
+        </labels>
+      </metric>
+
+      <metric>
+        name {{ include "gateway.fullname" . }}_http_request_elapsed_time_seconds
+        type histogram
+        desc Histogram of the total time spent on receiving the response from the upstream server.
+        key elapsed_time
+        <labels>
+          method ${method}
+          path ${path}
+          status_code ${status_code}
+          server_name ${server_name}
+        </labels>
+      </metric>
+    {{- if $.Values.proxy.extraMonitoring.enabled }}
+    {{ $.Values.proxy.extraMonitoring.content | nindent 4 }}
+    {{- end }}
+    </filter>

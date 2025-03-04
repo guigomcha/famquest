@@ -1,0 +1,147 @@
+{{ $services := .Values.proxy.services }}
+{{ $common := .Values.common }}
+{{ $auth := .Values.proxy.auth }}
+{{ $ingress := .Values.ingress }}
+{{ $extraServerConfig := .Values.proxy.extraServerConfig }}
+{{- if $ingress.tls }}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "gateway.fullname" . }}-issuer
+spec:
+  acme:
+    email: "{{ $ingress.email }}"
+    privateKeySecretRef:
+      name: {{ include "gateway.fullname" . }}-issuer-secret
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+    - http01:
+        ingress:
+          class: traefik
+{{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure, web
+    {{- if $ingress.tls }}
+    cert-manager.io/issuer: {{ include "gateway.fullname" . }}-issuer
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    cert-manager.io/issue-temporary-certificate: "true"
+    {{- end }}
+  name: {{ include "gateway.fullname" . }}-ingress
+  labels:
+    {{- with .Values.common.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  # ingressClassName: traefik
+  {{- if $ingress.tls }}
+  tls:
+    - secretName: {{ include "gateway.fullname" . }}-letsencrypt-secret
+      hosts:
+      {{- if $extraServerConfig.enabled }}
+      {{- range $extraServerConfig.extraServerHosts }}
+        - "{{ .routingKey }}.{{ $common.baseDomain }}"
+      {{- end }}
+      {{- end }}
+        - "{{ $auth.routingKey }}.{{ $common.baseDomain }}"
+      {{- range $services }}
+        - "{{ .routingKey }}.{{ $common.baseDomain }}"
+      {{- end }}
+  {{- end }}
+  rules:
+  {{- if $ingress.exporters }}
+    # Used to extract metrics in Prometheus
+    - host: "metrics-oauth.{{ $common.baseDomain }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "gateway.fullname" . }}-svc
+                port:
+                  number: 44180
+    - host: "metrics-nginx.{{ $common.baseDomain }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "gateway.fullname" . }}-svc
+                port:
+                  number: 9113
+    - host: "metrics-fluentd.{{ $common.baseDomain }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "gateway.fullname" . }}-svc
+                port:
+                  number: 24231
+  {{- end }}
+  {{- if $auth.enabled }}
+    # auth always uses subdomain
+    - host: "{{ $auth.routingKey }}.{{ $common.baseDomain }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "gateway.fullname" . }}-svc
+                port:
+                  number: 80 # SSL termination
+  {{- end }}
+  {{- if eq $.Values.proxy.routing "subdomain" }}
+    {{- range $services }}
+    # reverse proxy entry-point
+    - host: "{{ .routingKey }}.{{ $common.baseDomain }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                # https://helm.sh/docs/chart_template_guide/control_structures/#modifying-scope-using-with
+                name: {{ include "gateway.fullname"  $ }}-svc
+                port:
+                  number: 80 # SSL termination
+    {{- end }}
+  {{- else }}
+    # location routingKey  
+    - host: "{{ $common.baseDomain }}"
+      http:
+        paths:
+        {{- range $services }}
+          - path: "{{ .routingKey }}"
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "gateway.fullname"  $ }}-svc
+                port:
+                  number: 80 # SSL termination
+        {{- end }}
+  {{- end }}
+  {{- if $extraServerConfig.enabled }}
+    {{- range $extraServerConfig.extraServerHosts }}
+    # reverse proxy entry-point
+    - host: "{{ .routingKey }}.{{ $common.baseDomain }}"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                # https://helm.sh/docs/chart_template_guide/control_structures/#modifying-scope-using-with
+                name: {{ include "gateway.fullname"  $ }}-svc
+                port:
+                  number: 80 # SSL termination
+    {{- end }}
+  {{- end }}
