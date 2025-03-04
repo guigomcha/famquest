@@ -54,7 +54,7 @@ common:
     app: common
     fullapp: testbed
   baseDomain: REPLACE_BASE_DOMAIN
-  pullSecret: gatewaysecrets
+  pullSecret: guigomchasecrets
 
 # Configure the Exposure layer
 ingress:

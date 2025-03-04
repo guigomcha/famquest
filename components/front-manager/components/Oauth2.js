@@ -47,21 +47,23 @@ const OAuth2Login = ({ onUserChange }) => {
     const loginUrl = `https://auth.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN/oauth2/sign_in?rd=${encodeURIComponent(frontendUrl)}`;
     window.location.href = loginUrl;
   };
-
-
+  
+  
   const logout = () => {
-    fetch("https://auth.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN/oauth2/sign_out", { method: "GET", credentials: "include" })
-      .then(() => {
-        setUser(null);
-        onUserChange(null); // Notify parent component
-        console.info("Logout ok");
-      })
-      .catch(() => {
-        setUser(null);
-        onUserChange(null); // Notify parent component
-        console.info("Logout error");
-      });
-    window.location.reload();
+    
+    fetch(`https://auth.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN/oauth2/sign_out`, { method: "GET", credentials: "include" })
+    .then(() => {
+      console.info("Logout ok");
+    })
+    .catch((error) => {
+      console.info("Logout error", error);
+    });
+    setUser(null);
+    onUserChange(null);
+    
+    // Fetch does not work and ?post_logout_redirect_uri in keycloak's endpoint requires some Id to be automatic
+    const keycloakLogout = `https://keycloak.REPLACE_BASE_DOMAIN/realms/REPLACE_TARGET_USER/protocol/openid-connect/logout`;
+    window.location.href = keycloakLogout;
   };
   
   return (

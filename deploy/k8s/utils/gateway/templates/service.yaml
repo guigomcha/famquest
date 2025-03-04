@@ -1,0 +1,49 @@
+{{ $services := .Values.proxy.services }}
+{{ $common := .Values.common }}
+{{ $auth := .Values.proxy.auth }}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ include "gateway.fullname" . }}-svc
+  labels:
+    {{- with $common.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    {{- with $common.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    name: web 
+  {{- if $auth.enabled }}
+  - protocol: TCP
+    port: {{ $auth.port }}
+    targetPort: {{ $auth.port }}
+    name: proxy
+  {{- end }}
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+    name: api
+  - protocol: TCP
+    port: 9000
+    targetPort: 9000
+    name: nginx-raw
+  - protocol: TCP
+    port: 44180
+    targetPort: 44180
+    name: metrics-oauth
+  - protocol: TCP
+    port: 9113
+    targetPort: 9113
+    name: metrics-nginx
+  - protocol: TCP
+    port: 24231
+    targetPort: 24231
+    name: metrics-fluentd
+

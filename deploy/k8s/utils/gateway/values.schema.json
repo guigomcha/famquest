@@ -1,0 +1,181 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "proxy": {
+      "type": "object",
+      "description": "Configures the NGINX reverse proxy redirects",
+      "properties": {
+        "routing": {
+          "type": "string",
+          "enum": ["location", "subdomain"],
+          "description": "Reverse proxy based on subdomain or prefix path over common.baseDomain"
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "routingKey": {
+                "type": "string",
+                "description": "Will be a subdomain or a prefix path"
+              },
+              "dropRoutingKey": {
+                "type": "boolean",
+                "description": "Only makes sense to be true if routing is of type location"
+              },
+              "svcName": {
+                "type": "string",
+                "description": "K8s service name"
+              },
+              "namespace": {
+                "type": "string",
+                "description": "K8s namespace for the service"
+              },
+              "port": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535,
+                "description": "K8s service port"
+              }
+            },
+            "required": ["routingKey", "svcName", "namespace", "port"],
+            "additionalProperties": false
+          }
+        },
+        "auth": {
+          "type": "object",
+          "description": "Configure the Auth layer",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Activate oauth2 based auth"
+            },
+            "routingKey": {
+              "type": "string",
+              "description": "Routing key for the auth service. Always subdomain"
+            },
+            "svcName": {
+              "type": "string",
+              "description": "Auth service name"
+            },
+            "namespace": {
+              "type": "string",
+              "description": "K8s namespace for the auth service"
+            },
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535,
+              "description": "K8s port for the auth service"
+            },
+            "secretCookie": {
+              "type": "string",
+              "description": "Secret for cookie management"
+            },
+            "realmUrl": {
+              "type": "string",
+              "description": "Realm URL for the auth service"
+            },
+            "client": {
+              "type": "string",
+              "description": "Client identifier for the auth service"
+            },
+            "secret": {
+              "type": "string",
+              "description": "Secret for the auth service"
+            }
+          },
+          "required": ["enabled", "routingKey", "svcName", "namespace", "port", "secretCookie", "realmUrl", "client", "secret"],
+          "additionalProperties": false
+        },
+        "extraServerConfig": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable extra server configuration"
+            },
+            "extraServerHosts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "routingKey": {
+                    "type": "string",
+                    "description": "Routing key for extra server hosts. Has to be subdomain type."
+                  }
+                },
+                "required": ["routingKey"],
+                "additionalProperties": false
+              },
+              "description": "Extra server hosts for the Ingress"
+            },
+            "content": {
+              "type": "string",
+              "description": "Full NGINX server configuration"
+            }
+          },
+          "required": ["enabled", "extraServerHosts", "content"],
+          "additionalProperties": false
+        },
+        "extraMonitoring": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable extra fluentd monitoring configuration"
+            },
+            "content": {
+              "type": "string",
+              "description": "Additional Metrics definitions for fluentd"
+            }
+          },
+          "required": ["enabled", "content"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["routing", "services", "auth", "extraServerConfig", "extraMonitoring"],
+      "additionalProperties": false
+    },
+    "common": {
+      "type": "object",
+      "properties": {
+        "labels": {
+          "type": "object"
+        },
+        "baseDomain": {
+          "type": "string",
+          "description": "Base domain for the application"
+        },
+        "pullSecret": {
+          "type": "string",
+          "description": "Pull secret for accessing container images"
+        }
+      },
+      "required": ["labels", "baseDomain", "pullSecret"],
+      "additionalProperties": false
+    },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "tls": {
+          "type": "boolean",
+          "description": "Enable TLS for ingress"
+        },
+        "email": {
+          "type": "string",
+          "description": "Email for Let's Encrypt notifications"
+        },
+        "exporters": {
+          "type": "boolean",
+          "description": "Enable exposure of the exporters as subdomain ingresses"
+        }
+      },
+      "required": ["tls", "email", "exporters"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["proxy", "common", "ingress"],
+  "additionalProperties": false
+}
