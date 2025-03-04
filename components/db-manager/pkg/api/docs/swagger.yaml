@@ -215,7 +215,7 @@ info:
     name: Guillermo Gomez GPL V3
   termsOfService: http://swagger.io/terms/
   title: FamQuest DB Manager API
-  version: "1.0"
+  version: 0.2.0
 paths:
   /attachment:
     get:
