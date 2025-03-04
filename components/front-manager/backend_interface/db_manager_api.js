@@ -2,69 +2,49 @@ const API_URL = "https://api.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN";
 const isLocal = true;
 
 export const registerUser = async (data) => {
-  console.info("URL: "+ API_URL + "user connected" + JSON.stringify(data));
+  console.info("URL: "+ API_URL + "user connected " + JSON.stringify(data));
+  console.log("Registering new user");
+  // Register
+  var role = "contributor"
+  for (let r of ["contributor", "owner", "hybrid", "admin", "target"]) {
+    if (data.groups.some(group => group.includes(r))) {
+      role = r;
+    }
+  }
   try {
     const response = await fetch(`${API_URL}/user`, {
+      method: 'POST',
+      body: JSON.stringify({
+        "extRef": data.user,
+        "name": data.preferredUsername,
+        "email": data.email,
+        "role": role
+      }
+      ),
       headers: {
         'accept': 'application/json',
+        'Content-Type': 'application/json'
       },
       ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
     });
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    const users = await response.json();
-    // console.info("Fetched users "+ JSON.stringify(users))
-    const matches = users.filter(user => user.extRef === data.user);
-    if (matches.length > 0) {
-      console.log("Current user exists:", matches);
-      return;
-    }
-    console.log("Registering new user");
-    // Register
-    var role = "contributor"
-    for (let r of ["contributor", "owner", "hybrid", "admin", "target"]) {
-      if (data.groups.some(group => group.includes(r))) {
-        role = r;
-      }
-    }
-    try {
-      const response = await fetch(`${API_URL}/user`, {
-        method: 'POST',
-        body: JSON.stringify({
-          "extRef": data.user,
-          "name": data.preferredUsername,
-          "email": data.email,
-          "role": role
-        }
-        ),
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-        // mode: 'cors',
-      });
-  
-      if (response.ok) {
-        const finalUser = await response.json();
-        return finalUser; // return the URL or data if needed
-      } else {
-        console.error('Failed to upload the user:', response.text());
-        return null;
-      }
-    } catch (error) {
-      console.error('Error uploading user:', error);
+
+    if (response.ok) {
+      const finalUser = await response.json();
+      return finalUser; // return the URL or data if needed
+    } else {
+      console.error('Failed to upload the user:', response.text());
       return null;
     }
   } catch (error) {
-    console.error("Error fetching initial users: ", error);
+    console.error('Error uploading user:', error);
     return null;
   }
+  
 };
 
 export const getUserInfo = async (refId) => {
-  console.info("URL: "+ API_URL + "user requested" + refId);
+  console.info("URL: "+ API_URL + " user requested " + refId);
   let prefix = ""; 
   if (refId > 0 ) {
     prefix = "/"+ refId;
@@ -89,6 +69,26 @@ export const getUserInfo = async (refId) => {
   }
 };
 
+export const getConfigure = async () => {
+  console.info("URL: "+ API_URL);
+  try {
+    const response = await fetch(`${API_URL}/configure`, {
+      headers: {
+        'accept': 'application/json',
+      },
+      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const resp = await response.json();
+    console.info("configure response: ", resp);
+    return;  // Returning the resp array
+  } catch (error) {
+    console.error(`Error requesting configure: `, error);
+    return;
+  }
+};
 export const getInDB = async (endpoint) => {
   console.info("URL: "+ API_URL);
   try {

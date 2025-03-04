@@ -17,15 +17,14 @@ import (
 // @Router /configure [get]
 func Configure(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("initiating db manager backend")
-	db, err := connection.ConnectToPostgreSQL()
+	err := connection.ConnectToPostgreSQL()
 	if err != nil {
 		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	logger.Log.Info("Postgress connected")
-	connection.DB = db
-	if _, err := db.Exec(models.Schema); err != nil {
+	if _, err := connection.DB.Exec(models.Schema); err != nil {
 		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
