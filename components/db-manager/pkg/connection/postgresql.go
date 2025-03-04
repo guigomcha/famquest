@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -19,11 +20,20 @@ const (
 
 var DB *sqlx.DB
 
-func ConnectToPostgreSQL() (*sqlx.DB, error) {
+func ConnectToPostgreSQL() error {
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable",
 		os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("POSTGRES_DB_HOST"), os.Getenv("POSTGRES_DB_PORT"))
 	logger.Log.Infof("Connecting to Postgress '%s'", connStr)
-	return sqlx.Connect("postgres", connStr)
+	var err error
+	DB, err = sqlx.Connect("postgres", connStr)
+	if err != nil {
+		return err
+	}
+	DB.SetConnMaxLifetime(10 * time.Minute)
+	DB.SetConnMaxIdleTime(5 * time.Minute)
+	DB.SetMaxOpenConns(10)
+	DB.SetMaxIdleConns(10)
+	return err
 }
 
 // Insert Function
@@ -36,6 +46,7 @@ func Insert(db *sqlx.DB, model DbInterface) (int, error) {
 		logger.Log.Debug("unable to insert")
 		return 0, err
 	}
+	defer result.Close()
 	if ok := result.Next(); !ok {
 		return 0, err
 	}
@@ -201,10 +212,11 @@ func Update(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
 	if ok := checkIDExists(db, model.GetTableName(), id); !ok {
 		return nil, errors.New(ErrorIdDoesNotExits)
 	}
-	_, err := db.NamedQuery(model.GetUpdateQuery(), model)
+	res, err := db.NamedQuery(model.GetUpdateQuery(), model)
 	if err != nil {
 		return nil, err
 	}
+	defer res.Close()
 	err = performMultipleNamedQueries(db, model, model.GetInsertExtraQueries())
 	if err != nil {
 		return nil, err
