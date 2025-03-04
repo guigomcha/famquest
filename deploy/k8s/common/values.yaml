@@ -53,7 +53,7 @@ common:
     # Useful to link to other deployments
     app: common
     fullapp: testbed
-  baseDomain: REPLACE_BASE_DOMAIN
+  baseDomain: common.REPLACE_BASE_DOMAIN
   pullSecret: guigomchasecrets
 
 # Configure the Exposure layer

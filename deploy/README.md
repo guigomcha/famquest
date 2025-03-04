@@ -82,6 +82,7 @@ dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+
 ```bash
 kubectl apply -f deploy/k8s/components/dbmanager.yaml -n REPLACE_TARGET_USER
 kubectl apply -f deploy/k8s/components/frontmanager.yaml -n REPLACE_TARGET_USER
+kubectl apply -f deploy/k8s/components/backupmanager-cronjob.yaml # namespace is inside due to manifest conflicts
 # Note: the current values and confimap overlay expect to have the monitoring stack already installed
 helm install gateway  OCI://ghcr.io/guigomcha/famquest/gateway --version 1.3.0 -n REPLACE_TARGET_USER -f deploy/k8s/components/values.yaml
 kubectl apply -f deploy/k8s/components/gateway-cm.yaml -n REPLACE_TARGET_USER
