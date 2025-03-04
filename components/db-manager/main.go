@@ -32,7 +32,7 @@ func init() {
 }
 
 // @title FamQuest DB Manager API
-// @version 1.0
+// @version 0.2.0
 // @description Handles the connection to the DBs in DB Manager. PostgreSQL and MINIO
 // @termsOfService http://swagger.io/terms/
 // @contact.name Guillermo Gomez
@@ -96,7 +96,7 @@ func main() {
 		"http://localhost:3000",
 		"http://localhost:8081",
 		"http://localhost:8080",
-		"https://portal.staging.famquest.guigomcha.dynv6.net",
+		"https://portal.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN",
 	}
 	allowedMethods := []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	allowedHeaders := []string{"Content-Type", "Accept"}
