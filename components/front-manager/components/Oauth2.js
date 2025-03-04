@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Button from 'react-bootstrap/Button';
-import { registerUser, getUserInfo } from '../backend_interface/db_manager_api';
+import { registerUser, getUserInfo, getConfigure } from '../backend_interface/db_manager_api';
 import { useTranslation } from "react-i18next";
 
 const isLocal = true;
@@ -9,31 +9,34 @@ const OAuth2Login = ({ onUserChange }) => {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState(null); // User information
   
-  const transformToDBUser = async (data) => {
-    console.info("fetching users to find", data);
-    const tempUsers = await getUserInfo(0);
-    console.info("obtained tempUsers ", tempUsers);
-    const foundUser = tempUsers.find(item => item.extRef === data.user);
-    console.info("connected as ", foundUser);
-    setUser(foundUser);
-    return foundUser;
-  }
-
   useEffect(() => {
+    console.info("Should get it: ", user)
     // Fetch user info to check if logged in
-    fetch("https://auth.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN/oauth2/userinfo", { credentials: "include" })
+    fetch("https://auth.staging.famquest.guigomcha.dynv6.net/oauth2/userinfo", { credentials: "include" })
       .then((res) => {
-        if (res.ok) return res.json();
+        if (res.ok) {
+          console.info("was ok at least");
+          return res.json();
+        }
+        console.info("Not logged in");
         throw new Error("Not logged in");
       })
       .then(async (data) => {
-        setUser(data);
-        console.info(JSON.stringify(data));
+        // Make sure the idle connections are cleaned up
+        await getConfigure();
+        console.info("Received from proxy: " + JSON.stringify(data));
         // Register the user in the backend if it does not exist
-        const resp = await registerUser(data);
-        console.info("Response from registerUser: ", resp)
-        const userInfo = await transformToDBUser(data);
-        onUserChange(userInfo); // Notify parent component
+        const tempUsers = await getUserInfo(0);
+        console.info("obtained tempUsers ", tempUsers);
+        const foundUser = tempUsers.find(item => item.extRef === data.user);
+        console.info("connected as: ", foundUser);
+        if (!foundUser) {
+          const resp = await registerUser(data);
+          console.info("Response from registerUser: ", resp)
+          setUser(resp);
+        }
+        setUser(foundUser);
+        onUserChange(foundUser); // Notify parent component
       })
       .catch(() => {
         setUser(null);

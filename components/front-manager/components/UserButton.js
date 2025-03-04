@@ -64,10 +64,9 @@ const UserButton = ({ user,  mapRef }) => {
             // Check if the position was already loaded
             const matches = userLocationsLayer.current.getLayers().filter(layer => layer.getLatLng().lat === e.latitude && layer.getLatLng().lng === e.longitude);
             if (matches.length > 0) {
-              console.log("Current location exists:", matches);
               return;
             }
-            console.info("Live location found ", e, userLocationsLayer.current.getLayers());
+            console.info("New live location found ", e, userLocationsLayer.current.getLayers());
             var marker = L.marker([e.latitude, e.longitude], {
               icon: L.icon({
                 iconUrl: 'assets/marker-icon.png',
