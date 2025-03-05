@@ -34,6 +34,8 @@ const OAuth2Login = ({ onUserChange }) => {
           const resp = await registerUser(data);
           console.info("Response from registerUser: ", resp)
           setUser(resp);
+          onUserChange(resp); // Notify parent component
+          return;
         }
         setUser(foundUser);
         onUserChange(foundUser); // Notify parent component
