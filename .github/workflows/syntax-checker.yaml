@@ -1,0 +1,32 @@
+name: Syntax checker
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+
+jobs:
+  spellcheck-codebase:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Spell check everything
+        uses: streetsidesoftware/cspell-action@v6
+        with:
+          root: .
+          incremental_files_only: false
+          config: .cspell.json
+          verbose: true
+  markdown-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DavidAnson/markdownlint-cli2-action@v19
+        name: Markdown lint
+        with:
+          config: .markdownlint.jsonc
+          globs: |
+            *.md
+            **/*.md

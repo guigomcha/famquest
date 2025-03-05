@@ -1,0 +1,118 @@
+{
+    "version": "0.2",
+    "ignoreWords": [
+        "cicd",
+        "dockerhub",
+        "kaniko",
+        "startuml",
+        "enduml",
+        "skinparam",
+        "infof",
+        "debugf",
+        "warningf",
+        "GARCH",
+        "GOOS",
+        "CGO_ENABLED",
+        "helmignore",
+        "helmcharts",
+        "godoc",
+        "swaggo"
+    ],
+    "enableGlobDot": true,
+    "ignorePaths": [
+        "*.csv",
+        "*.c",
+        "*.txt",
+        "Makefile",
+        "tmp/*",
+        "*.toml",
+        "*.proto",
+        "*.h",
+        ".git/*",
+        "*.drawio",
+        "*.sum",
+        "*.mod",
+        ".gitignore",
+        "**/.dockerignore",
+        "**/.helmignore"
+    ],
+    "import": [
+        "@cspell/dict-rust/cspell-ext.json",
+        "@cspell/dict-golang/cspell-ext.json",
+        "@cspell/dict-python/cspell-ext.json",
+        "@cspell/dict-docker/cspell-ext.json",
+        "@cspell/dict-git/cspell-ext.json",
+        "@cspell/dict-k8s/cspell-ext.json",
+        "@cspell/dict-makefile/cspell-ext.json",
+        "@cspell/dict-markdown/cspell-ext.json",
+        "@cspell/dict-public-licenses/cspell-ext.json"
+    ],
+    "useGitignore": true,
+    "caseSensitive": false,
+    "language": "en",
+    "languageSettings": [
+        {
+            "languageId": "rust",
+            "includeRegExpList": [
+                "comments",
+                "string"
+            ],
+            "ignoreRegExpList": [
+                "`.*`",
+                "\\/[\\w.\\-_]+",
+                "[\\w.\\-_]+\\/",
+                "pod[a-zA-Z0-9]+",
+                "\", .*\""
+            ]
+        },
+        {
+            "languageId": "markdown",
+            "ignoreRegExpList": [
+                "/^\\s*```[\\s\\S]*?^\\s*```/gm"
+            ]
+        },
+        {
+            "languageId": "go",
+            "ignoreRegExpList": [
+                ".*\"github\\.com\\/.*\".*",
+                ".*\"gitlab\\.com\\/.*\".*",
+                ".*\".io\\/.*\".*"
+            ]
+        }
+    ],
+    "dictionaryDefinitions": [],
+    "dictionaries": [
+        "rust",
+        "go",
+        "project-words",
+        "makefile",
+        "en-gb",
+        "cpp",
+        "cpp-legacy",
+        "cpp-refined",
+        "networking-terms",
+        "python",
+        "scala"
+    ],
+    "patterns": [
+        {
+            "name": "comment-single-line",
+            "pattern": "//.*"
+        },
+        {
+            "name": "comment-multi-line",
+            "pattern": "/(?:\\/\\*[\\s\\S]*?\\*\\/)/g"
+        },
+        {
+            "name": "comments",
+            "pattern": [
+                "comment-single-line",
+                "comment-multi-line"
+            ]
+        },
+        {
+            "name": "string",
+            "pattern": "\".*\""
+        }
+    ]
+}
