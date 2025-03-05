@@ -16,6 +16,13 @@
         "helmignore",
         "helmcharts",
         "godoc",
+        "dynv",
+        "famquest",
+        "DIGI",
+        "pgadmin",
+        "thirdparty",
+        "adulting",
+        "Gamifiying",
         "swaggo"
     ],
     "enableGlobDot": true,
@@ -37,7 +44,6 @@
         "**/.helmignore"
     ],
     "import": [
-        "@cspell/dict-rust/cspell-ext.json",
         "@cspell/dict-golang/cspell-ext.json",
         "@cspell/dict-python/cspell-ext.json",
         "@cspell/dict-docker/cspell-ext.json",
@@ -51,20 +57,6 @@
     "caseSensitive": false,
     "language": "en",
     "languageSettings": [
-        {
-            "languageId": "rust",
-            "includeRegExpList": [
-                "comments",
-                "string"
-            ],
-            "ignoreRegExpList": [
-                "`.*`",
-                "\\/[\\w.\\-_]+",
-                "[\\w.\\-_]+\\/",
-                "pod[a-zA-Z0-9]+",
-                "\", .*\""
-            ]
-        },
         {
             "languageId": "markdown",
             "ignoreRegExpList": [
@@ -82,11 +74,11 @@
     ],
     "dictionaryDefinitions": [],
     "dictionaries": [
-        "rust",
         "go",
         "project-words",
         "makefile",
         "en-gb",
+        "es-esp",
         "cpp",
         "cpp-legacy",
         "cpp-refined",
@@ -113,6 +105,15 @@
         {
             "name": "string",
             "pattern": "\".*\""
+        }
+    ],
+    "overrides": [
+        {
+            "filename": "components/front-manager/public/locales/es/translation.json",
+            "language": "es",
+            "ignoreRegExpList": [
+                "/\"[^\"\\n]*\"\\s*:\\s*\"([^\\n\"]+)\"/"
+            ]
         }
     ]
 }
