@@ -1,3 +1,7 @@
+<h1>
+  <a href="https://github.com/guigomcha/famquest/releases"><img src="https://img.shields.io/github/v/tag/guigomcha/famquest" alt="Latest Tag"></a>
+</h1>
+
 # The FamQuest App
 
 A map guiding users on an adventure to uncover family memories and history, while creating their own in a gamified quest to resolve adulting tasks.
@@ -102,9 +106,9 @@ A Gitflow methodology is implemented within this repo. Proceed as follows:
 
 1. Open an Issue, label appropriately and assign to the next planned release.
 2. Pull the latest develop and branch off of it with a branch or PR created from Github.
-4. After the first commit, open a DRAFT PR to develop.
-3. Commit and push frequently.
-4. When ready, set PR as ready, request review and wait for approval.
+3. After the first commit, open a DRAFT PR to develop.
+4. Commit and push frequently.
+5. When ready, set PR as ready, request review and wait for approval.
 
 ## License
 
