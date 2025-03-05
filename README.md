@@ -85,7 +85,6 @@ It is consumed as a Progressive Web App that can be used from a mobile or a lapt
 
 ### v0.2.0
 
-
 <p align="center">
   <div style="display: flex; overflow-x: scroll; width: 100%;">
     <img src="./docs/v0.2.0/home-en.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>

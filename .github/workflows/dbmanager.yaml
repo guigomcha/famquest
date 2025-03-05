@@ -9,7 +9,7 @@ on:
 
 
 jobs:
-  docker:
+  build-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,6 +30,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: components/dbmanager/install/Dockerfile
+          file: components/db-manager/install/Dockerfile
           push: true
           tags: ghcr.io/guigomcha/famquest/dbmanager:latest
