@@ -265,7 +265,7 @@ export const updateInDB = async (body, endpoint) => {
 };
 
 export const uploadAttachment = async (data, formData) => {
-  console.info("Uploading attahment");
+  console.info("Uploading attachment");
   if (data instanceof Blob) {
     // If it's a Blob (image from the camera or audio fromthe mic), append it with a filename of the right type
     if (name == "audio") {

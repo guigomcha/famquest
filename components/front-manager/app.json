@@ -14,7 +14,7 @@
     },
     "platforms":[
       "web",
-      "azndroid",
+      "android",
       "ios"
     ],
     "ios": {
