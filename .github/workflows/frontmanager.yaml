@@ -1,4 +1,4 @@
-name: dbmanager
+name: frontmanager
 
 on:
   push:
@@ -6,12 +6,12 @@ on:
       - main
       - develop
     paths:
-      - 'components/db-manager/**'
-      - '.github/workflows/dbmanager.yaml'
+      - 'components/front-manager/**'
+      - '.github/workflows/frontmanager.yaml'
   pull_request:
     paths:
-      - 'components/db-manager/**'
-      - '.github/workflows/dbmanager.yaml'
+      - 'components/front-manager/**'
+      - '.github/workflows/frontmanager.yaml'
 
 jobs:
   build-push:
@@ -30,6 +30,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: components/db-manager/install/Dockerfile
+          file: components/front-manager/install/Dockerfile
           push: true
-          tags: ghcr.io/guigomcha/famquest/dbmanager:latest
+          tags: ghcr.io/guigomcha/famquest/frontmanager:latest

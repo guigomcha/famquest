@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM ghcr.io/guigomcha/proxy/alpine:latest
 
 WORKDIR /
 
