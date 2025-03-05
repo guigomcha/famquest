@@ -11,9 +11,9 @@
 ## Description
 
 For the end-user, the idea is to have a view of a map which is discovered based on the location history of the user.
-The admins (family members) will have acess to the entire map to register everything and save it to DB.
+The admins (family members) will have access to the entire map to register everything and save it to DB.
 
-The objective is to have a close-to-native app by releasing a Progresive Web App
+The objective is to have a close-to-native app by releasing a Progressive Web App
 
 ## Getting Started
 
@@ -98,7 +98,7 @@ Pending things to implement
 - <https://snack.expo.dev/>
 - <https://dev.to/ghost/running-exporeact-native-in-docker-4hme>
 
-Trying to run android emulator (Android studio has to be on the wondows side and can only interact with backends running also on the windows side or deployed with docker in WSL.) :
+Trying to run android emulator (Android studio has to be on the windows side and can only interact with backends running also on the windows side or deployed with docker in WSL.) :
 
 - <https://gist.github.com/sushant-at-nitor/30ca1185f2501f55fff61752d18387cc>
 - <https://atekihcan.com/blog/codeorrandom/how-to-setup-android-sdk-on-wsl/>

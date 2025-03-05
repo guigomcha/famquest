@@ -1,6 +1,6 @@
 apiVersion: v2
 appVersion: alpine
-description: A reverser proxy (NGINX) for K8s which provides SSO and preformance +
+description: A reverser proxy (NGINX) for K8s which provides SSO and performance +
   HTTPStatus metrics for Prometheus and Grafana
 name: gateway
 type: application

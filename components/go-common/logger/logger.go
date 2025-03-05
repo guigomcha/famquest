@@ -44,7 +44,7 @@ func ConfigureLogger(name string) *logging.Logger {
 	return log
 }
 
-// Useful as a deferred function to make sure we see panic errors when LOGS_DISCARG == True
+// Useful as a deferred function to make sure we see panic errors when LOGS_DISCARD == True
 func PrintPanic() {
 	if r := recover(); r != nil {
 		fmt.Println("Internal Error due to: ", r)

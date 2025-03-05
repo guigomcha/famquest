@@ -1,3 +1,7 @@
+<h1>
+  <a href="https://github.com/guigomcha/famquest/releases"><img src="https://img.shields.io/github/v/tag/guigomcha/famquest" alt="Latest Tag"></a>
+</h1>
+
 # The FamQuest App
 
 A map guiding users on an adventure to uncover family memories and history, while creating their own in a gamified quest to resolve adulting tasks.
@@ -79,16 +83,30 @@ It is consumed as a Progressive Web App that can be used from a mobile or a lapt
 - Grafana
 - Fluentd
 
+### v0.2.0
+
+<p align="center">
+  <div style="display: flex; overflow-x: scroll; width: 100%;">
+    <img src="./docs/v0.2.0/home-en.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.2.0/home-esp.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.2.0/quick-actions.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.2.0/spot.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.2.0/discovered.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.2.0/user.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.2.0/note.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+  </div>
+</p>
+
 ### v0.1.0
 
 <p align="center">
-  <img src="./docs/v0.1.0/home.jpg" alt="Phone Screenshot" width="300"/>
-  <img src="./docs/v0.1.0/map-edit.jpg" alt="Phone Screenshot" width="300"/>
-  <img src="./docs/v0.1.0/map-mask.jpg" alt="Phone Screenshot" width="300"/>
-</p>
-<p align="center">
-  <img src="./docs/v0.1.0/spot.jpg" alt="Phone Screenshot" width="300"/>
-  <img src="./docs/v0.1.0/spot-photo.jpg" alt="Phone Screenshot" width="300"/>
+  <div style="display: flex; overflow-x: scroll; width: 100%;">
+    <img src="./docs/v0.1.0/home.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.1.0/map-edit.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.1.0/map-mask.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.1.0/spot.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.1.0/spot-photo.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+  </div>
 </p>
 
 ## Planning
@@ -102,9 +120,9 @@ A Gitflow methodology is implemented within this repo. Proceed as follows:
 
 1. Open an Issue, label appropriately and assign to the next planned release.
 2. Pull the latest develop and branch off of it with a branch or PR created from Github.
-4. After the first commit, open a DRAFT PR to develop.
-3. Commit and push frequently.
-4. When ready, set PR as ready, request review and wait for approval.
+3. After the first commit, open a DRAFT PR to develop.
+4. Commit and push frequently.
+5. When ready, set PR as ready, request review and wait for approval.
 
 ## License
 

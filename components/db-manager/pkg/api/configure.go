@@ -23,13 +23,13 @@ func Configure(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logger.Log.Info("Postgress connected")
+	logger.Log.Info("Postgresql connected")
 	if _, err := connection.DB.Exec(models.Schema); err != nil {
 		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logger.Log.Info("Postgress configured")
+	logger.Log.Info("Postgresql configured")
 	minioClient, err := connection.ConnectToMinio()
 	if err != nil {
 		logger.Log.Error(err.Error())

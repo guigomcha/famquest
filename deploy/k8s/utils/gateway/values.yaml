@@ -20,7 +20,7 @@ proxy:
     secret: REPLACE
   # Dynamically add more metrics to the fluentd exporter base on this log format
   # '$remote_addr - $remote_user [$time_local] $host "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" $upstream_response_time';
-  # Alredy exporting {{ include "gateway.fullname" . }}_size_bytes_total {{ include "gateway.fullname" . }}_request_status_code_total {{ include "gateway.fullname" . }}_http_request_elapsed_time_seconds 
+  # Already exporting {{ include "gateway.fullname" . }}_size_bytes_total {{ include "gateway.fullname" . }}_request_status_code_total {{ include "gateway.fullname" . }}_http_request_elapsed_time_seconds 
   extraMonitoring:
     enabled: false
     content: |

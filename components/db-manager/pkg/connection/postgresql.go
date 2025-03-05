@@ -23,7 +23,7 @@ var DB *sqlx.DB
 func ConnectToPostgreSQL() error {
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable",
 		os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("POSTGRES_DB_HOST"), os.Getenv("POSTGRES_DB_PORT"))
-	logger.Log.Infof("Connecting to Postgress '%s'", connStr)
+	logger.Log.Infof("Connecting to Postgresql '%s'", connStr)
 	var err error
 	DB, err = sqlx.Connect("postgres", connStr)
 	if err != nil {
@@ -105,7 +105,7 @@ func Get(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
 		return &received, err
 
 	default:
-		return nil, fmt.Errorf("unsuported struct in GetAll %+v", m)
+		return nil, fmt.Errorf("unsupported struct in GetAll %+v", m)
 	}
 }
 
@@ -188,7 +188,7 @@ func GetAll(db *sqlx.DB, model DbInterface, filter string) ([]DbInterface, error
 			dest = append(dest, &s) // Add the struct to the interface slice
 		}
 	default:
-		return dest, fmt.Errorf("unsuported struct in GetAll %+v", m)
+		return dest, fmt.Errorf("unsupported struct in GetAll %+v", m)
 	}
 	return dest, nil
 }

@@ -1,0 +1,142 @@
+{
+    "version": "0.2",
+    "ignoreWords": [
+        "cicd",
+        "dockerhub",
+        "kaniko",
+        "startuml",
+        "enduml",
+        "skinparam",
+        "infof",
+        "debugf",
+        "warningf",
+        "GARCH",
+        "GOOS",
+        "CGO_ENABLED",
+        "helmignore",
+        "helmcharts",
+        "godoc",
+        "dynv",
+        "famquest",
+        "DIGI",
+        "pgadmin",
+        "thirdparty",
+        "adulting",
+        "Gamifiying",
+        "guigomcha",
+        "guille",
+        "discovereds",
+        "latlng",
+        "bitnami",
+        "GOPROXY",
+        "GOINSECURE",
+        "GOPATH",
+        "sqlx",
+        "sqlx",
+        "beginx",
+        "ossp",
+        "plpgsql",
+        "padel",
+        "languagedetector",
+        "swaggo"
+    ],
+    "enableGlobDot": true,
+    "ignorePaths": [
+        "*.csv",
+        "*.c",
+        "*.txt",
+        "Makefile",
+        "tmp/*",
+        "*.toml",
+        "*.proto",
+        "*.h",
+        "*.sql",
+        "*.yaml",
+        "*.html",
+        ".git/*",
+        "*.drawio",
+        "*.sum",
+        "*.mod",
+        ".gitignore",
+        "**/.dockerignore",
+        "**/.helmignore"
+    ],
+    "import": [
+        "@cspell/dict-golang/cspell-ext.json",
+        "@cspell/dict-python/cspell-ext.json",
+        "@cspell/dict-docker/cspell-ext.json",
+        "@cspell/dict-git/cspell-ext.json",
+        "@cspell/dict-k8s/cspell-ext.json",
+        "@cspell/dict-node/cspell-ext.json",
+        "@cspell/dict-html/cspell-ext.json",
+        "@cspell/dict-css/cspell-ext.json",
+        "@cspell/dict-makefile/cspell-ext.json",
+        "@cspell/dict-markdown/cspell-ext.json",
+        "@cspell/dict-public-licenses/cspell-ext.json"
+    ],
+    "useGitignore": true,
+    "caseSensitive": false,
+    "language": "en",
+    "languageSettings": [
+        {
+            "languageId": "markdown",
+            "ignoreRegExpList": [
+                "/^\\s*```[\\s\\S]*?^\\s*```/gm"
+            ]
+        },
+        {
+            "languageId": "go",
+            "ignoreRegExpList": [
+                ".*\"github\\.com\\/.*\".*",
+                ".*\"gitlab\\.com\\/.*\".*",
+                ".*\".io\\/.*\".*"
+            ]
+        }
+    ],
+    "dictionaryDefinitions": [],
+    "dictionaries": [
+        "go",
+        "project-words",
+        "makefile",
+        "en-gb",
+        "es-esp",
+        "cpp",
+        "cpp-legacy",
+        "cpp-refined",
+        "networking-terms",
+        "python",
+        "k8s",
+        "helm",
+        "scala"
+    ],
+    "patterns": [
+        {
+            "name": "comment-single-line",
+            "pattern": "//.*"
+        },
+        {
+            "name": "comment-multi-line",
+            "pattern": "/(?:\\/\\*[\\s\\S]*?\\*\\/)/g"
+        },
+        {
+            "name": "comments",
+            "pattern": [
+                "comment-single-line",
+                "comment-multi-line"
+            ]
+        },
+        {
+            "name": "string",
+            "pattern": "\".*\""
+        }
+    ],
+    "overrides": [
+        {
+            "filename": "components/front-manager/public/locales/es/translation.json",
+            "language": "es",
+            "ignoreRegExpList": [
+                "/\"[^\"\\n]*\"\\s*:\\s*\"([^\\n\"]+)\"/"
+            ]
+        }
+    ]
+}
