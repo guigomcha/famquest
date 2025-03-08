@@ -16,7 +16,7 @@ const UserForm = ({ initialData, handledFinished }) => {
   const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     setIsLoading(true);
     const form = event.currentTarget;
     event.preventDefault();
@@ -36,7 +36,7 @@ const UserForm = ({ initialData, handledFinished }) => {
       formValues[key] = value;
     });
     setValidated(true);
-    const newUser = updateInDB(formValues, 'user');
+    const newUser = await updateInDB(formValues, 'user');
     console.info("Received user", newUser);
     setIsLoading(false);
     handledFinished("done");

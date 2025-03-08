@@ -6,14 +6,15 @@ import Row from 'react-bootstrap/Row';
 import { Spin } from 'antd';
 import '../css/classes.css';
 import { useTranslation } from "react-i18next";
-
+import { SpotFromForm } from '../backend_interface/components_helper';
 
 // This request the baseline info to create a new Spot in DB
-const SpotForm = ({ initialData, onSubmit, handledFinished }) => {
+const SpotForm = ({ initialData, handledFinished }) => {
   const { t, i18n } = useTranslation();
   const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectValue, setSelectValue] = useState(initialData?.discovered.condition.parameterType || 'location');
+  const [selectValue, setSelectValue] = useState(initialData?.discovered?.condition?.parameterType || 'location');
+
 
   const handleSelectValue = (event) => {
     console.info("handle select ", event)
@@ -22,7 +23,7 @@ const SpotForm = ({ initialData, onSubmit, handledFinished }) => {
     setSelectValue(event.target.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     setIsLoading(true);
     const form = event.currentTarget;
     event.preventDefault();
@@ -38,7 +39,9 @@ const SpotForm = ({ initialData, onSubmit, handledFinished }) => {
       formValues[key] = value;
     });
     setValidated(true);
-    onSubmit(formValues);
+    console.info("submiting form ", formValues, initialData);
+    const resp = await SpotFromForm(formValues, initialData);
+    console.info("response from form ", resp);
     setIsLoading(false);
     handledFinished("done");
   };
@@ -90,7 +93,7 @@ const SpotForm = ({ initialData, onSubmit, handledFinished }) => {
                 <Form.Control
                   type="date"
                   name="date"
-                  defaultValue={new Date().toISOString().split('T')[0]}
+                  defaultValue={initialData?.discovered?.condition?.thresholdTarget ||  new Date().toISOString().split('T')[0]}
                 />
               </Form.Group>
               }
@@ -100,7 +103,7 @@ const SpotForm = ({ initialData, onSubmit, handledFinished }) => {
                   type="switch"
                   name="show"
                   label={t('editDiscoverOptionCheckbox')}
-                  defaultChecked={initialData?.discovered.show || false}
+                  defaultChecked={initialData?.discovered?.show || false}
                 >
                 </Form.Check>
             </Col>

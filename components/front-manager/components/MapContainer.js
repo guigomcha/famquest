@@ -34,7 +34,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
   const fogGeoJson = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [locations, setLocations] = useState([]);
-  const allSpots = useRef(null);
+  const allDiscovered = useRef(null);
   const allLocations = useRef(null);
   const [spots, setSpots] = useState([]);
 
@@ -47,12 +47,11 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
     console.info("Fetched initial locations ", tempLocations);
     // setLocations(tempLocations);
     allLocations.current = tempLocations;
-    const tempSpots = await fetchAndPrepareSpots();
-    console.info("Fetched initial spots ", tempSpots);
-    // setSpots(tempSpots);
-    allSpots.current = tempSpots;
+    const tempDiscovered = await getInDB('discovered');
+    console.info("Fetched initial discovered ", tempDiscovered);
+    // setDiscovered(tempDiscovered);
+    allDiscovered.current = tempDiscovered;
     prepareMap();
-    displaySpots();
   };
 
   const prepareMap = () => {
@@ -60,18 +59,53 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
     if (mapRef.current && allLocations.current && fogLayer.current) {
       allLocations.current.forEach((location, index) => {
         if (location.refId != 0) {
-          // console.info("Ignoring location from spot: ", location);
+          console.info("Checking it should display spot: ", location.refId);
+          let visible = true;
+          let markerRef = null;
+          markers.current.forEach((mark) => {
+            if (mark.spotId == location.refId){
+              markerRef = mark.marker;
+            }
+          })
+          // Visibility based on Fog
+          if (!isVisibleWithFog(location)){
+            visible = false;
+          }
+          // // The show condition is only for the target user (which uses the fog)
+          // find it 
+          if (mapRef.current.hasLayer(featureGroup.current) && visible){
+            discovered = allDiscovered.current.filter(item => item.refId == location.refId && item.refType == "spot")
+            visible = discovered?.show || true;
+          }
+          // Visibility based on spot condition which is handled in the backend
+          if (!visible){
+            if (markerRef) {
+              guilleSpotsGroup.current.removeLayer(markerRef);
+              markers.current = markers.current.filter(item => item.spotId != location.refId);
+            }
+            return;
+          }
+          // Todo: Decide the owner based on something
+          // Adding a marker with custom icon
+          const marker = L.marker([location.latitude, location.longitude], {
+            icon: L.icon(iconStyle),
+          }).addTo(mapRef.current);
+          marker.data = {...location, componentType: "SpotPopup"}
+          marker.addEventListener("click", sendBackComponent);
+          guilleSpotsGroup.current.addLayer(marker);
+          markers.current.push({"spotId": location.refId, "marker": marker});
           return;
+        } else {
+          //Uncover new area in fog
+          fogGeoJson.current = uncoverFog(location, fogGeoJson.current);
+          featureGroup.current.removeLayer(fogLayer.current);
+          fogLayer.current = L.geoJSON([fogGeoJson.current], {
+            style(feature) {
+              return feature.properties && feature.properties.style;
+            },
+          });
+          featureGroup.current.addLayer(fogLayer.current);
         }
-        //Uncover new area in fog
-        fogGeoJson.current = uncoverFog(location, fogGeoJson.current);
-        featureGroup.current.removeLayer(fogLayer.current);
-        fogLayer.current = L.geoJSON([fogGeoJson.current], {
-          style(feature) {
-            return feature.properties && feature.properties.style;
-          },
-        });
-        featureGroup.current.addLayer(fogLayer.current);
       });
     }
   };
@@ -79,11 +113,13 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
   const sendBackComponent = (e) => {
     if (e == "done") {
       handleMenuChange(null);
-      // fetchData(); // This results in a "maximum call stack size exceeded" error and does not show the new spot created or the new content of a spot ...
+      fetchData();
     } else if (e?.target.data.componentType == "SpotPopup") {
-      handleMenuChange(<SpotPopup spot={e.target.data} handledFinished={sendBackComponent}/>);
+      console.info("opening a spot from map ", e);
+      handleMenuChange(<SpotPopup location={e.target.data} handledFinished={sendBackComponent}/>);
     } else {
-      handleMenuChange(<SpotForm onSubmit={async (data) => SpotFromForm(data, e.target.data)} handledFinished={sendBackComponent}/>);
+      console.info("opening a new form from map ", e);
+      handleMenuChange(<SpotForm initialData={e.target.data} handledFinished={sendBackComponent}/>);
     }
   };
 
@@ -97,47 +133,6 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
     return true;
   }
 
-  const displaySpots = () => {
-    console.info("called display spots ", mapRef.current, allSpots.current);
-    if (mapRef.current && allSpots.current) {
-      allSpots.current.forEach((spot) => {
-        // console.info("Checking it should display spot: ", spot);
-        let visible = true;
-        let markerRef = null;
-        markers.current.forEach((mark) => {
-          if (mark.spotId == spot.id){
-            markerRef = mark.marker;
-          }
-        })
-        // Visibility based on Fog
-        if (!isVisibleWithFog(spot.location)){
-          visible = false;
-        }
-        // // The show condition is only for the target user (which uses the fog)
-        if (mapRef.current.hasLayer(featureGroup.current) && visible){
-          visible = spot.discovered.show;
-        }
-        // Visibility based on spot condition which is handled in the backend
-        if (!visible){
-          if (markerRef) {
-            guilleSpotsGroup.current.removeLayer(markerRef);
-            markers.current = markers.current.filter(item => item.spotId != spot.id);
-          }
-          return;
-        }
-        // Todo: Decide the owner based on something
-        // Adding a marker with custom icon
-        const marker = L.marker([spot.location.latitude, spot.location.longitude], {
-          icon: L.icon(iconStyle),
-        }).addTo(mapRef.current);
-        marker.data = {...spot, componentType: "SpotPopup"}
-        marker.addEventListener("click", sendBackComponent);
-        guilleSpotsGroup.current.addLayer(marker);
-        markers.current.push({"spotId": spot.id, "marker": marker});
-
-      });
-    }
-  };
   // Create and configure the map
   useEffect(() => {
     if (!mapRef.current) {
@@ -150,7 +145,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
       }).addTo(mapRef.current);
       L.control.scale().addTo(mapRef.current);
       handleMapRef(mapRef);
-      // // To support map inside of tab
+      // To support map inside of tab
       const resizeObserver = new ResizeObserver(() => {
         mapRef.current.invalidateSize();
       });      
@@ -158,6 +153,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
       
       // Add layer group to host the spots from 1 user
       guilleSpotsGroup.current = L.layerGroup().addTo(mapRef.current);
+      // Create the fog if it doesn't exist
       if (!fogLayer.current){
         fogGeoJson.current = worldPolygon();
         fogLayer.current = L.geoJSON([fogGeoJson.current], {
@@ -171,11 +167,11 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
         featureGroup.current.addLayer(fogLayer.current);
         featureGroup.current.on('remove', (e) => {
           console.info("mask removed", e);
-          displaySpots();
+          prepareMap();
         });
         featureGroup.current.on('add', (e) => {
           console.info("mask added", e);
-          displaySpots();
+          prepareMap();
         });
         
       }

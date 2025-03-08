@@ -89,10 +89,14 @@ export const getConfigure = async () => {
     return;
   }
 };
-export const getInDB = async (endpoint) => {
-  console.info("URL: "+ API_URL);
+export const getInDB = async (endpoint, refId=0) => {
+  let url = `${API_URL}/${endpoint}`
+  if (refId > 0) {
+    url = url + `/${refId}`
+  }
+  console.info("URL: "+ url);
   try {
-    const response = await fetch(`${API_URL}/${endpoint}`, {
+    const response = await fetch(url, {
       headers: {
         'accept': 'application/json',
       },
@@ -101,9 +105,9 @@ export const getInDB = async (endpoint) => {
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    const notes = await response.json();
+    const resp = await response.json();
 
-    return notes;  // Returning the notes array
+    return resp;  // Returning the resp array or single item
   } catch (error) {
     console.error(`Error fetching ${endpoint}: `, error);
     return [];
@@ -132,41 +136,33 @@ export const deleteInDB = async (refId, endpoint) => {
   }
 };
 
-export const fetchAndPrepareSpots = async () => {
+export const fetchAndPrepareSpots = async (refId) => {
   try {
     // Fetch spots data
-    const spotsData = await getInDB('spot');
-    // Add show info to each spot
-    // We can take this directly from the location get all?
-    const spotsWithLocation = await Promise.all(
-      spotsData.map(async (spot) => {
-        // console.info("spot without location:", spot); // Log each updated spot
-        let updatedSpot = await addLocationToSpot(spot);
-        let discovered = await getInDBWithFilter(spot.id, "spot", "discovered");
-        // console.info("Discovered: "+JSON.stringify(discovered));
-        if (discovered.length > 0) {
-          // more than one??
-          updatedSpot.discovered = discovered[0];
-        } else {
-          updatedSpot.discovered = {
-            "show": true,
-            "condition": {
-              "conformanceComparator": "eq",
-              "parameterType": "location",
-              "thresholdTarget": ""
-            }
-          }
+    const spotsData = await getInDB('spot', refId);
+    console.info("fetching spot: ", refId, spotsData);
+    let discovered = await getInDBWithFilter(spotsData.id, "spot", "discovered");
+    // console.info("Discovered: "+JSON.stringify(discovered));
+    if (discovered.length > 0) {
+      // more than one??
+      spotsData.discovered = discovered[0];
+    } else {
+      console.error("All spots should have a discovered entry");
+      spotsData.discovered = {
+        "show": true,
+        "condition": {
+          "conformanceComparator": "eq",
+          "parameterType": "location",
+          "thresholdTarget": ""
         }
-        // console.info("Updated spot with location:", updatedSpot); // Log each updated spot
-        return updatedSpot;
-      })
-    );
+      }
+    }
 
-    // Set the fully fetched spots with location data
-    return spotsWithLocation;
+    // Set the fully fetched completed spot data
+    return spotsData;
   } catch (err) {
-    console.error("Error fetching spots with location:", err);
-    return [];
+    console.error("Error fetching completed spot:", err);
+    return {};
   }
 };
 
@@ -336,7 +332,7 @@ export const getInDBWithFilter = async (refId, refType, endpoint) => {
 
     if (response.ok) {
       const data = await response.json();
-      console.info(`Received ${endpoint}: `+ JSON.stringify(data))
+      //console.info(`Received ${endpoint}: `+ JSON.stringify(data))
       return data; // return attachment data if needed
     } else {
       throw new Error(`Failed to fetch ${endpoint}`);

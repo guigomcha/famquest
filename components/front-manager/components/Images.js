@@ -15,6 +15,7 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedImages, setSelectedImages] = useState([]);
   const [info, setInfo] = useState({"name": "unknown"});
+  const [reload, setReload] = useState(true);
 
   const handleSelect = (selectedIndex) => {
     setActiveIndex(selectedIndex);
@@ -23,11 +24,13 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
   const handledFinished = (msg) => {
     callFetchAttachmentsForSpot(refId, refType);
     handleMenuChange(msg);
+    setReload(!reload);
   };
 
   const handleRequestDelete = async (e) => {
     const deleteResponse = await deleteInDB(selectedImages[activeIndex].id, 'attachment');
     console.info("delete response: ", deleteResponse);
+    setReload(!reload);
   }; 
 
   const handleRequestNew = (e) => {
@@ -41,10 +44,10 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
   const callFetchAttachmentsForSpot = async (refId, refType) => {
     setSelectedImages([]); 
     const attachments = await getInDBWithFilter(refId, refType, 'attachment');
-
+    console.info("Filling images for ", refId, attachments);
     attachments.forEach(attachment => {
       if (attachment.contentType.startsWith("image/")) {
-        setSelectedImages((prevImages) => [...prevImages, attachment]);
+        setSelectedImages([...selectedImages, attachment]);
       }
     });
     fetchRelatedInfo(attachments[0]);
@@ -63,7 +66,7 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
   // fetch the attachments for this spot
   useEffect(() => {
     callFetchAttachmentsForSpot(refId, refType)
-  }, [refId]);
+  }, [refId, reload]);
   
   useEffect(() => {
     fetchRelatedInfo(selectedImages[activeIndex]);

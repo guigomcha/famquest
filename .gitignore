@@ -1,2 +1,3 @@
 components/db-manager/dbmanager
 components/front-manager/android/*
+backups/*
