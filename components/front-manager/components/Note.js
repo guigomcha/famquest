@@ -23,13 +23,15 @@ const Note = ({ initialData, userId, handledFinished }) => {
   const handleRequestDelete = async (e) => {
     const deleteResponse = await deleteInDB(initialData.id, 'note');
     console.info("delete response: ", deleteResponse);
-    handledFinished("done");  
+    handledFinished("done");
+    setReload(!reload);
   }; 
 
   const handleNestedRequestEdit = (comp) => {
     console.info("handleNested ", comp);
     if (comp == "done" || !comp) {
-      setComponent(null);  
+      setComponent(null);
+      handledFinished("done");
       setReload(!reload);
     } else {
       setComponent(comp); // Trigger show slideMenu
@@ -49,7 +51,7 @@ const Note = ({ initialData, userId, handledFinished }) => {
   useEffect(() => {
     console.info("Showing note ", initialData);
     fetchRelatedInfo(initialData);
-  }, [initialData, component]);
+  }, [initialData, component, reload]);
 
   return (
     <>

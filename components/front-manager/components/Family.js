@@ -22,7 +22,8 @@ const FamilyTab = ({ user }) => {
   const [notes, setNotes] = useState([]);
   const [users, setUsers] = useState([]);
   const [key, setKey] = useState('');
-
+  const [reload, setReload] = useState(true);
+    
   const selectTab = (key) => {
     setKey(key);
   };
@@ -39,7 +40,8 @@ const FamilyTab = ({ user }) => {
   const handleNestedRequestEdit = (comp) => {
     console.info("handleNested ", comp);
     if (comp == "done" || !comp) {
-      setComponent(null);  
+      setComponent(null);
+      setReload(!reload);
     } else {
       setComponent(comp); // Trigger show slideMenu
     }
@@ -59,7 +61,7 @@ const FamilyTab = ({ user }) => {
   
   useEffect(() => {
     fetchRelatedInfo();
-  }, [user, component]);
+  }, [user, component, reload]);
 
 
   return (
@@ -98,9 +100,9 @@ const FamilyTab = ({ user }) => {
                     {notes.length > 0 ? ( 
                       <ListGroup as="ol" numbered>
                         {notes
-                          .filter(note => note.refUserUploader === u.id)
+                          .filter(note => note.refUserUploader == u.id)
                           .map((note, index) => (
-                            <ListGroup.Item className="justify-content-between align-items-start" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={notes[index]} userId={u.id} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
+                            <ListGroup.Item className="justify-content-between align-items-start" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} userId={user.id} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
                               {note.name}
                               <Badge bg="primary" pill>
                               {note.category}
