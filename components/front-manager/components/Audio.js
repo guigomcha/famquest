@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 const Audio = ({ refId, refType, handleMenuChange }) => {
   const { t, i18n } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [reload, setReload] = useState(true);
   const [selectedAudios, setSelectedAudios] = useState([]);
   const [info, setInfo] = useState({"name": "unknown"});
 
@@ -21,6 +22,7 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
   const handledFinished = (msg) => {
     callFetchAttachmentsForSpot(refId, refType);
     handleMenuChange(msg);
+    setReload(!reload);
   };
 
   const handleRequestNew = (e) => {
@@ -34,15 +36,17 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
   const handleRequestDelete = async (e) => {
     const deleteResponse = await deleteInDB(selectedAudios[activeIndex].id, 'attachment');
     console.info("delete response: ", deleteResponse);
+    setReload(!reload);
   }; 
 
   const callFetchAttachmentsForSpot = async (refId, refType) => {
-    setSelectedAudios([]); 
+    setSelectedAudios([]);
+     
     const attachments = await getInDBWithFilter(refId, refType, 'attachment');
-
+    console.info("Filling audios for ", refId, attachments);
     attachments.forEach(attachment => {
       if (attachment.contentType.startsWith("audio/")) {
-        setSelectedAudios((prevImages) => [...prevImages, attachment]);
+        setSelectedAudios([...selectedAudios, attachment]);
       }
     });
     fetchRelatedInfo(attachments[0]);
@@ -51,7 +55,7 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
   // fetch the attachments for this spot
   useEffect(() => {
     callFetchAttachmentsForSpot(refId, refType)
-  }, [refId]);
+  }, [refId, reload]);
 
   // fetch the additional info for this audio
   const fetchRelatedInfo = async (model) => {

@@ -60,5 +60,6 @@
 	"editDiscoverOptionCheckbox": "Mostrar",
 	"discoverLocation": "El usuario pasa cerca del lugar",
 	"discoverDate": "Fecha fija en el futuro",
+	"invalidSpot": "Este lugar no debería existir, manda esta información al administrador: ",
 	"discoveredUpdate": "Nuevas ubicacion(es) descubiertas"
 }

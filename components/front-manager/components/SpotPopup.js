@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Images from './Images';
 import Audio from './Audio';
 import Card from 'react-bootstrap/Card';
@@ -7,61 +7,78 @@ import { Button } from 'antd';
 import SpotForm from './SpotForm';
 import { SpotFromForm } from '../backend_interface/components_helper';
 import { renderDescription } from '../utils/render_message';
-import { getUserInfo, deleteInDB } from '../backend_interface/db_manager_api';
+import { getUserInfo, deleteInDB, fetchAndPrepareSpots } from '../backend_interface/db_manager_api';
 import SlideMenu from './SlideMenu';
 import { useTranslation } from "react-i18next";
+import { Spin, Alert } from 'antd';
 
-
-const SpotPopup = ({ spot, handledFinished }) => {
+const SpotPopup = ({ location, handledFinished }) => {
   const { t, i18n } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
   const [component, setComponent] = useState(null);
   const [info, setInfo] = useState({ "name": "unknown" });
-
+  const [spotInfo, setSpotInfo] = useState({ "id": location.refId });
+  const [reload, setReload] = useState(true);
+  
   const handleRequestEdit = (e) => {
-    setComponent(<SpotForm initialData={spot} onSubmit={async (data) => SpotFromForm(data, e.target.data)} handledFinished={handleNestedRequestEdit} />);
+    setComponent(<SpotForm initialData={spotInfo} handledFinished={handleNestedRequestEdit} />);
   };
 
   const handleRequestDelete = async (e) => {
-    const deleteResponse = await deleteInDB(spot.id, 'spot');
+    const deleteResponse = await deleteInDB(spotInfo.id, 'spot');
     console.info("delete response: ", deleteResponse);
+    setComponent(null);
+    handledFinished("done");
   }; 
 
-  const handleNestedRequestEdit = (comp) => {
+  const handleNestedRequestEdit = async (comp) => {
     console.info("handleNested ", comp);
     if (comp == "done" || !comp) {
+      const resp = await fetchRelatedInfo(spotInfo);
+      console.info("response from fetch", resp);
       setComponent(null);
-      handledFinished("done");  
+      setReload(!reload);
     } else {
+      console.info("should be to open the slide with a form ");
       setComponent(comp); // Trigger show slideMenu
     }
   };
 
   // fetch the additional info for this spot
   const fetchRelatedInfo = async (model) => {
-    console.info("fetching info for ", model);
-    if (!model){
+    setIsLoading(true);
+    let tempSpot = await fetchAndPrepareSpots(model.refId);
+    console.info("Fetched initial spots ", tempSpot);
+    tempSpot.location = location;
+    setSpotInfo(tempSpot);
+    console.info("fetching info for ", tempSpot);
+    if (!tempSpot){
+      setIsLoading(false);
       return;
     }
-    const userInfo = await getUserInfo(model.refUserUploader);
+    const userInfo = await getUserInfo(tempSpot.refUserUploader);
     setInfo(userInfo);
+    setIsLoading(false);
   };
 
   useEffect(() => {
-    fetchRelatedInfo(spot);
-  }, [spot]);
+    fetchRelatedInfo(location);
+  }, [component, reload]);
 
   return (
-    <>
+    <>    
+      {(isLoading) &&<Spin>{t('loading')}</Spin>}
       <Card>
-        <Card.Header>id: {spot.id}</Card.Header>
-        <Card.Title>{t('spot')}: {spot.name}</Card.Title>
+        <Card.Header>id: {spotInfo.id}</Card.Header>
+        <Card.Title>{t('spot')}: {spotInfo.name}</Card.Title>
         <Card>
           {/* <Card.Body>
-            <Card.Text>discovered {JSON.stringify(spot.discovered)}</Card.Text>
-          </Card.Body> */}
+            <Card.Text>discovered {JSON.stringify(spotInfo.discovered)}</Card.Text>
+            </Card.Body> */}
           <Card.Body>
+            {!spotInfo.id && <Card.Text>{t('invalidSpot')}{JSON.stringify(location)}</Card.Text>}
             {/* Render description with line breaks */}
-            <Card.Text>{renderDescription(spot.description)}</Card.Text>
+            <Card.Text>{renderDescription(spotInfo.description)}</Card.Text>
           </Card.Body>
           <Card.Footer>
             <Button
@@ -83,11 +100,11 @@ const SpotPopup = ({ spot, handledFinished }) => {
         </Card>
         <Card>
           <Card.Title>{t('audiosInSpot')}</Card.Title>
-          <Audio refId={spot.id} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
+          <Audio refId={location.refId} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
         </Card>
         <Card>
           <Card.Title>{t('imagesInSpot')}</Card.Title>
-          <Images refId={spot.id} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
+          <Images refId={location.refId} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
         </Card>
       </Card>
       <SlideMenu component={component} handledFinished={handleNestedRequestEdit}/>

@@ -14,7 +14,8 @@ const Note = ({ initialData, userId, handledFinished }) => {
   const { t, i18n } = useTranslation();
   const [component, setComponent] = useState(null);
   const [info, setInfo] = useState({ "name": "unknown" });
-
+  const [reload, setReload] = useState(true);
+     
   const handleRequestEdit = (e) => {
     setComponent(<NoteForm initialData={initialData} handledFinished={handleNestedRequestEdit} />);
   };
@@ -22,13 +23,14 @@ const Note = ({ initialData, userId, handledFinished }) => {
   const handleRequestDelete = async (e) => {
     const deleteResponse = await deleteInDB(initialData.id, 'note');
     console.info("delete response: ", deleteResponse);
+    handledFinished("done");  
   }; 
 
   const handleNestedRequestEdit = (comp) => {
     console.info("handleNested ", comp);
     if (comp == "done" || !comp) {
-      setComponent(null);
-      handledFinished("done");  
+      setComponent(null);  
+      setReload(!reload);
     } else {
       setComponent(comp); // Trigger show slideMenu
     }

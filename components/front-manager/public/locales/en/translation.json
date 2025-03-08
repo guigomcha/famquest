@@ -60,5 +60,6 @@
 	"editDiscoverOptionCheckbox": "Show",
 	"discoverLocation": "User goes near the spot",
 	"discoverDate": "Fixed date in the future",
+	"invalidSpot": "This spot should not exist, send this to the administrator to delete the location: ",
 	"discoveredUpdate": "New spot(s) discovered"
 }
