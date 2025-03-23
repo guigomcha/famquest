@@ -54,12 +54,14 @@ const Audio = ({ parentInfo, refType, handleMenuChange }) => {
      
     const attachments = await getInDBWithFilter(refId, refType, 'attachment');
     console.info("Filling audios for ", refId, attachments);
+    let filteredAttachments = []
     attachments.forEach(attachment => {
       attachment.refId = parentInfo.id;
       if (attachment.contentType.startsWith("audio/")) {
-        setSelectedAudios([...selectedAudios, attachment]);
+        filteredAttachments = [...filteredAttachments, attachment];
       }
     });
+    setSelectedAudios(filteredAttachments);
     fetchRelatedInfo(attachments[0]);
   };
 

@@ -7,6 +7,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// TODO: bday should be a date
+
 // For swagger input
 type APIUsers struct {
 	ExtRef   string `db:"ext_ref" json:"extRef"`

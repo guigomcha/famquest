@@ -26,6 +26,7 @@ const NoteForm = ({ initialData, handledFinished, userId }) => {
       return;
     }
     const formDataObj = new FormData(form);
+    formDataObj.set("datetime", formDataObj.get("datetime")+"T00:00:00Z")
     // Convert FormData to a plain object
     const formValues = {};
     formDataObj.forEach((value, key) => {
@@ -93,7 +94,7 @@ const NoteForm = ({ initialData, handledFinished, userId }) => {
               required
               type="date"
               name="datetime"
-              defaultValue={initialData?.datetime}
+              defaultValue={initialData?.datetime?.split("T")[0] || new Date().toISOString().split("T")[0]}
             />
           </Form.Group>
         </Row>

@@ -78,7 +78,7 @@ const UserForm = ({ initialData, handledFinished }) => {
               required
               type="date"
               name="birthday"
-              defaultValue={initialData?.birthday}
+              defaultValue={initialData?.birthday?.split("T")[0]}
             />
           </Form.Group>
 

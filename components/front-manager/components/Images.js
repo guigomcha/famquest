@@ -56,12 +56,14 @@ const Images = ( {parentInfo, refType, handleMenuChange} ) => {
     setSelectedImages([]); 
     const attachments = await getInDBWithFilter(refId, refType, 'attachment');
     console.info("Filling images for ", refId, attachments);
+    let filteredAttachments = []
     attachments.forEach(attachment => {
       attachment.refId = parentInfo.id;
       if (attachment.contentType.startsWith("image/")) {
-        setSelectedImages([...selectedImages, attachment]);
+        filteredAttachments = [...filteredAttachments, attachment];
       }
     });
+    setSelectedImages(filteredAttachments);
     fetchRelatedInfo(attachments[0]);
   };
 

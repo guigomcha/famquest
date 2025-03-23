@@ -49,9 +49,16 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer data.Close()
+	ts, err := time.Parse(time.RFC3339, r.FormValue("datetime"))
+	if err != nil {
+		logger.Log.Debugf("datetime not supported '%s': %s", r.FormValue("datetime"), err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 	attachment := models.Attachments{
 		Name:            r.FormValue("name"),
 		Description:     r.FormValue("description"),
+		Datetime:        ts,
 		ContentType:     header.Header.Get("Content-Type"),
 		RefUserUploader: info["user"].(int),
 	}

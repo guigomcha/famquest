@@ -139,7 +139,7 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
     console.info("submit handled: ", form);
     const formDataObj = new FormData(form);
     const dataToUpload = formDataObj.file || imageBlob;
-    
+    formDataObj.set("datetime", formDataObj.get("datetime")+"T00:00:00Z")
     // Is a put
     if (initialData?.id){
       // Convert FormData to a plain object
@@ -220,7 +220,7 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
               required
               type="date"
               name="datetime"
-              defaultValue={initialData?.datetime || new Date().toISOString().split('T')[0]}
+              defaultValue={initialData?.datetime?.split("T")[0] || new Date().toISOString().split("T")[0]}
             />
           </Form.Group>
         </Row>
