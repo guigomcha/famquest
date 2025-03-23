@@ -61,5 +61,11 @@
 	"discoverLocation": "User goes near the spot",
 	"discoverDate": "Fixed date in the future",
 	"invalidSpot": "This spot should not exist, send this to the administrator to delete the location: ",
+	"autoDescription": "Empty description",
+	"autoName": "Empty name",
+	"actionCompleted": "Action completed ok",
+	"formNotValid": "Form not valid, please check.",
+	"internalError": "Something happened in the app. Check logs",
+	"actionInvalid": "User action invalid.",
 	"discoveredUpdate": "New spot(s) discovered"
 }

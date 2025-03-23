@@ -129,10 +129,10 @@ export const deleteInDB = async (refId, endpoint) => {
     }
     const resp = await response.text();
 
-    return resp;  // Returning the notes array
+    return "OK";  // Returning the notes array
   } catch (error) {
-    console.error(`Error fetching ${endpoint}: `, error);
-    return {};
+    console.error(`Error deleting ${endpoint}: `, error);
+    return "";
   }
 };
 
@@ -312,7 +312,9 @@ export const addReferenceInDB = async (targetId, refId, refType, endpoint) => {
     }
   } catch (error) {
     console.error(`Error to add ${refType} and id ${refId} reference to ${endpoint}`, error);
+    return;
   }
+  return "OK";
 };
 
 export const getInDBWithFilter = async (refId, refType, endpoint) => {

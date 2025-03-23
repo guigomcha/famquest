@@ -7,10 +7,13 @@ import { Button } from 'antd';
 import NoteForm from './NoteForm';
 import { renderDescription } from '../utils/render_message';
 import { getUserInfo, deleteInDB } from '../backend_interface/db_manager_api';
+import { GlobalMessage } from '../backend_interface/components_helper';
 import SlideMenu from './SlideMenu';
 import { useTranslation } from "react-i18next";
+import { Spin, Alert } from 'antd';
 
 const Note = ({ initialData, userId, handledFinished }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const { t, i18n } = useTranslation();
   const [component, setComponent] = useState(null);
   const [info, setInfo] = useState({ "name": "unknown" });
@@ -21,10 +24,17 @@ const Note = ({ initialData, userId, handledFinished }) => {
   };
   
   const handleRequestDelete = async (e) => {
+    setIsLoading(true);
     const deleteResponse = await deleteInDB(initialData.id, 'note');
     console.info("delete response: ", deleteResponse);
+    if (deleteResponse == "OK") {
+      GlobalMessage(t("actionCompleted"), "info");
+    } else {
+      GlobalMessage(t("actionInvalid"), "warning");
+    }
     handledFinished("done");
     setReload(!reload);
+    setIsLoading(false);
   }; 
 
   const handleNestedRequestEdit = (comp) => {
@@ -55,6 +65,7 @@ const Note = ({ initialData, userId, handledFinished }) => {
 
   return (
     <>
+      {(isLoading) &&<Spin>{t('loading')}</Spin>}
       <Card>
         <Card.Header>id: {initialData.id}</Card.Header>
         <Card.Title>{t('note')}: {initialData.name}</Card.Title>
@@ -84,11 +95,11 @@ const Note = ({ initialData, userId, handledFinished }) => {
         </Card>
         <Card>
           <Card.Title>{t('audiosInNote')}</Card.Title>
-          <Audio refId={initialData.id} refType={'note'} handleMenuChange={handleNestedRequestEdit} />
+          <Audio parentInfo={initialData} refType={'note'} handleMenuChange={handleNestedRequestEdit} />
         </Card>
         <Card>
           <Card.Title>{t('imagesInNote')}</Card.Title>
-          <Images refId={initialData.id} refType={'note'} handleMenuChange={handleNestedRequestEdit} />
+          <Images parentInfo={initialData} refType={'note'} handleMenuChange={handleNestedRequestEdit} />
         </Card>
       </Card>
       <SlideMenu component={component} handledFinished={handleNestedRequestEdit}/>

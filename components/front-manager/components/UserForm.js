@@ -8,12 +8,11 @@ import '../css/classes.css';
 import { updateInDB } from '../backend_interface/db_manager_api';
 import { DatePicker, Space } from 'antd';
 import { useTranslation } from "react-i18next";
-
+import { GlobalMessage } from '../backend_interface/components_helper';
 
 // This request the baseline info to create a new User in DB
 const UserForm = ({ initialData, handledFinished }) => {
   const { t, i18n } = useTranslation();
-  const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (event) => {
@@ -23,6 +22,7 @@ const UserForm = ({ initialData, handledFinished }) => {
     event.stopPropagation();
     if (form.checkValidity() === false) {
       setIsLoading(false);
+      GlobalMessage(t('formNotValid'), "error");
       return;
     }
     const formDataObj = new FormData(form);
@@ -35,9 +35,13 @@ const UserForm = ({ initialData, handledFinished }) => {
     formDataObj.forEach((value, key) => {
       formValues[key] = value;
     });
-    setValidated(true);
     const newUser = await updateInDB(formValues, 'user');
     console.info("Received user", newUser);
+    if (!newUser){
+      GlobalMessage(t('internalError'), "error");
+    } else {
+      GlobalMessage(t('actionCompleted'), "info");
+    }
     setIsLoading(false);
     handledFinished("done");
   };

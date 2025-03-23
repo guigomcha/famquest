@@ -20,25 +20,17 @@ import { renderDescription } from './utils/render_message';
 import { updateDiscoveredConditionsForUser } from './backend_interface/db_manager_api';
 import { useTranslation } from "react-i18next";
 import i18next from "./i18n";
-import { message } from 'antd';
+import { GlobalMessage } from './backend_interface/components_helper';
 
-// const queryClient = new QueryClient()
 
 const isLocal = true;
 
 export default function App() { 
   const { t, i18n } = useTranslation();
-  const [messageApi, contextHolder] = message.useMessage();
   const [user, setUser] = useState(null);
   const [key, setKey] = useState('home');
   const mapRef = useRef(null);
 
-  const successMessage = (msg) => {
-    messageApi.open({
-      type: 'success',
-      content: msg,
-    });
-  };
 
   const handleUserChange = async (userInfo) => {
     setUser(userInfo);
@@ -47,7 +39,7 @@ export default function App() {
       const resp = await updateDiscoveredConditionsForUser(userInfo);
       console.info("requested discover update: ", resp);
       if (resp.length >0) {
-        successMessage(resp.length + "x" +t('discoveredUpdate'));
+        GlobalMessage(resp.length + "x" +t('discoveredUpdate'), "info");
       }
     }
   };
@@ -107,7 +99,6 @@ export default function App() {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-        {contextHolder}
         <Tabs
           id="controlled-tab-example"
           activeKey={key}

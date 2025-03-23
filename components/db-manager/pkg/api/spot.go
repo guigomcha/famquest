@@ -125,6 +125,7 @@ func SpotDelete(w http.ResponseWriter, r *http.Request) {
 	// linked location and discovered handled directly via sql GetDeleteExtraQueries
 	httpStatus, err := crudDelete(&spot, mux.Vars(r))
 	if err != nil {
+		logger.Log.Debugf("Unable to delete %s", err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}

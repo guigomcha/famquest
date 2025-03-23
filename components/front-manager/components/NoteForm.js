@@ -7,11 +7,12 @@ import { Spin } from 'antd';
 import '../css/classes.css';
 import { updateInDB, createInDB, addReferenceInDB } from '../backend_interface/db_manager_api';
 import { useTranslation } from "react-i18next";
+import { GlobalMessage } from '../backend_interface/components_helper';
+
 
 // This request the baseline info to create a new Note in DB
 const NoteForm = ({ initialData, handledFinished, userId }) => {
   const { t, i18n } = useTranslation();
-  const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (event) => {
@@ -21,6 +22,7 @@ const NoteForm = ({ initialData, handledFinished, userId }) => {
     event.stopPropagation();
     if (form.checkValidity() === false) {
       setIsLoading(false);
+      GlobalMessage(t('formNotValid'), "error");
       return;
     }
     const formDataObj = new FormData(form);
@@ -29,7 +31,6 @@ const NoteForm = ({ initialData, handledFinished, userId }) => {
     formDataObj.forEach((value, key) => {
       formValues[key] = value;
     });
-    setValidated(true);
     console.info("form content ", formValues);
     let newNote = {}
     if (formValues['id']) {
@@ -38,6 +39,11 @@ const NoteForm = ({ initialData, handledFinished, userId }) => {
       newNote = await createInDB(formValues, 'note');
       //withRef = await addReferenceInDB(newNote.id, userId, 'user', 'note');
       //console.info("after ref update");
+    }
+    if (!newNote){
+      GlobalMessage(t('internalError'), "error");
+    } else {
+      GlobalMessage(t('actionCompleted'), "info");
     }
     console.info("Received new note ", newNote);
     setIsLoading(false);

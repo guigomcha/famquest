@@ -10,10 +10,11 @@ import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import { Spin, Alert } from 'antd';
 import { uploadAttachment, updateInDB, addReferenceInDB } from '../backend_interface/db_manager_api';
+import { GlobalMessage } from '../backend_interface/components_helper';
 import '../css/classes.css';
 import { useTranslation } from "react-i18next";
 
-const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
+const ImagesForm = ( {initialData, refType, handledFinished} ) => {
   const { t, i18n } = useTranslation();
   const [imageBlob, setImageBlob] = useState(null);
   const [videoBlob, setVideoBlob] = useState(null);
@@ -27,7 +28,6 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
   const cameraRef = useRef(null); // To keep track of the camera stream
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState(null);
-  const [statusMessage, setStatusMessage] = useState("");
 
   const stopCameraPreview = () => {
     mediaStream?.getTracks().forEach((track) => track.stop());
@@ -125,7 +125,6 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
   };
 
   const handleSubmit = async (event) => {
-    setStatusMessage("");
     setIsLoading(true);
     event.preventDefault();
     event.stopPropagation();
@@ -133,6 +132,7 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
     if (form.checkValidity() === false) {
       console.info("not valid");
       setIsLoading(false);
+      GlobalMessage(t('formNotValid'), "error");
       return;
     }
     
@@ -158,21 +158,31 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
       console.info("Updated: ", attachment)
       setIsLoading(false);
       handledFinished("done");
+      GlobalMessage(t('actionCompleted'), "info");
       return;
     }
     console.info("new image to be sent")
     if (!dataToUpload) {
-      setStatusMessage(t('formNotValid'));
+      GlobalMessage(t('formNotValid'), "error");
       setIsLoading(false);
       return;
+    }
+    // Add default name and description
+    if (formDataObj.get("name") == "") {
+      formDataObj.set("name", t("autoName"));
+    }
+    if (formDataObj.get("description") == "") {
+      formDataObj.set("description", t("autoDescription"));
     }
     const attachment = await uploadAttachment(dataToUpload, formDataObj);
     
     if (attachment) {
       // Add reference to current parent
-      await addReferenceInDB(attachment.id, refId, refType, 'attachment');
+      await addReferenceInDB(attachment.id, initialData.refId, refType, 'attachment');
+      GlobalMessage(t('actionCompleted'), "info");
     } else {
-      console.info(t('formFailed'));
+      console.info(t('internalError'));
+      GlobalMessage(t('internalError'), "error");
     }
 
     setFile('');
@@ -198,7 +208,6 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
           <Form.Group as={Col} controlId="formGridName">
             <Form.Label>{t('name')}</Form.Label>
             <Form.Control 
-              required
               type="text"
               name="name"
               placeholder={t('editName')}
@@ -208,10 +217,11 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
 
           <Form.Group as={Col} controlId="formGridDescription">
             <Form.Label>{t('description')}</Form.Label>
-            <Form.Control 
-              required
-              type="text"
+            <Form.Control
+              type="textarea"
+              rows={10}
               name="description"
+              style={{ resize: "none", overflowY: "scroll", maxHeight: "150px" }}
               placeholder={t('editDescription')}
               defaultValue={initialData?.description}  
             />
@@ -315,7 +325,6 @@ const ImagesForm = ( {initialData, refId, refType, handledFinished} ) => {
         </Row>
         }
       <Button variant="primary" type="submit">{initialData?.id ? t('update') : t('upload')}</Button>
-      {statusMessage && <p>{statusMessage}</p>}
       </Form>
     </>
   );

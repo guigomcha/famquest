@@ -6,12 +6,11 @@ import Row from 'react-bootstrap/Row';
 import { Spin } from 'antd';
 import '../css/classes.css';
 import { useTranslation } from "react-i18next";
-import { SpotFromForm } from '../backend_interface/components_helper';
+import { SpotFromForm, GlobalMessage } from '../backend_interface/components_helper';
 
 // This request the baseline info to create a new Spot in DB
 const SpotForm = ({ initialData, handledFinished }) => {
   const { t, i18n } = useTranslation();
-  const [validated, setValidated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectValue, setSelectValue] = useState(initialData?.discovered?.condition?.parameterType || 'location');
 
@@ -30,6 +29,7 @@ const SpotForm = ({ initialData, handledFinished }) => {
     event.stopPropagation();
     if (form.checkValidity() === false) {
       setIsLoading(false);
+      GlobalMessage(t('formNotValid'), "error");
       return;
     }
     const formDataObj = new FormData(form);
@@ -38,10 +38,14 @@ const SpotForm = ({ initialData, handledFinished }) => {
     formDataObj.forEach((value, key) => {
       formValues[key] = value;
     });
-    setValidated(true);
     console.info("submiting form ", formValues, initialData);
     const resp = await SpotFromForm(formValues, initialData);
     console.info("response from form ", resp);
+    if (!resp){
+      GlobalMessage(t('internalError'), "error");
+    } else {
+      GlobalMessage(t('actionCompleted'), "info");
+    }
     setIsLoading(false);
     handledFinished("done");
   };

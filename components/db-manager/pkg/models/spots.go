@@ -92,11 +92,11 @@ func (m *Spots) GetUpdateQuery() string {
 
 func (m *Spots) GetDeleteExtraQueries() []string {
 	return []string{
-		// `DELETE FROM known_locations WHERE ref_id = :id AND ref_type = 'spot'`,
-		// `DELETE FROM discovered WHERE ref_id = :ID AND ref_type = 'spot'`,
-		// `UPDATE attachments
-		//  SET ref_id = 0
-		//  WHERE ref_id = :id AND ref_type = 'spot'`,
+		`DELETE FROM known_locations WHERE ref_id = :id AND ref_type = 'spot'`,
+		`DELETE FROM discovered WHERE ref_id = :id AND ref_type = 'spot'`,
+		//`UPDATE attachments
+		// SET ref_id = 0
+		// WHERE ref_id = :id AND ref_type = 'spot'`,
 	}
 }
 

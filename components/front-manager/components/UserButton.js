@@ -4,12 +4,12 @@ import { message, Button, FloatButton } from 'antd';
 import Card from 'react-bootstrap/Card';
 import { UserOutlined, ReloadOutlined, AimOutlined } from '@ant-design/icons';
 import { createInDB, updateDiscoveredConditionsForUser } from '../backend_interface/db_manager_api';
+import { GlobalMessage } from '../backend_interface/components_helper';
 import { useTranslation } from "react-i18next";
 
 const UserButton = ({ user,  mapRef }) => {
   const { t, i18n } = useTranslation();
   const userLocationsLayer = useRef(null);
-  const [messageApi, contextHolder] = message.useMessage();
 
   const handleReload = (event) => {
     event.preventDefault();
@@ -26,22 +26,10 @@ const UserButton = ({ user,  mapRef }) => {
       mapRef.current.flyTo([locations[locations.length -1].getLatLng().lat, locations[locations.length -1].getLatLng().lng], 13);
     } else {
       console.info("No previous locations known: ", locations);
-      warning(t('noPreviousLocation'));
+      GlobalMessage(t('noPreviousLocation'), "warning");
     }
   };
   
-  const warning = (msg) => {
-    messageApi.open({
-      type: 'warning',
-      content: msg,
-    });
-  };
-  const successMessage = (msg) => {
-    messageApi.open({
-      type: 'success',
-      content: msg,
-    });
-  };
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -99,12 +87,12 @@ const UserButton = ({ user,  mapRef }) => {
               const resp = await updateDiscoveredConditionsForUser(user);
               console.info("requested discover update: ", resp);
               if (resp.length >0) {
-                successMessage(resp.length + "x" +t('discoveredUpdate'));
+                GlobalMessage(resp.length + "x" +t('discoveredUpdate'), "info");
               }
             }
           })
          .on('locationerror', function(e){
-            warning(t('liveLocationError'));
+            GlobalMessage(t('liveLocationError'), "error");
             console.info("live location error", e);
           });
   }, [mapRef.current]);
@@ -117,7 +105,6 @@ const UserButton = ({ user,  mapRef }) => {
         tooltip={<div>{t('userInfo')}</div>}
       >
       <>
-        {contextHolder}
         <Card style={{
           position: "fixed",
           bottom: "40px",

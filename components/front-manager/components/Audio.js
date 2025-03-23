@@ -7,9 +7,12 @@ import { Button } from 'antd';
 import { EditOutlined, AudioOutlined, DeleteOutlined } from '@ant-design/icons';
 import AudioForm from './AudioForm';
 import { useTranslation } from "react-i18next";
+import { GlobalMessage } from "../backend_interface/components_helper";
+import { Spin, Alert } from 'antd';
 
-const Audio = ({ refId, refType, handleMenuChange }) => {
+const Audio = ({ parentInfo, refType, handleMenuChange }) => {
   const { t, i18n } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [reload, setReload] = useState(true);
   const [selectedAudios, setSelectedAudios] = useState([]);
@@ -20,22 +23,29 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
   };
 
   const handledFinished = (msg) => {
-    callFetchAttachmentsForSpot(refId, refType);
+    callFetchAttachmentsForSpot(parentInfo.refId, refType);
     handleMenuChange(msg);
     setReload(!reload);
   };
 
   const handleRequestNew = (e) => {
-    handleMenuChange(<AudioForm refId={refId} refType={refType} handledFinished={handledFinished}/>);
+    handleMenuChange(<AudioForm initialData={{"refId": parentInfo.id}} refType={refType} handledFinished={handledFinished}/>);
   }; 
   
   const handleRequestEdit = (e) => {
-    handleMenuChange(<AudioForm initialData={selectedAudios[activeIndex]} refId={refId} refType={refType} handledFinished={handledFinished}/>); 
+    handleMenuChange(<AudioForm initialData={selectedAudios[activeIndex]} refType={refType} handledFinished={handledFinished}/>); 
   }; 
 
   const handleRequestDelete = async (e) => {
+    setIsLoading(true);
     const deleteResponse = await deleteInDB(selectedAudios[activeIndex].id, 'attachment');
     console.info("delete response: ", deleteResponse);
+    if (deleteResponse == "OK") {
+      GlobalMessage(t("actionCompleted"), "info");
+    } else {
+      GlobalMessage(t("actionInvalid"), "warning");
+    }
+    setIsLoading(false);
     setReload(!reload);
   }; 
 
@@ -45,6 +55,7 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
     const attachments = await getInDBWithFilter(refId, refType, 'attachment');
     console.info("Filling audios for ", refId, attachments);
     attachments.forEach(attachment => {
+      attachment.refId = parentInfo.id;
       if (attachment.contentType.startsWith("audio/")) {
         setSelectedAudios([...selectedAudios, attachment]);
       }
@@ -54,8 +65,8 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
 
   // fetch the attachments for this spot
   useEffect(() => {
-    callFetchAttachmentsForSpot(refId, refType)
-  }, [refId, reload]);
+    callFetchAttachmentsForSpot(parentInfo.id, refType)
+  }, [parentInfo, reload]);
 
   // fetch the additional info for this audio
   const fetchRelatedInfo = async (model) => {
@@ -73,6 +84,7 @@ const Audio = ({ refId, refType, handleMenuChange }) => {
 
   return (
       <>
+        {(isLoading) &&<Spin>{t('loading')}</Spin>}
         <Card.Body>
           {selectedAudios.length > 0 ? (
               <Carousel activeIndex={activeIndex} onSelect={handleSelect} slide={false} interval={null} data-bs-theme="dark" controls={true}> 
