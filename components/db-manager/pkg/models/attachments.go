@@ -9,8 +9,9 @@ import (
 
 // For swagger input
 type APIAttachments struct {
-	Name        string `json:"name"`
-	Description string `json:"description"` // Description
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Datetime    time.Time `db:"datetime" json:"datetime"`
 }
 
 // `db:"attachments"` and swagger ouput
@@ -26,6 +27,7 @@ type Attachments struct {
 	Description     string    `db:"description" json:"description"`
 	URL             string    `db:"url" json:"url"`
 	RefUserUploader int       `db:"ref_user_uploader" json:"refUserUploader"`
+	Datetime        time.Time `db:"datetime" json:"datetime"`
 	CreatedAt       time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
 	UpdatedAt       time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 }
@@ -44,20 +46,20 @@ func (m *Attachments) GetSelectAllQuery() string {
 
 func (m *Attachments) GetInsertQuery() string {
 	return fmt.Sprintf(`
-		INSERT INTO %s (name, description, url, content_type, ref_user_uploader)
-		VALUES (:name, :description, :url, :content_type, :ref_user_uploader) RETURNING id`, m.GetTableName())
+		INSERT INTO %s (name, description, url, content_type, ref_user_uploader, datetime)
+		VALUES (:name, :description, :url, :content_type, :ref_user_uploader, :datetime) RETURNING id`, m.GetTableName())
 }
 
 func (m *Attachments) GetQuery() string {
 	return fmt.Sprintf(`
-		INSERT INTO %s (name, description, url, content_type, ref_user_uploader)
-		VALUES (:name, :description, :url, :content_type, :ref_user_uploader) RETURNING id`, m.GetTableName())
+		INSERT INTO %s (name, description, url, content_type, ref_user_uploader, datetime)
+		VALUES (:name, :description, :url, :content_type, :ref_user_uploader, :datetime) RETURNING id`, m.GetTableName())
 }
 
 func (m *Attachments) GetUpdateQuery() string {
 	return fmt.Sprintf(`
 			UPDATE %s
-			SET name = :name, description = :description, ref_user_uploader=:ref_user_uploader
+			SET name = :name, description = :description, ref_user_uploader = :ref_user_uploader, datetime = :datetime
 			WHERE id = :id`, m.GetTableName())
 }
 
