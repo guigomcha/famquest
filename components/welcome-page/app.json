@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "welcome-page",
+    "slug": "welcome-page",
+    "version": "0.3.0",
+    "orientation": "portrait",
+    "icon": "./public/favicon.ico",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": ["**/*"],
+    "splash": {},
+    "platforms":[
+      "web",
+      "android",
+      "ios"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {},
+      "package": "famquest"
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./public/favicon.ico"
+    }
+  }
+}

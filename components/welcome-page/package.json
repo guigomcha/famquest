@@ -1,0 +1,49 @@
+{
+  "name": "welcome-page",
+  "version": "0.2.0",
+  "main": "expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web"
+  },
+  "homepage": "https://famquest.guigomcha.dynv6.net",
+  "bugs": {
+    "url": "https://github.com/guigomcha/famquest/issues"
+  },
+  "license": "GPL-3.0-only",
+  "author": {
+    "name": "Guillermo Gomez Chavez",
+    "email": "guillermo.gc1994@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guigomcha/famquest.git"
+  },
+  "dependencies": {
+    "-": "~0.0.1",
+    "@expo/metro-runtime": "~3.2.3",
+    "@react-navigation/native-stack": "~7.1.1",
+    "antd": "^5.22.2",
+    "bootstrap": "^5.3.3",
+    "expo": "~51.0.28",
+    "i18next": "^24.2.2",
+    "i18next-browser-languagedetector": "^8.0.2",
+    "i18next-http-backend": "^3.0.2",
+    "react": "~18.2.0",
+    "react-bootstrap": "^2.10.6",
+    "react-dom": "~18.2.0",
+    "react-i18next": "^15.4.0",
+    "react-native": "0.74.5",
+    "react-native-web": "~0.19.10",
+    "react-query": "~3.39.3",
+    "react-router-dom": "~5.3.4",
+    "save": "~2.9.0"
+  },
+  "devDependencies": {
+    "@babel/core": "~7.20.0",
+    "@types/react-router-dom": "~5.3.3"
+  },
+  "private": true
+}
