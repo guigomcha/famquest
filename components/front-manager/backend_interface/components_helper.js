@@ -84,13 +84,13 @@ export async function SpotFromForm(data, contextData) {
 
 
 
-export function GlobalMessage(msg, type) {
+export function GlobalMessage(msg, type, duration=10) {
   if (type == "info") {
-    message.info(msg);
+    message.info(msg, duration);
   } else if (type == "warning") {
-    message.warning(msg);
+    message.warning(msg, duration);
   } else if (type == "error") {
-    message.error(msg);
+    message.error(msg, duration);
   } else {
     console.error("Invalid Global message type " + msg + "'"+type+"'");
   }
