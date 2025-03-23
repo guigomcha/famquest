@@ -1250,8 +1250,10 @@ const docTemplate = `{
         "models.APIAttachments": {
             "type": "object",
             "properties": {
+                "datetime": {
+                    "type": "string"
+                },
                 "description": {
-                    "description": "Description",
                     "type": "string"
                 },
                 "name": {
@@ -1296,6 +1298,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "category": {
+                    "type": "string"
+                },
+                "datetime": {
                     "type": "string"
                 },
                 "description": {
@@ -1348,6 +1353,9 @@ const docTemplate = `{
                 },
                 "createdAt": {
                     "description": "Automatically generated",
+                    "type": "string"
+                },
+                "datetime": {
                     "type": "string"
                 },
                 "description": {
@@ -1460,6 +1468,9 @@ const docTemplate = `{
                 },
                 "createdAt": {
                     "description": "Automatically generated",
+                    "type": "string"
+                },
+                "datetime": {
                     "type": "string"
                 },
                 "description": {

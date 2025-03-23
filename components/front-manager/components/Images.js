@@ -56,12 +56,14 @@ const Images = ( {parentInfo, refType, handleMenuChange} ) => {
     setSelectedImages([]); 
     const attachments = await getInDBWithFilter(refId, refType, 'attachment');
     console.info("Filling images for ", refId, attachments);
+    let filteredAttachments = []
     attachments.forEach(attachment => {
       attachment.refId = parentInfo.id;
       if (attachment.contentType.startsWith("image/")) {
-        setSelectedImages([...selectedImages, attachment]);
+        filteredAttachments = [...filteredAttachments, attachment];
       }
     });
+    setSelectedImages(filteredAttachments);
     fetchRelatedInfo(attachments[0]);
   };
 
@@ -77,7 +79,7 @@ const Images = ( {parentInfo, refType, handleMenuChange} ) => {
 
   // fetch the attachments for this spot
   useEffect(() => {
-    callFetchAttachmentsForSpot(parentInfo.refId, refType)
+    callFetchAttachmentsForSpot(parentInfo.id, refType)
   }, [parentInfo, reload]);
   
   useEffect(() => {
@@ -97,9 +99,9 @@ const Images = ( {parentInfo, refType, handleMenuChange} ) => {
                 <Card className="bg-dark text-black">
                   <Card.Header>id: {image.id}</Card.Header>
                   <Card.Img src={image.url} alt={`Attachment ${index + 1}`} className="center-block" />
-                  <Card.Title>{image.name}</Card.Title>
+                  <Card.Title>{image.datetime}: {image.name}</Card.Title>
                   <Card.Text>{image.description}</Card.Text>
-                  <Card.Text>{t('signedAs')}: {info.name}</Card.Text>
+                  <Card.Text>{t('owner')}: {info.name}</Card.Text>
                 </Card>
               </Carousel.Item>
             ))}

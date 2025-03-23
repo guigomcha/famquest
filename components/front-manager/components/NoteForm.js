@@ -26,6 +26,7 @@ const NoteForm = ({ initialData, handledFinished, userId }) => {
       return;
     }
     const formDataObj = new FormData(form);
+    formDataObj.set("datetime", formDataObj.get("datetime")+"T00:00:00Z")
     // Convert FormData to a plain object
     const formValues = {};
     formDataObj.forEach((value, key) => {
@@ -87,7 +88,17 @@ const NoteForm = ({ initialData, handledFinished, userId }) => {
               defaultValue={initialData?.category}
             />
           </Form.Group>
-
+          <Form.Group as={Col} controlId="formGridDatetime">
+            <Form.Label>{t('datetime')}</Form.Label>
+            <Form.Control
+              required
+              type="date"
+              name="datetime"
+              defaultValue={initialData?.datetime?.split("T")[0] || new Date().toISOString().split("T")[0]}
+            />
+          </Form.Group>
+        </Row>
+        <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridDescription">
             <Form.Label>{t('description')}</Form.Label>
             <Form.Control

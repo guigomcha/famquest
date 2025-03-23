@@ -69,6 +69,7 @@ const Note = ({ initialData, userId, handledFinished }) => {
       <Card>
         <Card.Header>id: {initialData.id}</Card.Header>
         <Card.Title>{t('note')}: {initialData.name}</Card.Title>
+        <Card.Subtitle>{initialData.datetime}</Card.Subtitle>
         <Card>
           <Card.Body>
             <Card.Text>{renderDescription(initialData.description)}</Card.Text>

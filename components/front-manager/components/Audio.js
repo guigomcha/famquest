@@ -54,12 +54,14 @@ const Audio = ({ parentInfo, refType, handleMenuChange }) => {
      
     const attachments = await getInDBWithFilter(refId, refType, 'attachment');
     console.info("Filling audios for ", refId, attachments);
+    let filteredAttachments = []
     attachments.forEach(attachment => {
       attachment.refId = parentInfo.id;
       if (attachment.contentType.startsWith("audio/")) {
-        setSelectedAudios([...selectedAudios, attachment]);
+        filteredAttachments = [...filteredAttachments, attachment];
       }
     });
+    setSelectedAudios(filteredAttachments);
     fetchRelatedInfo(attachments[0]);
   };
 
@@ -100,9 +102,9 @@ const Audio = ({ parentInfo, refType, handleMenuChange }) => {
                         <audio controls src={audio.url} style={{width: "200px", height: "50px"}}></audio>
                     </Card.Body>
                     <Card.Footer>
-                        <Card.Title>{audio.name}</Card.Title>
+                        <Card.Title>{audio.datetime}: {audio.name}</Card.Title>
                         <Card.Text>{audio.description}</Card.Text>
-                        <Card.Text>{t('signedAs')}: {info.name}</Card.Text>
+                        <Card.Text>{t('owner')}: {info.name}</Card.Text>
                     </Card.Footer>
                   </Card>
                 </Carousel.Item>

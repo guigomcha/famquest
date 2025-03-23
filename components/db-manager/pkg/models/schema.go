@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS notes (
     description TEXT,
     category TEXT,
     ref_user_uploader INT DEFAULT 0,
+    datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- When was this
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
 );
@@ -48,6 +49,7 @@ CREATE TABLE IF NOT EXISTS attachments (
     content_type TEXT DEFAULT 'image/jpeg', -- Constraint for ref_type
     url TEXT NOT NULL,
     ref_user_uploader INT DEFAULT 0,
+    datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- When was this
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
 );
