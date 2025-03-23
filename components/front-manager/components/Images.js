@@ -5,13 +5,17 @@ import Card from 'react-bootstrap/Card';
 import { Button } from 'antd';
 import { EditOutlined, FileAddOutlined, DeleteOutlined } from '@ant-design/icons';
 import { getInDBWithFilter, getUserInfo, deleteInDB } from '../backend_interface/db_manager_api';
+import { GlobalMessage } from '../backend_interface/components_helper';
 import {renderEmptyState} from '../utils/render_message';
 import Audio from './Audio';
 import ImagesForm from './ImagesForm';
 import { useTranslation } from "react-i18next";
+import { Spin, Alert } from 'antd';
 
-const Images = ( {refId, refType, handleMenuChange} ) => {
+
+const Images = ( {parentInfo, refType, handleMenuChange} ) => {
   const { t, i18n } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedImages, setSelectedImages] = useState([]);
   const [info, setInfo] = useState({"name": "unknown"});
@@ -22,23 +26,30 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
   };
 
   const handledFinished = (msg) => {
-    callFetchAttachmentsForSpot(refId, refType);
+    callFetchAttachmentsForSpot(parentInfo.id, refType);
     handleMenuChange(msg);
     setReload(!reload);
   };
 
   const handleRequestDelete = async (e) => {
+    setIsLoading(true);
     const deleteResponse = await deleteInDB(selectedImages[activeIndex].id, 'attachment');
     console.info("delete response: ", deleteResponse);
+    if (deleteResponse == "OK") {
+      GlobalMessage(t("actionCompleted"), "info");
+    } else {
+      GlobalMessage(t("actionInvalid"), "warning");
+    }
     setReload(!reload);
+    setIsLoading(false);
   }; 
 
   const handleRequestNew = (e) => {
-    handleMenuChange(<ImagesForm refId={refId} refType={refType} handledFinished={handledFinished}/>);
+    handleMenuChange(<ImagesForm initialData={{"refId": parentInfo.id }} refType={refType} handledFinished={handledFinished}/>);
   }; 
   
   const handleRequestEdit = (e) => {
-    handleMenuChange(<ImagesForm initialData={selectedImages[activeIndex]} refId={refId} refType={refType} handledFinished={handledFinished}/>); 
+    handleMenuChange(<ImagesForm initialData={selectedImages[activeIndex]} refType={refType} handledFinished={handledFinished}/>); 
   }; 
  
   const callFetchAttachmentsForSpot = async (refId, refType) => {
@@ -46,6 +57,7 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
     const attachments = await getInDBWithFilter(refId, refType, 'attachment');
     console.info("Filling images for ", refId, attachments);
     attachments.forEach(attachment => {
+      attachment.refId = parentInfo.id;
       if (attachment.contentType.startsWith("image/")) {
         setSelectedImages([...selectedImages, attachment]);
       }
@@ -65,8 +77,8 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
 
   // fetch the attachments for this spot
   useEffect(() => {
-    callFetchAttachmentsForSpot(refId, refType)
-  }, [refId, reload]);
+    callFetchAttachmentsForSpot(parentInfo.refId, refType)
+  }, [parentInfo, reload]);
   
   useEffect(() => {
     fetchRelatedInfo(selectedImages[activeIndex]);
@@ -75,6 +87,7 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
 
   return (
     <>
+      {(isLoading) &&<Spin>{t('loading')}</Spin>}
       <Card.Body>
         {selectedImages.length > 0 ? (
           <Container>
@@ -93,7 +106,7 @@ const Images = ( {refId, refType, handleMenuChange} ) => {
           </Carousel>
           <Card>
             <Card.Title>{t('audiosInImage')}</Card.Title> 
-            <Audio refId={selectedImages[activeIndex].id} refType={'attachment'} handleMenuChange={handleMenuChange}/> 
+            <Audio parentInfo={selectedImages[activeIndex]} refType={'attachment'} handleMenuChange={handleMenuChange}/> 
           </Card>
           </Container>
         ) : (

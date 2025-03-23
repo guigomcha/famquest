@@ -5,11 +5,12 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { Spin, Alert } from 'antd';
 import { uploadAttachment, addReferenceInDB, updateInDB } from '../backend_interface/db_manager_api';
+import { GlobalMessage } from '../backend_interface/components_helper';
 import '../css/classes.css';
 import { useTranslation } from "react-i18next";
 
 
-const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
+const AudioForm = ({ initialData, refType, handledFinished }) => {
   const { t, i18n } = useTranslation();
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioOpened, setAudioOpened] = useState(false);
@@ -45,13 +46,13 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
   // Handle form submission and send audio file
   const handleSubmit = async (event) => {
     setIsLoading(true);
-    setStatusMessage("");
     const form = event.currentTarget;
     event.preventDefault();
     event.stopPropagation();
     if (form.checkValidity() === false) {
       console.info("not valid");
       setIsLoading(false);
+      GlobalMessage(t('formNotValid'), "error");
       return;
     }
     console.info("submit handled: ", form);
@@ -71,31 +72,42 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
       const attachment = await updateInDB(formValues, 'attachment');
       if (!attachment) {
         console.info("error updating attachment");
+        GlobalMessage(t('internalError'), "error");
+      } else {
+        console.info("Updated: ", attachment)
+        GlobalMessage(t('actionCompleted'), "info");
       }
-      console.info("Updated: ", attachment)
       setIsLoading(false);
       handledFinished("done");
       return;
     }
     console.info("new audio to be sent")
     if (!audioBlob) {
-      setStatusMessage(t('formNotValid'));
+      GlobalMessage(t('formNotValid'), "error");
       setIsLoading(false);
       return;
+    }
+    // Add default name and description
+    if (formDataObj.get("name") == "") {
+      formDataObj.set("name", t("autoName"));
+    }
+    if (formDataObj.get("description") == "") {
+      formDataObj.set("description", t("autoDescription"));
     }
     const attachment = await uploadAttachment(audioBlob, formDataObj);
     
     if (attachment) {
       // Add reference to current spot
-      await addReferenceInDB(attachment.id, refId, refType, 'attachment');
+      await addReferenceInDB(attachment.id, initialData.refId, refType, 'attachment');
+      GlobalMessage(t('actionCompleted'), "info");
     } else {
-      setStatusMessage(t('formFailed'));
+      console.info("unable to upload audio");
+      GlobalMessage(t('internalError'), "error");
     }
     setAudioBlob('');
     setIsLoading(false);
     handledFinished("done");
   };
-  
   return (
     <>
       {(isLoading) && (
@@ -113,8 +125,7 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
       <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridName">
             <Form.Label>{t('name')}</Form.Label>
-            <Form.Control 
-              required
+            <Form.Control
               type="text"
               name="name"
               placeholder={t('editName')}
@@ -124,8 +135,7 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
 
           <Form.Group as={Col} controlId="formGridDescription">
             <Form.Label>{t('description')}</Form.Label>
-            <Form.Control 
-              required
+            <Form.Control
               type="textarea"
               rows={10}
               name="description"
@@ -158,7 +168,6 @@ const AudioForm = ({ initialData, refId, refType, handledFinished }) => {
               )}
           </Row>
           <Button variant="primary" type="submit">{initialData?.id ? (t('update')) : (t('upload'))}</Button>
-          {statusMessage && <p>{statusMessage}</p>}
       </Form>
     </>
   );

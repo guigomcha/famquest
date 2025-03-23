@@ -5,7 +5,7 @@ import Card from 'react-bootstrap/Card';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import SpotForm from './SpotForm';
-import { SpotFromForm } from '../backend_interface/components_helper';
+import { GlobalMessage, SpotFromForm } from '../backend_interface/components_helper';
 import { renderDescription } from '../utils/render_message';
 import { getUserInfo, deleteInDB, fetchAndPrepareSpots } from '../backend_interface/db_manager_api';
 import SlideMenu from './SlideMenu';
@@ -25,10 +25,17 @@ const SpotPopup = ({ location, handledFinished }) => {
   };
 
   const handleRequestDelete = async (e) => {
+    setIsLoading(true);
     const deleteResponse = await deleteInDB(spotInfo.id, 'spot');
     console.info("delete response: ", deleteResponse);
-    setComponent(null);
-    handledFinished("done");
+    if (deleteResponse == "OK") {
+      GlobalMessage(t("actionCompleted"), "info");
+      handledFinished({"msg": "done", "id": spotInfo.id});
+      setComponent(null);
+    } else {
+      GlobalMessage(t("actionInvalid"), "warning");
+    }
+    setIsLoading(false);
   }; 
 
   const handleNestedRequestEdit = async (comp) => {
@@ -100,11 +107,11 @@ const SpotPopup = ({ location, handledFinished }) => {
         </Card>
         <Card>
           <Card.Title>{t('audiosInSpot')}</Card.Title>
-          <Audio refId={location.refId} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
+          <Audio parentInfo={spotInfo} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
         </Card>
         <Card>
           <Card.Title>{t('imagesInSpot')}</Card.Title>
-          <Images refId={location.refId} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
+          <Images parentInfo={spotInfo} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
         </Card>
       </Card>
       <SlideMenu component={component} handledFinished={handleNestedRequestEdit}/>

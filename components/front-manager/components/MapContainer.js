@@ -6,7 +6,7 @@ import * as L from 'leaflet';
 import React, { useEffect, useRef, useState } from "react";
 import SpotForm from './SpotForm';
 import SpotPopup from './SpotPopup';
-import { SpotFromForm } from '../backend_interface/components_helper';
+import { GlobalMessage, SpotFromForm } from '../backend_interface/components_helper';
 import { worldPolygon, uncoverFog, locationVisible } from '../backend_interface/fog_functions';
 import { Spin, Alert } from 'antd';
 import { getInDB, fetchAndPrepareSpots } from "../backend_interface/db_manager_api";
@@ -33,16 +33,13 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
   const fogLayer = useRef(null);
   const fogGeoJson = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [locations, setLocations] = useState([]);
   const allDiscovered = useRef(null);
   const allLocations = useRef(null);
-  const [spots, setSpots] = useState([]);
+  const [reload, setReload] = useState(true);
 
-  const handleTrigger = (e) => {
-    fetchData();
-  };
-
+  
   const fetchData = async () => {
+    setIsLoading(true);
     const tempLocations = await getInDB('location');
     console.info("Fetched initial locations ", tempLocations);
     // setLocations(tempLocations);
@@ -52,6 +49,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
     // setDiscovered(tempDiscovered);
     allDiscovered.current = tempDiscovered;
     prepareMap();
+    setIsLoading(false);
   };
 
   const prepareMap = () => {
@@ -74,7 +72,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
           // // The show condition is only for the target user (which uses the fog)
           // find it 
           if (mapRef.current.hasLayer(featureGroup.current) && visible){
-            discovered = allDiscovered.current.filter(item => item.refId == location.refId && item.refType == "spot")
+            let discovered = allDiscovered.current.filter(item => item.refId == location.refId && item.refType == "spot")
             visible = discovered?.show || true;
           }
           // Visibility based on spot condition which is handled in the backend
@@ -112,8 +110,23 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
   
   const sendBackComponent = (e) => {
     if (e == "done") {
+      // An spot has been updated
       handleMenuChange(null);
       fetchData();
+      setReload(!reload);
+    } else if (e?.id) {
+      // An spot has been deleted
+      console.info("an spot was deleted");
+      markers.current.forEach((mark) => {
+        console.info("should delete? ", mark.spotId, e.id);
+        if (mark.spotId == e.id){
+          guilleSpotsGroup.current.removeLayer(mark.marker);
+          markers.current = markers.current.filter(item => item.spotId != e.id);
+        }
+      });
+      fetchData();
+      handleMenuChange(null);
+      setReload(!reload);
     } else if (e?.target.data.componentType == "SpotPopup") {
       console.info("opening a spot from map ", e);
       handleMenuChange(<SpotPopup location={e.target.data} handledFinished={sendBackComponent}/>);
@@ -128,6 +141,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
       // console.info("mask disabled: "+ JSON.stringify(location));
     } else if (!locationVisible(location, fogGeoJson.current)){
       console.info("can only right click and see outside of fog");
+      GlobalMessage(t("actionInvalid"), "warning");
       return false;
     }
     return true;
@@ -136,7 +150,6 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
   // Create and configure the map
   useEffect(() => {
     if (!mapRef.current) {
-      setIsLoading(true);
       console.log("Creating the map:", isLoading);
       const mapDiv = document.getElementById("mapId");
       mapRef.current = L.map(mapDiv).setView([defaultCenter.lat, defaultCenter.lng], scale);
@@ -200,12 +213,11 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
       L.control.layers(null, overlays, { collapsed: false }).addTo(mapRef.current);
       mapRef.current.removeLayer(featureGroup.current);
       markers.current = []
-      fetchData();
-      setIsLoading(false);
       console.log("created the map:", isLoading);
     }
+    fetchData();
   
-  }, []);
+  }, [reload]);
 
 
   return (

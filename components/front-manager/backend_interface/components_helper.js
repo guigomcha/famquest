@@ -1,4 +1,5 @@
 import { createInDB, addReferenceInDB, updateInDB } from '../backend_interface/db_manager_api';
+import { message } from 'antd';
 
 export async function SpotFromForm(data, contextData) {
   // Remove everything that is not part of the spot datamodel
@@ -31,7 +32,7 @@ export async function SpotFromForm(data, contextData) {
       }
       , "discovered");
     console.info("Received response put discovered: ", discoveredDb);
-    return;
+    return spotDb;
   }
   // Add location to DB
   var locationBody = {
@@ -45,11 +46,13 @@ export async function SpotFromForm(data, contextData) {
     console.info("Unable to create associated location: ", locationDb);
     return;
   }
+  console.info("new location: ", locationDb);
   const spotDb = await createInDB(data, "spot");
   if (!spotDb) {
     console.info("Unable to create spot: ", spotDb);
     return;
   }
+  console.info("new spot: ", spotDb);
   const locRef = await addReferenceInDB(locationDb.id, spotDb.id, "spot", "location");
   if (!locRef) {
     console.info("Unable to create ref from spot and loc: ", locRef);
@@ -75,5 +78,21 @@ export async function SpotFromForm(data, contextData) {
     console.info("Unable to create ref from spot and discovered: ", discRef);
     return;
   }
+  return spotDb;
   // console.info("Received response add reference: ", refResponse);  
+};
+
+
+
+export function GlobalMessage(msg, type) {
+  if (type == "info") {
+    message.info(msg);
+  } else if (type == "warning") {
+    message.warning(msg);
+  } else if (type == "error") {
+    message.error(msg);
+  } else {
+    console.error("Invalid Global message type " + msg + "'"+type+"'");
+  }
+  
 };

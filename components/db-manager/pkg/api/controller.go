@@ -100,7 +100,12 @@ func crudDelete(m connection.DbInterface, mVars map[string]string) (int, error) 
 	if err != nil {
 		return http.StatusBadRequest, err
 	}
-	if err := connection.Delete(connection.DB, intId, m); err != nil {
+	dest, err := connection.Get(connection.DB, intId, m)
+	if err != nil {
+		logger.Log.Debugf("Get error: %s", err.Error())
+		return http.StatusBadRequest, err
+	}
+	if err := connection.Delete(connection.DB, intId, dest); err != nil {
 		logger.Log.Debugf("Unable to delete: %d", intId)
 		if err.Error() == connection.ErrorIdDoesNotExits {
 			return http.StatusBadRequest, err
