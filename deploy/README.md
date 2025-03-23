@@ -179,12 +179,37 @@ kubectl exec -it minio-deployment-7cc89bb699-x9l88 -n famquest -- sh -c "mkdir -
 kubectl cp --retries=-1 famquest/minio-deployment-7cc89bb699-x9l88:/opt/bitnami/minio-client/backups backups
 ```
 
-### Load the backup manually
+From the backup manager
 
 ```bash
-docker cp backups/backup-REPLACE_TARGET_USER-01-23-2025-18-29.sql postgresql:/var/lib/postgresql
-docker exec -it postgresql bash
-psql -U REPLACE_USER -d REPLACE_TARGET_USER -f /var/lib/postgresql/backup-REPLACE_TARGET_USER-01-23-2025-18-29.sql 
+kubectl apply -f deploy/k8s/utils/pvc-access-pod.yaml -n REPLACE_TARGET_USER
+kubectl cp --retries=-1 REPLACE_TARGET_USER/pvc-access-pod:/backups backups
+kubectl delete -f deploy/k8s/utils/pvc-access-pod.yaml -n REPLACE_TARGET_USER
+```
+
+### Load the backup manually
+
+Postgres
+
+```bash
+kubectl cp backups/backups-postgresql/backup-postgresql-REPLACE_TARGET_USER-03-07-2025-04-30.sql famquest/postgresql-deployment-59fcf6944d-kkvqn:/
+# Drop the tables (pgadmin)
+kubectl exec -it -n famquest postgresql-deployment-59fcf6944d-kkvqn -- /bin/bash
+psql -U REPLACE_USER -d REPLACE_TARGET_USER -f /backup-postgresql-REPLACE_TARGET_USER-03-07-2025-04-30.sql 
+exit
+```
+
+Minio
+
+```bash
+kubectl cp backups/backups-minio/backup-minio-REPLACE_TARGET_USER-03-05-2025-00-30.tar.gz famquest/minio-deployment-7cc89bb699-x9l88:/opt/bitnami/minio-client/
+
+kubectl exec -it -n famquest minio-deployment-7cc89bb699-x9l88 -- /bin/bash
+tar -xzvf backup-minio-REPLACE_TARGET_USER-03-05-2025-00-30.tar.gz
+# replace the original folder from /data/REPLACE_TARGET_USER-{image or audio} with the contents of /opt/bitnami/minio-client/data/REPLACE_TARGET_USER-{image or audio}
+rm -rf data
+rm -rf *.tar.gz
+exit
 ```
 
 ## Upgrades
