@@ -2,14 +2,21 @@ import React, { useState, useRef, useEffect } from 'react';
 import * as L from 'leaflet';
 import { message, Button, FloatButton } from 'antd';
 import Card from 'react-bootstrap/Card';
-import { UserOutlined, ReloadOutlined, AimOutlined } from '@ant-design/icons';
+import Row from 'react-bootstrap/Row';
+import { UserOutlined, ReloadOutlined, AimOutlined, FrownOutlined } from '@ant-design/icons';
 import { createInDB, updateDiscoveredConditionsForUser } from '../backend_interface/db_manager_api';
 import { GlobalMessage } from '../backend_interface/components_helper';
+import { collectLogs } from '../backend_interface/utils';
 import { useTranslation } from "react-i18next";
 
 const UserButton = ({ user,  mapRef }) => {
   const { t, i18n } = useTranslation();
   const userLocationsLayer = useRef(null);
+
+  const handleReport = () => {
+    collectLogs();
+    GlobalMessage(t('sendEmail'), "info", 30);
+  };
 
   const handleReload = (event) => {
     event.preventDefault();
@@ -107,7 +114,7 @@ const UserButton = ({ user,  mapRef }) => {
       <>
         <Card style={{
           position: "fixed",
-          bottom: "40px",
+          bottom: "80px",
           right: "70px",
           border: "1px solid #ddd",
           padding: "15px",
@@ -119,16 +126,25 @@ const UserButton = ({ user,  mapRef }) => {
             <Card.Text>{t('email')}: {user?.email}</Card.Text>
           </Card.Body>
           <Card.Footer>
+            <Row>
+              <Button trigger="click"
+                type="default"
+                icon={<ReloadOutlined />}
+                onClick={handleReload}
+              >{t('reload')}</Button>
+              <Button trigger="click"
+                type="default"
+                icon={<AimOutlined />}
+                onClick={handleLocate}
+              >{t('location')}</Button>
+            </Row>
+            <Row>
             <Button trigger="click"
               type="default"
-              icon={<ReloadOutlined />}
-              onClick={handleReload}
-            >{t('reload')}</Button>
-            <Button trigger="click"
-              type="default"
-              icon={<AimOutlined />}
-              onClick={handleLocate}
-            >{t('location')}</Button>
+              icon={<FrownOutlined />}
+              onClick={handleReport}
+            >{t('report')}</Button>
+            </Row>
           </Card.Footer>
         </Card>
       </> 
