@@ -55,6 +55,7 @@
 	"location": "Encuéntrame",
 	"birthday": "Cumpleaños",
 	"biography": "Biografía",
+	"datetime" : "¿Cuándo fué esto?",
 	"editBiography": "Añade una biografía",
 	"editDiscoverOptionSelect": "Selecciona cómo se descubre este lugar",
 	"editDiscoverOptionCheckbox": "Mostrar",

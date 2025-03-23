@@ -76,7 +76,7 @@ const FamilyTab = ({ user }) => {
             <Tab eventKey={u.name} title={u.name}>
               <Card>
                 <Card>
-                  <Card.Title> {t('userInfo')}</Card.Title>
+                  <Card.Title>{t('userInfo')}</Card.Title>
                   <Card.Body>
                     <Card.Text>{renderDescription(u.bio)}</Card.Text>
                   </Card.Body>
@@ -102,7 +102,7 @@ const FamilyTab = ({ user }) => {
                         {notes
                           .filter(note => note.refUserUploader == u.id)
                           .map((note, index) => (
-                            <ListGroup.Item className="justify-content-between align-items-start" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} userId={user.id} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
+                            <ListGroup.Item className="justify-content-between" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} userId={user.id} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
                               {note.name}
                               <Badge bg="primary" pill>
                               {note.category}

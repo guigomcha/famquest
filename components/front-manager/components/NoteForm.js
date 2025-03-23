@@ -87,7 +87,17 @@ const NoteForm = ({ initialData, handledFinished, userId }) => {
               defaultValue={initialData?.category}
             />
           </Form.Group>
-
+          <Form.Group as={Col} controlId="formGridDatetime">
+            <Form.Label>{t('datetime')}</Form.Label>
+            <Form.Control
+              required
+              type="date"
+              name="datetime"
+              defaultValue={initialData?.datetime}
+            />
+          </Form.Group>
+        </Row>
+        <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridDescription">
             <Form.Label>{t('description')}</Form.Label>
             <Form.Control

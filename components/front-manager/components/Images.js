@@ -77,7 +77,7 @@ const Images = ( {parentInfo, refType, handleMenuChange} ) => {
 
   // fetch the attachments for this spot
   useEffect(() => {
-    callFetchAttachmentsForSpot(parentInfo.refId, refType)
+    callFetchAttachmentsForSpot(parentInfo.id, refType)
   }, [parentInfo, reload]);
   
   useEffect(() => {
@@ -97,9 +97,9 @@ const Images = ( {parentInfo, refType, handleMenuChange} ) => {
                 <Card className="bg-dark text-black">
                   <Card.Header>id: {image.id}</Card.Header>
                   <Card.Img src={image.url} alt={`Attachment ${index + 1}`} className="center-block" />
-                  <Card.Title>{image.name}</Card.Title>
+                  <Card.Title>{image.datetime}: {image.name}</Card.Title>
                   <Card.Text>{image.description}</Card.Text>
-                  <Card.Text>{t('signedAs')}: {info.name}</Card.Text>
+                  <Card.Text>{t('owner')}: {info.name}</Card.Text>
                 </Card>
               </Carousel.Item>
             ))}

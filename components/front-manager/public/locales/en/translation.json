@@ -55,6 +55,7 @@
 	"location" : "FindMe",
 	"birthday" : "Birthday",
 	"biography" : "Biography",
+	"datetime" : "When was this?",
 	"editBiography" : "Add a biography",
 	"editDiscoverOptionSelect": "Select what triggers the discovery of this spot",
 	"editDiscoverOptionCheckbox": "Show",
