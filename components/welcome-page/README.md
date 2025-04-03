@@ -70,30 +70,3 @@ cd components/welcome-page
 ## Documentation
 
 ## API documentation
-
-
-
-    "-": "~0.0.1",
-    "@expo/config": "^8.1.1",
-    "@expo/metro-config": "^0.10.0",
-    "@expo/metro-runtime": "~3.2.3",
-    "@react-navigation/native-stack": "~7.1.1",
-    "antd": "^5.22.2",
-    "bootstrap": "^5.3.3",
-    "expo": "^52.0.41",
-    "expo-cli": "^6.3.10",
-    "i18next": "^24.2.2",
-    "i18next-browser-languagedetector": "^8.0.2",
-    "i18next-http-backend": "^3.0.2",
-    "metro-inspector-proxy": "^0.78.1",
-    "react": "~18.2.0",
-    "react-bootstrap": "^2.10.6",
-    "react-dom": "~18.2.0",
-    "react-i18next": "^15.4.0",
-    "react-native": "0.76.7",
-    "react-native-web": "~0.19.13",
-    "react-query": "~3.39.3",
-    "react-router-dom": "~5.3.4",
-    "save": "~2.9.0"
-
-npx expo install antd i18next i18next-browser-languagedetector i18next-http-backend metro-inspector-proxy react react-bootstrap react-i18next react-native react-native-web
