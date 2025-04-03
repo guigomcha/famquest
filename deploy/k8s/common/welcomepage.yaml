@@ -18,10 +18,10 @@ spec:
       # hostAliases:
       #   - ip: "192.168.137.35"
       #     hostnames:
-      #       - "api.staging.famquest.guigomcha.dynv6.net"
-      #       - "minio.famquest.guigomcha.dynv6.net"
-      #       - "minioapi.famquest.guigomcha.dynv6.net"
-      #       - "portal.staging.famquest.guigomcha.dynv6.net"
+      #       - "api.staging.famquest.REPLACE"_BASE_DOMAIN
+      #       - "minio.famquest.REPLACE"_BASE_DOMAIN
+      #       - "minioapi.famquest.REPLACE"_BASE_DOMAIN
+      #       - "portal.staging.famquest.REPLACE"_BASE_DOMAIN
       imagePullSecrets:
         - name: guigomchasecrets
       containers:
@@ -63,7 +63,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-  - host: famquest.guigomcha.dynv6.net
+  - host: famquest.REPLACE_BASE_DOMAIN
     http:
       paths:
       - backend:
@@ -75,7 +75,7 @@ spec:
         pathType: Prefix
   tls:
   - hosts:
-    - famquest.guigomcha.dynv6.net
+    - famquest.REPLACE_BASE_DOMAIN
     secretName: welcomepage-letsencrypt-secret
 ---
 apiVersion: cert-manager.io/v1
@@ -87,7 +87,7 @@ metadata:
   name: welcomepage-issuer
 spec:
   acme:
-    email: guillermo.gc1994@gmail.com
+    email: REPLACE@gmail.com
     privateKeySecretRef:
       name: welcomepage-issuer-secret
     server: https://acme-v02.api.letsencrypt.org/directory

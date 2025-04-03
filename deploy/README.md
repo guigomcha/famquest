@@ -6,6 +6,7 @@
 
 1. Search and replace in the codebase:
   
+    + REPLACE@
     - REPLACE_USER
     - REPLACE_PASSWORD
     - REPLACE_BASE_DOMAIN
