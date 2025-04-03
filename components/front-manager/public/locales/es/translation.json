@@ -4,7 +4,7 @@
 	"family": "Familia",
 	"welcomeTitle": "Bienvenido a tu instancia de la aplicación FamQuest",
 	"famQuest": "\"FamQuest\"",
-	"footerText": "Esta es una instancia privada de un servicio disponible públicamente que puedes instalar para tu `Familia`",
+	"footerText": "Esta es una instancia privada de un servicio disponible públicamente que puedes instalar para tu <strong>Familia</strong> ",
 	"userInfo": "Información del perfil de usuario",
 	"signedAs": "Conectado como",
 	"loading": "Cargando",

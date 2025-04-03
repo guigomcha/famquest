@@ -15,5 +15,10 @@
 	"participate": "Instalar",
 	"downloadTitle": "Consigue tu instancia de FamQuest",
 	"instances": "Instancias Privadas",
-	"downloadBody": "<p><strong>FamQuest</strong> es una plataforma de código abierto que te permite instalar y mantener el software en tu propio servidor, asegurando el control total sobre tus datos. Alternativamente, puedes solicitar una instancia mantenida enviando un mini PC para conectarlo directamente a tu red doméstica o utilizando una infraestructura compartida. El software pone énfasis en la <em>seguridad</em>, <em>privacidad</em> y la <strong>independencia</strong> entre las instancias, asegurando que tus datos se mantengan protegidos e aislados de otros usuarios.</p>"
+	"callToAction": "Info",
+	"downloadHead": "<p><strong>FamQuest</strong> es una plataforma de codigo abierto que pone énfasis en la <em>seguridad</em>, <em>privacidad</em> y la <strong>independencia sobre metodos tradicionales de financiación mediante publicidad</strong>. <br>En todos los casos tus datos se mantendrán protegidos y aislados de otras instancias y te permite tener el control completo de tus datos y copias de seguridad.</p>",
+	"downloadFreeHead": "Instalación Privada",
+	"downloadPublicHead": "Instalación Pública",
+	"downloadFreeBody": "<p><strong>FamQuest</strong> ya está disponible como Plataforma libre para descargar y utilizar, para uso personal, dentro de tu propia vivienda tal y como se indica en la documentación de despliegue en el código. <br>Para los usuarios no técnicos, se está preparando un proceso para el envio del hardware pre-configurado o la instalación remota.</p>",
+	"downloadPublicBody": "<p>Se está trabajando en crear un punto de acceso público desde el que cualquier usuario pueda obtener su propia instancia de FamQuest en el cloud.</p>"
 }

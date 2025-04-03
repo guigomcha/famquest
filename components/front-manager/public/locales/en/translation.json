@@ -4,7 +4,7 @@
 	"family": "Family",
 	"welcomeTitle": "Welcome to your private instance of the FamQuest App",
   "famQuest": "\"FamQuest\"",
-  "footerText": "This is a private instance of a publicly available service that you can install to host your `Family`.",
+  "footerText": "This is a private instance of a publicly available service that you can install to host your <strong>Family</strong> ",
 	"userInfo" : "User Profile Info", 
 	"signedAs" : "Signed as",
 	"loading" : "Loading",

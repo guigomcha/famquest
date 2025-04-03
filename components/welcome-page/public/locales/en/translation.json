@@ -14,5 +14,10 @@
 	"participate": "Install",
 	"downloadTitle": "Get your own instance",
 	"instances": "Private Instances",
-	"downloadBody": "<p><strong>FamQuest App</strong> is an open-source platform that allows you to install and maintain the software on your own server, ensuring full control over your data. Alternatively, you can request a maintained instance by shipping a mini PC to be directly connected to your home network or using a shared infrastructure. The software emphasizes <em>security</em>, <em>privacy</em>, and <strong>independence</strong> between instances, ensuring that your data remains protected and isolated from other users.</p>"
+	"callToAction": "Info",
+	"downloadFreeHead": "Private Installation",
+	"downloadPublicHead": "Public Installation",
+	"downloadHead": "<p><strong>FamQuest</strong> is an open-source platform that emphasizes <em>security</em>, <em>privacy</em>, and <strong>independence from traditional advertising-based funding methods</strong>. <br>In all cases, your data will be kept protected and isolated from other instances, giving you full control over your data and backups.</p>",
+	"downloadFreeBody": "<p><strong>FamQuest</strong> is already available as a free platform to download and use for personal use within your own home, as indicated in the deployment documentation in the code. <br>For non-technical users, a process is being prepared for sending pre-configured hardware or remote installation.</p>",
+	"downloadPublicBody": "<p>Work is underway to create a public access point from which any user can obtain their own instance of FamQuest in the cloud.</p>"
 }

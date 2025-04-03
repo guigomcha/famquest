@@ -110,12 +110,12 @@ export default function App() {
           <Tab eventKey="home" title={t('home')}>
             <Container fluid>
                 <Card>
-                  <Card.Img variant="top" src="assets/famquest-logo.png" />
-                  <Card.Body>
                   <Card.Title>{t('welcomeTitle')}</Card.Title>
-                  <Card.Text>
-                    {renderDescription(t('footerText'))}{' '}<a href="https://github.com/guigomcha/famquest" className="fa fa-github" />
-                  </Card.Text>
+                  <Card.Body>
+                    <Card.Text>
+                      {renderDescription(t('footerText'))} <a href="https://github.com/guigomcha/famquest" className="fa fa-github" />
+                    </Card.Text>
+                    <Card.Img variant="top" src="assets/famquest-logo.png" />
                 </Card.Body>
                 </Card>
             </Container>

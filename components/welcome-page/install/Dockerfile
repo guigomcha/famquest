@@ -9,6 +9,7 @@ RUN npm install
 # Copy the rest of the application code
 COPY components/welcome-page/*.js ./
 COPY components/welcome-page/utils ./utils
+COPY components/welcome-page/css ./css
 #COPY components/welcome-page/components ./components
 COPY components/welcome-page/assets ./assets
 COPY components/welcome-page/public ./public
