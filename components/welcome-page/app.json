@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "front-manager",
-    "slug": "front-manager",
+    "name": "welcome-page",
+    "slug": "welcome-page",
     "version": "0.3.0",
     "orientation": "portrait",
     "icon": "./public/favicon.ico",

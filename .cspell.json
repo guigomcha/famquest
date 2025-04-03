@@ -137,6 +137,13 @@
             "ignoreRegExpList": [
                 "/\"[^\"\\n]*\"\\s*:\\s*\"([^\\n\"]+)\"/"
             ]
+        },
+        {
+            "filename": "components/welcome-page/public/locales/es/translation.json",
+            "language": "es",
+            "ignoreRegExpList": [
+                "/\"[^\"\\n]*\"\\s*:\\s*\"([^\\n\"]+)\"/"
+            ]
         }
     ]
 }

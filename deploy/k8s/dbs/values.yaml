@@ -40,5 +40,5 @@ common:
 # Configure the Exposure layer
 ingress:
   tls: true
-  email: guillermo.gc1994@gmail.com
+  email: REPLACE@gmail.com
   exporters: false # indirectly 

@@ -1,0 +1,23 @@
+{
+	"home": "Home",
+	"family": "Family",
+	"welcomeTitleTargetUser": "Private instance of Famquest for ",
+  "famQuest": "\"FamQuest\"",
+  "introText": "''<b>FamQuest</b>'' is born as the 1-year bday present for my first nephew, Jaime, with the initial objective of telling my story in his city as he discovers it (I live in a different city now). It has eventually grown out to host the story of the whole family around the world, <b>as a location-based media-storage application</b> that is similar to a very private family photo album and journal shared between family members, keeping it very clear that <b>this is not another social network</b>. It is a way to share memories and pass them down in this new era of technology, lack of family time and globalization.",
+  "coreObjectivesTitle": "Some of the core objectives:",
+  "coreObjective1": "Your family members pre-populate your world with memories from their past. E.g., old family house, school, important trips, where the parents met...",
+  "coreObjective2": "The target user has to physically be in a spot to visualize something (or prove it via google-maps). The map of the world is not fully visible, you have to discover it 'fog-of-war-style' (age-of-empire). E.g., A notification alerts the user of a new spot found.",
+  "coreObjective3": "Older generations have a way to quickly record an audio describing a spot or photo so that their voices can be heard by future generations of the family.",
+  "coreObjective4": "Keep lists of things that would be nice to be shared at a later time. E.g., Important movies, tips and tricks...",
+  "coreObjective5": "Each family will be able to host their own instance of the application on an old laptop/miniPC without the need to sell off their private memories to a big tech.",
+	"welcomeTitle": "Welcome to the FamQuest App",
+	"participate": "Install",
+	"downloadTitle": "Get your own instance",
+	"instances": "Private Instances",
+	"callToAction": "Info",
+	"downloadFreeHead": "Private Installation",
+	"downloadPublicHead": "Public Installation",
+	"downloadHead": "<p><strong>FamQuest</strong> is an open-source platform that emphasizes <em>security</em>, <em>privacy</em>, and <strong>independence from traditional advertising-based funding methods</strong>. <br>In all cases, your data will be kept protected and isolated from other instances, giving you full control over your data and backups.</p>",
+	"downloadFreeBody": "<p><strong>FamQuest</strong> is already available as a free platform to download and use for personal use within your own home, as indicated in the deployment documentation in the code. <br>For non-technical users, a process is being prepared for sending pre-configured hardware or remote installation.</p>",
+	"downloadPublicBody": "<p>Work is underway to create a public access point from which any user can obtain their own instance of FamQuest in the cloud.</p>"
+}

@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: welcomepage-deployment
+  labels:
+    app: welcomepage
+    fullapp: testbed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: welcomepage
+  template:
+    metadata:
+      labels:
+        app: welcomepage
+    spec:
+      # hostAliases:
+      #   - ip: "192.168.137.35"
+      #     hostnames:
+      #       - "api.staging.famquest.REPLACE"_BASE_DOMAIN
+      #       - "minio.famquest.REPLACE"_BASE_DOMAIN
+      #       - "minioapi.famquest.REPLACE"_BASE_DOMAIN
+      #       - "portal.staging.famquest.REPLACE"_BASE_DOMAIN
+      imagePullSecrets:
+        - name: guigomchasecrets
+      containers:
+      - name: welcomepage
+        image: ghcr.io/guigomcha/famquest/welcomepage:staging
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: welcomepage-svc
+  labels:
+    app: welcomepage
+    fullapp: testbed
+spec:
+  selector:
+    app: welcomepage
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+---
+# Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    cert-manager.io/issue-temporary-certificate: "true"
+    cert-manager.io/issuer: welcomepage-issuer
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure, web
+  labels:
+    app: welcomepage
+    fullapp: testbed
+  name: welcomepage-ingress
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: famquest.REPLACE_BASE_DOMAIN
+    http:
+      paths:
+      - backend:
+          service:
+            name: welcomepage-svc
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - famquest.REPLACE_BASE_DOMAIN
+    secretName: welcomepage-letsencrypt-secret
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  labels:
+    app: welcomepage
+    fullapp: testbed
+  name: welcomepage-issuer
+spec:
+  acme:
+    email: REPLACE@gmail.com
+    privateKeySecretRef:
+      name: welcomepage-issuer-secret
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+    - http01:
+        ingress:
+          class: traefik
