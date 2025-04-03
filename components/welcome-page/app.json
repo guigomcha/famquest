@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {},
-      "package": "famquest"
+      "package": "famquest.REPLACE_TARGET_USER"
     },
     "web": {
       "bundler": "metro",

@@ -52,6 +52,8 @@ export default function App() {
     if (key == "map" || key == "user") {
       if (user || isLocal) {
         setKey(key);
+      } else {
+        GlobalMessage(t('privateArea'), "warning");
       }
     } else {
       setKey(key);
@@ -112,19 +114,8 @@ export default function App() {
                   <Card.Body>
                   <Card.Title>{t('welcomeTitle')}</Card.Title>
                   <Card.Text>
-                    {renderDescription(t('introText'))}
-                  </Card.Text>
-                  <Card.Text>{t('coreObjectivesTitle')}</Card.Text>
-                  <ul>
-                    <li>{renderDescription(t('coreObjective1'))}</li>
-                    <li>{renderDescription(t('coreObjective2'))}</li>
-                    <li>{renderDescription(t('coreObjective3'))}</li>
-                    <li>{renderDescription(t('coreObjective4'))}</li>
-                    <li>{renderDescription(t('coreObjective5'))}</li>
-                  </ul>
-                  <Card.Footer>
                     {renderDescription(t('footerText'))}{' '}<a href="https://github.com/guigomcha/famquest" className="fa fa-github" />
-                  </Card.Footer>
+                  </Card.Text>
                 </Card.Body>
                 </Card>
             </Container>

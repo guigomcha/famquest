@@ -2,16 +2,12 @@
   "expo": {
     "name": "front-manager",
     "slug": "front-manager",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./public/favicon.ico",
     "userInterfaceStyle": "light",
     "assetBundlePatterns": ["**/*"],
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
+    "splash": {},
     "platforms":[
       "web",
       "android",
@@ -21,15 +17,12 @@
       "supportsTablet": true
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
+      "adaptiveIcon": {},
       "package": "famquest.REPLACE_TARGET_USER"
     },
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/favicon.png"
+      "favicon": "./public/favicon.ico"
     }
   }
 }

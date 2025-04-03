@@ -11,6 +11,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { Select } from 'antd';
 import { useTranslation } from "react-i18next";
+import { renderDescription } from './utils/render_message';
 import i18next from "./i18n";
 
 export default function App() { 
@@ -58,31 +59,53 @@ export default function App() {
           <Tab eventKey="home" title={t('home')}>
             <Container fluid>
                 <Card>
-                  <Card.Img variant="top" src="assets/famquest-logo.png" />
-                  <Card.Body>
                   <Card.Title>{t('welcomeTitle')}</Card.Title>
-                  <Card.Text>
-                    {renderDescription(t('introText'))}
-                  </Card.Text>
-                  <Card.Text>{t('coreObjectivesTitle')}</Card.Text>
-                  <ul>
-                    <li>{renderDescription(t('coreObjective1'))}</li>
-                    <li>{renderDescription(t('coreObjective2'))}</li>
-                    <li>{renderDescription(t('coreObjective3'))}</li>
-                    <li>{renderDescription(t('coreObjective4'))}</li>
-                    <li>{renderDescription(t('coreObjective5'))}</li>
-                  </ul>
-                  <Card.Footer>
-                    {renderDescription(t('footerText'))}{' '}<a href="https://github.com/guigomcha/famquest" className="fa fa-github" />
-                  </Card.Footer>
-                </Card.Body>
+                  <Row>
+                    <Col>
+                      <Card.Img variant="top" src="assets/famquest-logo.png" />
+                    </Col>
+                    <Col>
+                      <Card.Body>
+                      <Card.Text>
+                        {renderDescription(t('introText'))}
+                      </Card.Text>
+                      <Card.Text>{t('coreObjectivesTitle')}</Card.Text>
+                      <ul>
+                        <li>{renderDescription(t('coreObjective1'))}</li>
+                        <li>{renderDescription(t('coreObjective2'))}</li>
+                        <li>{renderDescription(t('coreObjective3'))}</li>
+                        <li>{renderDescription(t('coreObjective4'))}</li>
+                        <li>{renderDescription(t('coreObjective5'))}</li>
+                      </ul>
+                    </Card.Body>
+                    </Col>
+                  </Row>
                 </Card>
             </Container>
           </Tab>
           <Tab eventKey="participate" title={t('participate')}>
             <Container fluid>
                 <Card>
-                  
+                  <Card.Title>{t('downloadTitle')}</Card.Title>
+                  <Card.Body>
+                    <Card.Text>
+                      {renderDescription(t('downloadBody'))}
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
+            </Container>
+          </Tab>
+          <Tab eventKey="instances" title={t('instances')}>
+            <Container fluid>
+                <Card>
+                  <Card.Title>{t('instances')}</Card.Title>
+                  <Card.Body>
+                    <Card.Text>
+                      <ul>
+                        <li><a href="https://portal.jaime.famquest.dynv6.net" target="_blank" rel="Gomez Chavez family">Jaime</a></li>
+                      </ul>
+                    </Card.Text>
+                  </Card.Body>
                 </Card>
             </Container>
           </Tab>
