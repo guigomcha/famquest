@@ -105,7 +105,7 @@ func SpotDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Cannot delete if there are things connected to this
-	models := []connection.DbInterface{&models.Attachments{}}
+	models := []connection.DbInterface{&models.Attachments{}, &models.Notes{}}
 	for _, modelType := range models {
 		filter := fmt.Sprintf("WHERE ref_id = %d AND ref_type = 'spot'", intId)
 		destsList, httpStatus, err := crudGetAll(modelType, filter)

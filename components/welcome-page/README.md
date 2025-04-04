@@ -38,7 +38,7 @@ sudo apt install nodejs
 - npm packages (already done and available via in package.json)
 
 ```bash
-npx create-react-app welcome-page
+npx create-expo-app@latest front-manager
 cd welcome-page
 npm install expo-cli
 npm install react react-dom

@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS notes (
     description TEXT,
     category TEXT,
     ref_user_uploader INT DEFAULT 0,
+    ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot', 'user' )), -- Constraint for ref_type
+    ref_id INT DEFAULT 0,
     datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- When was this
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger

@@ -1456,13 +1456,6 @@ const docTemplate = `{
         "models.Notes": {
             "type": "object",
             "properties": {
-                "attachments": {
-                    "description": "only json -\u003e Need to create the parse the json  to and from db",
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "category": {
                     "type": "string"
                 },
@@ -1495,12 +1488,6 @@ const docTemplate = `{
         "models.Spots": {
             "type": "object",
             "properties": {
-                "attachments": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "createdAt": {
                     "description": "Automatically generated",
                     "type": "string"

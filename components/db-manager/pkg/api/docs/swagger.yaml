@@ -138,11 +138,6 @@ definitions:
     type: object
   models.Notes:
     properties:
-      attachments:
-        description: only json -> Need to create the parse the json  to and from db
-        items:
-          type: integer
-        type: array
       category:
         type: string
       createdAt:
@@ -165,10 +160,6 @@ definitions:
     type: object
   models.Spots:
     properties:
-      attachments:
-        items:
-          type: integer
-        type: array
       createdAt:
         description: Automatically generated
         type: string
