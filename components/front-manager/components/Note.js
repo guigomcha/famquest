@@ -12,7 +12,7 @@ import SlideMenu from './SlideMenu';
 import { useTranslation } from "react-i18next";
 import { Spin, Alert } from 'antd';
 
-const Note = ({ initialData, userId, handledFinished }) => {
+const Note = ({ initialData, userId, parentInfo, refType, handledFinished }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { t, i18n } = useTranslation();
   const [component, setComponent] = useState(null);
@@ -20,7 +20,7 @@ const Note = ({ initialData, userId, handledFinished }) => {
   const [reload, setReload] = useState(true);
      
   const handleRequestEdit = (e) => {
-    setComponent(<NoteForm initialData={initialData} handledFinished={handleNestedRequestEdit} />);
+    setComponent(<NoteForm initialData={initialData} parentInfo={parentInfo} refType={refType} handledFinished={handleNestedRequestEdit} />);
   };
   
   const handleRequestDelete = async (e) => {

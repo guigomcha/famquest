@@ -11,6 +11,7 @@ import { getUserInfo, deleteInDB, fetchAndPrepareSpots } from '../backend_interf
 import SlideMenu from './SlideMenu';
 import { useTranslation } from "react-i18next";
 import { Spin, Alert } from 'antd';
+import Note from './Note';
 
 const SpotPopup = ({ location, handledFinished }) => {
   const { t, i18n } = useTranslation();
@@ -19,10 +20,15 @@ const SpotPopup = ({ location, handledFinished }) => {
   const [info, setInfo] = useState({ "name": "unknown" });
   const [spotInfo, setSpotInfo] = useState({ "id": location.refId });
   const [reload, setReload] = useState(true);
+  const [notes, setNotes] = useState([]);
   
   const handleRequestEdit = (e) => {
     setComponent(<SpotForm initialData={spotInfo} handledFinished={handleNestedRequestEdit} />);
   };
+
+  const handleRequestNewNote = (e) => {
+    setComponent(<NoteForm handledFinished={handleNestedRequestEdit} userId={info.id} parentInfo={spotInfo} refType={'spot'}/>);
+  }; 
 
   const handleRequestDelete = async (e) => {
     setIsLoading(true);
@@ -63,6 +69,9 @@ const SpotPopup = ({ location, handledFinished }) => {
       setIsLoading(false);
       return;
     }
+    const tempNotes = await getInDBWithFilter(tempSpot.id, 'spot', 'note');
+    setNotes(tempNotes);
+    console.info("obtained tempNotes ", tempNotes);
     const userInfo = await getUserInfo(tempSpot.refUserUploader);
     setInfo(userInfo);
     setIsLoading(false);
@@ -86,6 +95,32 @@ const SpotPopup = ({ location, handledFinished }) => {
             {!spotInfo.id && <Card.Text>{t('invalidSpot')}{JSON.stringify(location)}</Card.Text>}
             {/* Render description with line breaks */}
             <Card.Text>{renderDescription(spotInfo.description)}</Card.Text>
+            <Card>
+              <Card.Title>{t('notesInSpot')}</Card.Title>
+                {notes.length > 0 ? ( 
+                <ListGroup as="ol" numbered>
+                  {notes
+                    .map((note, index) => (
+                      <ListGroup.Item className="justify-content-between" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} userId={info.id} parentInfo={spotInfo} refType={'spot'} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
+                        {note.name}
+                        <Badge bg="primary" pill>
+                        {note.category}
+                        </Badge>
+                      </ListGroup.Item>
+                    ))}
+                </ListGroup>
+                ) : (                  
+                  renderEmptyState(t('empty'))
+                )}
+                <Card.Footer> 
+                    <Button trigger="click"
+                      type="default"
+                      icon={<AppstoreAddOutlined />}
+                      onClick={handleRequestNewNote}
+                      >{t('new')}
+                    </Button>
+                </Card.Footer>
+            </Card> {/* TODO: initialData userId handledFinished */}
           </Card.Body>
           <Card.Footer>
             <Button

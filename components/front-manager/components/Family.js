@@ -29,7 +29,7 @@ const FamilyTab = ({ user }) => {
   };
 
   const handleRequestNew = (e) => {
-    setComponent(<NoteForm handledFinished={handleNestedRequestEdit} userId={user.id}/>);
+    setComponent(<NoteForm handledFinished={handleNestedRequestEdit} userId={user.id} parentInfo={user} refType={'user'}/>);
   }; 
 
   const handleRequestEdit = (e) => {
@@ -102,7 +102,7 @@ const FamilyTab = ({ user }) => {
                         {notes
                           .filter(note => note.refUserUploader == u.id)
                           .map((note, index) => (
-                            <ListGroup.Item className="justify-content-between" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} userId={user.id} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
+                            <ListGroup.Item className="justify-content-between" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} userId={user.id} parentInfo={user} refType={'user'} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
                               {note.name}
                               <Badge bg="primary" pill>
                               {note.category}
