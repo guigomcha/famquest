@@ -758,6 +758,24 @@ const docTemplate = `{
                     "note"
                 ],
                 "summary": "Retrieve all notes",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Reference ID (optional)",
+                        "name": "refId",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "spot",
+                            "note"
+                        ],
+                        "type": "string",
+                        "description": "Reference Type (optional)",
+                        "name": "refType",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1456,13 +1474,6 @@ const docTemplate = `{
         "models.Notes": {
             "type": "object",
             "properties": {
-                "attachments": {
-                    "description": "only json -\u003e Need to create the parse the json  to and from db",
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "category": {
                     "type": "string"
                 },
@@ -1495,12 +1506,6 @@ const docTemplate = `{
         "models.Spots": {
             "type": "object",
             "properties": {
-                "attachments": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "createdAt": {
                     "description": "Automatically generated",
                     "type": "string"

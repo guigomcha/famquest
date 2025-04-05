@@ -6,7 +6,7 @@ import Row from 'react-bootstrap/Row';
 import { Spin } from 'antd';
 import '../css/classes.css';
 import { useTranslation } from "react-i18next";
-import { SpotFromForm, GlobalMessage } from '../backend_interface/components_helper';
+import { SpotFromForm, GlobalMessage } from '../functions/components_helper';
 
 // This request the baseline info to create a new Spot in DB
 const SpotForm = ({ initialData, handledFinished }) => {

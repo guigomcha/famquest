@@ -138,11 +138,6 @@ definitions:
     type: object
   models.Notes:
     properties:
-      attachments:
-        description: only json -> Need to create the parse the json  to and from db
-        items:
-          type: integer
-        type: array
       category:
         type: string
       createdAt:
@@ -165,10 +160,6 @@ definitions:
     type: object
   models.Spots:
     properties:
-      attachments:
-        items:
-          type: integer
-        type: array
       createdAt:
         description: Automatically generated
         type: string
@@ -711,6 +702,18 @@ paths:
   /note:
     get:
       description: Get a list of all notes
+      parameters:
+      - description: Reference ID (optional)
+        in: query
+        name: refId
+        type: integer
+      - description: Reference Type (optional)
+        enum:
+        - spot
+        - note
+        in: query
+        name: refType
+        type: string
       produces:
       - application/json
       responses:

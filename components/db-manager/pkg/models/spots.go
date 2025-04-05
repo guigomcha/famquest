@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/lib/pq"
+	//"github.com/lib/pq"
 )
 
 // For swagger input
@@ -25,8 +25,9 @@ type Spots struct {
 	UpdatedAt       time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 	RefUserUploader int       `db:"ref_user_uploader" json:"refUserUploader"`
 	// only json -> Need to create the parse the json  to and from db
-	Location    int           `json:"location"`
-	Attachments pq.Int64Array `json:"attachments"`
+	Location int `json:"location"`
+	//Attachments pq.Int64Array `json:"attachments"`
+	//Notes pq.Int64Array `json:"notes"`
 }
 
 func (m *Spots) GetTableName() string {
@@ -42,14 +43,11 @@ func (m *Spots) GetSelectOneQuery() string {
 			s.ref_user_uploader, 
 			s.created_at, 
 			s.updated_at,
-			COALESCE(kl.id, 0) AS location,
-			COALESCE(array_agg(DISTINCT a.id) FILTER (WHERE a.id IS NOT NULL), '{}'::INT[]) AS attachments
-	FROM 
+			COALESCE(kl.id, 0) AS location
+	FROM
 			spots s
 	LEFT JOIN 
 			known_locations kl ON kl.ref_id = s.id AND kl.ref_type = 'spot'
-	LEFT JOIN 
-			attachments a ON a.ref_id = s.id AND a.ref_type = 'spot'
 	WHERE
 			s.id = $1
 	GROUP BY 
@@ -65,14 +63,11 @@ func (m *Spots) GetSelectAllQuery() string {
 			s.ref_user_uploader, 
 			s.created_at, 
 			s.updated_at,
-			COALESCE(kl.id, 0) AS location,
-			COALESCE(array_agg(DISTINCT a.id) FILTER (WHERE a.id IS NOT NULL), '{}'::INT[]) AS attachments
+			COALESCE(kl.id, 0) AS location
 	FROM 
 			spots s
 	LEFT JOIN 
 			known_locations kl ON kl.ref_id = s.id AND kl.ref_type = 'spot'
-	LEFT JOIN 
-			attachments a ON a.ref_id = s.id AND a.ref_type = 'spot'
 	GROUP BY 
 			s.id, kl.id, s.name, s.description, s.created_at, s.updated_at, s.ref_user_uploader`
 }

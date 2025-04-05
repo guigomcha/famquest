@@ -332,7 +332,7 @@ func AttachmentPutRef(w http.ResponseWriter, r *http.Request) {
 	attachment.RefUserUploader = info["user"].(int)
 	// Update the attachment which will trigger the GetInsertExtraQueries
 	logger.Log.Debug("Decoded object")
-	dest, httpStatus, err = crudPut(dest, mux.Vars(r))
+	dest, httpStatus, err = crudPut(attachment, mux.Vars(r))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
 		return

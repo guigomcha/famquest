@@ -1,4 +1,4 @@
-import { createInDB, addReferenceInDB, updateInDB } from '../backend_interface/db_manager_api';
+import { createInDB, addReferenceInDB, updateInDB } from './db_manager_api';
 import { message } from 'antd';
 
 export async function SpotFromForm(data, contextData) {

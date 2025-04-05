@@ -5,13 +5,13 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { Spin } from 'antd';
 import '../css/classes.css';
-import { updateInDB, createInDB, addReferenceInDB } from '../backend_interface/db_manager_api';
+import { updateInDB, createInDB, addReferenceInDB } from '../functions/db_manager_api';
 import { useTranslation } from "react-i18next";
-import { GlobalMessage } from '../backend_interface/components_helper';
+import { GlobalMessage } from '../functions/components_helper';
 
 
 // This request the baseline info to create a new Note in DB
-const NoteForm = ({ initialData, handledFinished, userId }) => {
+const NoteForm = ({ initialData, parentInfo, refType, handledFinished }) => {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,8 +38,8 @@ const NoteForm = ({ initialData, handledFinished, userId }) => {
       newNote = await updateInDB(formValues, 'note');
     } else {
       newNote = await createInDB(formValues, 'note');
-      //withRef = await addReferenceInDB(newNote.id, userId, 'user', 'note');
-      //console.info("after ref update");
+      withRef = await addReferenceInDB(newNote.id, parentInfo.id, refType, 'note');
+      console.info("note after ref update", withRef);
     }
     if (!newNote){
       GlobalMessage(t('internalError'), "error");

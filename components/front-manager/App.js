@@ -16,11 +16,11 @@ import MapManager from './components/MapManager';
 import UserButton from './components/UserButton';
 import FamilyTab from './components/Family';
 import OAuth2 from './components/Oauth2';
-import { renderDescription } from './utils/render_message';
-import { updateDiscoveredConditionsForUser } from './backend_interface/db_manager_api';
+import { renderDescription } from './functions/render_message';
+import { updateDiscoveredConditionsForUser } from './functions/db_manager_api';
 import { useTranslation } from "react-i18next";
 import i18next from "./i18n";
-import { GlobalMessage } from './backend_interface/components_helper';
+import { GlobalMessage } from './functions/components_helper';
 
 
 const isLocal = true;

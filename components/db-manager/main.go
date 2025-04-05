@@ -62,6 +62,7 @@ func main() {
 	r.HandleFunc("/note", api.NoteGetAll).Methods("GET", "OPTIONS")
 	r.HandleFunc("/note/{id}", api.NoteGet).Methods("GET", "OPTIONS")
 	r.HandleFunc("/note/{id}", api.NotePut).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/note/{id}/ref", api.NotePutRef).Methods("PUT", "OPTIONS")
 	r.HandleFunc("/note/{id}", api.NoteDelete).Methods("DELETE", "OPTIONS")
 
 	r.HandleFunc("/user", api.UserPost).Methods("POST", "OPTIONS")

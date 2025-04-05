@@ -5,14 +5,14 @@ import Card from 'react-bootstrap/Card';
 import { EditOutlined, AppstoreAddOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import NoteForm from './NoteForm';
-import { renderDescription } from '../utils/render_message';
-import { getUserInfo, deleteInDB } from '../backend_interface/db_manager_api';
-import { GlobalMessage } from '../backend_interface/components_helper';
+import { renderDescription } from '../functions/render_message';
+import { getUserInfo, deleteInDB } from '../functions/db_manager_api';
+import { GlobalMessage } from '../functions/components_helper';
 import SlideMenu from './SlideMenu';
 import { useTranslation } from "react-i18next";
 import { Spin, Alert } from 'antd';
 
-const Note = ({ initialData, userId, handledFinished }) => {
+const Note = ({ initialData, userId, parentInfo, refType, handledFinished }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { t, i18n } = useTranslation();
   const [component, setComponent] = useState(null);
@@ -20,7 +20,7 @@ const Note = ({ initialData, userId, handledFinished }) => {
   const [reload, setReload] = useState(true);
      
   const handleRequestEdit = (e) => {
-    setComponent(<NoteForm initialData={initialData} handledFinished={handleNestedRequestEdit} />);
+    setComponent(<NoteForm initialData={initialData} parentInfo={parentInfo} refType={refType} handledFinished={handleNestedRequestEdit} />);
   };
   
   const handleRequestDelete = async (e) => {

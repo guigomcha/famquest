@@ -4,8 +4,8 @@ import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { Spin, Alert } from 'antd';
-import { uploadAttachment, addReferenceInDB, updateInDB } from '../backend_interface/db_manager_api';
-import { GlobalMessage } from '../backend_interface/components_helper';
+import { uploadAttachment, addReferenceInDB, updateInDB } from '../functions/db_manager_api';
+import { GlobalMessage } from '../functions/components_helper';
 import '../css/classes.css';
 import { useTranslation } from "react-i18next";
 

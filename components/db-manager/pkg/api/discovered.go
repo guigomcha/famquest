@@ -348,7 +348,7 @@ func DiscoveredPutRef(w http.ResponseWriter, r *http.Request) {
 	discovered.RefType = r.URL.Query().Get("refType")
 	// Update the discovered which will trigger the GetInsertExtraQueries
 	logger.Log.Debug("Decoded object")
-	dest, httpStatus, err = crudPut(dest, mux.Vars(r))
+	dest, httpStatus, err = crudPut(discovered, mux.Vars(r))
 	if err != nil {
 		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)

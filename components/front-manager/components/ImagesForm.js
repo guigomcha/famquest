@@ -9,8 +9,8 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import { Spin, Alert } from 'antd';
-import { uploadAttachment, updateInDB, addReferenceInDB } from '../backend_interface/db_manager_api';
-import { GlobalMessage } from '../backend_interface/components_helper';
+import { uploadAttachment, updateInDB, addReferenceInDB } from '../functions/db_manager_api';
+import { GlobalMessage } from '../functions/components_helper';
 import '../css/classes.css';
 import { useTranslation } from "react-i18next";
 

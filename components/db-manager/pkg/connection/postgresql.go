@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/lib/pq"
 
 	"famquest/components/db-manager/pkg/models"
 	"famquest/components/go-common/logger"
@@ -86,17 +85,11 @@ func Get(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
 	case *models.Spots:
 		received := models.Spots{}
 		err := db.Get(&received, model.GetSelectOneQuery(), id)
-		if received.Attachments == nil {
-			received.Attachments = pq.Int64Array{}
-		}
 		return &received, err
 
 	case *models.Notes:
 		received := models.Notes{}
 		err := db.Get(&received, model.GetSelectOneQuery(), id)
-		if received.Attachments == nil {
-			received.Attachments = pq.Int64Array{}
-		}
 		return &received, err
 
 	case *models.Discovered:
