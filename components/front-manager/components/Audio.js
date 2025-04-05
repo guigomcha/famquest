@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
-import { getInDBWithFilter, getUserInfo, deleteInDB } from '../backend_interface/db_manager_api';
-import {renderEmptyState} from '../utils/render_message';
+import { getInDBWithFilter, getUserInfo, deleteInDB } from '../functions/db_manager_api';
+import {renderEmptyState} from '../functions/render_message';
 import Card from 'react-bootstrap/Card';
 import Carousel from 'react-bootstrap/Carousel';
 import { Button } from 'antd';
 import { EditOutlined, AudioOutlined, DeleteOutlined } from '@ant-design/icons';
 import AudioForm from './AudioForm';
 import { useTranslation } from "react-i18next";
-import { GlobalMessage } from "../backend_interface/components_helper";
+import { GlobalMessage } from "../functions/components_helper";
 import { Spin, Alert } from 'antd';
 
 const Audio = ({ parentInfo, refType, handleMenuChange }) => {

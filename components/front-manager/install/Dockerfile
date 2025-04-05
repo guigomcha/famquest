@@ -10,9 +10,8 @@ RUN npm install
 COPY components/front-manager/*.js ./
 COPY components/front-manager/components ./components
 COPY components/front-manager/assets ./assets
-COPY components/front-manager/backend_interface ./backend_interface
 COPY components/front-manager/public ./public
-COPY components/front-manager/utils ./utils
+COPY components/front-manager/functions ./functions
 COPY components/front-manager/css ./css
 # Release in dit/
 RUN npx expo export --platform web

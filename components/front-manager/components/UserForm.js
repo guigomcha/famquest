@@ -5,10 +5,10 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { Spin } from 'antd';
 import '../css/classes.css';
-import { updateInDB } from '../backend_interface/db_manager_api';
+import { updateInDB } from '../functions/db_manager_api';
 import { DatePicker, Space } from 'antd';
 import { useTranslation } from "react-i18next";
-import { GlobalMessage } from '../backend_interface/components_helper';
+import { GlobalMessage } from '../functions/components_helper';
 
 // This request the baseline info to create a new User in DB
 const UserForm = ({ initialData, handledFinished }) => {

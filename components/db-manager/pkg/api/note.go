@@ -46,6 +46,8 @@ func NotePost(w http.ResponseWriter, r *http.Request) {
 // @Description Get a list of all notes
 // @Tags note
 // @Produce json
+// @Param refId query int false "Reference ID (optional)"
+// @Param refType query string false "Reference Type (optional)" Enums(spot,note)
 // @Success 200 {array} models.Notes
 // @Router /note [get]
 func NoteGetAll(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +55,18 @@ func NoteGetAll(w http.ResponseWriter, r *http.Request) {
 	// w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	handleHeaders(w, r)
 	logger.Log.Info("Called to func NoteGetAll")
-	dest, httpStatus, err := crudGetAll(&models.Notes{}, "")
+	// Create the filter
+	filter := ""
+	if r.URL.Query().Get("refId") != "" {
+		intId, err := parseId(r.URL.Query().Get("refId"))
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Ref error: %s", err.Error()), http.StatusBadRequest)
+			return
+		}
+		filter = fmt.Sprintf("WHERE ref_id = %d AND ref_type = '%s'", intId, r.URL.Query().Get("refType"))
+		logger.Log.Debugf("created filer '%s'", filter)
+	}
+	dest, httpStatus, err := crudGetAll(&models.Notes{}, filter)
 	logger.Log.Debugf("objects obtained '%d'", len(dest))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
@@ -223,7 +236,7 @@ func NotePutRef(w http.ResponseWriter, r *http.Request) {
 	note.RefUserUploader = info["user"].(int)
 	// Update the note which will trigger the GetInsertExtraQueries
 	logger.Log.Debug("Decoded object")
-	dest, httpStatus, err = crudPut(dest, mux.Vars(r))
+	dest, httpStatus, err = crudPut(note, mux.Vars(r))
 	if err != nil {
 		http.Error(w, err.Error(), httpStatus)
 		return

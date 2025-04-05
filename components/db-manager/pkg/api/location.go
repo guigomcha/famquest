@@ -211,7 +211,7 @@ func LocationPutRef(w http.ResponseWriter, r *http.Request) {
 	location.RefUserUploader = info["user"].(int)
 	// Update the location which will trigger the GetInsertExtraQueries
 	logger.Log.Debug("Decoded object")
-	dest, httpStatus, err = crudPut(dest, mux.Vars(r))
+	dest, httpStatus, err = crudPut(location, mux.Vars(r))
 	if err != nil {
 		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)

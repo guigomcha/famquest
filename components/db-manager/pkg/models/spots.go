@@ -43,8 +43,8 @@ func (m *Spots) GetSelectOneQuery() string {
 			s.ref_user_uploader, 
 			s.created_at, 
 			s.updated_at,
-			COALESCE(kl.id, 0) AS location,
-	FROM 
+			COALESCE(kl.id, 0) AS location
+	FROM
 			spots s
 	LEFT JOIN 
 			known_locations kl ON kl.ref_id = s.id AND kl.ref_type = 'spot'
@@ -63,7 +63,7 @@ func (m *Spots) GetSelectAllQuery() string {
 			s.ref_user_uploader, 
 			s.created_at, 
 			s.updated_at,
-			COALESCE(kl.id, 0) AS location,
+			COALESCE(kl.id, 0) AS location
 	FROM 
 			spots s
 	LEFT JOIN 

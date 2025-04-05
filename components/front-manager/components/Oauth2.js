@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Button from 'react-bootstrap/Button';
-import { registerUser, getUserInfo, getConfigure } from '../backend_interface/db_manager_api';
+import { registerUser, getUserInfo, getConfigure } from '../functions/db_manager_api';
 import { useTranslation } from "react-i18next";
 
 const isLocal = true;

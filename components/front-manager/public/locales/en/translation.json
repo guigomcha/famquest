@@ -21,6 +21,7 @@
 	"recording" : "Recording",
 	"notes" : "Notes",
 	"audiosInImage" : "Audios available in this image",
+	"notesInSpot" : "Notes available in this spot",
 	"readOnly" : "ReadOnly",
 	"selectFromDevice" : "Select from device",
 	"cameraControl" : "open&close",

@@ -702,6 +702,18 @@ paths:
   /note:
     get:
       description: Get a list of all notes
+      parameters:
+      - description: Reference ID (optional)
+        in: query
+        name: refId
+        type: integer
+      - description: Reference Type (optional)
+        enum:
+        - spot
+        - note
+        in: query
+        name: refType
+        type: string
       produces:
       - application/json
       responses:

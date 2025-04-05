@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,39 +37,11 @@ func (m *Notes) GetTableName() string {
 }
 
 func (m *Notes) GetSelectOneQuery() string {
-	return `
-	SELECT 
-			s.id, 
-			s.name, 
-			s.description, 
-			s.category, 
-			s.ref_user_uploader, 
-			s.datetime, 
-			s.created_at, 
-			s.updated_at
-	FROM 
-			notes s
-	WHERE
-			s.id = $1
-	GROUP BY 
-			s.id, s.name, s.description, s.category, s.datetime, s.created_at, s.updated_at, s.ref_user_uploader`
+	return fmt.Sprintf(`SELECT * FROM %s  WHERE id = $1`, m.GetTableName())
 }
 
 func (m *Notes) GetSelectAllQuery() string {
-	return `
-	SELECT 
-			s.id, 
-			s.name, 
-			s.description, 
-			s.category, 
-			s.ref_user_uploader, 
-			s.datetime, 
-			s.created_at, 
-			s.updated_at
-	FROM 
-			notes s
-	GROUP BY 
-			s.id, s.name, s.description, s.category, s.datetime, s.created_at, s.updated_at, s.ref_user_uploader`
+	return fmt.Sprintf(`SELECT * FROM %s `, m.GetTableName())
 }
 
 func (m *Notes) GetInsertQuery() string {
@@ -93,5 +66,13 @@ func (m *Notes) GetDeleteExtraQueries() []string {
 }
 
 func (m *Notes) GetInsertExtraQueries() []string {
+	if m.RefId != 0 {
+		return []string{
+			fmt.Sprintf(`
+			UPDATE %s
+			SET ref_id = :ref_id, ref_type = :ref_type
+			WHERE id = :id`, m.GetTableName()),
+		}
+	}
 	return []string{}
 }

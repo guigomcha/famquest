@@ -4,9 +4,9 @@ import { message, Button, FloatButton } from 'antd';
 import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import { UserOutlined, ReloadOutlined, AimOutlined, FrownOutlined } from '@ant-design/icons';
-import { createInDB, updateDiscoveredConditionsForUser } from '../backend_interface/db_manager_api';
-import { GlobalMessage } from '../backend_interface/components_helper';
-import { collectLogs } from '../backend_interface/utils';
+import { createInDB, updateDiscoveredConditionsForUser } from '../functions/db_manager_api';
+import { GlobalMessage } from '../functions/components_helper';
+import { collectLogs } from '../functions/utils';
 import { useTranslation } from "react-i18next";
 
 const UserButton = ({ user,  mapRef }) => {

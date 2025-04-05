@@ -38,10 +38,12 @@ BEGIN
         -- Dynamically execute the ALTER TABLE command to add the column without a default
         EXECUTE format('
             ALTER TABLE %I
-            ADD COLUMN IF NOT EXISTS ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot', 'user' ));', table_to_update);
+            ADD COLUMN IF NOT EXISTS ref_type TEXT DEFAULT ''user'' CHECK (ref_type IN (''spot'', ''user'' ));', table_to_update);
         EXECUTE format('
             ALTER TABLE %I
             ADD COLUMN IF NOT EXISTS ref_id INT DEFAULT 0;', table_to_update);
-
+        EXECUTE format('
+            UPDATE %I
+            SET ref_id = ref_user_uploader;', table_to_update);
     END LOOP;
 END $$;

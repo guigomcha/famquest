@@ -758,6 +758,24 @@ const docTemplate = `{
                     "note"
                 ],
                 "summary": "Retrieve all notes",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Reference ID (optional)",
+                        "name": "refId",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "spot",
+                            "note"
+                        ],
+                        "type": "string",
+                        "description": "Reference Type (optional)",
+                        "name": "refType",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

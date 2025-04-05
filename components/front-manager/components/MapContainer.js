@@ -6,10 +6,10 @@ import * as L from 'leaflet';
 import React, { useEffect, useRef, useState } from "react";
 import SpotForm from './SpotForm';
 import SpotPopup from './SpotPopup';
-import { GlobalMessage, SpotFromForm } from '../backend_interface/components_helper';
-import { worldPolygon, uncoverFog, locationVisible } from '../backend_interface/fog_functions';
+import { GlobalMessage, SpotFromForm } from '../functions/components_helper';
+import { worldPolygon, uncoverFog, locationVisible } from '../functions/fog_functions';
 import { Spin, Alert } from 'antd';
-import { getInDB, fetchAndPrepareSpots } from "../backend_interface/db_manager_api";
+import { getInDB, fetchAndPrepareSpots } from "../functions/db_manager_api";
 import { useTranslation } from "react-i18next";
 const scale = 13;
 
