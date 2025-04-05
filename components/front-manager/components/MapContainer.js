@@ -66,7 +66,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
             }
           })
           // Visibility based on Fog
-          if (!isVisibleWithFog(location)){
+          if (!isVisibleWithFog(location, rightClick=false)){
             visible = false;
           }
           // // The show condition is only for the target user (which uses the fog)
@@ -96,13 +96,11 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
         } else {
           //Uncover new area in fog
           fogGeoJson.current = uncoverFog(location, fogGeoJson.current);
-          featureGroup.current.removeLayer(fogLayer.current);
           fogLayer.current = L.geoJSON([fogGeoJson.current], {
             style(feature) {
               return feature.properties && feature.properties.style;
             },
           });
-          featureGroup.current.addLayer(fogLayer.current);
         }
       });
     }
@@ -136,12 +134,14 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
     }
   };
 
-  const isVisibleWithFog = (location) => {
+  const isVisibleWithFog = (location, rightClick=true) => {
     if (!mapRef.current.hasLayer(featureGroup.current)){
       // console.info("mask disabled: "+ JSON.stringify(location));
     } else if (!locationVisible(location, fogGeoJson.current)){
-      console.info("can only right click and see outside of fog");
-      GlobalMessage(t("actionInvalid"), "warning");
+      if (rightClick) {
+        console.info("can only right click and see outside of fog");
+        GlobalMessage(t("actionInvalid"), "warning");
+      }
       return false;
     }
     return true;
@@ -179,12 +179,14 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
         featureGroup.current = L.featureGroup().addTo(mapRef.current);
         featureGroup.current.addLayer(fogLayer.current);
         featureGroup.current.on('remove', (e) => {
-          console.info("mask removed", e);
           prepareMap();
+          featureGroup.current.removeLayer(fogLayer.current);
+          console.info("mask removed", e);
         });
         featureGroup.current.on('add', (e) => {
-          console.info("mask added", e);
           prepareMap();
+          featureGroup.current.addLayer(fogLayer.current);
+          console.info("mask added", e);
         });
         
       }
