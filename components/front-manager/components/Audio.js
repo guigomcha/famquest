@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next";
 import { GlobalMessage } from "../functions/components_helper";
 import { Spin, Alert } from 'antd';
 
-const Audio = ({ parentInfo, refType, handleMenuChange }) => {
+const Audio = ({ parentInfo, refType, handleMenuChange, user }) => {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -105,6 +105,22 @@ const Audio = ({ parentInfo, refType, handleMenuChange }) => {
                         <Card.Title>{audio.datetime}: {audio.name}</Card.Title>
                         <Card.Text>{audio.description}</Card.Text>
                         <Card.Text>{t('owner')}: {info.name}</Card.Text>
+                        {user.id == info.id && 
+                          <>
+                          <Button trigger="click"
+                            type="default"
+                            icon={<EditOutlined />}
+                            onClick={handleRequestEdit}
+                          >{t('edit')}
+                          </Button>
+                          <Button trigger="click"
+                            type="default"
+                            icon={<DeleteOutlined />}
+                            onClick={handleRequestDelete}
+                            >{t('delete')}
+                          </Button>
+                        </>
+                        }
                     </Card.Footer>
                   </Card>
                 </Carousel.Item>
@@ -120,22 +136,6 @@ const Audio = ({ parentInfo, refType, handleMenuChange }) => {
             icon={<AudioOutlined />}
             onClick={handleRequestNew}
             >{t('new')}</Button>
-
-          {selectedAudios.length > 0 && 
-          <>
-            <Button trigger="click"
-              type="default"
-              icon={<EditOutlined />}
-              onClick={handleRequestEdit}
-            >{t('edit')}
-            </Button>
-            <Button trigger="click"
-              type="default"
-              icon={<DeleteOutlined />}
-              onClick={handleRequestDelete}
-              >{t('delete')}
-            </Button>
-          </>}
         </Card.Footer>
       </>
   );

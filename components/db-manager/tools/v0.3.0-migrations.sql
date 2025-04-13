@@ -47,3 +47,39 @@ BEGIN
             SET ref_id = ref_user_uploader;', table_to_update);
     END LOOP;
 END $$;
+
+--- Attachments are now linked only to notes and other attachments, not to spots
+
+BEGIN;
+
+-- Step 1: Insert new notes for each spot with attachments
+WITH inserted_notes AS (
+    INSERT INTO notes (name, description, ref_type, ref_id, ref_user_uploader, category, datetime)
+    SELECT 
+        s.name,
+        s.description,
+        'spot' AS ref_type,
+        s.id AS ref_id,
+        s.ref_user_uploader,
+        'general' AS category,
+        s.created_at AS datetime
+    FROM spots s
+    WHERE EXISTS (
+        SELECT 1 
+        FROM attachments a
+        WHERE a.ref_type = 'spot'
+          AND a.ref_id = s.id
+    )
+    RETURNING id AS note_id, ref_id AS spot_id
+)
+
+-- Step 2: Update attachments to reference the new notes
+UPDATE attachments a
+SET 
+    ref_type = 'note',
+    ref_id = n.note_id
+FROM inserted_notes n
+WHERE a.ref_type = 'spot'
+  AND a.ref_id = n.spot_id;
+
+COMMIT;

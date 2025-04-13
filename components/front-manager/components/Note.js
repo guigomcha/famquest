@@ -6,26 +6,27 @@ import { EditOutlined, AppstoreAddOutlined, DeleteOutlined } from '@ant-design/i
 import { Button } from 'antd';
 import NoteForm from './NoteForm';
 import { renderDescription } from '../functions/render_message';
-import { getUserInfo, deleteInDB } from '../functions/db_manager_api';
+import { getUserInfo, deleteInDB, getInDB } from '../functions/db_manager_api';
 import { GlobalMessage } from '../functions/components_helper';
 import SlideMenu from './SlideMenu';
 import { useTranslation } from "react-i18next";
 import { Spin, Alert } from 'antd';
 
-const Note = ({ initialData, userId, parentInfo, refType, handledFinished }) => {
+const Note = ({ initialData, user, parentInfo, refType, handledFinished }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { t, i18n } = useTranslation();
   const [component, setComponent] = useState(null);
   const [info, setInfo] = useState({ "name": "unknown" });
   const [reload, setReload] = useState(true);
+  const [content, setContent] = useState(initialData);
      
   const handleRequestEdit = (e) => {
-    setComponent(<NoteForm initialData={initialData} parentInfo={parentInfo} refType={refType} handledFinished={handleNestedRequestEdit} />);
+    setComponent(<NoteForm initialData={content} parentInfo={parentInfo} refType={refType} handledFinished={handleNestedRequestEdit} />);
   };
   
   const handleRequestDelete = async (e) => {
     setIsLoading(true);
-    const deleteResponse = await deleteInDB(initialData.id, 'note');
+    const deleteResponse = await deleteInDB(content.id, 'note');
     console.info("delete response: ", deleteResponse);
     if (deleteResponse == "OK") {
       GlobalMessage(t("actionCompleted"), "info");
@@ -41,7 +42,9 @@ const Note = ({ initialData, userId, parentInfo, refType, handledFinished }) => 
     console.info("handleNested ", comp);
     if (comp == "done" || !comp) {
       setComponent(null);
-      handledFinished("done");
+      if (refType == "user"){
+        handledFinished("done");
+      }
       setReload(!reload);
     } else {
       setComponent(comp); // Trigger show slideMenu
@@ -56,27 +59,30 @@ const Note = ({ initialData, userId, parentInfo, refType, handledFinished }) => 
     }
     const userInfo = await getUserInfo(model.refUserUploader);
     setInfo(userInfo);
+    const tempContent = await getInDB("note", content.id);
+    setContent(tempContent);
   };
 
   useEffect(() => {
-    console.info("Showing note ", initialData);
-    fetchRelatedInfo(initialData);
-  }, [initialData, component, reload]);
+    console.info("Showing note ", content);
+    console.info("Showing note from user ", user);
+    fetchRelatedInfo(content);
+  }, [component, reload]);
 
   return (
     <>
       {(isLoading) &&<Spin>{t('loading')}</Spin>}
       <Card>
-        <Card.Header>id: {initialData.id}</Card.Header>
-        <Card.Title>{t('note')}: {initialData.name}</Card.Title>
-        <Card.Subtitle>{initialData.datetime}</Card.Subtitle>
+        <Card.Header>id: {content.id}</Card.Header>
+        <Card.Title>{t('note')}: {content.name}</Card.Title>
+        <Card.Subtitle>{t('datetimeRef')}: {content.datetime}</Card.Subtitle>
         <Card>
           <Card.Body>
-            <Card.Text>{renderDescription(initialData.description)}</Card.Text>
+            <Card.Text>{renderDescription(content.description)}</Card.Text>
           </Card.Body>
           <Card.Footer>
             <Card.Text>{t('owner')}: {info.name}</Card.Text>
-            {(userId == initialData.refUserUploader) &&
+            {(user.id == content.refUserUploader) &&
               <>
                 <Button trigger="click"
                   type="default"
@@ -96,11 +102,11 @@ const Note = ({ initialData, userId, parentInfo, refType, handledFinished }) => 
         </Card>
         <Card>
           <Card.Title>{t('audiosInNote')}</Card.Title>
-          <Audio parentInfo={initialData} refType={'note'} handleMenuChange={handleNestedRequestEdit} />
+          <Audio parentInfo={content} refType={'note'} handleMenuChange={handleNestedRequestEdit} user={user}/>
         </Card>
         <Card>
           <Card.Title>{t('imagesInNote')}</Card.Title>
-          <Images parentInfo={initialData} refType={'note'} handleMenuChange={handleNestedRequestEdit} />
+          <Images parentInfo={content} refType={'note'} handleMenuChange={handleNestedRequestEdit} user={user}/>
         </Card>
       </Card>
       <SlideMenu component={component} handledFinished={handleNestedRequestEdit}/>

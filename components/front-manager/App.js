@@ -63,6 +63,9 @@ export default function App() {
     i18n.changeLanguage(value);
   };
   
+  useEffect(() => {
+  }, [user]);
+  
   return (   
     <>
       <Navbar className="bg-body-tertiary">
@@ -123,7 +126,7 @@ export default function App() {
           <Tab eventKey="map" title={t('map')}>
             <Container fluid>
               <View >
-                <MapManager handleMapRef={transferHandleMapRef}/>
+                <MapManager handleMapRef={transferHandleMapRef} user={user}/>
               </View>
               <UserButton user={user} mapRef={mapRef}/>
             </Container>
