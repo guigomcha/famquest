@@ -24,7 +24,7 @@ const iconStyle = {
   iconAnchor: [12, 36],
 };
 
-const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
+const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
   const { t, i18n } = useTranslation();
   const mapRef = useRef(null);
   const guilleSpotsGroup = useRef(null);
@@ -127,7 +127,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
       setReload(!reload);
     } else if (e?.target.data.componentType == "SpotPopup") {
       console.info("opening a spot from map ", e);
-      handleMenuChange(<SpotPopup location={e.target.data} handledFinished={sendBackComponent}/>);
+      handleMenuChange(<SpotPopup location={e.target.data} handledFinished={sendBackComponent} user={user}/>);
     } else {
       console.info("opening a new form from map ", e);
       handleMenuChange(<SpotForm initialData={e.target.data} handledFinished={sendBackComponent}/>);
@@ -219,7 +219,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef } ) => {
     }
     fetchData();
   
-  }, [reload]);
+  }, [reload, user]);
 
 
   return (

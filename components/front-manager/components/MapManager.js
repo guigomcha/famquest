@@ -8,7 +8,7 @@ import '../css/classes.css';
 
 
 // This is the main component of the Map which should connect with APIs to get the required info to feed it down
-const MapManager = ( {handleMapRef} ) => {  
+const MapManager = ( {handleMapRef, user} ) => {  
   const [component, setComponent] = useState(null);
 
   const handleMenuChange = (comp) => {
@@ -16,11 +16,13 @@ const MapManager = ( {handleMapRef} ) => {
   }; 
   const transferHandleMapRef = (map) => {
     handleMapRef(map); 
-  };   
+  };
+  useEffect(() => {
+  }, [user]);
   return (
     <>
       <div>
-        <MapContainer handleMenuChange={handleMenuChange} handleMapRef={transferHandleMapRef}/>
+        <MapContainer handleMenuChange={handleMenuChange} handleMapRef={transferHandleMapRef} user={user}/>
         {component && <SlideMenu component={component} handledFinished={handleMenuChange}></SlideMenu>}
       </div>
     </>

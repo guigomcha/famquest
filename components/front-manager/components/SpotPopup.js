@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Images from './Images';
-import Audio from './Audio';
 import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Badge from 'react-bootstrap/Badge';
@@ -16,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { Spin, Alert } from 'antd';
 import Note from './Note';
 
-const SpotPopup = ({ location, handledFinished }) => {
+const SpotPopup = ({ location, handledFinished, user }) => {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [component, setComponent] = useState(null);
@@ -55,7 +53,7 @@ const SpotPopup = ({ location, handledFinished }) => {
       setComponent(null);
       setReload(!reload);
     } else {
-      console.info("should be to open the slide with a form ");
+      console.info("should open the secondary slide ");
       setComponent(comp); // Trigger show slideMenu
     }
   };
@@ -72,10 +70,17 @@ const SpotPopup = ({ location, handledFinished }) => {
       setIsLoading(false);
       return;
     }
-    const tempNotes = await getInDBWithFilter(tempSpot.id, 'spot', 'note');
-    setNotes(tempNotes);
-    console.info("obtained tempNotes ", tempNotes);
+    let tempNotes = await getInDBWithFilter(tempSpot.id, 'spot', 'note');
+    const updatedNotes = await Promise.all(
+      tempNotes.map(async (note) => {
+        const userInfo = await getUserInfo(note.refUserUploader);
+        return { ...note, "userInfo": userInfo };
+      })
+    );
+    setNotes(updatedNotes);
+    console.info("obtained tempNotes ", updatedNotes);
     const userInfo = await getUserInfo(tempSpot.refUserUploader);
+    console.info("obtained userInfo ", userInfo);
     setInfo(userInfo);
     setIsLoading(false);
   };
@@ -96,34 +101,7 @@ const SpotPopup = ({ location, handledFinished }) => {
             </Card.Body> */}
           <Card.Body>
             {!spotInfo.id && <Card.Text>{t('invalidSpot')}{JSON.stringify(location)}</Card.Text>}
-            {/* Render description with line breaks */}
             <Card.Text>{renderDescription(spotInfo.description)}</Card.Text>
-            <Card>
-              <Card.Title>{t('notesInSpot')}</Card.Title>
-                {notes.length > 0 ? ( 
-                <ListGroup as="ol" numbered>
-                  {notes
-                    .map((note, index) => (
-                      <ListGroup.Item className="justify-content-between" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} userId={info.id} parentInfo={spotInfo} refType={'spot'} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
-                        {note.name}
-                        <Badge bg="primary" pill>
-                        {note.category}
-                        </Badge>
-                      </ListGroup.Item>
-                    ))}
-                </ListGroup>
-                ) : (                  
-                  renderEmptyState(t('empty'))
-                )}
-                <Card.Footer> 
-                    <Button trigger="click"
-                      type="default"
-                      icon={<AppstoreAddOutlined />}
-                      onClick={handleRequestNewNote}
-                      >{t('new')}
-                    </Button>
-                </Card.Footer>
-            </Card> {/* TODO: initialData userId handledFinished */}
           </Card.Body>
           <Card.Footer>
             <Button
@@ -140,17 +118,41 @@ const SpotPopup = ({ location, handledFinished }) => {
               onClick={handleRequestDelete}
               >{t('delete')}
             </Button>
-            <Card.Text>{t('owner')}: {info.name}</Card.Text>
+            {/* <Card.Text>{t('owner')}: {info.name}</Card.Text> */}
           </Card.Footer>
-        </Card>
-        <Card>
-          <Card.Title>{t('audiosInSpot')}</Card.Title>
-          <Audio parentInfo={spotInfo} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
-        </Card>
-        <Card>
-          <Card.Title>{t('imagesInSpot')}</Card.Title>
-          <Images parentInfo={spotInfo} refType={'spot'} handleMenuChange={handleNestedRequestEdit} />
-        </Card>
+          </Card>
+          <Card>
+            <Card.Title>{t('notesInSpot')}</Card.Title>
+              {notes.length > 0 ? ( 
+              <ListGroup as="ol" numbered>
+                {notes
+                  .map((note, index) => (
+                    <ListGroup.Item  as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} user={user} parentInfo={spotInfo} refType={'spot'} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
+                      {note.name}
+                      <Badge bg="primary" pill>
+                      {t('category')}: {note.category}
+                      </Badge>
+                      <Badge bg="info" pill>
+                      {t('owner')}: {note.userInfo.name}
+                      </Badge>
+                      <Badge bg="secondary" pill>
+                      {t('datetimeRef')}: {note.datetime}
+                      </Badge>
+                    </ListGroup.Item>
+                  ))}
+              </ListGroup>
+              ) : (                  
+                renderEmptyState(t('empty'))
+              )}
+              <Card.Footer> 
+                  <Button trigger="click"
+                    type="default"
+                    icon={<AppstoreAddOutlined />}
+                    onClick={handleRequestNewNote}
+                    >{t('new')}
+                  </Button>
+              </Card.Footer>
+          </Card>
       </Card>
       <SlideMenu component={component} handledFinished={handleNestedRequestEdit}/>
     </>

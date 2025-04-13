@@ -20,6 +20,7 @@
 	"audioControl": "iniciar/detener grabación",
 	"recording": "Grabando",
 	"notes": "Notas",
+	"datetimeRef" : "Fecha",
 	"notesInSpot" : "Notas disponibles en este lugar",
 	"audiosInImage": "Audios disponibles en esta imagen",
 	"readOnly": "Solo lectura",

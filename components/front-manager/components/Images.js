@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 import { Spin, Alert } from 'antd';
 
 
-const Images = ( {parentInfo, refType, handleMenuChange} ) => {
+const Images = ( {parentInfo, refType, handleMenuChange, user} ) => {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -102,6 +102,24 @@ const Images = ( {parentInfo, refType, handleMenuChange} ) => {
                   <Card.Title>{image.datetime}: {image.name}</Card.Title>
                   <Card.Text>{image.description}</Card.Text>
                   <Card.Text>{t('owner')}: {info.name}</Card.Text>
+                  <Card.Footer>
+                    {user.id == info.id &&
+                    <>
+                      <Button trigger="click"
+                        type="default"
+                        icon={<EditOutlined />}
+                        onClick={handleRequestEdit}
+                      >{t('edit')}
+                      </Button>
+                      <Button trigger="click"
+                        type="default"
+                        icon={<DeleteOutlined />}
+                        onClick={handleRequestDelete}
+                        >{t('delete')}
+                      </Button>
+                    </>
+                    }
+                  </Card.Footer>
                 </Card>
               </Carousel.Item>
             ))}
@@ -121,25 +139,8 @@ const Images = ( {parentInfo, refType, handleMenuChange} ) => {
             icon={<FileAddOutlined />}
             onClick={handleRequestNew}
             >{t('new')}</Button>
-
-          {selectedImages.length > 0 &&
-          <>
-            <Button trigger="click"
-              type="default"
-              icon={<EditOutlined />}
-              onClick={handleRequestEdit}
-            >{t('edit')}
-            </Button>
-            <Button trigger="click"
-              type="default"
-              icon={<DeleteOutlined />}
-              onClick={handleRequestDelete}
-              >{t('delete')}
-            </Button>
-          </>}
         </Card.Footer>
       </>
-
   );
 };
 export default Images;
