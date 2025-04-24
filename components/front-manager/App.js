@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import React, { useRef, useState, useEffect } from "react";
 import 'leaflet/dist/leaflet.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './css/App.css';
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
 import Card from 'react-bootstrap/Card';

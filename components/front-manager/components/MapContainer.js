@@ -36,6 +36,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
   const allDiscovered = useRef(null);
   const allLocations = useRef(null);
   const [reload, setReload] = useState(true);
+  const [connectedUser, setConnectedUser] = useState(user);
 
   
   const fetchData = async () => {
@@ -53,10 +54,11 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
   };
 
   const prepareMap = () => {
+    console.info("prepare with user ", connectedUser)
     // After the map is loaded, reveal the area around each marker
     if (mapRef.current && allLocations.current && fogLayer.current) {
       allLocations.current.forEach((location, index) => {
-        if (location.refId != 0) {
+        if (location.refId != 0 && location.refType == "spot") {
           console.info("Checking it should display spot: ", location.refId);
           let visible = true;
           let markerRef = null;
@@ -93,7 +95,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
           guilleSpotsGroup.current.addLayer(marker);
           markers.current.push({"spotId": location.refId, "marker": marker});
           return;
-        } else {
+        } else if (location.refType == "user" && location.refId == connectedUser.id){
           //Uncover new area in fog
           fogGeoJson.current = uncoverFog(location, fogGeoJson.current);
           fogLayer.current = L.geoJSON([fogGeoJson.current], {
@@ -127,7 +129,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
       setReload(!reload);
     } else if (e?.target.data.componentType == "SpotPopup") {
       console.info("opening a spot from map ", e);
-      handleMenuChange(<SpotPopup location={e.target.data} handledFinished={sendBackComponent} user={user}/>);
+      handleMenuChange(<SpotPopup location={e.target.data} handledFinished={sendBackComponent} user={connectedUser}/>);
     } else {
       console.info("opening a new form from map ", e);
       handleMenuChange(<SpotForm initialData={e.target.data} handledFinished={sendBackComponent}/>);
@@ -149,7 +151,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
 
   // Create and configure the map
   useEffect(() => {
-    if (!mapRef.current) {
+    if (!mapRef.current || !user) {
       console.log("Creating the map:", isLoading);
       const mapDiv = document.getElementById("mapId");
       mapRef.current = L.map(mapDiv).setView([defaultCenter.lat, defaultCenter.lng], scale);

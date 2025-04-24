@@ -4,6 +4,7 @@
 	"family": "Familia",
 	"welcomeTitle": "Bienvenido a tu instancia de la aplicación FamQuest",
 	"famQuest": "\"FamQuest\"",
+	"callToAction": "Info",
 	"frontDescription": "Esta es una instancia privada de un servicio disponible públicamente (código abierto en GitHub <a href=\"https://github.com/guigomcha/famquest\" target=\"_blank\" className=\"fa fa-github\"></a>) que puedes instalar para alojar tu <strong>FamQuest</strong>. <br> Cada miembro de la familia puede contribuir con información que ayudará a crear un libro digital interactivo y compartido (pero privado) de la historia familiar que podrá ser descubierto por nuevas generaciones.",
 	"coreObjectivesTitle": "¿Cómo funciona?:",
 	"coreObjective1": "Cada miembro de la familia puede contribuir con nuevas ubicaciones de interés o en las ya existentes.",
