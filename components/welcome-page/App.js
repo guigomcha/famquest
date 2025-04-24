@@ -152,21 +152,6 @@ export default function App() {
                 </Card>
             </Container>
           </Tab>
-          <Tab eventKey="instances" title={t('instances')}>
-            <Container fluid>
-                <Card>
-                  <Card.Title>{t('instances')}</Card.Title>
-                  <Card.Body>
-                    <Card.Text>
-                      <ul>
-                        <li><a href="https://portal.jaime.famquest.guigomcha.dynv6.net" target="_blank" rel="Gomez Chavez family">Jaime</a></li>
-                        <li><a href="https://portal.staging.famquest.guigomcha.dynv6.net" target="_blank" rel="Staging">Dev</a></li>
-                      </ul>
-                    </Card.Text>
-                  </Card.Body>
-                </Card>
-            </Container>
-          </Tab>
       </Tabs>
     </> 
   );
