@@ -8,9 +8,10 @@ import SpotForm from './SpotForm';
 import SpotPopup from './SpotPopup';
 import { GlobalMessage, SpotFromForm } from '../functions/components_helper';
 import { worldPolygon, uncoverFog, locationVisible } from '../functions/fog_functions';
-import { Spin } from 'antd';
 import { getInDB, fetchAndPrepareSpots } from "../functions/db_manager_api";
 import { useTranslation } from "react-i18next";
+import Row from 'react-bootstrap/Row';
+import { Select, Space, Spin } from 'antd';
 
 const scale = 13;
 
@@ -38,7 +39,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
   const allLocations = useRef(null);
   const [reload, setReload] = useState(true);
   const userRef = useRef();
-  const configuration = useState({"mode": "adventure"});
+  const [configuration, setConfiguration] = useState({"mode": "adventure"});
 
   
   const fetchData = async () => {
@@ -175,9 +176,25 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
     return true;
   }
 
+  const handleChangeMode = (e) => {
+    console.info("modechange ", e)
+    setConfiguration({...configuration, mode: e})
+  }
+  useEffect(() => {
+    if (!mapRef.current || !fogLayer.current || !featureGroup.current){
+      return;
+    }
+    console.info("configuration re-render ", configuration, featureGroup.current.hasLayer(fogLayer.current))
+    if (configuration.mode == "adventure" && !featureGroup.current.hasLayer(fogLayer.current) ) {
+      featureGroup.current.addLayer(fogLayer.current);
+    } else if (configuration.mode == "visualization" && featureGroup.current.hasLayer(fogLayer.current)) {
+      featureGroup.current.removeLayer(fogLayer.current);
+    }
+    prepareMap();
+  }, [configuration])
+
   // Create and configure the map
   useEffect(() => {
-
     if (user?.id) {
       userRef.current = user;
       console.info("added user to mapcontainer ", user);
@@ -246,10 +263,8 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
       // Create overlay controls
       const overlays = {
         "Spots": guilleSpotsGroup.current,
-        "Mask map": featureGroup.current
       };
       L.control.layers(null, overlays, { collapsed: false }).addTo(mapRef.current);
-      mapRef.current.removeLayer(featureGroup.current);
       markers.current = []
       console.log("created the map:", isLoading);
     }
@@ -262,9 +277,25 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%"}}>
-      {(isLoading) &&<Spin>{t('loading')}</Spin>}
-      <div id="mapId" style={{ height: '100vh', width: '100vw' }}>
-      </div>
+      <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
+        <Row>
+          <Select
+          prefix={t("mode")}
+          defaultValue="adventure"
+          style={{ width: 200 }}
+          onChange={handleChangeMode}
+          options={[
+            { value: 'adventure', label: t("adventure") },
+            { value: 'visualization', label: t("visualization") },
+          ]}
+        />
+        </Row>
+        <Row>
+          <div id="mapId" style={{ height: '100vh', width: '100vw' }}>
+            {(isLoading) &&<Spin >{t('loading')}</Spin>}
+          </div>
+        </Row>
+      </Space>
     </div>
   );
 };
