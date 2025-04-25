@@ -133,14 +133,14 @@
     "overrides": [
         {
             "filename": "components/front-manager/public/locales/es/translation.json",
-            "language": "es",
+            "language": "es-esp",
             "ignoreRegExpList": [
                 "/\"[^\"\\n]*\"\\s*:\\s*\"([^\\n\"]+)\"/"
             ]
         },
         {
             "filename": "components/welcome-page/public/locales/es/translation.json",
-            "language": "es",
+            "language": "es-esp",
             "ignoreRegExpList": [
                 "/\"[^\"\\n]*\"\\s*:\\s*\"([^\\n\"]+)\"/"
             ]
