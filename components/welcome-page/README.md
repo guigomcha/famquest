@@ -61,7 +61,7 @@ npx expo export --platform web
 
 ```bash
 cd ../../
-docker build -t ghcr.io/guigomcha/famquest/welcomepage:staging -f components/welcome-page/install/Dockerfile --progress plain  --network=host .
+docker build -t ghcr.io/guigomcha/famquest/welcomepage:staging -f components/welcome-page/install/Dockerfile --progress plain  --network=host . && docker push ghcr.io/guigomcha/famquest/welcomepage:staging && kubectl rollout restart deployment -n common welcomepage-deployment
 cd components/welcome-page
 ```
 
