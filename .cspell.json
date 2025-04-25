@@ -72,6 +72,7 @@
         "@cspell/dict-css/cspell-ext.json",
         "@cspell/dict-makefile/cspell-ext.json",
         "@cspell/dict-markdown/cspell-ext.json",
+        "@cspell/dict-es-es/cspell-ext.json",
         "@cspell/dict-public-licenses/cspell-ext.json"
     ],
     "useGitignore": true,
@@ -99,7 +100,7 @@
         "project-words",
         "makefile",
         "en-gb",
-        "es-esp",
+        "es",
         "cpp",
         "cpp-legacy",
         "cpp-refined",
@@ -133,14 +134,14 @@
     "overrides": [
         {
             "filename": "components/front-manager/public/locales/es/translation.json",
-            "language": "es-esp",
+            "language": "es",
             "ignoreRegExpList": [
                 "/\"[^\"\\n]*\"\\s*:\\s*\"([^\\n\"]+)\"/"
             ]
         },
         {
             "filename": "components/welcome-page/public/locales/es/translation.json",
-            "language": "es-esp",
+            "language": "es",
             "ignoreRegExpList": [
                 "/\"[^\"\\n]*\"\\s*:\\s*\"([^\\n\"]+)\"/"
             ]
