@@ -82,7 +82,6 @@ export default function App() {
               <Card.Title>{t('welcomeTitle')}</Card.Title>
               <Row className={`card-row ${isImageAboveText ? 'stacked' : ''}`}>
                 <Col md={isImageAboveText ? 12 : 6}>
-                  <Card.Img variant="top" src="assets/famquest-logo.png" />
                   {isImageAboveText && (
                     <Card.ImgOverlay bsPrefix="card-row">
                       <Button trigger="click"
@@ -92,6 +91,7 @@ export default function App() {
                         >{t('callToAction')}</Button>
                     </Card.ImgOverlay>
                   )}
+                  <Card.Img variant="top" src="assets/famquest-logo.png" />
                 </Col>
                 <Col md={isImageAboveText ? 12 : 6}>
                   <Card.Body ref={textRef}>
@@ -123,32 +123,42 @@ export default function App() {
                       </Card.Text>
                     </Card.Body>
                   </Row>
-                  <Row className={`card-row ${isImageAboveText ? 'stacked' : ''}`}>
                     <Accordion defaultActiveKey="0">
-                      <Accordion.Item eventKey="0" md={isImageAboveText ? 12 : 6}>
+                      <Accordion.Item eventKey="0">
                         <Accordion.Header>{t('downloadFreeHead')}</Accordion.Header>
                         <Accordion.Body>
-                          <Col >
-                            <Card.Text>
-                              {renderDescription(t('downloadFreeBody'))}
-                            </Card.Text>
-                            <Card.Img variant="top" src="assets/opensource-version.png" />
-                          </Col>
+                          <Card>
+                            <Row className={`card-row ${isImageAboveText ? 'stacked' : ''}`}>
+                              <Col md={isImageAboveText ? 12 : 6}>
+                                <Card.Text>
+                                  {renderDescription(t('downloadFreeBody'))}
+                                </Card.Text>
+                              </Col>
+                              <Col md={isImageAboveText ? 12 : 6}>
+                                <Card.Img variant="top" src="assets/opensource-version.png" />
+                              </Col>
+                            </Row>
+                          </Card>
                         </Accordion.Body>
                       </Accordion.Item>
-                      <Accordion.Item eventKey="1" md={isImageAboveText ? 12 : 6}>
+                      <Accordion.Item eventKey="1">
                         <Accordion.Header>{t('downloadPublicHead')}</Accordion.Header>
                         <Accordion.Body>
-                          <Col>
-                            <Card.Text>
-                                {renderDescription(t('downloadPublicBody'))}
-                              </Card.Text>
-                            <Card.Img variant="top" src="assets/public-version.png" />
-                          </Col>
+                          <Card>
+                            <Row className={`card-row ${isImageAboveText ? 'stacked' : ''}`}>
+                              <Col md={isImageAboveText ? 12 : 6}>
+                                <Card.Text>
+                                  {renderDescription(t('downloadPublicBody'))}
+                                </Card.Text>
+                              </Col>
+                              <Col md={isImageAboveText ? 12 : 6}>
+                                <Card.Img variant="top" src="assets/public-version.png" />
+                              </Col>
+                            </Row>
+                          </Card>
                         </Accordion.Body>
                       </Accordion.Item>
                     </Accordion>
-                  </Row>
                 </Card>
             </Container>
           </Tab>
