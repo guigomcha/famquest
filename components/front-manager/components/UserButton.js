@@ -90,7 +90,7 @@ const UserButton = ({ user,  mapRef }) => {
               return;
             }
             console.info("sent location", locationDb);
-            const withRef = await addReferenceInDB(locationDb.id, user.id, "user", "spot");
+            const withRef = await addReferenceInDB(locationDb.id, user.id, "user", "location");
             console.info("sent with ref", withRef)
             if (user?.role == "target"){
               const resp = await updateDiscoveredConditionsForUser(user);

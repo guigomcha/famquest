@@ -18,7 +18,7 @@
 	"loading": "Cargando",
 	"new": "Nuevo",
 	"liveLocationInfo": "Ubicación real en ",
-	"liveLocationError": "Ubicación not encontrada, se reintentará",
+	"liveLocationError": "Ubicación no encontrada, se reintentará",
 	"privateArea": "Es necesario hacer login",
 	"edit": "Editar",
 	"name": "Nombre",
@@ -75,5 +75,8 @@
 	"internalError": "Algo ocurrió en la applicación. Consulta logs",
 	"formNotValid": "Formulario incorrecto, comprueba los campos necesarios.",
 	"actionInvalid": "Acción no permitida",
-	"discoveredUpdate": "Nuevas ubicacion(es) descubiertas"
+	"discoveredUpdate": "Nuevas ubicacion(es) descubiertas",
+	"mode": "Modo",
+	"adventure": "aventura",
+	"visualization": "visualización"
 }

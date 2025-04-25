@@ -17,8 +17,7 @@ const MapManager = ( {handleMapRef, user} ) => {
   const transferHandleMapRef = (map) => {
     handleMapRef(map); 
   };
-  useEffect(() => {
-  }, [user]);
+
   return (
     <>
       <div>
@@ -28,7 +27,7 @@ const MapManager = ( {handleMapRef, user} ) => {
     </>
   );
 };
-  
+
 export default MapManager;
   
 

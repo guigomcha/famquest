@@ -75,5 +75,8 @@
 	"formNotValid": "Form not valid, please check.",
 	"internalError": "Something happened in the app. Check logs",
 	"actionInvalid": "User action invalid.",
-	"discoveredUpdate": "New spot(s) discovered"
+	"discoveredUpdate": "New spot(s) discovered",
+	"mode": "Mode",
+	"adventure": "Adventure",
+	"visualization": "Visualization"
 }

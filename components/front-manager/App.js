@@ -30,7 +30,7 @@ const isLocal = true;
 
 export default function App() { 
   const { t, i18n } = useTranslation();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({});
   const [key, setKey] = useState('home');
   const mapRef = useRef(null);
   const [isImageAboveText, setIsImageAboveText] = useState(false); // Track layout change
@@ -137,7 +137,6 @@ export default function App() {
                   <Card.Title>{t('welcomeTitle')}</Card.Title>
                     <Row className={`card-row ${isImageAboveText ? 'stacked' : ''}`}>
                       <Col md={isImageAboveText ? 12 : 6}>
-                        <Card.Img variant="top" src="assets/famquest-logo.png" />
                         {isImageAboveText && (
                           <Card.ImgOverlay bsPrefix="card-row">
                             <Button trigger="click"
@@ -147,6 +146,7 @@ export default function App() {
                               >{t('callToAction')}</Button>
                           </Card.ImgOverlay>
                         )}
+                        <Card.Img variant="top" src="assets/famquest-logo.png" />
                       </Col>
                       <Col md={isImageAboveText ? 12 : 6}>
                         <Card.Body ref={textRef}>
@@ -169,17 +169,21 @@ export default function App() {
             </Container>
           </Tab>
           <Tab eventKey="map" title={t('map')}>
-            <Container fluid>
-              <View >
-                <MapManager handleMapRef={transferHandleMapRef} user={user}/>
-              </View>
-              <UserButton user={user} mapRef={mapRef}/>
-            </Container>
+            { (user?.id) && 
+              <Container fluid>
+                <View >
+                  <MapManager handleMapRef={transferHandleMapRef} user={user}/>
+                </View>
+                <UserButton user={user} mapRef={mapRef}/>
+              </Container>
+            }
           </Tab>
           <Tab eventKey="user" title={t('family')}>
+          { (user?.id) &&
             <Container fluid>
               <FamilyTab user={user}></FamilyTab>
             </Container>
+          }
           </Tab>
         </Tabs>
     </> 
