@@ -729,7 +729,8 @@ const docTemplate = `{
                     },
                     {
                         "enum": [
-                            "spot"
+                            "spot",
+                            "user"
                         ],
                         "type": "string",
                         "description": "Reference Type",

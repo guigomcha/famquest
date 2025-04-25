@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS known_locations (
     name TEXT NOT NULL,
     longitude FLOAT NOT NULL, -- Longitude as signed float
     latitude FLOAT NOT NULL, -- Latitude as signed float
-    ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot')), -- Constraint for ref_type
+    ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot', 'user')), -- Constraint for ref_type
     ref_id INT DEFAULT 0,
     ref_user_uploader INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated

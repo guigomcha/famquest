@@ -685,6 +685,7 @@ paths:
       - description: Reference Type
         enum:
         - spot
+        - user
         in: query
         name: refType
         required: true
