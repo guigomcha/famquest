@@ -139,17 +139,14 @@ export const deleteInDB = async (refId, endpoint) => {
   }
 };
 
-export const fetchAndPrepareSpots = async (refId) => {
+export const fetchAndPrepareSpots = async (refId, userInfo) => {
   try {
     // Fetch spots data
     const spotsData = await getInDB('spot', refId);
     console.info("fetching spot: ", refId, spotsData);
-    let discovered = await getInDB("discovered", `?refId=${spotsData.id}&refType=spot`);
+    let discovered = await getInDB("discovered", `?refId=${spotsData.id}&refType=spot&refUserUploader=${userInfo.id}`);
     // console.info("Discovered: "+JSON.stringify(discovered));
-    if (discovered.length == 1) {
-      spotsData.discovered = discovered[0];
-    } else if (discovered.length > 1) {
-      console.warning("More than one discovered?: ", discovered);
+    if (discovered.length > 0) {
       spotsData.discovered = discovered[0];
     } else {
       console.error("All spots should have a discovered entry");

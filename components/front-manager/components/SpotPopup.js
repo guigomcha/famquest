@@ -61,7 +61,7 @@ const SpotPopup = ({ location, handledFinished, user }) => {
   // fetch the additional info for this spot
   const fetchRelatedInfo = async (model) => {
     setIsLoading(true);
-    let tempSpot = await fetchAndPrepareSpots(model.refId);
+    let tempSpot = await fetchAndPrepareSpots(model.refId, user);
     console.info("Fetched initial spots ", tempSpot);
     tempSpot.location = location;
     setSpotInfo(tempSpot);

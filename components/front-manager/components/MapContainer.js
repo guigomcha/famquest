@@ -243,8 +243,6 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
         featureGroup.current = L.featureGroup();
         featureGroup.current.addLayer(fogLayer.current);
         featureGroup.current.on('remove', async (e) => {
-          console.info("before remove ", featureGroup.current,fogLayer.current)
-          console.info("after remove ", featureGroup.current,fogLayer.current)
           // Re-add markers (old, and then refresh)
           prepareMap();
           await fetchData();
@@ -289,9 +287,17 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
       markers.current = []
       console.log("created the map:", isLoading);
     }
-    if (mapRef.current && userRef.current){
-      fetchData();
-    }
+    const interval = setInterval(async () => {
+      console.log('Function executed at', new Date().toLocaleTimeString());
+      if (mapRef.current && userRef.current && featureGroup.current && fogLayer.current){
+        await fetchData();
+        featureGroup.current.clearLayers();
+        featureGroup.current.addLayer(fogLayer.current);
+      }
+    }, 5000);
+
+    // Cleanup on unmount
+    return () => clearInterval(interval);
   
   }, [reload, user]);
 

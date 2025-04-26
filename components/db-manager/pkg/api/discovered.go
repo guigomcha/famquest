@@ -140,7 +140,7 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 
 	COMMIT;
 	`, userConnected, userConnected)
-	var newDiscResult interface{}
+	var newDiscResult []interface{}
 	err = connection.ExecuteCustom(connection.DB, createMissingDiscoveredQuery, &newDiscResult)
 	if err != nil {
 		logger.Log.Error(err.Error())
