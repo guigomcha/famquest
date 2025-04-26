@@ -89,7 +89,7 @@ export const getConfigure = async () => {
     return;
   }
 };
-export const getInDB = async (endpoint, refId=0) => {
+export const getInDB = async (endpoint, refId=0, filter="") => {
   let url = `${API_URL}/${endpoint}`
   if (refId > 0) {
     url = url + `/${refId}`

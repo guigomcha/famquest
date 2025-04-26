@@ -8,7 +8,7 @@ import SpotForm from './SpotForm';
 import SpotPopup from './SpotPopup';
 import { GlobalMessage, SpotFromForm } from '../functions/components_helper';
 import { worldPolygon, uncoverFog, locationVisible } from '../functions/fog_functions';
-import { getInDB, fetchAndPrepareSpots } from "../functions/db_manager_api";
+import { getInDB, updateDiscoveredConditionsForUser } from "../functions/db_manager_api";
 import { useTranslation } from "react-i18next";
 import Row from 'react-bootstrap/Row';
 import { Select, Space, Spin } from 'antd';
@@ -46,12 +46,20 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
     setIsLoading(true);
     const tempLocations = await getInDB('location');
     console.info("Fetched initial locations ", tempLocations);
-    // setLocations(tempLocations);
     allLocations.current = tempLocations;
-    const tempDiscovered = await getInDB('discovered', 0, `?refUserUploader=${user.id}`);
-    console.info("Fetched initial discovered ", tempDiscovered);
-    // setDiscovered(tempDiscovered);
+
+    // Gets and creates missing ones
+    let tempDiscovered = await getInDB('discovered', 0, `?refUserUploader=${user.id}`);
+    console.info("Discovered for user: ", tempDiscovered);
+    const resp = await updateDiscoveredConditionsForUser(user);
+    console.info("requested discover update: ", resp);
+    if (resp.length >0) {
+      GlobalMessage(resp.length + "x" +t('discoveredUpdate')+": "+resp, "info");
+      tempDiscovered = await getInDB('discovered', 0, `?refUserUploader=${user.id}`);
+      console.info("Re-requesteddDiscovered for user: ", tempDiscovered);
+    }
     allDiscovered.current = tempDiscovered;
+    
     prepareMap();
     setIsLoading(false);
   };
