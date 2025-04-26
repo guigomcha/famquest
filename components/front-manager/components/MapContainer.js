@@ -56,7 +56,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
     if (resp.length >0) {
       GlobalMessage(resp.length + "x" +t('discoveredUpdate')+": "+resp, "info");
       tempDiscovered = await getInDB('discovered', 0, `?refUserUploader=${user.id}`);
-      console.info("Re-requesteddDiscovered for user: ", tempDiscovered);
+      console.info("Re-requested discovered for user: ", tempDiscovered);
     }
     allDiscovered.current = tempDiscovered;
     
@@ -200,7 +200,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
       console.info("should have added the mask and triggered event")
     } else if (configuration.mode == "visualization" && mapRef.current.hasLayer(featureGroup.current)) {
       featureGroup.current.remove();
-      console.info("should have deleted the mask and trigered event")
+      console.info("should have deleted the mask and triggered event")
     }
   }, [configuration])
   
