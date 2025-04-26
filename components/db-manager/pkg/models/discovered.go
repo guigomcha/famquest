@@ -15,60 +15,19 @@ type APIDiscovered struct {
 	Show      bool     `db:"show" json:"show"`           // condition was met
 }
 
-/* Examples
-
-// Discoverable when the location is found. Which happens when a nearby location is found
-{
-	"condition": {
-		"conformanceComparator": "eq",
-		"parameterType": "location",
-		"thresholdTarget": ""
-		"relatedEntity": []
-	},
-	"show": true
-}
-
-// Discoverable when the user with id 4 reaches an age of 16
-{
-	"condition": {
-		"conformanceComparator": "gt",
-		"parameterType": "age",
-		"thresholdTarget": "16"
-		"relatedEntity": [
-			{
-				"refId": "4",
-				"refType": "user"
-			}
-		]
-	},
-	"show": true
-}
-
-// Discoverable when the date is greater or equal to 2025
-{
-	"condition": {
-		"conformanceComparator": "ge",
-		"parameterType": "date",
-		"thresholdTarget": "2025"
-		"relatedEntity": []
-	},
-	"show": true
-}
-
-*/
-
 // `db:"discovered"`
 type Discovered struct {
 	// Only DB
 	UUID uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
 	// db + json
-	Condition JSONBMap  `db:"condition" json:"condition"` // this will hold a JSONB in postgresql with the condition
-	Show      bool      `db:"show" json:"show"`           // condition was met
-	RefType   string    `db:"ref_type" json:"refType"`
-	RefId     int       `db:"ref_id" json:"refId"`
-	ID        int       `db:"id" json:"id"`                          // Auto-incremented integer ID
-	CreatedAt time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
-	UpdatedAt time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
+	Condition       JSONBMap  `db:"condition" json:"condition"` // this will hold a JSONB in postgresql with the condition
+	Show            bool      `db:"show" json:"show"`           // condition was met
+	RefType         string    `db:"ref_type" json:"refType"`
+	RefId           int       `db:"ref_id" json:"refId"`
+	RefUserUploader int       `db:"ref_user_uploader" json:"refUserUploader"`
+	ID              int       `db:"id" json:"id"`                          // Auto-incremented integer ID
+	CreatedAt       time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
+	UpdatedAt       time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 }
 
 // Used to evaluate the condition based on locations
@@ -119,14 +78,14 @@ func (m *Discovered) GetSelectAllQuery() string {
 
 func (m *Discovered) GetInsertQuery() string {
 	return fmt.Sprintf(`
-		INSERT INTO %s (condition, show)
-		VALUES (:condition, :show) RETURNING id`, m.GetTableName())
+		INSERT INTO %s (condition, show, ref_user_uploader)
+		VALUES (:condition, :show, :ref_user_uploader) RETURNING id`, m.GetTableName())
 }
 
 func (m *Discovered) GetUpdateQuery() string {
 	return fmt.Sprintf(`
 		UPDATE %s
-		SET condition = :condition, show = :show
+		SET condition = :condition, show = :show, ref_user_uploader = :ref_user_uploader
 		WHERE id = :id`, m.GetTableName())
 }
 

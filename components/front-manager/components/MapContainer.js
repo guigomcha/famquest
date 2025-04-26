@@ -8,7 +8,7 @@ import SpotForm from './SpotForm';
 import SpotPopup from './SpotPopup';
 import { GlobalMessage, SpotFromForm } from '../functions/components_helper';
 import { worldPolygon, uncoverFog, locationVisible } from '../functions/fog_functions';
-import { getInDB, fetchAndPrepareSpots } from "../functions/db_manager_api";
+import { getInDB, updateDiscoveredConditionsForUser } from "../functions/db_manager_api";
 import { useTranslation } from "react-i18next";
 import Row from 'react-bootstrap/Row';
 import { Select, Space, Spin } from 'antd';
@@ -46,12 +46,20 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
     setIsLoading(true);
     const tempLocations = await getInDB('location');
     console.info("Fetched initial locations ", tempLocations);
-    // setLocations(tempLocations);
     allLocations.current = tempLocations;
-    const tempDiscovered = await getInDB('discovered');
-    console.info("Fetched initial discovered ", tempDiscovered);
-    // setDiscovered(tempDiscovered);
+
+    // Gets and creates missing ones
+    let tempDiscovered = await getInDB('discovered', 0, `?refUserUploader=${user.id}`);
+    console.info("Discovered for user: ", tempDiscovered);
+    const resp = await updateDiscoveredConditionsForUser(user);
+    console.info("requested discover update: ", resp);
+    if (resp.length >0) {
+      GlobalMessage(resp.length + "x" +t('discoveredUpdate')+": "+resp, "info");
+      tempDiscovered = await getInDB('discovered', 0, `?refUserUploader=${user.id}`);
+      console.info("Re-requested discovered for user: ", tempDiscovered);
+    }
     allDiscovered.current = tempDiscovered;
+    
     prepareMap();
     setIsLoading(false);
   };
@@ -192,7 +200,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
       console.info("should have added the mask and triggered event")
     } else if (configuration.mode == "visualization" && mapRef.current.hasLayer(featureGroup.current)) {
       featureGroup.current.remove();
-      console.info("should have deleted the mask and trigered event")
+      console.info("should have deleted the mask and triggered event")
     }
   }, [configuration])
   
@@ -235,8 +243,6 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
         featureGroup.current = L.featureGroup();
         featureGroup.current.addLayer(fogLayer.current);
         featureGroup.current.on('remove', async (e) => {
-          console.info("before remove ", featureGroup.current,fogLayer.current)
-          console.info("after remove ", featureGroup.current,fogLayer.current)
           // Re-add markers (old, and then refresh)
           prepareMap();
           await fetchData();
@@ -281,9 +287,17 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
       markers.current = []
       console.log("created the map:", isLoading);
     }
-    if (mapRef.current && userRef.current){
-      fetchData();
-    }
+    const interval = setInterval(async () => {
+      console.log('Function executed at', new Date().toLocaleTimeString());
+      if (mapRef.current && userRef.current && featureGroup.current && fogLayer.current){
+        await fetchData();
+        featureGroup.current.clearLayers();
+        featureGroup.current.addLayer(fogLayer.current);
+      }
+    }, 5000);
+
+    // Cleanup on unmount
+    return () => clearInterval(interval);
   
   }, [reload, user]);
 
