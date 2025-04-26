@@ -72,10 +72,6 @@ func (m *KnownLocations) GetInsertExtraQueries() []string {
 			UPDATE %s
 			SET ref_id = :ref_id, ref_type = :ref_type
 			WHERE id = :id`, m.GetTableName()),
-			fmt.Sprintf(`
-			UPDATE %s
-			SET ref_id = 0
-			WHERE ref_id = :ref_id AND ref_type = :ref_type AND id != :id`, m.GetTableName()),
 		}
 	}
 	return []string{}

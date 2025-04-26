@@ -1418,6 +1418,12 @@ const docTemplate = `{
                     "description": "Auto-incremented integer ID",
                     "type": "integer"
                 },
+                "refId": {
+                    "type": "integer"
+                },
+                "refType": {
+                    "type": "string"
+                },
                 "show": {
                     "description": "condition was met",
                     "type": "boolean"

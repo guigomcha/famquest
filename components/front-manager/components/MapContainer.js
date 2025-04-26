@@ -57,33 +57,34 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
   };
 
   const prepareMap = () => {
-    console.info("prepare with user ", userRef.current);
+    console.info("prepare with user ", userRef.current, mapRef.current.hasLayer(featureGroup.current));
     // After the map is loaded, reveal the area around each marker
     if (mapRef.current && allLocations.current && fogLayer.current && userRef.current) {
       // First uncover fog and add markers 
       allLocations.current.forEach((location, index) => {
         if (location.refType == "user" && location.refId == userRef.current.id){
           //Uncover new area in fog
-          // console.info("uncover fog for user and location", location, userRef.current)
           fogGeoJson.current = uncoverFog(location, fogGeoJson.current);
           fogLayer.current = L.geoJSON([fogGeoJson.current], {
             style(feature) {
               return feature.properties && feature.properties.style;
             },
           });
+          //console.info("uncover fog for user and location", location, userRef.current, fogGeoJson.current)
+
         } else if (location.refType == "spot") {
           // Adding a marker with custom icon
           let markerExists = false;
           markers.current.forEach((mark) => {
             if (mark.spotId == location.refId){
-              // console.info("spot already has marker ", location);
+              console.info("spot already has marker ", location);
               markerExists = true;
             }
           })
           if (markerExists){
             return;
           }
-          // console.info("adding marker for location", location)
+          console.info("adding marker for location", location)
           const marker = L.marker([location.latitude, location.longitude], {
             icon: L.icon(iconStyle),
           }).addTo(mapRef.current);
@@ -92,14 +93,14 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
           guilleSpotsGroup.current.addLayer(marker);
           markers.current.push({"spotId": location.refId, "marker": marker});
         } else if (location.refId == 0 ) {
-          // console.info("location invalid or deprecated ", location)
+          console.info("location invalid or deprecated ", location)
         }
       });
       // Second iteration to decide if spot markers are visible
       if (mapRef.current.hasLayer(featureGroup.current)) {
         allLocations.current.forEach((location, index) => {
+          console.info("Checking it should display spot: ", location.refId);
           if (location.refId != 0 && location.refType == "spot") {
-            // console.info("Checking it should display spot: ", location.refId);
             let visible = true;
             let markerRef = null;
             markers.current.forEach((mark) => {
@@ -110,18 +111,18 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
             // Visibility based on Fog
             // console.info("markerfound for location", location, markerRef)
             if (!isVisibleWithFog(location, rightClick=false)){
-              // console.info("markerfound not visible", markerRef)
+              console.info("markerfound not visible", markerRef)
               visible = false;
             }
             // The show condition is for adventure mode
             if (visible){
               let discovered = allDiscovered.current.filter(item => item.refId == location.refId && item.refType == "spot")
-              // console.info("it was visible but discovered for marker", discovered)
-              visible = discovered.show;
+              console.info("it was visible but discovered for marker", discovered)
+              visible = discovered[0].show;
             }
             // Visibility based on spot condition which is handled in the backend
             if (!visible){
-              // console.info("deleting marker ", location)
+              console.info("deleting marker ", location)
               if (markerRef) {
                 guilleSpotsGroup.current.removeLayer(markerRef);
                 markers.current = markers.current.filter(item => item.spotId != location.refId);
@@ -180,19 +181,24 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
     console.info("modechange ", e)
     setConfiguration({...configuration, mode: e})
   }
+  /*
   useEffect(() => {
     if (!mapRef.current || !fogLayer.current || !featureGroup.current){
       return;
     }
-    console.info("configuration re-render ", configuration, featureGroup.current.hasLayer(fogLayer.current))
-    if (configuration.mode == "adventure" && !featureGroup.current.hasLayer(fogLayer.current) ) {
+    console.info("configuration re-render ", configuration, mapRef.current.hasLayer(featureGroup.current))
+    if (configuration.mode == "adventure" && !mapRef.current.hasLayer(featureGroup.current) ) {
       featureGroup.current.addLayer(fogLayer.current);
-    } else if (configuration.mode == "visualization" && featureGroup.current.hasLayer(fogLayer.current)) {
+      mapRef.current.addLayer(featureGroup.current)
+      console.info("should have added the mask")
+    } else if (configuration.mode == "visualization" && mapRef.current.hasLayer(featureGroup.current)) {
       featureGroup.current.removeLayer(fogLayer.current);
+      mapRef.current.removeLayer(featureGroup.current)
+      console.info("should have deleted the mask")
     }
     prepareMap();
   }, [configuration])
-
+  */
   // Create and configure the map
   useEffect(() => {
     if (user?.id) {
@@ -226,19 +232,28 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
           style(feature) {
             return feature.properties && feature.properties.style;
           },
-        }).addTo(mapRef.current);
+        });
+        console.info("initial geojson ", fogGeoJson.current)
         fogLayer.current.bringToFront();
         // Add feature group to enable/disable the discovery map
         featureGroup.current = L.featureGroup().addTo(mapRef.current);
         featureGroup.current.addLayer(fogLayer.current);
-        featureGroup.current.on('remove', (e) => {
-          featureGroup.current.removeLayer(fogLayer.current);
+        featureGroup.current.on('remove', async (e) => {
+          console.info("before remove ", featureGroup.current,fogLayer.current)
+          console.info("after remove ", featureGroup.current,fogLayer.current)
+          // Re-add markers (old, and then refresh)
           prepareMap();
+          await fetchData();
           console.info("mask removed", e);
         });
-        featureGroup.current.on('add', (e) => {
-          featureGroup.current.addLayer(fogLayer.current);
+        featureGroup.current.on('add', async (e) => {
+          // TODO: There should be a trigger to refresh every second or so 
+          // Recreate fog and delete markers (refresh to bring the latest locations to the fog)
           prepareMap();
+          await fetchData();
+          featureGroup.current.clearLayers();
+          featureGroup.current.addLayer(fogLayer.current);
+          console.info("after add ", featureGroup.current)
           console.info("mask added", e);
         });
         
@@ -263,12 +278,14 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
       // Create overlay controls
       const overlays = {
         "Spots": guilleSpotsGroup.current,
+        "mask": featureGroup.current,
       };
       L.control.layers(null, overlays, { collapsed: false }).addTo(mapRef.current);
+      featureGroup.current.remove();
       markers.current = []
       console.log("created the map:", isLoading);
     }
-    if (userRef.current){
+    if (mapRef.current && userRef.current){
       fetchData();
     }
   

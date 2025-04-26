@@ -92,6 +92,7 @@ const UserButton = ({ user,  mapRef }) => {
             console.info("sent location", locationDb);
             const withRef = await addReferenceInDB(locationDb.id, user.id, "user", "location");
             console.info("sent with ref", withRef)
+            // TODO: each user has their own discover??
             if (user?.role == "target"){
               const resp = await updateDiscoveredConditionsForUser(user);
               // Are you a string?

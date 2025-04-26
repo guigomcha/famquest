@@ -64,8 +64,8 @@ type Discovered struct {
 	// db + json
 	Condition JSONBMap  `db:"condition" json:"condition"` // this will hold a JSONB in postgresql with the condition
 	Show      bool      `db:"show" json:"show"`           // condition was met
-	RefType   string    `db:"ref_type" json:"-"`
-	RefId     int       `db:"ref_id" json:"-"`
+	RefType   string    `db:"ref_type" json:"refType"`
+	RefId     int       `db:"ref_id" json:"refId"`
 	ID        int       `db:"id" json:"id"`                          // Auto-incremented integer ID
 	CreatedAt time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
 	UpdatedAt time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
