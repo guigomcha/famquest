@@ -83,3 +83,40 @@ WHERE a.ref_type = 'spot'
   AND a.ref_id = n.spot_id;
 
 COMMIT;
+
+
+--- Known locations will be linked to users too to be able to create custom masks for each one
+
+BEGIN;
+
+-- 1. accept user as ref_type to known_locations
+
+DO $$ 
+DECLARE 
+    constraint_name TEXT;
+BEGIN
+    -- Step 1: Identify the existing constraint name
+    SELECT conname INTO constraint_name 
+    FROM pg_constraint 
+    WHERE conrelid = 'known_locations'::regclass 
+    AND contype = 'c' 
+    AND conname LIKE '%ref_type%';
+
+    -- Step 2: Drop the existing constraint if found
+    IF constraint_name IS NOT NULL THEN
+        EXECUTE format('ALTER TABLE known_locations DROP CONSTRAINT %I', constraint_name);
+    END IF;
+
+    -- Step 3: Add the updated constraint
+    ALTER TABLE known_locations 
+    ADD CONSTRAINT known_locations_ref_type_check 
+    CHECK (ref_type IN ('spot', 'user'));
+END $$;
+-- 1. Update existing locations to a user
+UPDATE known_locations
+SET 
+    ref_type = 'user',
+    ref_id = 1
+WHERE ref_id = 0;
+
+COMMIT;

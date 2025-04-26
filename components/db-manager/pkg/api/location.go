@@ -170,7 +170,7 @@ func LocationPut(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id path int true "Location ID"
 // @Param refId query int true "Reference ID (optional)"
-// @Param refType query string true "Reference Type" Enums(spot)
+// @Param refType query string true "Reference Type" Enums(spot,user)
 // @Success 200 {object} models.KnownLocations
 // @Router /location/{id}/ref [put]
 func LocationPutRef(w http.ResponseWriter, r *http.Request) {
@@ -185,14 +185,21 @@ func LocationPutRef(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var dest connection.DbInterface
-	_, httpStatus, err := crudGet(&models.Spots{}, map[string]string{"id": fmt.Sprint(intId)})
+	var httpStatus int
+	switch r.URL.Query().Get("refType") {
+	case "spot":
+		_, httpStatus, err = crudGet(&models.Spots{}, map[string]string{"id": fmt.Sprint(intId)})
+	case "user":
+		_, httpStatus, err = crudGet(&models.Users{}, map[string]string{"id": fmt.Sprint(intId)})
+	default:
+		err = fmt.Errorf("reftype '%s' not implemented", r.URL.Query().Get("refType"))
+		httpStatus = http.StatusBadRequest
+	}
 	if err != nil {
-		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
-	logger.Log.Debug("Ref to Spot seems ok")
-	// Now bring the original location
+	logger.Log.Debug("Ref seems ok") // Now bring the original location
 	dest, httpStatus, err = crudGet(&models.KnownLocations{}, mux.Vars(r))
 	if err != nil {
 		logger.Log.Error(err.Error())

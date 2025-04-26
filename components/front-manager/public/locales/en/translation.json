@@ -4,7 +4,15 @@
 	"family": "Family",
 	"welcomeTitle": "Welcome to your private instance of the FamQuest App",
   "famQuest": "\"FamQuest\"",
-  "footerText": "This is a private instance of a publicly available service that you can install to host your <strong>Family</strong> ",
+	"callToAction": "Info",
+  "frontDescription": "This is a private instance of a publicly available service (open source code in GitHub <a href=\"https://github.com/guigomcha/famquest\" target=\"_blank\" className=\"fa fa-github\" ></a>) that you can install to host your <strong>FamQuest</strong>. <br> Each Family member can contribute with information that will help create an interactive and shared (but private) family history digital book that can be discovered by new generations.",
+  "coreObjectivesTitle": "How does it work?:",
+  "coreObjective1": "Each family member can contribute with new locations of interest or to existing ones.",
+  "coreObjective2": "For each location, a series of notes can be added to represent an event, an anecdote, a personal opinion or a message for the family to read.",
+  "coreObjective3": "Each note provides a description, photos, audios, (soon also videos) to fully describe what happened there.",
+  "coreObjective4": "Each family member may also provide notes as part of their profile to provide information not directly associated to a location, such as family drama, cooking recipes, life lessons learned...",
+  "coreObjective5": "In <strong>adventure mode</strong>, a location (soon also notes) can be \"discovered\" based on the user GPS history or fixed date so that you gradually unveil what your family experienced in a location as you pass by there.",
+  "coreObjective6": "In <strong>display mode</strong>, all contributions can be visualized as a digital photo frame or explored manually with no restictions.",
 	"userInfo" : "User Profile Info", 
 	"signedAs" : "Signed as",
 	"loading" : "Loading",
@@ -67,5 +75,8 @@
 	"formNotValid": "Form not valid, please check.",
 	"internalError": "Something happened in the app. Check logs",
 	"actionInvalid": "User action invalid.",
-	"discoveredUpdate": "New spot(s) discovered"
+	"discoveredUpdate": "New spot(s) discovered",
+	"mode": "Mode",
+	"adventure": "Adventure",
+	"visualization": "Visualization"
 }

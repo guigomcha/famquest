@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Button from 'react-bootstrap/Button';
+import { Button } from 'antd';
 import { registerUser, getUserInfo, getConfigure } from '../functions/db_manager_api';
 import { useTranslation } from "react-i18next";
 
@@ -23,6 +23,8 @@ const OAuth2Login = ({ onUserChange }) => {
       })
       .then(async (data) => {
         // Make sure the idle connections are cleaned up
+        await getConfigure();
+        // we have to call twice to force reload
         await getConfigure();
         console.info("Received from proxy: " + JSON.stringify(data));
         // Register the user in the backend if it does not exist

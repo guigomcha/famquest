@@ -75,7 +75,7 @@ npx expo export --platform web
 
 ```bash
 cd ../../
-docker build -t ghcr.io/guigomcha/famquest/frontmanager:latest -f components/front-manager/install/Dockerfile --progress plain  --network=host .
+docker build -t ghcr.io/guigomcha/famquest/frontmanager:staging -f components/front-manager/install/Dockerfile --progress plain  --network=host . && docker push ghcr.io/guigomcha/famquest/frontmanager:staging && kubectl rollout restart deployment -n staging frontmanager-deployment
 cd components/front-manager
 ```
 

@@ -4,7 +4,9 @@
 
 # The FamQuest App
 
-A map guiding users on an adventure to uncover family memories and history, while creating their own in a gamified quest to resolve adulting tasks.
+A map guiding users on an adventure to uncover family memories and history shared in the form of a geolocation-based digital photo frame.
+
+See the documentation online in <https://famquest.guigomcha.dynv6.net> and continue reading the README files.
 
 ## Repo structure
 

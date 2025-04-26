@@ -12,6 +12,9 @@ i18next
     interpolation: {
       escapeValue: false,
     },
+    backend: {
+      loadPath: '/public/locales/{{lng}}/{{ns}}.json?v=2'
+    }
   });
 
 export default i18next;

@@ -73,6 +73,7 @@ const SlideMenu = ({ component, handledFinished }) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: "#e0e0e0",
           }}
         >
           <ColumnHeightOutlined style={{height: "30px"}}/>

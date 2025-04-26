@@ -4,7 +4,7 @@ import { message, Button, FloatButton } from 'antd';
 import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import { UserOutlined, ReloadOutlined, AimOutlined, FrownOutlined } from '@ant-design/icons';
-import { createInDB, updateDiscoveredConditionsForUser } from '../functions/db_manager_api';
+import { createInDB, updateDiscoveredConditionsForUser, addReferenceInDB } from '../functions/db_manager_api';
 import { GlobalMessage } from '../functions/components_helper';
 import { collectLogs } from '../functions/utils';
 import { useTranslation } from "react-i18next";
@@ -39,7 +39,7 @@ const UserButton = ({ user,  mapRef }) => {
   
 
   useEffect(() => {
-    if (!mapRef.current) {
+    if (!mapRef.current || !user) {
       return;
     } 
     if (!userLocationsLayer.current){
@@ -89,9 +89,13 @@ const UserButton = ({ user,  mapRef }) => {
               console.info("unable to push live location");
               return;
             }
-            console.info("sent location", locationDb)
+            console.info("sent location", locationDb);
+            const withRef = await addReferenceInDB(locationDb.id, user.id, "user", "location");
+            console.info("sent with ref", withRef)
+            // TODO: each user has their own discover??
             if (user?.role == "target"){
               const resp = await updateDiscoveredConditionsForUser(user);
+              // Are you a string?
               console.info("requested discover update: ", resp);
               if (resp.length >0) {
                 GlobalMessage(resp.length + "x" +t('discoveredUpdate'), "info");

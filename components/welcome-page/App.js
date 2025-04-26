@@ -82,7 +82,6 @@ export default function App() {
               <Card.Title>{t('welcomeTitle')}</Card.Title>
               <Row className={`card-row ${isImageAboveText ? 'stacked' : ''}`}>
                 <Col md={isImageAboveText ? 12 : 6}>
-                  <Card.Img variant="top" src="assets/famquest-logo.png" />
                   {isImageAboveText && (
                     <Card.ImgOverlay bsPrefix="card-row">
                       <Button trigger="click"
@@ -92,6 +91,7 @@ export default function App() {
                         >{t('callToAction')}</Button>
                     </Card.ImgOverlay>
                   )}
+                  <Card.Img variant="top" src="assets/famquest-logo.png" />
                 </Col>
                 <Col md={isImageAboveText ? 12 : 6}>
                   <Card.Body ref={textRef}>
@@ -123,47 +123,42 @@ export default function App() {
                       </Card.Text>
                     </Card.Body>
                   </Row>
-                  <Row className={`card-row ${isImageAboveText ? 'stacked' : ''}`}>
                     <Accordion defaultActiveKey="0">
-                      <Accordion.Item eventKey="0" md={isImageAboveText ? 12 : 6}>
+                      <Accordion.Item eventKey="0">
                         <Accordion.Header>{t('downloadFreeHead')}</Accordion.Header>
                         <Accordion.Body>
-                          <Col >
-                            <Card.Text>
-                              {renderDescription(t('downloadFreeBody'))}
-                            </Card.Text>
-                            <Card.Img variant="top" src="assets/opensource-version.png" />
-                          </Col>
+                          <Card>
+                            <Row className={`card-row ${isImageAboveText ? 'stacked' : ''}`}>
+                              <Col md={isImageAboveText ? 12 : 6}>
+                                <Card.Text>
+                                  {renderDescription(t('downloadFreeBody'))}
+                                </Card.Text>
+                              </Col>
+                              <Col md={isImageAboveText ? 12 : 6}>
+                                <Card.Img variant="top" src="assets/opensource-version.png" />
+                              </Col>
+                            </Row>
+                          </Card>
                         </Accordion.Body>
                       </Accordion.Item>
-                      <Accordion.Item eventKey="1" md={isImageAboveText ? 12 : 6}>
+                      <Accordion.Item eventKey="1">
                         <Accordion.Header>{t('downloadPublicHead')}</Accordion.Header>
                         <Accordion.Body>
-                          <Col>
-                            <Card.Text>
-                                {renderDescription(t('downloadPublicBody'))}
-                              </Card.Text>
-                            <Card.Img variant="top" src="assets/public-version.png" />
-                          </Col>
+                          <Card>
+                            <Row className={`card-row ${isImageAboveText ? 'stacked' : ''}`}>
+                              <Col md={isImageAboveText ? 12 : 6}>
+                                <Card.Text>
+                                  {renderDescription(t('downloadPublicBody'))}
+                                </Card.Text>
+                              </Col>
+                              <Col md={isImageAboveText ? 12 : 6}>
+                                <Card.Img variant="top" src="assets/public-version.png" />
+                              </Col>
+                            </Row>
+                          </Card>
                         </Accordion.Body>
                       </Accordion.Item>
                     </Accordion>
-                  </Row>
-                </Card>
-            </Container>
-          </Tab>
-          <Tab eventKey="instances" title={t('instances')}>
-            <Container fluid>
-                <Card>
-                  <Card.Title>{t('instances')}</Card.Title>
-                  <Card.Body>
-                    <Card.Text>
-                      <ul>
-                        <li><a href="https://portal.jaime.famquest.guigomcha.dynv6.net" target="_blank" rel="Gomez Chavez family">Jaime</a></li>
-                        <li><a href="https://portal.staging.famquest.guigomcha.dynv6.net" target="_blank" rel="Staging">Dev</a></li>
-                      </ul>
-                    </Card.Text>
-                  </Card.Body>
                 </Card>
             </Container>
           </Tab>

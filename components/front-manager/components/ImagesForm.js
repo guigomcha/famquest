@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { useQuery, useQueryClient } from 'react-query';
 import Form from 'react-bootstrap/Form';
 import { CameraOutlined, VideoCameraAddOutlined } from '@ant-design/icons';
-import Button from 'react-bootstrap/Button';
+import { Button } from 'antd';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Row from 'react-bootstrap/Row';

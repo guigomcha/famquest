@@ -729,7 +729,8 @@ const docTemplate = `{
                     },
                     {
                         "enum": [
-                            "spot"
+                            "spot",
+                            "user"
                         ],
                         "type": "string",
                         "description": "Reference Type",
@@ -1416,6 +1417,12 @@ const docTemplate = `{
                 "id": {
                     "description": "Auto-incremented integer ID",
                     "type": "integer"
+                },
+                "refId": {
+                    "type": "integer"
+                },
+                "refType": {
+                    "type": "string"
                 },
                 "show": {
                     "description": "condition was met",
