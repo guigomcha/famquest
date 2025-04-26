@@ -102,6 +102,8 @@ definitions:
         type: integer
       refType:
         type: string
+      refUserUploader:
+        type: integer
       show:
         description: condition was met
         type: boolean
@@ -535,18 +537,6 @@ paths:
   /discovered/updateConditions:
     post:
       description: Updates discovered based on the user locations, age, etc.
-      parameters:
-      - description: Reference ID of the user to update
-        in: query
-        name: refId
-        required: true
-        type: integer
-      - description: Reference Type
-        enum:
-        - user
-        in: query
-        name: refType
-        type: string
       produces:
       - application/json
       responses:

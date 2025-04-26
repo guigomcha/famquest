@@ -357,24 +357,6 @@ const docTemplate = `{
                     "discovered"
                 ],
                 "summary": "Updates all discovered entries for a user",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Reference ID of the user to update",
-                        "name": "refId",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "enum": [
-                            "user"
-                        ],
-                        "type": "string",
-                        "description": "Reference Type",
-                        "name": "refType",
-                        "in": "query"
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "The Ids of the discovered that were updated",
@@ -1423,6 +1405,9 @@ const docTemplate = `{
                 },
                 "refType": {
                     "type": "string"
+                },
+                "refUserUploader": {
+                    "type": "integer"
                 },
                 "show": {
                     "description": "condition was met",

@@ -120,3 +120,28 @@ SET
 WHERE ref_id = 0;
 
 COMMIT;
+
+--- Add ref_user_uploader to discovered table so that each user has their own mask
+
+DO $$
+DECLARE
+    table_to_update TEXT;
+BEGIN
+    -- List of tables to modify
+    FOR table_to_update IN
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public' -- Modify 'public' if your schema is different
+        AND table_name IN ('discovered')
+    LOOP
+        -- Dynamically execute the ALTER TABLE command to add the column
+        EXECUTE format('
+            ALTER TABLE %I
+            ADD COLUMN IF NOT EXISTS ref_user_uploader INT DEFAULT 0;', table_to_update);
+        
+        -- You will have to set the ref_user_uploader to a known user id. By default set to 1
+        EXECUTE format('
+            UPDATE %I
+            SET ref_user_uploader = 1;', table_to_update);
+    END LOOP;
+END $$;

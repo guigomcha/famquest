@@ -24,7 +24,7 @@ import (
 // @Router /discovered [post]
 func DiscoveredPost(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func DiscoveredPost")
-	//info := handleHeaders(w, r)
+	info := handleHeaders(w, r)
 	var discovered models.Discovered
 	var dest connection.DbInterface
 	if err := json.NewDecoder(r.Body).Decode(&discovered); err != nil {
@@ -32,6 +32,7 @@ func DiscoveredPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	discovered.RefUserUploader = info["user"].(int)
 	logger.Log.Debug("object decoded")
 	dest, httpStatus, err := crudPost(&discovered)
 	if err != nil {
@@ -85,28 +86,56 @@ func DiscoveredGetAll(w http.ResponseWriter, r *http.Request) {
 // @Description Updates discovered based on the user locations, age, etc.
 // @Tags discovered
 // @Produce json
-// @Param refId query int true "Reference ID of the user to update"
-// @Param refType query string false "Reference Type" Enums(user)
 // @Success 200 {array} int "The Ids of the discovered that were updated"
 // @Router /discovered/updateConditions [post]
 func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func DiscoveredUpdateAll")
-	handleHeaders(w, r)
+	info := handleHeaders(w, r)
+	userConnected := fmt.Sprintf("%d", info["user"].(int))
 	// make sure user exists
-	userDbInterface, httpStatus, err := crudGet(&models.Users{}, map[string]string{"id": r.URL.Query().Get("refId")})
+	userDbInterface, httpStatus, err := crudGet(&models.Users{}, map[string]string{"id": userConnected})
 	if err != nil {
 		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
 	if userDbInterface == nil {
-		logger.Log.Error(fmt.Sprintf("User with id '%s' not found", r.URL.Query().Get("refId")))
-		http.Error(w, "refId not valid", http.StatusBadRequest)
+		logger.Log.Error(fmt.Sprintf("User with id '%s' not found", userConnected))
+		http.Error(w, "userConnected not valid", http.StatusBadRequest)
+		return
+	}
+	// First make sure that the discovered table has the relevant entries for this user
+	createMissingDiscoveredQuery := fmt.Sprintf(`
+	BEGIN;
+
+	INSERT INTO discovered (condition, ref_id, ref_type, show, ref_user_uploader)
+	SELECT d.condition, d.ref_id, d.ref_type, d.show, %s
+	FROM discovered d
+	WHERE NOT EXISTS (
+		SELECT 1
+		FROM discovered d2
+		WHERE d2.ref_type = d.ref_type
+			AND d2.ref_id = d.ref_id
+			AND d2.ref_user_uploader = %s
+	)
+	AND (
+		SELECT MIN(id)
+		FROM discovered d3
+		WHERE d3.ref_type = d.ref_type
+			AND d3.ref_id = d.ref_id
+	) = d.id;
+
+	COMMIT;
+	`, userConnected, userConnected)
+	var newDiscResult interface{}
+	err = connection.ExecuteCustom(connection.DB, createMissingDiscoveredQuery, &newDiscResult)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		http.Error(w, err.Error(), httpStatus)
 		return
 	}
 	// TODO: Expand to something else other than spots
-	// TODO: At some point make sure that the user is "target" and allow multiple target users
-	locationBasedDiscoveredsQuery := `
+	locationBasedDiscoveredsQuery := fmt.Sprintf(`
 	WITH spot_locations AS (
 			SELECT 
 					kl.latitude AS spot_latitude,
@@ -120,7 +149,7 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 			JOIN 
 					known_locations kl ON s.id = kl.ref_id AND kl.ref_type = 'spot'
 			WHERE 
-					d.ref_type = 'spot' AND d.show = false AND condition->>'parameterType' = 'location'
+					d.ref_user_uploader = %s AND d.ref_type = 'spot' AND d.show = false AND condition->>'parameterType' = 'location'
 	)
 	SELECT 
 		sl.spot_id,
@@ -139,7 +168,7 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 							POW(SIN(RADIANS(kl.longitude - sl.spot_longitude) / 2), 2)
 					)
 			) <= 200;
-	`
+	`, userConnected)
 	var locCondResults []models.LocationBasedCondition
 	err = connection.ExecuteCustom(connection.DB, locationBasedDiscoveredsQuery, &locCondResults)
 	if err != nil {
@@ -149,7 +178,7 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Find discovered to update based on date
-	dateBasedDiscoveredsQuery := `
+	dateBasedDiscoveredsQuery := fmt.Sprintf(`
 	SELECT 
 		s.id AS spot_id,
 		d.id AS discovered_id
@@ -157,8 +186,8 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 		discovered d
 	JOIN 
 		spots s ON d.ref_id = s.id
-	WHERE d.ref_type = 'spot' AND condition->>'parameterType' = 'date' AND d.show = false AND (condition->>'thresholdTarget')::timestamp < CURRENT_TIMESTAMP;
-	`
+	WHERE d.ref_user_uploader = %s AND d.ref_type = 'spot' AND condition->>'parameterType' = 'date' AND d.show = false AND (condition->>'thresholdTarget')::timestamp < CURRENT_TIMESTAMP;
+	`, userConnected)
 	var dateCondResults []models.DateBasedCondition
 	err = connection.ExecuteCustom(connection.DB, dateBasedDiscoveredsQuery, &dateCondResults)
 	if err != nil {
@@ -255,7 +284,7 @@ func DiscoveredDelete(w http.ResponseWriter, r *http.Request) {
 // @Router /discovered/{id} [put]
 func DiscoveredPut(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func DiscoveredPut")
-	//info := handleHeaders(w, r)
+	info := handleHeaders(w, r)
 	var discovered models.Discovered
 	var dest connection.DbInterface
 	err := json.NewDecoder(r.Body).Decode(&discovered)
@@ -277,6 +306,7 @@ func DiscoveredPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	discovered.ID = intId
+	discovered.RefUserUploader = info["user"].(int)
 	// Update the discovered
 	logger.Log.Debug("Decoded object")
 	dest, httpStatus, err := crudPut(&discovered, mux.Vars(r))
@@ -301,7 +331,7 @@ func DiscoveredPut(w http.ResponseWriter, r *http.Request) {
 // @Router /discovered/{id}/ref [put]
 func DiscoveredPutRef(w http.ResponseWriter, r *http.Request) {
 	logger.Log.Info("Called to func DiscoveredPutRef")
-	//info := handleHeaders(w, r)
+	info := handleHeaders(w, r)
 	// first ensure ref is ok
 	intId, err := parseId(r.URL.Query().Get("refId"))
 	if err != nil || intId == 0 {
@@ -346,6 +376,7 @@ func DiscoveredPutRef(w http.ResponseWriter, r *http.Request) {
 	}
 	discovered.RefId = intId
 	discovered.RefType = r.URL.Query().Get("refType")
+	discovered.RefUserUploader = info["user"].(int)
 	// Update the discovered which will trigger the GetInsertExtraQueries
 	logger.Log.Debug("Decoded object")
 	dest, httpStatus, err = crudPut(discovered, mux.Vars(r))

@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS discovered (
     show BOOLEAN NOT NULL, -- Boolean field for the "show" value
     ref_type TEXT NOT NULL DEFAULT 'spot' CHECK (ref_type IN ('spot', 'note', 'attachment' )), -- Constraint for ref_type
     ref_id INT DEFAULT 0, -- Integer field for the ref_id
+    ref_user_uploader INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
 );
