@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { getInDBWithFilter, getUserInfo, deleteInDB } from '../functions/db_manager_api';
+import { getInDB, getUserInfo, deleteInDB } from '../functions/db_manager_api';
 import {renderEmptyState} from '../functions/render_message';
 import Card from 'react-bootstrap/Card';
 import Carousel from 'react-bootstrap/Carousel';
@@ -52,7 +52,7 @@ const Audio = ({ parentInfo, refType, handleMenuChange, user }) => {
   const callFetchAttachmentsForSpot = async (refId, refType) => {
     setSelectedAudios([]);
      
-    const attachments = await getInDBWithFilter(refId, refType, 'attachment');
+    const attachments = await getInDB('attachment', 0, `?refId=${refId}&refType=${refType}`);
     console.info("Filling audios for ", refId, attachments);
     let filteredAttachments = []
     attachments.forEach(attachment => {

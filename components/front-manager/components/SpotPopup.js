@@ -8,7 +8,7 @@ import SpotForm from './SpotForm';
 import NoteForm from './NoteForm';
 import { GlobalMessage, SpotFromForm } from '../functions/components_helper';
 import { renderDescription, renderEmptyState } from '../functions/render_message';
-import { getUserInfo, deleteInDB, fetchAndPrepareSpots, getInDBWithFilter } from '../functions/db_manager_api';
+import { getUserInfo, deleteInDB, fetchAndPrepareSpots, getInDB } from '../functions/db_manager_api';
 import SlideMenu from './SlideMenu';
 import { useTranslation } from "react-i18next";
 import { Spin, Alert } from 'antd';
@@ -70,7 +70,7 @@ const SpotPopup = ({ location, handledFinished, user }) => {
       setIsLoading(false);
       return;
     }
-    let tempNotes = await getInDBWithFilter(tempSpot.id, 'spot', 'note');
+    let tempNotes = await getInDB('note', 0, `?refId=${tempSpot.id}&refType=spot`);
     const updatedNotes = await Promise.all(
       tempNotes.map(async (note) => {
         const userInfo = await getUserInfo(note.refUserUploader);

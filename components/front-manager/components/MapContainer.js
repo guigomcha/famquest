@@ -48,7 +48,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
     console.info("Fetched initial locations ", tempLocations);
     // setLocations(tempLocations);
     allLocations.current = tempLocations;
-    const tempDiscovered = await getInDB('discovered');
+    const tempDiscovered = await getInDB('discovered', 0, `?refUserUploader=${user.id}`);
     console.info("Fetched initial discovered ", tempDiscovered);
     // setDiscovered(tempDiscovered);
     allDiscovered.current = tempDiscovered;

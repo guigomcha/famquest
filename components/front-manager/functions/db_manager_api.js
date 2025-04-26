@@ -94,6 +94,9 @@ export const getInDB = async (endpoint, refId=0) => {
   if (refId > 0) {
     url = url + `/${refId}`
   }
+  if (filter != ""){
+    url = url + filter
+  }
   console.info("URL: "+ url);
   try {
     const response = await fetch(url, {
@@ -141,10 +144,12 @@ export const fetchAndPrepareSpots = async (refId) => {
     // Fetch spots data
     const spotsData = await getInDB('spot', refId);
     console.info("fetching spot: ", refId, spotsData);
-    let discovered = await getInDBWithFilter(spotsData.id, "spot", "discovered");
+    let discovered = await getInDB("discovered", `?refId=${spotsData.id}&refType=spot`);
     // console.info("Discovered: "+JSON.stringify(discovered));
-    if (discovered.length > 0) {
-      // more than one??
+    if (discovered.length == 1) {
+      spotsData.discovered = discovered[0];
+    } else if (discovered.length > 1) {
+      console.warning("More than one discovered?: ", discovered);
       spotsData.discovered = discovered[0];
     } else {
       console.error("All spots should have a discovered entry");
@@ -187,7 +192,7 @@ export const addLocationToSpot = async (spot) => {
 };
 
 export const updateDiscoveredConditionsForUser = async (userInfo) => {
-  const response = await fetch(`${API_URL}/discovered/updateConditions?refId=${userInfo.id}&refType=user`, {
+  const response = await fetch(`${API_URL}/discovered/updateConditions`, {
     method: "POST",
     headers: {
       'accept': 'application/json',
@@ -317,30 +322,3 @@ export const addReferenceInDB = async (targetId, refId, refType, endpoint) => {
   return "OK";
 };
 
-export const getInDBWithFilter = async (refId, refType, endpoint) => {
-  try {
-    var filter = "";
-    if (refId > 0) {
-      filter = `?refId=${refId}&refType=${refType}`
-    }
-    const response = await fetch(`${API_URL}/${endpoint}${filter}`, {
-      method: 'GET',
-      headers: {
-        'accept': 'application/json'
-      },
-      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-      // mode: 'cors',
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      //console.info(`Received ${endpoint}: `+ JSON.stringify(data))
-      return data; // return attachment data if needed
-    } else {
-      throw new Error(`Failed to fetch ${endpoint}`);
-    }
-  } catch (error) {
-    console.error(`Error fetching ${endpoint}:`, error);
-    return [];
-  }
-};

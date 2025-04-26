@@ -4,7 +4,7 @@ import Container from 'react-bootstrap/Container';
 import Card from 'react-bootstrap/Card';
 import { Button } from 'antd';
 import { EditOutlined, FileAddOutlined, DeleteOutlined } from '@ant-design/icons';
-import { getInDBWithFilter, getUserInfo, deleteInDB } from '../functions/db_manager_api';
+import { getInDB, getUserInfo, deleteInDB } from '../functions/db_manager_api';
 import { GlobalMessage } from '../functions/components_helper';
 import {renderEmptyState} from '../functions/render_message';
 import Audio from './Audio';
@@ -54,7 +54,7 @@ const Images = ( {parentInfo, refType, handleMenuChange, user} ) => {
  
   const callFetchAttachmentsForSpot = async (refId, refType) => {
     setSelectedImages([]); 
-    const attachments = await getInDBWithFilter(refId, refType, 'attachment');
+    const attachments = await getInDB('attachment', 0, `?refId=${refId}&refType=${refType}`);
     console.info("Filling images for ", refId, attachments);
     let filteredAttachments = []
     attachments.forEach(attachment => {
