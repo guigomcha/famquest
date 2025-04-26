@@ -300,6 +300,12 @@ const docTemplate = `{
                         "description": "Reference Type (optional)",
                         "name": "refType",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "filter for the specific user (optional)",
+                        "name": "refUserUploader",
+                        "in": "query"
                     }
                 ],
                 "responses": {

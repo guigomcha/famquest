@@ -405,6 +405,10 @@ paths:
         in: query
         name: refType
         type: string
+      - description: filter for the specific user (optional)
+        in: query
+        name: refUserUploader
+        type: integer
       produces:
       - application/json
       responses:

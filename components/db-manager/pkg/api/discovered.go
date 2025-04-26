@@ -51,6 +51,7 @@ func DiscoveredPost(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param refId query int false "Reference ID (optional)"
 // @Param refType query string false "Reference Type (optional)" Enums(spot,attachment,note)
+// @Param refUserUploader query int false "filter for the specific user (optional)"
 // @Success 200 {array} models.Discovered
 // @Router /discovered [get]
 func DiscoveredGetAll(w http.ResponseWriter, r *http.Request) {
@@ -64,8 +65,20 @@ func DiscoveredGetAll(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		filter = fmt.Sprintf("WHERE ref_id = %d AND ref_type = '%s'", intId, r.URL.Query().Get("refType"))
-		logger.Log.Debugf("created filer '%s'", filter)
 	}
+	if r.URL.Query().Get("refUserUploader") != "" {
+		intId, err := parseId(r.URL.Query().Get("refUserUploader"))
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Ref error: %s", err.Error()), http.StatusBadRequest)
+			return
+		}
+		if filter != "" {
+			filter = fmt.Sprintf("%s AND ref_user_uploader = %d", filter, intId)
+		} else {
+			filter = fmt.Sprintf("WHERE ref_user_uploader = %d", intId)
+		}
+	}
+	logger.Log.Debugf("created filter '%s'", filter)
 	dest, httpStatus, err := crudGetAll(&models.Discovered{}, filter)
 	logger.Log.Debugf("objects obtained '%d'", len(dest))
 	if err != nil {
