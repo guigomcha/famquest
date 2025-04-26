@@ -181,24 +181,21 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
     console.info("modechange ", e)
     setConfiguration({...configuration, mode: e})
   }
-  /*
+  
   useEffect(() => {
     if (!mapRef.current || !fogLayer.current || !featureGroup.current){
       return;
     }
     console.info("configuration re-render ", configuration, mapRef.current.hasLayer(featureGroup.current))
     if (configuration.mode == "adventure" && !mapRef.current.hasLayer(featureGroup.current) ) {
-      featureGroup.current.addLayer(fogLayer.current);
-      mapRef.current.addLayer(featureGroup.current)
-      console.info("should have added the mask")
+      featureGroup.current.addTo(mapRef.current);
+      console.info("should have added the mask and triggered event")
     } else if (configuration.mode == "visualization" && mapRef.current.hasLayer(featureGroup.current)) {
-      featureGroup.current.removeLayer(fogLayer.current);
-      mapRef.current.removeLayer(featureGroup.current)
-      console.info("should have deleted the mask")
+      featureGroup.current.remove();
+      console.info("should have deleted the mask and trigered event")
     }
-    prepareMap();
   }, [configuration])
-  */
+  
   // Create and configure the map
   useEffect(() => {
     if (user?.id) {
@@ -235,8 +232,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
         });
         console.info("initial geojson ", fogGeoJson.current)
         fogLayer.current.bringToFront();
-        // Add feature group to enable/disable the discovery map
-        featureGroup.current = L.featureGroup().addTo(mapRef.current);
+        featureGroup.current = L.featureGroup();
         featureGroup.current.addLayer(fogLayer.current);
         featureGroup.current.on('remove', async (e) => {
           console.info("before remove ", featureGroup.current,fogLayer.current)
@@ -257,6 +253,8 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
           console.info("mask added", e);
         });
         
+        // Add feature group to enable aligned with the default in the select
+        featureGroup.current.addTo(mapRef.current)
       }
       // Right click to create a new spot
       mapRef.current.on('contextmenu', (e) => {
@@ -278,10 +276,8 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
       // Create overlay controls
       const overlays = {
         "Spots": guilleSpotsGroup.current,
-        "mask": featureGroup.current,
       };
       L.control.layers(null, overlays, { collapsed: false }).addTo(mapRef.current);
-      featureGroup.current.remove();
       markers.current = []
       console.log("created the map:", isLoading);
     }
