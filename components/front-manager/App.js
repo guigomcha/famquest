@@ -17,7 +17,7 @@ import { ArrowDownOutlined } from '@ant-design/icons';
 
 import MapManager from './components/MapManager';
 import UserButton from './components/UserButton';
-import FamilyTab from './components/Family';
+import FamilyTabs from './components/FamilyTabs';
 import FamilyTree from './components/FamilyTree';
 import OAuth2 from './components/Oauth2';
 import { renderDescription } from './functions/render_message';
@@ -185,14 +185,14 @@ export default function App() {
             <Row>
               <Container fluid>
                 <Card>
-                  <p>Testing</p>
+                  <Card.Title>{t("familyTitle")}</Card.Title>
                   <FamilyTree input={"some input"}></FamilyTree>
                 </Card>
               </Container>
             </Row>
             <Row>
               <Container fluid>
-                <FamilyTab user={user}></FamilyTab>
+                <FamilyTabs user={user}></FamilyTabs>
               </Container>
             </Row>            
             </>

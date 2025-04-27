@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { Button } from 'antd';
 import {
   Background,
   ReactFlow,
@@ -10,11 +11,13 @@ import {
 } from '@xyflow/react';
  
 import '@xyflow/react/dist/style.css';
+import FamilyNode from './FamilyNode';
+import { useTranslation } from "react-i18next";
 
 const initialNodes = [
-{ id: '1', position: { x: 0, y: 0 }, data: { label: 'guille' } },
-{ id: '2', position: { x: 50, y: 0 }, data: { label: 'irene' } },
-{ id: '3', position: { x: 0, y: 100 }, data: { label: 'charo' } },
+{ id: '1', position: { x: 0, y: 0 }, data: { label: 'guille' } , type: "custom"},
+{ id: '2', position: { x: 50, y: 0 }, data: { label: 'irene' }, type: "custom" },
+{ id: '3', position: { x: 50, y: 100 }, data: { label: 'charo' }, type: "custom" },
 ];
 
 const initialEdges = [
@@ -22,6 +25,10 @@ const initialEdges = [
   { id: '2', source: '2', target: '3', label: 'parent' },
   { id: '3', source: '1', target: '3', label: 'parent' },
 ]; 
+
+const nodeTypes = {
+  custom: FamilyNode
+}
  
 const flowKey = 'example-flow';
  
@@ -31,9 +38,25 @@ const Innerflow = ({input}) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [rfInstance, setRfInstance] = useState(null);
- 
+  const [users, setUsers] = useState([]);
+  const [component, setComponent] = useState(null);
+  const { t, i18n } = useTranslation();
+  const [reload, setReload] = useState(true);
+
+  // fetch all the relevant info
+  const fetchRelatedInfo = async () => {
+    console.info("fetching users having ", user);
+    const tempUsers = await getUserInfo(0);
+    console.info("obtained tempUsers ", tempUsers);
+    setUsers(tempUsers);
+  };
+
   const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
+    (params) => {
+      // TODO: request relationship
+      console.info("Connecting ", params)
+      setEdges((eds) => addEdge({...params, label: "something"}, eds))
+    },
     [setEdges],
   );
 
@@ -45,26 +68,19 @@ const Innerflow = ({input}) => {
   }, [rfInstance]);
  
   const onAdd = useCallback(() => {
+    // TODO: Request user info
     const newNode = {
       id: getNodeId(),
       data: { label: 'Added node' },
+      type: "custom",
       position: {
-        x: (Math.random() - 0.5) * 400,
-        y: (Math.random() - 0.5) * 400,
+        x: nodes[0].position.x - Math.random() * 100,
+        y: nodes[0].position.y + Math.random() * 100,
       },
     };
     setNodes((nds) => nds.concat(newNode));
   }, [setNodes]);
 
-  const onAddEdge = useCallback(() => {
-    const newEdge = {
-      id: getNodeId(),
-      label: 'Added node',
-      source: '1',
-      target: '2',
-    };
-    setEdges((edges) => edges.concat(newEdge));
-  }, [setEdges]);
 
   return (
       <ReactFlow
@@ -74,15 +90,15 @@ const Innerflow = ({input}) => {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onInit={setRfInstance}
+        nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 2 }}
+        fitViewOptions={{ padding: 10 }}
         style={{ backgroundColor: "#F7F9FB" }}
         >
           <Background />
         <Panel position="top-right">
-          <button onClick={onSave}>save</button>
-          <button onClick={onAdd}>add node</button>
-          <button onClick={onAddEdge}>add edge</button>
+          <Button onClick={onSave}>save</Button>
+          <Button onClick={onAdd}>add node</Button>
         </Panel>
       </ReactFlow>
   );

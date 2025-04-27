@@ -15,7 +15,7 @@ import Tabs from 'react-bootstrap/Tabs';
 import { useTranslation } from "react-i18next";
 
 // Shows the user info and all the notes from other family members
-const FamilyTab = ({ user }) => {
+const FamilyTabs = ({ user }) => {
   const [component, setComponent] = useState(null);
   const { t, i18n } = useTranslation();
   // const [info, setInfo] = useState({});
@@ -135,4 +135,4 @@ const FamilyTab = ({ user }) => {
   );
 };
 
-export default FamilyTab;
+export default FamilyTabs;
