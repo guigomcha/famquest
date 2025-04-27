@@ -79,5 +79,16 @@
 	"mode": "Mode",
 	"adventure": "Adventure",
 	"familyTitle": "Family Tree",
+	"addNode": "Add Node",
+  "add": "Add",
+  "addRelationship": "Add Relationship",
+  "relationship": "Relationship",
+  "connect": "Connect",
+  "save": "Save",
+	"empty": "None",
+	"ex": "(Former)",
+	"parent": "Parent/Child",
+	"partner": "Partner/Spouse",
+	"friend": "Friend",
 	"visualization": "Visualization"
 }

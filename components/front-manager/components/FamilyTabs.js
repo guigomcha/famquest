@@ -12,8 +12,11 @@ import SlideMenu from './SlideMenu';
 import UserForm from './UserForm';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
+import Row from 'react-bootstrap/Row';
 import { useTranslation } from "react-i18next";
+import FamilyTree from './FamilyTree';
 
+// TODO: Connect to User generation with, and without app access
 // Shows the user info and all the notes from other family members
 const FamilyTabs = ({ user }) => {
   const [component, setComponent] = useState(null);
@@ -63,74 +66,81 @@ const FamilyTabs = ({ user }) => {
     fetchRelatedInfo();
   }, [user, component, reload]);
 
-
   return (
     <>
-    <Tabs
-          id="user-tabs"
-          activeKey={key}
-          onSelect={(k) => selectTab(k)}
-          className="mb-3"
-        >
-          {users.map((u, index) => (
-            <Tab eventKey={u.name} title={u.name}>
+    <Row>
+      <Card>
+        <Card.Title>{t("familyTitle")}</Card.Title>
+        <FamilyTree users={users} ></FamilyTree>
+      </Card>
+    </Row>
+    <Row>
+      <Tabs
+        id="user-tabs"
+        activeKey={key}
+        onSelect={(k) => selectTab(k)}
+        className="mb-3"
+      >
+        {users.map((u, index) => (
+          <Tab eventKey={u.name} title={u.name}>
+            <Card>
               <Card>
-                <Card>
-                  <Card.Title>{t('userInfo')}</Card.Title>
-                  <Card.Body>
-                    <Card.Text>{renderDescription(u.bio)}</Card.Text>
-                  </Card.Body>
-                  <Card.Footer>
-                    <Card.Text>Contact: {u.email}</Card.Text>
-                    <Card.Text>Birthday: {u.birthday}</Card.Text>
-                    {(user.id == u.id) && 
-                      (<Button
-                        trigger="click"
-                        type="default"
-                        icon={<EditOutlined />}
-                        onClick={handleRequestEdit}
-                      >
-                        Edit
-                      </Button>)}
-                  </Card.Footer>
-                </Card>
-                <Card>
-                  <Card.Title>{t('notes')}</Card.Title>
-                  <Card.Body>
-                    {notes.length > 0 ? ( 
-                      <ListGroup as="ol" numbered>
-                        {notes
-                          .filter(note => note.refUserUploader == u.id)
-                          .map((note, index) => (
-                            <ListGroup.Item className="justify-content-between" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} userId={user.id} parentInfo={user} refType={'user'} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
-                              {note.name}
-                              <Badge bg="primary" pill>
-                              {note.category}
-                              </Badge>
-                            </ListGroup.Item>
-                          ))}
-                      </ListGroup>
-                      ) : (
-                        renderEmptyState(t('empty'))
-                      )}
-                  </Card.Body>
-                  <Card.Footer>
-                  {(user.id == u.id) && 
-                    <Button trigger="click"
-                    type="default"
-                    icon={<AppstoreAddOutlined />}
-                    onClick={handleRequestNew}
-                    >{t('new')}</Button>}
-                  </Card.Footer>
-                </Card>
+                <Card.Title>{t('userInfo')}</Card.Title>
+                <Card.Body>
+                  <Card.Text>{renderDescription(u.bio)}</Card.Text>
+                </Card.Body>
                 <Card.Footer>
-                  {t('signedAs')}: {user.name}
+                  <Card.Text>Contact: {u.email}</Card.Text>
+                  <Card.Text>Birthday: {u.birthday}</Card.Text>
+                  {(user.id == u.id) && 
+                    (<Button
+                      trigger="click"
+                      type="default"
+                      icon={<EditOutlined />}
+                      onClick={handleRequestEdit}
+                    >
+                      Edit
+                    </Button>)}
                 </Card.Footer>
               </Card>
-            </Tab>
-          ))}
+              <Card>
+                <Card.Title>{t('notes')}</Card.Title>
+                <Card.Body>
+                  {notes.length > 0 ? ( 
+                    <ListGroup as="ol" numbered>
+                      {notes
+                        .filter(note => note.refUserUploader == u.id)
+                        .map((note, index) => (
+                          <ListGroup.Item className="justify-content-between" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} userId={user.id} parentInfo={user} refType={'user'} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
+                            {note.name}
+                            <Badge bg="primary" pill>
+                            {note.category}
+                            </Badge>
+                          </ListGroup.Item>
+                        ))}
+                    </ListGroup>
+                    ) : (
+                      renderEmptyState(t('empty'))
+                    )}
+                </Card.Body>
+                <Card.Footer>
+                {(user.id == u.id) && 
+                  <Button trigger="click"
+                  type="default"
+                  icon={<AppstoreAddOutlined />}
+                  onClick={handleRequestNew}
+                  >{t('new')}</Button>}
+                </Card.Footer>
+              </Card>
+              <Card.Footer>
+                {t('signedAs')}: {user.name}
+              </Card.Footer>
+            </Card>
+          </Tab>
+        ))}
       </Tabs>     
-      <SlideMenu component={component} handledFinished={handleNestedRequestEdit}/>
+    </Row>
+    <SlideMenu component={component} handledFinished={handleNestedRequestEdit}/>
     </>
   );
 };

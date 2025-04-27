@@ -79,5 +79,16 @@
 	"mode": "Modo",
 	"adventure": "aventura",
 	"familyTitle": "Arbol Genealógico",
+	"addNode": "Add Node",
+  "add": "Add",
+  "addRelationship": "Añade Relación",
+  "relationship": "Relación",
+  "connect": "Connectar",
+  "save": "Guardar",
+	"empty": "Vacío",
+	"ex": "(Ex)",
+	"parent": "Padres/Hijos",
+	"partner": "Pareja/Matrimonio",
+	"friend": "Amistad",
 	"visualization": "visualización"
 }

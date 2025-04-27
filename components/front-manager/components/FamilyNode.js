@@ -15,7 +15,6 @@ const FamilyNode = ({ data }) => {
       <NodeResizeControl minWidth={minWidth} minHeight={100}>
         <ResizeIcon />
       </NodeResizeControl>
-
       
       <div style={{ padding: '10px', textAlign: 'center' }}>
         {data.label}

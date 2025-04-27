@@ -1,5 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Button } from 'antd';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   Background,
   ReactFlow,
@@ -8,111 +7,190 @@ import {
   useEdgesState,
   addEdge,
   Panel,
+  MiniMap,
+  reconnectEdge,
+  Controls,
 } from '@xyflow/react';
- 
-import '@xyflow/react/dist/style.css';
+import { Button, Modal, Input, Form } from 'antd';
 import FamilyNode from './FamilyNode';
+import '@xyflow/react/dist/style.css';
+import '../css/reactFlow.css';
 import { useTranslation } from "react-i18next";
+import { Select } from 'antd';
 
-const initialNodes = [
-{ id: '1', position: { x: 0, y: 0 }, data: { label: 'guille' } , type: "custom"},
-{ id: '2', position: { x: 50, y: 0 }, data: { label: 'irene' }, type: "custom" },
-{ id: '3', position: { x: 50, y: 100 }, data: { label: 'charo' }, type: "custom" },
-];
+const initialNodes = [];
 
-const initialEdges = [
-  { id: '1', source: '1', target: '2', label: 'sibiling' },
-  { id: '2', source: '2', target: '3', label: 'parent' },
-  { id: '3', source: '1', target: '3', label: 'parent' },
-]; 
+const initialEdges = [];
 
 const nodeTypes = {
   custom: FamilyNode
-}
- 
-const flowKey = 'example-flow';
- 
-const getNodeId = () => `randomnode_${+new Date()}`;
- 
-const Innerflow = ({input}) => {
+};
+
+const Innerflow = ({ users, selectedUsed }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const edgeReconnectSuccessful = useRef(true);
   const [rfInstance, setRfInstance] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [component, setComponent] = useState(null);
+  const [newNameModalVisible, setNewNameModalVisible] = useState(false);
+  const [relationshipModalVisible, setRelationshipModalVisible] = useState(false);
+  const [newNodeLabel, setNewNodeLabel] = useState('');
+  const [relationshipLabel, setRelationshipLabel] = useState('');
+  const [relationshipLabelNote, setRelationshipLabelNote] = useState('');
+  const [pendingConnection, setPendingConnection] = useState(null);
   const { t, i18n } = useTranslation();
-  const [reload, setReload] = useState(true);
 
-  // fetch all the relevant info
-  const fetchRelatedInfo = async () => {
-    console.info("fetching users having ", user);
-    const tempUsers = await getUserInfo(0);
-    console.info("obtained tempUsers ", tempUsers);
-    setUsers(tempUsers);
-  };
+  const onReconnectStart = useCallback(() => {
+    edgeReconnectSuccessful.current = false;
+  }, []);
+ 
+  const onReconnect = useCallback((oldEdge, newConnection) => {
+    edgeReconnectSuccessful.current = true;
+    setEdges((els) => reconnectEdge(oldEdge, newConnection, els));
+  }, []);
+ 
+  const onReconnectEnd = useCallback((_, edge) => {
+    if (!edgeReconnectSuccessful.current) {
+      setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+    }
+    edgeReconnectSuccessful.current = true;
+  }, []);
 
   const onConnect = useCallback(
     (params) => {
-      // TODO: request relationship
-      console.info("Connecting ", params)
-      setEdges((eds) => addEdge({...params, label: "something"}, eds))
+      setPendingConnection(params);
+      setRelationshipModalVisible(true);
     },
-    [setEdges],
+    []
   );
+
+  const handleAddConnection = () => {
+    if (pendingConnection) {
+      setEdges((eds) =>
+        addEdge({ ...pendingConnection, label: `${relationshipLabel} ${relationshipLabelNote}` }, eds)
+      );
+    }
+    setRelationshipModalVisible(false);
+    setPendingConnection(null);
+  };
 
   const onSave = useCallback(() => {
     if (rfInstance) {
       const flow = rfInstance.toObject();
-      console.info("flow json: ", flow);
+      console.info('flow json:', flow);
+      // TODO: create the new users and save the flow 
     }
   }, [rfInstance]);
- 
-  const onAdd = useCallback(() => {
-    // TODO: Request user info
-    const newNode = {
-      id: getNodeId(),
-      data: { label: 'Added node' },
-      type: "custom",
-      position: {
-        x: nodes[0].position.x - Math.random() * 100,
-        y: nodes[0].position.y + Math.random() * 100,
-      },
-    };
-    setNodes((nds) => nds.concat(newNode));
-  }, [setNodes]);
 
+  useEffect(() => {
+    // TODO: At first, check if the flow exist to load it, else create a node per each user
+    if (users.length != nodes.length){
+      console.info("Need to create the nodes")
+      users.forEach(user => {
+        console.info("Creating node for ", user)
+        const newNode = {
+          id: `${user.id}`,
+          data: { label: user.name },
+          type: "custom",
+          position: {
+            x: 0,
+            y: 0,
+          },
+        };
+        setNodes((nds) => [...nds, newNode]);      
+      });
+    }
+  }, [users]);
+
+  useEffect(() => {
+    console.info("Current nodes: ", nodes)
+  }, [nodes]);
 
   return (
+    <>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onReconnect={onReconnect}
+        onReconnectStart={onReconnectStart}
+        onReconnectEnd={onReconnectEnd}
         onConnect={onConnect}
         onInit={setRfInstance}
         nodeTypes={nodeTypes}
+        snapToGrid
         fitView
-        fitViewOptions={{ padding: 10 }}
-        style={{ backgroundColor: "#F7F9FB" }}
-        >
-          <Background />
+        style={{ backgroundColor: 'rgba(2, 31, 255, 0.2)' }}
+      >
+        <Background />
         <Panel position="top-right">
-          <Button onClick={onSave}>save</Button>
-          <Button onClick={onAdd}>add node</Button>
+          <Button onClick={onSave}>{t('save')}</Button>
         </Panel>
+        <Controls />
       </ReactFlow>
+
+      <Modal
+        title={t('addNode')}
+        open={newNameModalVisible}
+        onOk={handleAddNode}
+        onCancel={() => setNewNameModalVisible(false)}
+        okText={t('add')}
+      >
+        <Form layout="vertical">
+          <Form.Item label={t('name')}>
+            <Input
+              value={newNodeLabel}
+              onChange={(e) => setNewNodeLabel(e.target.value)}
+              placeholder={t('editName')}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title={t('addRelationship')}
+        open={relationshipModalVisible}
+        onOk={handleAddConnection}
+        onCancel={() => setRelationshipModalVisible(false)}
+        okText={t('connect')}
+      >
+        <Form layout="vertical">
+          <Form.Item label={t('relationship')}>
+            <Select
+              defaultValue=""
+              style={{ width: 200 }}
+              onChange={(e) => setRelationshipLabelNote(t(e))}
+              options={[
+                { value: '', label: t("empty") },
+                { value: 'ex', label: t("ex") },
+              ]}
+            />
+            <Select
+              style={{ width: 200 }}
+              onChange={(e) => setRelationshipLabel(t(e))}
+              options={[
+                { value: 'parent', label: t("parent") },
+                { value: 'partner', label: t("partner") },
+              ]}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
   );
 };
 
-      
-const FamilyTree = ({input}) => {
+// TODO: connect the nodes to the tab selected
+const FamilyTree = ({ users, selectedUsed }) => {
   return (
-    <div style={{ position: "relative", width: "100vw", height: "50vh"}}>
-      <ReactFlowProvider>
-        <Innerflow input={input}></Innerflow>
-      </ReactFlowProvider>
+    <div style={{ position: 'relative', width: '100vw', height: '50vh', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+      <div style={{ width: '80vw', margin: '0 auto', height: '100%' }}>
+        <ReactFlowProvider>
+          <Innerflow users={users} />
+        </ReactFlowProvider>
+      </div>
     </div>
-  )
-}
- 
+  );
+};
+
 export default FamilyTree;
