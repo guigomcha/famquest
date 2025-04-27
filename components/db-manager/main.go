@@ -86,6 +86,11 @@ func main() {
 	r.HandleFunc("/discovered/{id}/ref", api.DiscoveredPutRef).Methods("PUT", "OPTIONS")
 	r.HandleFunc("/discovered/{id}", api.DiscoveredDelete).Methods("DELETE", "OPTIONS")
 
+	r.HandleFunc("/familyTree", api.FamilyTreePost).Methods("POST", "OPTIONS")
+	r.HandleFunc("/familyTree", api.FamilyTreeGetAll).Methods("GET", "OPTIONS")
+	r.HandleFunc("/familyTree/{id}", api.FamilyTreeGet).Methods("GET", "OPTIONS")
+	r.HandleFunc("/familyTree/{id}", api.FamilyTreePut).Methods("PUT", "OPTIONS")
+
 	// Start the server
 	port := os.Getenv("SWAGGER_PORT")
 	if port == "" {

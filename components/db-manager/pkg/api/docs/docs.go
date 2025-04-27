@@ -519,6 +519,129 @@ const docTemplate = `{
                 }
             }
         },
+        "/familyTree": {
+            "get": {
+                "description": "Get a list of all familyTrees",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "familyTree"
+                ],
+                "summary": "Retrieve all familyTrees",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.FamilyTree"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new familyTree",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "familyTree"
+                ],
+                "summary": "Create a familyTree",
+                "parameters": [
+                    {
+                        "description": "FamilyTree data",
+                        "name": "familyTree",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APIFamilyTree"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.FamilyTree"
+                        }
+                    }
+                }
+            }
+        },
+        "/familyTree/{id}": {
+            "get": {
+                "description": "Get familyTree details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "familyTree"
+                ],
+                "summary": "Retrieve a familyTree by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "FamilyTree ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.FamilyTree"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update familyTree details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "familyTree"
+                ],
+                "summary": "Update a familyTree by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "FamilyTree ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "FamilyTree data",
+                        "name": "familyTree",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APIFamilyTree"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.FamilyTree"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Check the health of the service",
@@ -1285,6 +1408,19 @@ const docTemplate = `{
                 }
             }
         },
+        "models.APIFamilyTree": {
+            "type": "object",
+            "properties": {
+                "familyTree": {
+                    "description": "this will hold a JSONB in postgresql with the family_tree",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.JSONBMap"
+                        }
+                    ]
+                }
+            }
+        },
         "models.APIKnownLocations": {
             "type": "object",
             "properties": {
@@ -1418,6 +1554,31 @@ const docTemplate = `{
                 "show": {
                     "description": "condition was met",
                     "type": "boolean"
+                },
+                "updatedAt": {
+                    "description": "Automatically managed by trigger",
+                    "type": "string"
+                }
+            }
+        },
+        "models.FamilyTree": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "description": "Automatically generated",
+                    "type": "string"
+                },
+                "familyTree": {
+                    "description": "db + json",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.JSONBMap"
+                        }
+                    ]
+                },
+                "id": {
+                    "description": "db + json",
+                    "type": "integer"
                 },
                 "updatedAt": {
                     "description": "Automatically managed by trigger",
