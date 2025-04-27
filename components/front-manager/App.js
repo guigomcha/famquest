@@ -18,6 +18,7 @@ import { ArrowDownOutlined } from '@ant-design/icons';
 import MapManager from './components/MapManager';
 import UserButton from './components/UserButton';
 import FamilyTab from './components/Family';
+import FamilyTree from './components/FamilyTree';
 import OAuth2 from './components/Oauth2';
 import { renderDescription } from './functions/render_message';
 import { updateDiscoveredConditionsForUser } from './functions/db_manager_api';
@@ -180,9 +181,21 @@ export default function App() {
           </Tab>
           <Tab eventKey="user" title={t('family')}>
           { (user?.id) &&
-            <Container fluid>
-              <FamilyTab user={user}></FamilyTab>
-            </Container>
+            <>
+            <Row>
+              <Container fluid>
+                <Card>
+                  <p>Testing</p>
+                  <FamilyTree input={"some input"}></FamilyTree>
+                </Card>
+              </Container>
+            </Row>
+            <Row>
+              <Container fluid>
+                <FamilyTab user={user}></FamilyTab>
+              </Container>
+            </Row>            
+            </>
           }
           </Tab>
         </Tabs>

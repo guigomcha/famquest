@@ -8,6 +8,16 @@ A map guiding users on an adventure to uncover family memories and history share
 
 See the documentation online in <https://famquest.guigomcha.dynv6.net> and continue reading the README files.
 
+As a Progressive Web App, Famquest can be used from browser and mobile. Most development has been done and tested via **Google Chrome and Edge** (for iOS, Android, Windows and Mac), other browsers could be used but have not been tested. Check a reference like [this one from 2023](https://firt.dev/notes/pwa/).
+
+PWA features used:
+- Geolocalization (optional).
+- Image, video* and audio capture.
+- Add to home screen (optional).
+- App launching screen (optional).
+- Service Workers (WIP)
+- Web push notifications (WIP)
+
 ## Repo structure
 
 - assets: Assets involved in the system as external git repos. Includes libraries, SDKs, repos for local reference...
