@@ -120,7 +120,7 @@ func AttachmentGetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var attachments []*models.Attachments
-	// preauthorize urls
+	// pre-authorize urls
 	for _, dest := range dests {
 		// Type assertion: convert interface back to the concrete type
 		if att, ok := dest.(*models.Attachments); ok {
