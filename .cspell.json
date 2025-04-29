@@ -82,7 +82,6 @@
         "@cspell/dict-makefile/cspell-ext.json",
         "@cspell/dict-markdown/cspell-ext.json",
         ".cspell/.cspell-es.json",
-        "@cspell/dict-es-es/cspell-ext.json",
         "@cspell/dict-public-licenses/cspell-ext.json"
     ],
     "useGitignore": true,
