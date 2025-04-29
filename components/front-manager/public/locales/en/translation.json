@@ -90,5 +90,6 @@
 	"parent": "Parent/Child",
 	"partner": "Partner/Spouse",
 	"friend": "Friend",
+	"passing": "Passing",
 	"visualization": "Visualization"
 }

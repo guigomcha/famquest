@@ -38,6 +38,14 @@
         "plpgsql",
         "padel",
         "languagedetector",
+        "xyflow",
+        "boxshadow",
+        "connectionindicator",
+        "reactflow",
+        "Fediverse",
+        "Fediverso",
+        "bootable",
+        "gamified",
         "swaggo"
     ],
     "enableGlobDot": true,
@@ -72,6 +80,7 @@
         "@cspell/dict-css/cspell-ext.json",
         "@cspell/dict-makefile/cspell-ext.json",
         "@cspell/dict-markdown/cspell-ext.json",
+        "@cspell/dict-es-es/cspell-ext.json",
         "@cspell/dict-public-licenses/cspell-ext.json"
     ],
     "useGitignore": true,
@@ -98,8 +107,8 @@
         "go",
         "project-words",
         "makefile",
-        "en-gb",
-        "es",
+        "en-us",
+        "es_ES",
         "cpp",
         "cpp-legacy",
         "cpp-refined",
@@ -133,14 +142,16 @@
     "overrides": [
         {
             "filename": "components/front-manager/public/locales/es/translation.json",
-            "language": "es",
+            "languageId": "es_ES",
+            "language": "es_ES",
             "ignoreRegExpList": [
                 "/\"[^\"\\n]*\"\\s*:\\s*\"([^\\n\"]+)\"/"
             ]
         },
         {
             "filename": "components/welcome-page/public/locales/es/translation.json",
-            "language": "es",
+            "languageId": "es_ES",
+            "language": "es_ES",
             "ignoreRegExpList": [
                 "/\"[^\"\\n]*\"\\s*:\\s*\"([^\\n\"]+)\"/"
             ]
