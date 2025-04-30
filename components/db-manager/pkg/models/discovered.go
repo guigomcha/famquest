@@ -9,8 +9,8 @@ import (
 
 // For swagger input
 type APIDiscovered struct {
-	Condition JSONBMap `db:"condition" json:"condition"` // this will hold a JSONB in postgresql with the condition
-	Show      bool     `db:"show" json:"show"`           // condition was met
+	Condition JSONB `db:"condition" json:"condition"` // this will hold a JSONB in postgresql with the condition
+	Show      bool  `db:"show" json:"show"`           // condition was met
 }
 
 // `db:"discovered"`
@@ -18,7 +18,7 @@ type Discovered struct {
 	// Only DB
 	UUID uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
 	// db + json
-	Condition       JSONBMap  `db:"condition" json:"condition"` // this will hold a JSONB in postgresql with the condition
+	Condition       JSONB     `db:"condition" json:"condition"` // this will hold a JSONB in postgresql with the condition
 	Show            bool      `db:"show" json:"show"`           // condition was met
 	RefType         string    `db:"ref_type" json:"refType"`
 	RefId           int       `db:"ref_id" json:"refId"`

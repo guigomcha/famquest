@@ -6,14 +6,14 @@ import (
 
 // For swagger input
 type APIFamilyTree struct {
-	FamilyTree JSONBMap `db:"family_tree" json:"familyTree"` // this will hold a JSONB in postgresql with the family_tree
+	FamilyTree JSONB `db:"family_tree" json:"familyTree"` // this will hold a JSONB in postgresql with the family_tree
 }
 
 // `db:"global"`
 type FamilyTree struct {
-	// db + json
-	FamilyTree JSONBMap `db:"family_tree" json:"familyTree"` // this will hold a JSONB in postgresql with the family_tree
 	Global
+	// db + json
+	FamilyTree JSONB `db:"family_tree" json:"familyTree"` // this will hold a JSONB in postgresql with the family_tree
 }
 
 func (m *FamilyTree) GetTableName() string {

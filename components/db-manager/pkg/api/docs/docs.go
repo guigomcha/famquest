@@ -1398,7 +1398,7 @@ const docTemplate = `{
                     "description": "this will hold a JSONB in postgresql with the condition",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.JSONBMap"
+                            "$ref": "#/definitions/models.JSONB"
                         }
                     ]
                 },
@@ -1415,7 +1415,7 @@ const docTemplate = `{
                     "description": "this will hold a JSONB in postgresql with the family_tree",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.JSONBMap"
+                            "$ref": "#/definitions/models.JSONB"
                         }
                     ]
                 }
@@ -1483,6 +1483,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "passing": {
+                    "type": "string"
+                },
                 "role": {
                     "type": "string"
                 }
@@ -1505,10 +1508,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "DB + JSON",
+                    "description": "Auto-incremented integer ID",
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "refId": {
+                    "type": "integer"
+                },
+                "refType": {
+                    "description": "DB + JSON",
                     "type": "string"
                 },
                 "refUserUploader": {
@@ -1530,7 +1540,7 @@ const docTemplate = `{
                     "description": "db + json",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.JSONBMap"
+                            "$ref": "#/definitions/models.JSONB"
                         }
                     ]
                 },
@@ -1572,7 +1582,7 @@ const docTemplate = `{
                     "description": "db + json",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.JSONBMap"
+                            "$ref": "#/definitions/models.JSONB"
                         }
                     ]
                 },
@@ -1586,11 +1596,9 @@ const docTemplate = `{
                 }
             }
         },
-        "models.JSONBMap": {
+        "models.JSONB": {
             "type": "object",
-            "additionalProperties": {
-                "type": "string"
-            }
+            "additionalProperties": true
         },
         "models.KnownLocations": {
             "type": "object",
@@ -1647,10 +1655,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "db + json",
+                    "description": "Auto-incremented integer ID",
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "refId": {
+                    "type": "integer"
+                },
+                "refType": {
+                    "description": "db + json",
                     "type": "string"
                 },
                 "refUserUploader": {
@@ -1716,6 +1731,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "passing": {
                     "type": "string"
                 },
                 "role": {

@@ -9,6 +9,7 @@ import {
   Panel,
   MiniMap,
   reconnectEdge,
+  useReactFlow,
   Controls,
 } from '@xyflow/react';
 import { Button, Modal, Input, Form } from 'antd';
@@ -16,7 +17,9 @@ import FamilyNode from './FamilyNode';
 import '@xyflow/react/dist/style.css';
 import '../css/reactFlow.css';
 import { useTranslation } from "react-i18next";
-import { Select } from 'antd';
+import { createInDB, getInDB, updateInDB } from '../functions/db_manager_api';
+import { GlobalMessage, familyTreeComparison } from '../functions/components_helper';
+import { Select, Space, Spin } from 'antd';
 
 const initialNodes = [];
 
@@ -31,13 +34,16 @@ const Innerflow = ({ users, selectedUsed }) => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const edgeReconnectSuccessful = useRef(true);
   const [rfInstance, setRfInstance] = useState(null);
-  const [newNameModalVisible, setNewNameModalVisible] = useState(false);
+  const [pendingSave, setPendingSave] = useState(false);
   const [relationshipModalVisible, setRelationshipModalVisible] = useState(false);
-  const [newNodeLabel, setNewNodeLabel] = useState('');
   const [relationshipLabel, setRelationshipLabel] = useState('');
   const [relationshipLabelNote, setRelationshipLabelNote] = useState('');
   const [pendingConnection, setPendingConnection] = useState(null);
+  const oldFlow = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { t, i18n } = useTranslation();
+  const { setViewport } = useReactFlow();
+  
 
   const onReconnectStart = useCallback(() => {
     edgeReconnectSuccessful.current = false;
@@ -53,12 +59,14 @@ const Innerflow = ({ users, selectedUsed }) => {
       setEdges((eds) => eds.filter((e) => e.id !== edge.id));
     }
     edgeReconnectSuccessful.current = true;
+    setPendingSave(false)
   }, []);
 
   const onConnect = useCallback(
     (params) => {
       setPendingConnection(params);
       setRelationshipModalVisible(true);
+      setPendingSave(true)
     },
     []
   );
@@ -73,33 +81,107 @@ const Innerflow = ({ users, selectedUsed }) => {
     setPendingConnection(null);
   };
 
-  const onSave = useCallback(() => {
-    if (rfInstance) {
-      const flow = rfInstance.toObject();
-      console.info('flow json:', flow);
-      // TODO: create the new users and save the flow 
+  const onSave = useCallback(async () => {
+    setIsLoading(true);
+    const flow = rfInstance.toObject();
+    console.info('flow json:', flow);
+    console.info('oldflow json:', oldFlow.current);
+    if (!oldFlow.current) {
+      const resp = await createInDB({
+        "familyTree": flow
+        },
+      "familyTree") 
+      console.info("should have stored the flow", resp)
+      oldFlow.current = resp
+    } else {
+      const resp = await updateInDB({
+        "familyTree": flow,
+          "id": oldFlow.current.id
+      }, "familyTree") 
+      console.info("should have updated the flow", resp)
     }
+    setPendingSave(false)
+    setIsLoading(false);
   }, [rfInstance]);
 
-  useEffect(() => {
-    // TODO: At first, check if the flow exist to load it, else create a node per each user
-    if (users.length != nodes.length){
-      console.info("Need to create the nodes")
-      users.forEach(user => {
-        console.info("Creating node for ", user)
+  const upgradeTree = async () => {
+    setIsLoading(true);
+    let flows = await getInDB("familyTree")
+    console.info("received flows", flows)
+    let nodesToAdd = []
+    let edgesToAdd = []
+    oldFlow.current = flows[0]
+    if (!flows || flows.length == 0 || !flows[0]?.familyTree) {
+      console.info("need to create from scratch for users ", users)
+      for (const user of users) {
         const newNode = {
           id: `${user.id}`,
           data: { label: user.name },
           type: "custom",
           position: {
-            x: 0,
-            y: 0,
+            x: Math.floor(Math.random()*500),
+            y: Math.floor(Math.random()*100),
           },
-        };
-        setNodes((nds) => [...nds, newNode]);      
-      });
+        }
+        console.info("adding node ", newNode)
+        nodesToAdd.push(newNode)
+      }
+      GlobalMessage(t("familyTreeSave"), "info")
+      setPendingSave(true)
+    } else {
+      console.info("Creating flow from previous flow json", flows[0])
+      const actions = familyTreeComparison(users, flows[0].familyTree)
+      // Filter out nodes that need to be deleted
+      flows[0].familyTree.nodes = flows[0].familyTree.nodes.filter(node =>
+        !actions.some(action => action.action === 'delete' && action.id === node.id)
+      );
+      // Filter out edges that reference deleted nodes
+      const deletedIds = actions
+        .filter(action => action.action === 'delete')
+        .map(action => action.id);
+
+      flows[0].familyTree.edges = flows[0].familyTree.edges.filter(
+        edge => !deletedIds.includes(edge.source) && !deletedIds.includes(edge.target)
+      );
+      // Load the flows 
+      const { x = 0, y = 0, zoom = 1 } = flows[0].familyTree.viewport;
+      nodesToAdd = flows[0].familyTree.nodes
+      edgesToAdd = flows[0].familyTree.edges
+      setViewport({ x, y, zoom });
+      // Add new nodes for each 'add' action
+      const userMap = new Map(users.map(user => [String(user.id), user.name]));
+      actions
+        .filter(action => action.action === 'add')
+        .map(action => (
+          nodesToAdd.push( {
+            id: action.id,
+            data: { label: userMap.get(action.id) },
+            type: "custom",
+            position: {
+              x: Math.floor(Math.random()*500),
+              y: Math.floor(Math.random()*100),
+            },
+          })
+        )
+      );
+      if (actions.length > 0) {
+        GlobalMessage(t("familyTreeSave"), "info")
+        setPendingSave(true)
+      }
     }
-  }, [users]);
+    console.info("all nodes added ", nodesToAdd)
+    setNodes(nodesToAdd)
+    setEdges(edgesToAdd)
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    if (!users || users.length == 0 ){
+      return;
+    }
+    upgradeTree();
+  }
+  , [users]);
 
   useEffect(() => {
     console.info("Current nodes: ", nodes)
@@ -107,6 +189,7 @@ const Innerflow = ({ users, selectedUsed }) => {
 
   return (
     <>
+      {(isLoading) &&<Spin >{t('loading')}</Spin>}
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -120,42 +203,27 @@ const Innerflow = ({ users, selectedUsed }) => {
         nodeTypes={nodeTypes}
         snapToGrid
         fitView
+        fitViewOptions={{padding: 20, minZoom: 1 }}
+        minZoom={1}
+        maxZoom={15}
         style={{ backgroundColor: 'rgba(2, 31, 255, 0.2)' }}
       >
         <Background />
         <Panel position="top-right">
-          <Button onClick={onSave}>{t('save')}</Button>
+          <Button onClick={onSave} disabled={!pendingSave}>{t("save")}</Button>
         </Panel>
         <Controls />
       </ReactFlow>
 
       <Modal
-        title={t('addNode')}
-        open={newNameModalVisible}
-        onOk={handleAddNode}
-        onCancel={() => setNewNameModalVisible(false)}
-        okText={t('add')}
-      >
-        <Form layout="vertical">
-          <Form.Item label={t('name')}>
-            <Input
-              value={newNodeLabel}
-              onChange={(e) => setNewNodeLabel(e.target.value)}
-              placeholder={t('editName')}
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        title={t('addRelationship')}
+        title={t("addRelationship")}
         open={relationshipModalVisible}
         onOk={handleAddConnection}
         onCancel={() => setRelationshipModalVisible(false)}
-        okText={t('connect')}
+        okText={t("connect")}
       >
         <Form layout="vertical">
-          <Form.Item label={t('relationship')}>
+          <Form.Item label={t("relationship")}>
             <Select
               defaultValue=""
               style={{ width: 200 }}
@@ -182,6 +250,7 @@ const Innerflow = ({ users, selectedUsed }) => {
 
 // TODO: connect the nodes to the tab selected
 const FamilyTree = ({ users, selectedUsed }) => {
+  
   return (
     <div style={{ position: 'relative', width: '100vw', height: '50vh', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
       <div style={{ width: '80vw', margin: '0 auto', height: '100%' }}>

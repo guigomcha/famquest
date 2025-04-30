@@ -116,7 +116,7 @@ const NoteForm = ({ initialData, parentInfo, refType, handledFinished }) => {
             />
           </Form.Group>
         </Row>
-        <Button variant="primary" type="submit">
+        <Button variant="solid" type="primary" htmlType="submit">
           {t('submit')}
         </Button>
       </Form>

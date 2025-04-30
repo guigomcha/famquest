@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	
+
 	"github.com/gorilla/mux"
 
 	"famquest/components/db-manager/pkg/connection"
@@ -31,13 +31,14 @@ func FamilyTreePost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	logger.Log.Debug("object decoded")
+	logger.Log.Debugf("object decoded %+v", familyTree)
 	dest, httpStatus, err := crudPost(&familyTree)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		http.Error(w, err.Error(), httpStatus)
 		return
 	}
+	logger.Log.Debugf("object decoded %+v", familyTree)
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(dest)
 }

@@ -17,6 +17,7 @@ type APIUsers struct {
 	Name     string `db:"name" json:"name"`
 	Bio      string `db:"bio" json:"bio"`
 	Birthday string `db:"birthday" json:"birthday"`
+	Passing  string `db:"passing" json:"passing"`
 }
 
 // `db:"users"`
@@ -31,6 +32,7 @@ type Users struct {
 	Role      string    `db:"role" json:"role"`
 	Bio       string    `db:"bio" json:"bio"`
 	Birthday  string    `db:"birthday" json:"birthday"`
+	Passing   string    `db:"passing" json:"passing"`
 	CreatedAt time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
 	UpdatedAt time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 }
@@ -49,20 +51,20 @@ func (m *Users) GetSelectAllQuery() string {
 
 func (m *Users) GetInsertQuery() string {
 	return fmt.Sprintf(`
-		INSERT INTO %s (name, ext_ref, email, role, bio, birthday)
-		VALUES (:name, :ext_ref, :email, :role, :bio, :birthday) RETURNING id`, m.GetTableName())
+		INSERT INTO %s (name, ext_ref, email, role, bio, birthday, passing)
+		VALUES (:name, :ext_ref, :email, :role, :bio, :birthday, :passing) RETURNING id`, m.GetTableName())
 }
 
 func (m *Users) GetQuery() string {
 	return fmt.Sprintf(`
-		INSERT INTO %s (name, ext_ref, email, role, bio, birthday)
-		VALUES (:name, :ext_ref, :email, :role, :bio, :birthday) RETURNING id`, m.GetTableName())
+		INSERT INTO %s (name, ext_ref, email, role, bio, birthday, passing)
+		VALUES (:name, :ext_ref, :email, :role, :bio, :birthday, :passing) RETURNING id`, m.GetTableName())
 }
 
 func (m *Users) GetUpdateQuery() string {
 	return fmt.Sprintf(`
 			UPDATE %s
-			SET name = :name, email = :email, ext_ref = :ext_ref, role = :role, bio = :bio, birthday = :birthday
+			SET name = :name, email = :email, ext_ref = :ext_ref, role = :role, bio = :bio, birthday = :birthday, passing = :passing
 			WHERE id = :id`, m.GetTableName())
 }
 

@@ -1390,7 +1390,7 @@
                     "description": "this will hold a JSONB in postgresql with the condition",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.JSONBMap"
+                            "$ref": "#/definitions/models.JSONB"
                         }
                     ]
                 },
@@ -1407,7 +1407,7 @@
                     "description": "this will hold a JSONB in postgresql with the family_tree",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.JSONBMap"
+                            "$ref": "#/definitions/models.JSONB"
                         }
                     ]
                 }
@@ -1475,6 +1475,9 @@
                 "name": {
                     "type": "string"
                 },
+                "passing": {
+                    "type": "string"
+                },
                 "role": {
                     "type": "string"
                 }
@@ -1497,10 +1500,17 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "DB + JSON",
+                    "description": "Auto-incremented integer ID",
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "refId": {
+                    "type": "integer"
+                },
+                "refType": {
+                    "description": "DB + JSON",
                     "type": "string"
                 },
                 "refUserUploader": {
@@ -1522,7 +1532,7 @@
                     "description": "db + json",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.JSONBMap"
+                            "$ref": "#/definitions/models.JSONB"
                         }
                     ]
                 },
@@ -1564,7 +1574,7 @@
                     "description": "db + json",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.JSONBMap"
+                            "$ref": "#/definitions/models.JSONB"
                         }
                     ]
                 },
@@ -1578,11 +1588,9 @@
                 }
             }
         },
-        "models.JSONBMap": {
+        "models.JSONB": {
             "type": "object",
-            "additionalProperties": {
-                "type": "string"
-            }
+            "additionalProperties": true
         },
         "models.KnownLocations": {
             "type": "object",
@@ -1639,10 +1647,17 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "db + json",
+                    "description": "Auto-incremented integer ID",
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "refId": {
+                    "type": "integer"
+                },
+                "refType": {
+                    "description": "db + json",
                     "type": "string"
                 },
                 "refUserUploader": {
@@ -1708,6 +1723,9 @@
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "passing": {
                     "type": "string"
                 },
                 "role": {

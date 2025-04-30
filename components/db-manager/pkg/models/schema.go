@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS users (
     name TEXT NOT NULL,                  -- Preferred Username in keycloak
     bio TEXT,                  -- Bio for the user
     birthday TEXT NOT NULL,                  -- birthday of the user
+    passing TEXT ,                  -- date of passing of the user
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
 );

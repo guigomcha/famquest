@@ -145,3 +145,24 @@ BEGIN
             SET ref_user_uploader = 1;', table_to_update);
     END LOOP;
 END $$;
+
+--- Add passing to users table so that we have users that have passed away in the family tree and family tabs
+
+DO $$
+DECLARE
+    table_to_update TEXT;
+BEGIN
+    -- List of tables to modify
+    FOR table_to_update IN
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public' -- Modify 'public' if your schema is different
+        AND table_name IN ('users')
+    LOOP
+        -- Dynamically execute the ALTER TABLE command to add the column
+        EXECUTE format('
+            ALTER TABLE %I
+            ADD COLUMN IF NOT EXISTS passing TEXT DEFAULT '';', table_to_update);
+
+    END LOOP;
+END $$;

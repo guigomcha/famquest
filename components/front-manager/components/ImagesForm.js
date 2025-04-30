@@ -334,7 +334,7 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
           </Row>
         </Row>
         }
-      <Button variant="primary" type="submit">{initialData?.id ? t('update') : t('upload')}</Button>
+      <Button variant="solid" type="primary" htmlType="submit">{initialData?.id ? t('update') : t('upload')}</Button>
       </Form>
     </>
   );

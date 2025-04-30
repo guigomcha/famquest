@@ -6,16 +6,16 @@ import (
 	"fmt"
 )
 
-// JSONBMap is a custom type to handle map[string]string for JSONB in PostgreSQL
-type JSONBMap map[string]string
+// JSONB is a custom type to handle map[string]interface{} for JSONB in PostgreSQL
+type JSONB map[string]interface{}
 
-// Value implements the driver.Valuer interface for JSONBMap
-func (j JSONBMap) Value() (driver.Value, error) {
+// Value implements the driver.Valuer interface for JSONB
+func (j JSONB) Value() (driver.Value, error) {
 	return json.Marshal(j)
 }
 
-// Scan implements the sql.Scanner interface for JSONBMap
-func (j *JSONBMap) Scan(value interface{}) error {
+// Scan implements the sql.Scanner interface for JSONB
+func (j *JSONB) Scan(value interface{}) error {
 	if value == nil {
 		*j = nil
 		return nil

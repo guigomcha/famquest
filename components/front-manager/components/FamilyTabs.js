@@ -27,12 +27,19 @@ const FamilyTabs = ({ user }) => {
   const [key, setKey] = useState('');
   const [reload, setReload] = useState(true);
     
-  const selectTab = (key) => {
+  const selectTab = async (key) => {
     setKey(key);
+    const tempNotes = await getInDB('note');
+    setNotes(tempNotes);
   };
 
   const handleRequestNew = (e) => {
-    setComponent(<NoteForm handledFinished={handleNestedRequestEdit} userId={user.id} parentInfo={user} refType={'user'}/>);
+    const parentInfo = users.filter(u => u.id == key)[0]
+    setComponent(<NoteForm handledFinished={handleNestedRequestEdit} parentInfo={parentInfo} refType={'user'}/>);
+  }; 
+
+  const handleRequestNewUser = (e) => {
+    setComponent(<UserForm handledFinished={handleNestedRequestEdit} />);
   }; 
 
   const handleRequestEdit = (e) => {
@@ -55,16 +62,14 @@ const FamilyTabs = ({ user }) => {
     console.info("fetching users having ", user);
     const tempUsers = await getUserInfo(0);
     console.info("obtained tempUsers ", tempUsers);
-    setKey(user.name);
     setUsers(tempUsers);
-    const tempNotes = await getInDB('note');
-    setNotes(tempNotes);
-    console.info("obtained tempNotes ", tempNotes);
+    selectTab(user.id);
   };
   
   useEffect(() => {
+    console.info("main useffect")
     fetchRelatedInfo();
-  }, [user, component, reload]);
+  }, [component, reload]);
 
   return (
     <>
@@ -82,7 +87,7 @@ const FamilyTabs = ({ user }) => {
         className="mb-3"
       >
         {users.map((u, index) => (
-          <Tab eventKey={u.name} title={u.name}>
+          <Tab eventKey={u.id} title={u.name}>
             <Card>
               <Card>
                 <Card.Title>{t('userInfo')}</Card.Title>
@@ -109,9 +114,9 @@ const FamilyTabs = ({ user }) => {
                   {notes.length > 0 ? ( 
                     <ListGroup as="ol" numbered>
                       {notes
-                        .filter(note => note.refUserUploader == u.id)
+                        .filter(note => note.refId == u.id && note.refType == "user")
                         .map((note, index) => (
-                          <ListGroup.Item className="justify-content-between" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} userId={user.id} parentInfo={user} refType={'user'} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
+                          <ListGroup.Item className="justify-content-between" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} userId={user.id} parentInfo={{"id": key}} refType={'user'} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
                             {note.name}
                             <Badge bg="primary" pill>
                             {note.category}
@@ -124,7 +129,7 @@ const FamilyTabs = ({ user }) => {
                     )}
                 </Card.Body>
                 <Card.Footer>
-                {(user.id == u.id) && 
+                {(user.id == u.id || u.extRef == "") && 
                   <Button trigger="click"
                   type="default"
                   icon={<AppstoreAddOutlined />}
@@ -138,6 +143,11 @@ const FamilyTabs = ({ user }) => {
             </Card>
           </Tab>
         ))}
+        <Button trigger="click"
+          type="default"
+          icon={<AppstoreAddOutlined />}
+          onClick={handleRequestNewUser}
+        >{t('new')}</Button>
       </Tabs>     
     </Row>
     <SlideMenu component={component} handledFinished={handleNestedRequestEdit}/>

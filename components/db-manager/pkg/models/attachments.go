@@ -17,10 +17,10 @@ type APIAttachments struct {
 // `db:"attachments"` and swagger ouput
 type Attachments struct {
 	// only DB
-	UUID    uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
-	RefType string    `db:"ref_type" json:"-"`
-	RefId   int       `db:"ref_id" json:"-"`
+	UUID uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
 	// DB + JSON
+	RefType         string    `db:"ref_type" json:"refType"`
+	RefId           int       `db:"ref_id" json:"refId"`
 	ID              int       `db:"id" json:"id"` // Auto-incremented integer ID
 	Name            string    `db:"name" json:"name"`
 	ContentType     string    `db:"content_type" json:"contentType"`
