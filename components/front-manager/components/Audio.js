@@ -112,15 +112,13 @@ const Audio = ({ parentInfo, refType, handleMenuChange, user }) => {
                             variant="outlined"
                             icon={<EditOutlined />}
                             onClick={handleRequestEdit}
-                          >{t('edit')}
-                          </Button>
+                          ></Button>
                           <Button trigger="click"
                             color="danger" 
                             variant="outlined"
                             icon={<DeleteOutlined />}
                             onClick={handleRequestDelete}
-                            >{t('delete')}
-                          </Button>
+                            ></Button>
                         </>
                         }
                     </Card.Footer>

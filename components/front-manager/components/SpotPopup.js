@@ -96,9 +96,6 @@ const SpotPopup = ({ location, handledFinished, user }) => {
         <Card.Header>id: {spotInfo.id}</Card.Header>
         <Card.Title>{t('spot')}: {spotInfo.name}</Card.Title>
         <Card>
-          {/* <Card.Body>
-            <Card.Text>discovered {JSON.stringify(spotInfo.discovered)}</Card.Text>
-            </Card.Body> */}
           <Card.Body>
             {!spotInfo.id && <Card.Text>{t('invalidSpot')}{JSON.stringify(location)}</Card.Text>}
             <Card.Text>{renderDescription(spotInfo.description)}</Card.Text>

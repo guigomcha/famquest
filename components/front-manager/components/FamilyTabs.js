@@ -44,7 +44,8 @@ const FamilyTabs = ({ user }) => {
 
   const handleRequestEdit = (e) => {
     console.info("Handle Open with ", e);
-    setComponent(<UserForm initialData={user} handledFinished={handleNestedRequestEdit} />);
+    const parentInfo = users.filter(u => u.id == key)[0]
+    setComponent(<UserForm initialData={parentInfo} handledFinished={handleNestedRequestEdit} />);
   };
 
   const handleNestedRequestEdit = (comp) => {
@@ -97,7 +98,7 @@ const FamilyTabs = ({ user }) => {
                   <Card.Text>{t('email')}: {u.email}</Card.Text>
                   <Card.Text>{t('birthday')}: {u.birthday}</Card.Text>
                   {u.passing != "" && <Card.Text>{t('passing')}: {u.passing}</Card.Text>}
-                  {(user.id == u.id) && 
+                  {(user.id == u.id || u.extRef == "") && 
                     (<Button
                       trigger="click"
                       color="primary" 
