@@ -96,3 +96,27 @@ export function GlobalMessage(msg, type, duration=10) {
   }
   
 };
+
+
+export function familyTreeComparison(users, nodeData) {
+  const userIds = users.map(user => String(user.id));
+  const nodeIds = nodeData.nodes.map(node => node.id);
+
+  const actions = [];
+
+  // Find nodes to delete (no corresponding user)
+  for (const nodeId of nodeIds) {
+      if (!userIds.includes(nodeId)) {
+          actions.push({ action: 'delete', id: nodeId });
+      }
+  }
+
+  // Find users to add (no corresponding node)
+  for (const userId of userIds) {
+      if (!nodeIds.includes(userId)) {
+          actions.push({ action: 'add', id: userId });
+      }
+  }
+
+  return actions;
+}

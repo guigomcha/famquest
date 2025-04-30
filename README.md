@@ -4,20 +4,32 @@
 
 # The FamQuest App
 
-A map guiding users on an adventure to uncover family memories and history shared in the form of a geolocation-based digital photo frame.
+A map guiding users on an adventure to uncover family memories and history shared in the form of a geo-location-based digital photo frame.
 
-See the documentation online in <https://famquest.guigomcha.dynv6.net> and continue reading the README files.
+See the documentation online in <https://info.famquest.guigomcha.dynv6.net> and continue reading the README files.
+
+As a Progressive Web App, Famquest can be used from browser and mobile. Most development has been done and tested via **Google Chrome and Edge** (for iOS, Android, Windows and Mac), other browsers could be used but have not been tested. Check a reference like [this one from 2023](https://firt.dev/notes/pwa/).
+
+PWA features used:
+- Geo-localization (optional).
+- Image, video* and audio capture.
+- Add to home screen (optional).
+- App launching screen (optional).
+- Service Workers (WIP)
+- Web push notifications (WIP)
 
 ## Repo structure
 
 - assets: Assets involved in the system as external git repos. Includes libraries, SDKs, repos for local reference...
 - .github: CICD
 - components: Source code of each custom component. Develop, install and test in isolation.
-  - docs: Low Level docs
-  - install: dockerfile and scripts to install/build the component
-  - tools: Custom tools
-- deploy: Instructions to deploy components as part of the an E2E system including instructions to deploy opensource components which are required
-- docs: High level docs
+  - db-manager: Go API for the PostgreSQL and MINIO. Check the [README](./components/db-manager/README.md)
+  - front-manager: React portal for a private custom instance of FamQuest. Check the [README](./components/front-manager/README.md).
+  - welcome-page: React portal for the public information of FamQuest. Check the [README](./components/welcome-page/README.md)
+  - backup-manager: Script-based service to push backups from PostgreSQL and MINIO to Dropbox and a local PVC. Check the [README](./components/backup-manager/README.md)
+  - go-common: Go shared modules for all Go services. Check the [README](./components/go-common/README.md)
+- deploy: Instructions to deploy components as part of the an E2E system including instructions to deploy opensource components which are required. Check the [README](./deploy/README.md).
+- docs: Resources for docs
 - external: Directory ignored to be able to host local git submodules of thirdparty software of interest but not extended by us.
 - tools: Custom tools
 

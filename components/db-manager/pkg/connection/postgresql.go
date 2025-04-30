@@ -97,6 +97,11 @@ func Get(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
 		err := db.Get(&received, model.GetSelectOneQuery(), id)
 		return &received, err
 
+	case *models.FamilyTree:
+		received := models.FamilyTree{}
+		err := db.Get(&received, model.GetSelectOneQuery(), id)
+		return &received, err
+
 	default:
 		return nil, fmt.Errorf("unsupported struct in GetAll %+v", m)
 	}
@@ -109,7 +114,7 @@ func GetAll(db *sqlx.DB, model DbInterface, filter string) ([]DbInterface, error
 	case *models.KnownLocations:
 		received := []models.KnownLocations{}
 		err := db.Select(&received, m.GetSelectAllQuery()+" "+filter)
-		logger.Log.Debugf("objects obtained '%+v'", received)
+		// logger.Log.Debugf("objects obtained '%+v'", received)
 		if err != nil {
 			return dest, err
 		}
@@ -122,7 +127,7 @@ func GetAll(db *sqlx.DB, model DbInterface, filter string) ([]DbInterface, error
 	case *models.Attachments:
 		received := []models.Attachments{}
 		err := db.Select(&received, m.GetSelectAllQuery()+" "+filter)
-		logger.Log.Debugf("objects obtained '%+v'", received)
+		// logger.Log.Debugf("objects obtained '%+v'", received)
 		if err != nil {
 			return dest, err
 		}
@@ -136,7 +141,7 @@ func GetAll(db *sqlx.DB, model DbInterface, filter string) ([]DbInterface, error
 		received := []models.Users{}
 		logger.Log.Debugf("initial filter '%s'", m.GetSelectAllQuery())
 		err := db.Select(&received, m.GetSelectAllQuery()+" "+filter)
-		logger.Log.Debugf("objects obtained '%+v'", received)
+		// logger.Log.Debugf("objects obtained '%+v'", received)
 		if err != nil {
 			return dest, err
 		}
@@ -149,6 +154,18 @@ func GetAll(db *sqlx.DB, model DbInterface, filter string) ([]DbInterface, error
 	case *models.Spots:
 		// todo call the get function instead if there is too much duplicated code in the end
 		received := []models.Spots{}
+		err := db.Select(&received, m.GetSelectAllQuery()+" "+filter)
+		if err != nil {
+			return dest, err
+		}
+		// Slices need to be reconverted element by element
+		for _, s := range received {
+			dest = append(dest, &s) // Add the struct to the interface slice
+		}
+
+	case *models.FamilyTree:
+		// todo call the get function instead if there is too much duplicated code in the end
+		received := []models.FamilyTree{}
 		err := db.Select(&received, m.GetSelectAllQuery()+" "+filter)
 		if err != nil {
 			return dest, err
@@ -271,7 +288,7 @@ func performMultipleNamedQueries(db *sqlx.DB, m DbInterface, queries []string) e
 func ExecuteCustom(db *sqlx.DB, query string, dest interface{}) error {
 	logger.Log.Debugf("Executing query '%s'", query)
 	err := db.Select(dest, query)
-	logger.Log.Debugf("objects obtained '%+v'", dest)
+	// logger.Log.Debugf("objects obtained '%+v'", dest)
 	if err != nil {
 		logger.Log.Debugf("unable to execute query: `%s`", err.Error())
 	}

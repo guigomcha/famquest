@@ -103,22 +103,27 @@ const SpotPopup = ({ location, handledFinished, user }) => {
             {!spotInfo.id && <Card.Text>{t('invalidSpot')}{JSON.stringify(location)}</Card.Text>}
             <Card.Text>{renderDescription(spotInfo.description)}</Card.Text>
           </Card.Body>
-          <Card.Footer>
-            <Button
-              trigger="click"
-              type="default"
-              icon={<EditOutlined />}
-              onClick={handleRequestEdit}
-            >
-              {t('edit')}
-            </Button>
-            <Button trigger="click"
-              type="default"
-              icon={<DeleteOutlined />}
-              onClick={handleRequestDelete}
-              >{t('delete')}
-            </Button>
-            {/* <Card.Text>{t('owner')}: {info.name}</Card.Text> */}
+            <Card.Footer>
+              <Card.Text>{t('owner')}: {info.name}</Card.Text>
+              {(user.id == spotInfo.refUserUploader) &&
+                <>
+                  <Button
+                    trigger="click"
+                    color="primary" 
+                    variant="outlined"
+                    icon={<EditOutlined />}
+                    onClick={handleRequestEdit}
+                  >{t('edit')}
+                  </Button>
+                  <Button trigger="click"
+                    color="danger" 
+                    variant="outlined"
+                    icon={<DeleteOutlined />}
+                    onClick={handleRequestDelete}
+                  >{t('delete')}
+                  </Button>
+                </>
+              }
           </Card.Footer>
           </Card>
           <Card>
@@ -146,10 +151,11 @@ const SpotPopup = ({ location, handledFinished, user }) => {
               )}
               <Card.Footer> 
                   <Button trigger="click"
-                    type="default"
+                    color="primary" 
+                    variant="outlined"
                     icon={<AppstoreAddOutlined />}
                     onClick={handleRequestNewNote}
-                    >{t('new')}
+                  >{t('new')}
                   </Button>
               </Card.Footer>
           </Card>

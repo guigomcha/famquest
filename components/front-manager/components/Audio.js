@@ -89,7 +89,7 @@ const Audio = ({ parentInfo, refType, handleMenuChange, user }) => {
         {(isLoading) &&<Spin>{t('loading')}</Spin>}
         <Card.Body>
           {selectedAudios.length > 0 ? (
-              <Carousel activeIndex={activeIndex} onSelect={handleSelect} slide={false} interval={null} data-bs-theme="dark" controls={true}> 
+              <Carousel activeIndex={activeIndex} onSelect={handleSelect} slide={false} interval={null} data-bs-theme="dark" controls={false}> 
               {selectedAudios.map((audio, index) => (
                 <Carousel.Item>
                   <Card className="bg-dark text-white">
@@ -108,13 +108,15 @@ const Audio = ({ parentInfo, refType, handleMenuChange, user }) => {
                         {user.id == info.id && 
                           <>
                           <Button trigger="click"
-                            type="default"
+                            color="primary" 
+                            variant="outlined"
                             icon={<EditOutlined />}
                             onClick={handleRequestEdit}
                           >{t('edit')}
                           </Button>
                           <Button trigger="click"
-                            type="default"
+                            color="danger" 
+                            variant="outlined"
                             icon={<DeleteOutlined />}
                             onClick={handleRequestDelete}
                             >{t('delete')}
@@ -132,7 +134,8 @@ const Audio = ({ parentInfo, refType, handleMenuChange, user }) => {
         </Card.Body>
         <Card.Footer>
           <Button trigger="click"
-            type="default"
+            color="primary" 
+            variant="outlined"
             icon={<AudioOutlined />}
             onClick={handleRequestNew}
             >{t('new')}</Button>

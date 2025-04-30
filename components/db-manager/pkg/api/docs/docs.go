@@ -519,6 +519,129 @@ const docTemplate = `{
                 }
             }
         },
+        "/familyTree": {
+            "get": {
+                "description": "Get a list of all familyTrees",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "familyTree"
+                ],
+                "summary": "Retrieve all familyTrees",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.FamilyTree"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new familyTree",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "familyTree"
+                ],
+                "summary": "Create a familyTree",
+                "parameters": [
+                    {
+                        "description": "FamilyTree data",
+                        "name": "familyTree",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APIFamilyTree"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.FamilyTree"
+                        }
+                    }
+                }
+            }
+        },
+        "/familyTree/{id}": {
+            "get": {
+                "description": "Get familyTree details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "familyTree"
+                ],
+                "summary": "Retrieve a familyTree by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "FamilyTree ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.FamilyTree"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update familyTree details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "familyTree"
+                ],
+                "summary": "Update a familyTree by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "FamilyTree ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "FamilyTree data",
+                        "name": "familyTree",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APIFamilyTree"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.FamilyTree"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Check the health of the service",
@@ -1275,13 +1398,26 @@ const docTemplate = `{
                     "description": "this will hold a JSONB in postgresql with the condition",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.JSONBMap"
+                            "$ref": "#/definitions/models.JSONB"
                         }
                     ]
                 },
                 "show": {
                     "description": "condition was met",
                     "type": "boolean"
+                }
+            }
+        },
+        "models.APIFamilyTree": {
+            "type": "object",
+            "properties": {
+                "familyTree": {
+                    "description": "this will hold a JSONB in postgresql with the family_tree",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.JSONB"
+                        }
+                    ]
                 }
             }
         },
@@ -1347,6 +1483,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "passing": {
+                    "type": "string"
+                },
                 "role": {
                     "type": "string"
                 }
@@ -1369,10 +1508,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "DB + JSON",
+                    "description": "Auto-incremented integer ID",
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "refId": {
+                    "type": "integer"
+                },
+                "refType": {
+                    "description": "DB + JSON",
                     "type": "string"
                 },
                 "refUserUploader": {
@@ -1394,7 +1540,7 @@ const docTemplate = `{
                     "description": "db + json",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.JSONBMap"
+                            "$ref": "#/definitions/models.JSONB"
                         }
                     ]
                 },
@@ -1425,11 +1571,34 @@ const docTemplate = `{
                 }
             }
         },
-        "models.JSONBMap": {
+        "models.FamilyTree": {
             "type": "object",
-            "additionalProperties": {
-                "type": "string"
+            "properties": {
+                "createdAt": {
+                    "description": "Automatically generated",
+                    "type": "string"
+                },
+                "familyTree": {
+                    "description": "db + json",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.JSONB"
+                        }
+                    ]
+                },
+                "id": {
+                    "description": "db + json",
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "description": "Automatically managed by trigger",
+                    "type": "string"
+                }
             }
+        },
+        "models.JSONB": {
+            "type": "object",
+            "additionalProperties": true
         },
         "models.KnownLocations": {
             "type": "object",
@@ -1486,10 +1655,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "db + json",
+                    "description": "Auto-incremented integer ID",
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "refId": {
+                    "type": "integer"
+                },
+                "refType": {
+                    "description": "db + json",
                     "type": "string"
                 },
                 "refUserUploader": {
@@ -1513,10 +1689,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "db + json",
-                    "type": "integer"
-                },
-                "location": {
-                    "description": "only json -\u003e Need to create the parse the json  to and from db",
                     "type": "integer"
                 },
                 "name": {
@@ -1555,6 +1727,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "passing": {
                     "type": "string"
                 },
                 "role": {

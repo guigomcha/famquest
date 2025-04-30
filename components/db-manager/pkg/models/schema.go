@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS users (
     name TEXT NOT NULL,                  -- Preferred Username in keycloak
     bio TEXT,                  -- Bio for the user
     birthday TEXT NOT NULL,                  -- birthday of the user
+    passing TEXT ,                  -- date of passing of the user
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
 );
@@ -77,6 +78,15 @@ CREATE TABLE IF NOT EXISTS discovered (
     ref_type TEXT NOT NULL DEFAULT 'spot' CHECK (ref_type IN ('spot', 'note', 'attachment' )), -- Constraint for ref_type
     ref_id INT DEFAULT 0, -- Integer field for the ref_id
     ref_user_uploader INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
+);
+
+-- This table will have a single entry and each column with be handled in its own endpoint 
+CREATE TABLE IF NOT EXISTS global (
+    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- UUID as primary key
+    id SERIAL UNIQUE NOT NULL,                         -- Auto-incremented integer ID
+    family_tree JSONB NOT NULL, -- JSONB to store the family tree json
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
 );

@@ -5,7 +5,7 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { Spin } from 'antd';
 import '../css/classes.css';
-import { updateInDB } from '../functions/db_manager_api';
+import { createInDB, updateInDB } from '../functions/db_manager_api';
 import { DatePicker, Space } from 'antd';
 import { useTranslation } from "react-i18next";
 import { GlobalMessage } from '../functions/components_helper';
@@ -28,14 +28,19 @@ const UserForm = ({ initialData, handledFinished }) => {
     const formDataObj = new FormData(form);
     // Convert FormData to a plain object
     const formValues = {
-      "email": initialData.email,
-      "extRef": initialData.extRef,
-      "role": initialData.role,
+      "email": initialData?.email || "",
+      "extRef": initialData?.extRef || "",
+      "role": initialData?.role || "contributor",
     };
     formDataObj.forEach((value, key) => {
       formValues[key] = value;
     });
-    const newUser = await updateInDB(formValues, 'user');
+    let newUser = null;
+    if (initialData?.id){
+      newUser = await updateInDB(formValues, 'user');
+    } else {
+      newUser = await createInDB(formValues, 'user');      
+    }
     console.info("Received user", newUser);
     if (!newUser){
       GlobalMessage(t('internalError'), "error");
@@ -63,6 +68,7 @@ const UserForm = ({ initialData, handledFinished }) => {
           </Row>
         )}
         <Row className="mb-3">
+        {initialData?.extRef != "" ? (
           <Form.Group as={Col} controlId="formGridName">
             <Form.Label>{t('name')} ({t('readOnly')})</Form.Label>
             <Form.Control
@@ -71,7 +77,18 @@ const UserForm = ({ initialData, handledFinished }) => {
               name="name"
               defaultValue={initialData?.name}
             />
-          </Form.Group>
+          </Form.Group>) : (
+          <Form.Group as={Col} controlId="formGridName">
+            <Form.Label>{t('name')} </Form.Label>
+            <Form.Control
+              type="text"
+              required
+              name="name"
+              defaultValue={initialData?.name}
+            />
+          </Form.Group>) }
+          </Row>
+          <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridBirthday">
             <Form.Label>{t('birthday')}</Form.Label>
             <Form.Control
@@ -81,7 +98,16 @@ const UserForm = ({ initialData, handledFinished }) => {
               defaultValue={initialData?.birthday?.split("T")[0]}
             />
           </Form.Group>
-
+          <Form.Group as={Col} controlId="formGridPassing">
+            <Form.Label>{t('passing')}</Form.Label>
+            <Form.Control
+              type="date"
+              name="passing"
+              defaultValue={initialData?.passing?.split("T")[0]}
+            />
+          </Form.Group>
+          </Row>
+          <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridBio">
             <Form.Label>{t('biography')}</Form.Label>
             <Form.Control
@@ -99,8 +125,11 @@ const UserForm = ({ initialData, handledFinished }) => {
             />
           </Form.Group>
         </Row>
-        <Button variant="primary" type="submit">
-          {t('submit')}
+        <Button 
+          color="primary" 
+          variant="solid"
+          htmlType="submit"
+        >{t('submit')}
         </Button>
       </Form>
     </>

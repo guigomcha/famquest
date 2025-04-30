@@ -76,9 +76,17 @@ const OAuth2Login = ({ onUserChange }) => {
   return (
       <div >
         {(user || isLocal) ? (
-          <Button variant="primary" onClick={logout}>{t('logout')}</Button>
+          <Button           
+            color="default" 
+            variant="outlined"
+            onClick={logout}
+          >{t('logout')}</Button>
         ) : (
-          <Button variant="primary" onClick={login}>{t('login')}</Button>
+          <Button 
+            color="primary" 
+            variant="solid"
+            onClick={login}
+          >{t('login')}</Button>
         )}
       </div>
   );

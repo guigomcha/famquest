@@ -18,10 +18,10 @@ type APINotes struct {
 // `db:"notes"`
 type Notes struct {
 	// Only DB
-	UUID    uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
-	RefType string    `db:"ref_type" json:"-"`
-	RefId   int       `db:"ref_id" json:"-"`
+	UUID uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
 	// db + json
+	RefType         string    `db:"ref_type" json:"refType"`
+	RefId           int       `db:"ref_id" json:"refId"`
 	ID              int       `db:"id" json:"id"` // Auto-incremented integer ID
 	Name            string    `db:"name" json:"name"`
 	Description     string    `db:"description" json:"description"`

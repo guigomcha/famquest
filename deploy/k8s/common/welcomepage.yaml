@@ -63,7 +63,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-  - host: famquest.REPLACE_BASE_DOMAIN
+  - host: info.famquest.REPLACE_BASE_DOMAIN
     http:
       paths:
       - backend:
@@ -75,7 +75,7 @@ spec:
         pathType: Prefix
   tls:
   - hosts:
-    - famquest.REPLACE_BASE_DOMAIN
+    - info.famquest.REPLACE_BASE_DOMAIN
     secretName: welcomepage-letsencrypt-secret
 ---
 apiVersion: cert-manager.io/v1

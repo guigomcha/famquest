@@ -17,7 +17,7 @@ import { ArrowDownOutlined } from '@ant-design/icons';
 
 import MapManager from './components/MapManager';
 import UserButton from './components/UserButton';
-import FamilyTab from './components/Family';
+import FamilyTabs from './components/FamilyTabs';
 import OAuth2 from './components/Oauth2';
 import { renderDescription } from './functions/render_message';
 import { updateDiscoveredConditionsForUser } from './functions/db_manager_api';
@@ -140,7 +140,8 @@ export default function App() {
                         {isImageAboveText && (
                           <Card.ImgOverlay bsPrefix="card-row">
                             <Button trigger="click"
-                              type="default"
+                              color="primary" 
+                              variant="outlined"
                               icon={<ArrowDownOutlined />}
                               onClick={handleArrowClick}
                               >{t('callToAction')}</Button>
@@ -181,7 +182,7 @@ export default function App() {
           <Tab eventKey="user" title={t('family')}>
           { (user?.id) &&
             <Container fluid>
-              <FamilyTab user={user}></FamilyTab>
+              <FamilyTabs user={user}></FamilyTabs>
             </Container>
           }
           </Tab>

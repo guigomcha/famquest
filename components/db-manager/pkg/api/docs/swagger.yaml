@@ -12,11 +12,18 @@ definitions:
     properties:
       condition:
         allOf:
-        - $ref: '#/definitions/models.JSONBMap'
+        - $ref: '#/definitions/models.JSONB'
         description: this will hold a JSONB in postgresql with the condition
       show:
         description: condition was met
         type: boolean
+    type: object
+  models.APIFamilyTree:
+    properties:
+      familyTree:
+        allOf:
+        - $ref: '#/definitions/models.JSONB'
+        description: this will hold a JSONB in postgresql with the family_tree
     type: object
   models.APIKnownLocations:
     properties:
@@ -59,6 +66,8 @@ definitions:
         type: string
       name:
         type: string
+      passing:
+        type: string
       role:
         type: string
     type: object
@@ -74,9 +83,14 @@ definitions:
       description:
         type: string
       id:
-        description: DB + JSON
+        description: Auto-incremented integer ID
         type: integer
       name:
+        type: string
+      refId:
+        type: integer
+      refType:
+        description: DB + JSON
         type: string
       refUserUploader:
         type: integer
@@ -90,7 +104,7 @@ definitions:
     properties:
       condition:
         allOf:
-        - $ref: '#/definitions/models.JSONBMap'
+        - $ref: '#/definitions/models.JSONB'
         description: db + json
       createdAt:
         description: Automatically generated
@@ -111,9 +125,24 @@ definitions:
         description: Automatically managed by trigger
         type: string
     type: object
-  models.JSONBMap:
-    additionalProperties:
-      type: string
+  models.FamilyTree:
+    properties:
+      createdAt:
+        description: Automatically generated
+        type: string
+      familyTree:
+        allOf:
+        - $ref: '#/definitions/models.JSONB'
+        description: db + json
+      id:
+        description: db + json
+        type: integer
+      updatedAt:
+        description: Automatically managed by trigger
+        type: string
+    type: object
+  models.JSONB:
+    additionalProperties: true
     type: object
   models.KnownLocations:
     properties:
@@ -154,9 +183,14 @@ definitions:
       description:
         type: string
       id:
-        description: db + json
+        description: Auto-incremented integer ID
         type: integer
       name:
+        type: string
+      refId:
+        type: integer
+      refType:
+        description: db + json
         type: string
       refUserUploader:
         type: integer
@@ -173,9 +207,6 @@ definitions:
         type: string
       id:
         description: db + json
-        type: integer
-      location:
-        description: only json -> Need to create the parse the json  to and from db
         type: integer
       name:
         type: string
@@ -202,6 +233,8 @@ definitions:
         description: db + json
         type: integer
       name:
+        type: string
+      passing:
         type: string
       role:
         type: string
@@ -553,6 +586,87 @@ paths:
       summary: Updates all discovered entries for a user
       tags:
       - discovered
+  /familyTree:
+    get:
+      description: Get a list of all familyTrees
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.FamilyTree'
+            type: array
+      summary: Retrieve all familyTrees
+      tags:
+      - familyTree
+    post:
+      consumes:
+      - application/json
+      description: Create a new familyTree
+      parameters:
+      - description: FamilyTree data
+        in: body
+        name: familyTree
+        required: true
+        schema:
+          $ref: '#/definitions/models.APIFamilyTree'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.FamilyTree'
+      summary: Create a familyTree
+      tags:
+      - familyTree
+  /familyTree/{id}:
+    get:
+      description: Get familyTree details by ID
+      parameters:
+      - description: FamilyTree ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.FamilyTree'
+      summary: Retrieve a familyTree by ID
+      tags:
+      - familyTree
+    put:
+      consumes:
+      - application/json
+      description: Update familyTree details by ID
+      parameters:
+      - description: FamilyTree ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: FamilyTree data
+        in: body
+        name: familyTree
+        required: true
+        schema:
+          $ref: '#/definitions/models.APIFamilyTree'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.FamilyTree'
+      summary: Update a familyTree by ID
+      tags:
+      - familyTree
   /health:
     get:
       description: Check the health of the service

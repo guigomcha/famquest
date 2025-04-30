@@ -20,7 +20,10 @@ export function collectLogs() {
   };
 
   // Export to a file
-  const logJson = JSON.stringify(logData, getCircularReplacer(), 2);
+  BigInt.prototype.toJSON = function() {
+    return this.toString();
+    };
+  const logJson = JSON.stringify(logData, getCircularReplacer, 2);
   const blob = new Blob([logJson], { type: 'application/json' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);

@@ -93,10 +93,10 @@ const UserButton = ({ user,  mapRef }) => {
             const withRef = await addReferenceInDB(locationDb.id, user.id, "user", "location");
             console.info("sent with ref", withRef)
             const resp = await updateDiscoveredConditionsForUser(user);
-            // Are you a string?
+            // TODO: provide the actual list
             console.info("requested discover update: ", resp);
             if (resp.length >0) {
-              GlobalMessage(resp.length + "x" +t('discoveredUpdate')+": "+resp, "info");
+              GlobalMessage(resp.length + "x" +t('discoveredUpdate'), "info");
             }
           })
          .on('locationerror', function(e){
@@ -129,19 +129,22 @@ const UserButton = ({ user,  mapRef }) => {
           <Card.Footer>
             <Row>
               <Button trigger="click"
-                type="default"
+                color="primary" 
+                variant="outlined"
                 icon={<ReloadOutlined />}
                 onClick={handleReload}
               >{t('reload')}</Button>
               <Button trigger="click"
-                type="default"
+                color="primary" 
+                variant="outlined"
                 icon={<AimOutlined />}
                 onClick={handleLocate}
               >{t('location')}</Button>
             </Row>
             <Row>
             <Button trigger="click"
-              type="default"
+              color="primary" 
+              variant="outlined"
               icon={<FrownOutlined />}
               onClick={handleReport}
             >{t('report')}</Button>
