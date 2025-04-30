@@ -16,7 +16,7 @@ const Note = ({ initialData, user, parentInfo, refType, handledFinished }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { t, i18n } = useTranslation();
   const [component, setComponent] = useState(null);
-  const [info, setInfo] = useState({ "name": "unknown" });
+  const [info, setInfo] = useState({ "id": 0 });
   const [reload, setReload] = useState(true);
   const [content, setContent] = useState(initialData);
      
@@ -53,7 +53,7 @@ const Note = ({ initialData, user, parentInfo, refType, handledFinished }) => {
 
   // fetch the additional info for this note
   const fetchRelatedInfo = async (model) => {
-    console.info("fetching info for ", model);
+    console.info("fetching info for note ", model);
     if (!model){
       return;
     }

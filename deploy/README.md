@@ -215,8 +215,6 @@ exit
 
 ## Upgrades
 
-### v0.1.0 -> v0.2.0
-
 0. DB and Front replicas to 0
   
     ```bash
@@ -225,7 +223,11 @@ exit
     ```
 
 1. Backup of postgresql
-2. Access to pgadmin, delete the tasks table and apply the sql script in components/db-manager/tools/v0.2.0-migrations.sql
+2. Access to pgadmin and apply the sql script in components/db-manager/tools/$VERSION-migrations.sql
 3. Push the new docker image for db and front manager
 4. Scale to 1
-5. Execute the /configure endpoint in the db-manager swagger
+
+    ```bash
+    kubectl scale --replicas=1 deployment -n REPLACE_TARGET_USER dbmanager-deployment 
+    kubectl scale --replicas=1 deployment -n REPLACE_TARGET_USER frontmanager-deployment 
+    ```

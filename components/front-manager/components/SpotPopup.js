@@ -18,7 +18,7 @@ const SpotPopup = ({ location, handledFinished, user }) => {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [component, setComponent] = useState(null);
-  const [info, setInfo] = useState({ "name": "unknown" });
+  const [info, setInfo] = useState({ "id": 0 });
   const [spotInfo, setSpotInfo] = useState({ "id": location.refId });
   const [reload, setReload] = useState(true);
   const [notes, setNotes] = useState([]);
@@ -65,7 +65,7 @@ const SpotPopup = ({ location, handledFinished, user }) => {
     console.info("Fetched initial spots ", tempSpot);
     tempSpot.location = location;
     setSpotInfo(tempSpot);
-    console.info("fetching info for ", tempSpot);
+    console.info("fetching info for spot ", tempSpot);
     if (!tempSpot){
       setIsLoading(false);
       return;
