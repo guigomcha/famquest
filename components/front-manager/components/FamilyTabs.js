@@ -67,7 +67,6 @@ const FamilyTabs = ({ user }) => {
   };
   
   useEffect(() => {
-    console.info("main useffect")
     fetchRelatedInfo();
   }, [component, reload]);
 

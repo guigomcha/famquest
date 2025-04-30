@@ -23,7 +23,7 @@ PWA features used:
 - assets: Assets involved in the system as external git repos. Includes libraries, SDKs, repos for local reference...
 - .github: CICD
 - components: Source code of each custom component. Develop, install and test in isolation.
-  - db-manager: Go API for the PostgreSQLDB. Check the [README](./components/db-manager/README.md)
+  - db-manager: Go API for the PostgreSQL and MINIO. Check the [README](./components/db-manager/README.md)
   - front-manager: React portal for a private custom instance of FamQuest. Check the [README](./components/front-manager/README.md).
   - welcome-page: React portal for the public information of FamQuest. Check the [README](./components/welcome-page/README.md)
   - backup-manager: Script-based service to push backups from PostgreSQL and MINIO to Dropbox and a local PVC. Check the [README](./components/backup-manager/README.md)
