@@ -39,7 +39,7 @@ const FamilyTabs = ({ user }) => {
   }; 
 
   const handleRequestNewUser = (e) => {
-    setComponent(<UserForm handledFinished={handleNestedRequestEdit} />);
+    setComponent(<UserForm initialData={{"extRef": ""}} handledFinished={handleNestedRequestEdit} />);
   }; 
 
   const handleRequestEdit = (e) => {
@@ -143,11 +143,13 @@ const FamilyTabs = ({ user }) => {
             </Card>
           </Tab>
         ))}
-        <Button trigger="click"
+        <Tab eventKey={"new"} title={
+          <Button trigger="click"
           type="default"
           icon={<AppstoreAddOutlined />}
           onClick={handleRequestNewUser}
-        >{t('new')}</Button>
+        >{t('new')}</Button>}>
+        </Tab>
       </Tabs>     
     </Row>
     <SlideMenu component={component} handledFinished={handleNestedRequestEdit}/>

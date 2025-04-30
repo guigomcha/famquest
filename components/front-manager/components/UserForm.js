@@ -82,11 +82,13 @@ const UserForm = ({ initialData, handledFinished }) => {
             <Form.Label>{t('name')} </Form.Label>
             <Form.Control
               type="text"
+              required
               name="name"
               defaultValue={initialData?.name}
             />
           </Form.Group>) }
-
+          </Row>
+          <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridBirthday">
             <Form.Label>{t('birthday')}</Form.Label>
             <Form.Control
@@ -104,7 +106,8 @@ const UserForm = ({ initialData, handledFinished }) => {
               defaultValue={initialData?.passing?.split("T")[0]}
             />
           </Form.Group>
-
+          </Row>
+          <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridBio">
             <Form.Label>{t('biography')}</Form.Label>
             <Form.Control
