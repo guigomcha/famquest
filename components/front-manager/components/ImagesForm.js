@@ -251,7 +251,8 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
             <Col>
             <Dropdown as={ButtonGroup}>
               <Button trigger="click"
-                type="default"
+                color="primary" 
+                variant="solid"
                 onClick={toggleCamera}
                 >{t('cameraControl')}<br></br>{cameraOption} {t('camera')}</Button>
               <Dropdown.Toggle split variant="default" id="dropdown-split-basic" />
@@ -271,7 +272,8 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
                 </Col> */}
                 <Col>
                   <Button trigger="click"
-                    type="primary"
+                    color="primary" 
+                    variant="outlined"
                     icon={<CameraOutlined />}
                     onClick={captureImage}
                     >{t('cameraTakePhoto')}</Button>
@@ -334,7 +336,11 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
           </Row>
         </Row>
         }
-      <Button variant="solid" type="primary" htmlType="submit">{initialData?.id ? t('update') : t('upload')}</Button>
+      <Button 
+        color="primary" 
+        variant="solid"
+        htmlType="submit"
+      >{initialData?.id ? t('update') : t('upload')}</Button>
       </Form>
     </>
   );

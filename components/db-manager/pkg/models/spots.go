@@ -24,10 +24,6 @@ type Spots struct {
 	CreatedAt       time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
 	UpdatedAt       time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
 	RefUserUploader int       `db:"ref_user_uploader" json:"refUserUploader"`
-	// only json -> Need to create the parse the json  to and from db
-	Location int `json:"location"`
-	//Attachments pq.Int64Array `json:"attachments"`
-	//Notes pq.Int64Array `json:"notes"`
 }
 
 func (m *Spots) GetTableName() string {
@@ -42,16 +38,13 @@ func (m *Spots) GetSelectOneQuery() string {
 			s.description, 
 			s.ref_user_uploader, 
 			s.created_at, 
-			s.updated_at,
-			COALESCE(kl.id, 0) AS location
+			s.updated_at
 	FROM
 			spots s
-	LEFT JOIN 
-			known_locations kl ON kl.ref_id = s.id AND kl.ref_type = 'spot'
 	WHERE
 			s.id = $1
 	GROUP BY 
-			s.id, kl.id, s.name, s.description, s.created_at, s.updated_at, s.ref_user_uploader`
+			s.id, s.name, s.description, s.created_at, s.updated_at, s.ref_user_uploader`
 }
 
 func (m *Spots) GetSelectAllQuery() string {
@@ -62,14 +55,11 @@ func (m *Spots) GetSelectAllQuery() string {
 			s.description, 
 			s.ref_user_uploader, 
 			s.created_at, 
-			s.updated_at,
-			COALESCE(kl.id, 0) AS location
+			s.updated_at
 	FROM 
 			spots s
-	LEFT JOIN 
-			known_locations kl ON kl.ref_id = s.id AND kl.ref_type = 'spot'
 	GROUP BY 
-			s.id, kl.id, s.name, s.description, s.created_at, s.updated_at, s.ref_user_uploader`
+			s.id, s.name, s.description, s.created_at, s.updated_at, s.ref_user_uploader`
 }
 
 func (m *Spots) GetInsertQuery() string {
@@ -89,9 +79,6 @@ func (m *Spots) GetDeleteExtraQueries() []string {
 	return []string{
 		`DELETE FROM known_locations WHERE ref_id = :id AND ref_type = 'spot'`,
 		`DELETE FROM discovered WHERE ref_id = :id AND ref_type = 'spot'`,
-		//`UPDATE attachments
-		// SET ref_id = 0
-		// WHERE ref_id = :id AND ref_type = 'spot'`,
 	}
 }
 

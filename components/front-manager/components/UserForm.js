@@ -125,8 +125,11 @@ const UserForm = ({ initialData, handledFinished }) => {
             />
           </Form.Group>
         </Row>
-        <Button variant="solid" type="primary" htmlType="submit">
-          {t('submit')}
+        <Button 
+          color="primary" 
+          variant="solid"
+          htmlType="submit"
+        >{t('submit')}
         </Button>
       </Form>
     </>

@@ -93,7 +93,7 @@ const Images = ( {parentInfo, refType, handleMenuChange, user} ) => {
       <Card.Body>
         {selectedImages.length > 0 ? (
           <Container>
-          <Carousel activeIndex={activeIndex} onSelect={handleSelect} slide={false} interval={null} data-bs-theme="dark" controls={true}> 
+          <Carousel activeIndex={activeIndex} onSelect={handleSelect} slide={false} interval={null} data-bs-theme="dark" controls={false}> 
             {selectedImages.map((image, index) => (
               <Carousel.Item>
                 <Card className="bg-dark text-black">
@@ -106,13 +106,15 @@ const Images = ( {parentInfo, refType, handleMenuChange, user} ) => {
                     {user.id == info.id &&
                     <>
                       <Button trigger="click"
-                        type="default"
+                        color="primary" 
+                        variant="outlined"
                         icon={<EditOutlined />}
                         onClick={handleRequestEdit}
                       >{t('edit')}
                       </Button>
                       <Button trigger="click"
-                        type="default"
+                        color="danger" 
+                        variant="outlined"
                         icon={<DeleteOutlined />}
                         onClick={handleRequestDelete}
                         >{t('delete')}
@@ -135,7 +137,8 @@ const Images = ( {parentInfo, refType, handleMenuChange, user} ) => {
       </Card.Body>
       <Card.Footer>
           <Button trigger="click"
-            type="default"
+            color="primary" 
+            variant="outlined"
             icon={<FileAddOutlined />}
             onClick={handleRequestNew}
             >{t('new')}</Button>

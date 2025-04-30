@@ -140,7 +140,8 @@ export default function App() {
                         {isImageAboveText && (
                           <Card.ImgOverlay bsPrefix="card-row">
                             <Button trigger="click"
-                              type="default"
+                              color="primary" 
+                              variant="outlined"
                               icon={<ArrowDownOutlined />}
                               onClick={handleArrowClick}
                               >{t('callToAction')}</Button>

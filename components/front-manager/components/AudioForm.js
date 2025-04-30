@@ -158,7 +158,11 @@ const AudioForm = ({ initialData, refType, handledFinished }) => {
         </Row>
         <Row>
           { !initialData?.id &&
-          <Button onClick={toggleAudioRecording} variant="solid">
+          <Button 
+            onClick={toggleAudioRecording}
+            color="primary" 
+            variant="solid"
+            >
               {t('audioControl')}
               {audioOpened && (
                   <div
@@ -178,7 +182,11 @@ const AudioForm = ({ initialData, refType, handledFinished }) => {
                 <audio controls src={URL.createObjectURL(audioBlob)}></audio>
               )}
           </Row>
-          <Button variant="solid" type="primary" htmlType="submit">{initialData?.id ? (t('update')) : (t('upload'))}</Button>
+          <Button 
+            color="primary" 
+            variant="solid"
+            htmlType="submit"
+          >{initialData?.id ? (t('update')) : (t('upload'))}</Button>
       </Form>
     </>
   );

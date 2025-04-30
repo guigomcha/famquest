@@ -1683,10 +1683,6 @@
                     "description": "db + json",
                     "type": "integer"
                 },
-                "location": {
-                    "description": "only json -\u003e Need to create the parse the json  to and from db",
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
                 },

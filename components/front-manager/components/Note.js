@@ -85,13 +85,15 @@ const Note = ({ initialData, user, parentInfo, refType, handledFinished }) => {
             {(user.id == content.refUserUploader) &&
               <>
                 <Button trigger="click"
-                  type="default"
+                  color="primary" 
+                  variant="outlined"
                   icon={<EditOutlined />}
                   onClick={handleRequestEdit}
                   >{t('edit')}
                 </Button>
                 <Button trigger="click"
-                  type="default"
+                  color="danger" 
+                  variant="outlined"
                   icon={<DeleteOutlined />}
                   onClick={handleRequestDelete}
                   >{t('delete')}

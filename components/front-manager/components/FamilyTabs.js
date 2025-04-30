@@ -100,7 +100,8 @@ const FamilyTabs = ({ user }) => {
                   {(user.id == u.id) && 
                     (<Button
                       trigger="click"
-                      type="default"
+                      color="primary" 
+                      variant="outlined"
                       icon={<EditOutlined />}
                       onClick={handleRequestEdit}
                     >
@@ -131,7 +132,8 @@ const FamilyTabs = ({ user }) => {
                 <Card.Footer>
                 {(user.id == u.id || u.extRef == "") && 
                   <Button trigger="click"
-                  type="default"
+                  color="primary" 
+                  variant="outlined"
                   icon={<AppstoreAddOutlined />}
                   onClick={handleRequestNew}
                   >{t('new')}</Button>}
@@ -145,7 +147,8 @@ const FamilyTabs = ({ user }) => {
         ))}
         <Tab eventKey={"new"} title={
           <Button trigger="click"
-          type="default"
+          color="primary" 
+          variant="outlined"
           icon={<AppstoreAddOutlined />}
           onClick={handleRequestNewUser}
         >{t('new')}</Button>}>

@@ -210,7 +210,12 @@ const Innerflow = ({ users, selectedUsed }) => {
       >
         <Background />
         <Panel position="top-right">
-          <Button onClick={onSave} disabled={!pendingSave}>{t("save")}</Button>
+          <Button 
+            onClick={onSave}
+            disabled={!pendingSave}
+            color="primary" 
+            variant="solid"
+          >{t("save")}</Button>
         </Panel>
         <Controls />
       </ReactFlow>
