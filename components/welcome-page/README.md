@@ -12,8 +12,10 @@
 
 This will be the entrypoint to the Famquest application for all instances. It describes:
 
-- What this is
+- What FamQuest is
 - How to join
+
+Publicly available <https://info.famquest.guigomcha.dynv6.net>
 
 ## Getting Started
 

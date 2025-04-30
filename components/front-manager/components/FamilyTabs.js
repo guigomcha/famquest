@@ -94,8 +94,9 @@ const FamilyTabs = ({ user }) => {
                   <Card.Text>{renderDescription(u.bio)}</Card.Text>
                 </Card.Body>
                 <Card.Footer>
-                  <Card.Text>Contact: {u.email}</Card.Text>
-                  <Card.Text>Birthday: {u.birthday}</Card.Text>
+                  <Card.Text>{t('email')}: {u.email}</Card.Text>
+                  <Card.Text>{t('birthday')}: {u.birthday}</Card.Text>
+                  {u.passing != "" && <Card.Text>{t('passing')}: {u.passing}</Card.Text>}
                   {(user.id == u.id) && 
                     (<Button
                       trigger="click"
