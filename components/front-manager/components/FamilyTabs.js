@@ -43,8 +43,9 @@ const FamilyTabs = ({ user }) => {
   }; 
 
   const handleRequestEdit = (e) => {
-    console.info("Handle Open with ", e);
-    setComponent(<UserForm initialData={user} handledFinished={handleNestedRequestEdit} />);
+    console.info("Handle Open with ", e, users);
+    const parentInfo = users.filter(u => u.id == key)[0]
+    setComponent(<UserForm initialData={parentInfo} handledFinished={handleNestedRequestEdit} />);
   };
 
   const handleNestedRequestEdit = (comp) => {
@@ -67,6 +68,7 @@ const FamilyTabs = ({ user }) => {
   };
   
   useEffect(() => {
+    console.info("opened with user ", user)
     fetchRelatedInfo();
   }, [component, reload]);
 
@@ -97,7 +99,7 @@ const FamilyTabs = ({ user }) => {
                   <Card.Text>{t('email')}: {u.email}</Card.Text>
                   <Card.Text>{t('birthday')}: {u.birthday}</Card.Text>
                   {u.passing != "" && <Card.Text>{t('passing')}: {u.passing}</Card.Text>}
-                  {(user.id == u.id) && 
+                  {(user.id == u.id || u.extRef == "") && 
                     (<Button
                       trigger="click"
                       color="primary" 
@@ -117,7 +119,7 @@ const FamilyTabs = ({ user }) => {
                       {notes
                         .filter(note => note.refId == u.id && note.refType == "user")
                         .map((note, index) => (
-                          <ListGroup.Item className="justify-content-between" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} userId={user.id} parentInfo={{"id": key}} refType={'user'} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
+                          <ListGroup.Item className="justify-content-between" as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} user={user} parentInfo={{"id": key}} refType={'user'} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
                             {note.name}
                             <Badge bg="primary" pill>
                             {note.category}

@@ -16,7 +16,7 @@ const Audio = ({ parentInfo, refType, handleMenuChange, user }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [reload, setReload] = useState(true);
   const [selectedAudios, setSelectedAudios] = useState([]);
-  const [info, setInfo] = useState({"name": "unknown"});
+  const [info, setInfo] = useState({"id": 0});
 
   const handleSelect = (selectedIndex) => {
     setActiveIndex(selectedIndex);
@@ -72,7 +72,7 @@ const Audio = ({ parentInfo, refType, handleMenuChange, user }) => {
 
   // fetch the additional info for this audio
   const fetchRelatedInfo = async (model) => {
-    console.info("fetching info for ", model);
+    console.info("fetching info for audio", model, parentInfo);
     if (!model){
       return;
     }
@@ -112,15 +112,13 @@ const Audio = ({ parentInfo, refType, handleMenuChange, user }) => {
                             variant="outlined"
                             icon={<EditOutlined />}
                             onClick={handleRequestEdit}
-                          >{t('edit')}
-                          </Button>
+                          ></Button>
                           <Button trigger="click"
                             color="danger" 
                             variant="outlined"
                             icon={<DeleteOutlined />}
                             onClick={handleRequestDelete}
-                            >{t('delete')}
-                          </Button>
+                            ></Button>
                         </>
                         }
                     </Card.Footer>

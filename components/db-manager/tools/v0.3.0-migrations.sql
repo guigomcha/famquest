@@ -162,7 +162,7 @@ BEGIN
         -- Dynamically execute the ALTER TABLE command to add the column
         EXECUTE format('
             ALTER TABLE %I
-            ADD COLUMN IF NOT EXISTS passing TEXT DEFAULT '';', table_to_update);
+            ADD COLUMN IF NOT EXISTS passing TEXT DEFAULT '''';', table_to_update);
 
     END LOOP;
 END $$;

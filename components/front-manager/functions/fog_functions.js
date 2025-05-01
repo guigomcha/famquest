@@ -2,7 +2,7 @@ import * as turf from "@turf/turf";
 
 export function uncoverFog(location, fogPolygon) {
   //Create new circle polygon based on the user's position.
-  const circlePolygon = _createCirclePolygonFromLocation(location, 0.2, 16);
+  const circlePolygon = _createCirclePolygonFromLocation(location, 0.3, 16);
   //Extend the fog using our new circle polygon.
   const newFogPolygon = _addPolygonToFog(fogPolygon, circlePolygon);
 

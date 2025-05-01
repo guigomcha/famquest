@@ -18,7 +18,7 @@ const Images = ( {parentInfo, refType, handleMenuChange, user} ) => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedImages, setSelectedImages] = useState([]);
-  const [info, setInfo] = useState({"name": "unknown"});
+  const [info, setInfo] = useState({"id": 0});
   const [reload, setReload] = useState(true);
 
   const handleSelect = (selectedIndex) => {
@@ -69,7 +69,7 @@ const Images = ( {parentInfo, refType, handleMenuChange, user} ) => {
 
   // fetch the additional info for this spot
   const fetchRelatedInfo = async (model) => {
-    console.info("fetching info for ", model);
+    console.info("fetching info for image", model);
     if (!model){
       return;
     }
@@ -110,15 +110,13 @@ const Images = ( {parentInfo, refType, handleMenuChange, user} ) => {
                         variant="outlined"
                         icon={<EditOutlined />}
                         onClick={handleRequestEdit}
-                      >{t('edit')}
-                      </Button>
+                      ></Button>
                       <Button trigger="click"
                         color="danger" 
                         variant="outlined"
                         icon={<DeleteOutlined />}
                         onClick={handleRequestDelete}
-                        >{t('delete')}
-                      </Button>
+                        ></Button>
                     </>
                     }
                   </Card.Footer>
@@ -128,7 +126,7 @@ const Images = ( {parentInfo, refType, handleMenuChange, user} ) => {
           </Carousel>
           <Card>
             <Card.Title>{t('audiosInImage')}</Card.Title> 
-            <Audio parentInfo={selectedImages[activeIndex]} refType={'attachment'} handleMenuChange={handleMenuChange}/> 
+            <Audio parentInfo={selectedImages[activeIndex]} refType={'attachment'} handleMenuChange={handleMenuChange} user={user}/> 
           </Card>
           </Container>
         ) : (

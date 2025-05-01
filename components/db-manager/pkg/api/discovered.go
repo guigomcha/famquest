@@ -173,7 +173,7 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 	CROSS JOIN 
 			spot_locations sl
 	WHERE 
-			kl.ref_id = 0
+			kl.ref_id = %s AND kl.ref_type = 'user'
 			AND 6371000 * 2 * ASIN(
 					SQRT(
 							POW(SIN(RADIANS(kl.latitude - sl.spot_latitude) / 2), 2) +
@@ -181,7 +181,7 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 							POW(SIN(RADIANS(kl.longitude - sl.spot_longitude) / 2), 2)
 					)
 			) <= 200;
-	`, userConnected)
+	`, userConnected, userConnected)
 	var locCondResults []models.LocationBasedCondition
 	err = connection.ExecuteCustom(connection.DB, locationBasedDiscoveredsQuery, &locCondResults)
 	if err != nil {
@@ -217,11 +217,14 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 
 	// Extract discovered IDs
 	discoveredIDs := make([]int, len(locCondResults)+len(dateCondResults))
+	spotsIDs := make([]int, len(locCondResults)+len(dateCondResults))
 	for i, entry := range locCondResults {
 		discoveredIDs[i] = entry.DiscoveredId
+		spotsIDs[i] = entry.SpotId
 	}
 	for i, entry := range dateCondResults {
 		discoveredIDs[i] = entry.DiscoveredId
+		spotsIDs[i] = entry.SpotId
 	}
 
 	// Update the discovered
@@ -239,7 +242,7 @@ func DiscoveredUpdateAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logger.Log.Debugf("Result from update: %+v", updateResult)
-	json.NewEncoder(w).Encode(discoveredIDs)
+	json.NewEncoder(w).Encode(spotsIDs)
 }
 
 // DiscoveredGet retrieves a specific discovered by ID
