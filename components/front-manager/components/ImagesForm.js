@@ -53,8 +53,8 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
     });
     setMediaStream(stream);
     cameraRef.current = stream;
-    videoRef.current.srcObject = stream;
-    videoRef.current.play();
+    //videoRef.current.srcObject = stream;
+    //videoRef.current.play();
   };
 
   // Capture an image from the camera

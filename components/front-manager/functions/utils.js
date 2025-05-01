@@ -23,7 +23,7 @@ export function collectLogs() {
   BigInt.prototype.toJSON = function() {
     return this.toString();
     };
-  const logJson = JSON.stringify(logData, getCircularReplacer, 2);
+  const logJson = JSON.stringify(logData, getCircularReplacer(), 2);
   const blob = new Blob([logJson], { type: 'application/json' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);

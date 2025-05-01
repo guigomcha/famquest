@@ -7,7 +7,7 @@
 A map guiding users on an adventure to uncover family memories and history shared in the form of a geo-location-based digital photo frame.
 
 - See the documentation online in <https://info.famquest.guigomcha.dynv6.net> and continue reading the README files.
-- There is a public instance for showcasing FamQuest which is re-seted everyday. Check it out <https://portal.demo.famquest.guigomcha.dynv6.net> and provide any feedback as an issue in Github. You will need a user and password, drop a message and I'll send it to you :).
+- There is a public instance for showcasing FamQuest which is re-installed everyday. Check it out <https://portal.demo.famquest.guigomcha.dynv6.net> and provide any feedback as an issue in Github. You will need a user and password, drop a message and I'll send it to you :).
 
 As a Progressive Web App, Famquest can be used from browser and mobile. Most development has been done and tested via **Google Chrome and Edge** (for iOS, Android, Windows and Mac), other browsers could be used but have not been tested. Check a reference like [this one from 2023](https://firt.dev/notes/pwa/).
 
@@ -116,10 +116,10 @@ It is consumed as a Progressive Web App that can be used from a mobile or a lapt
 - Welcome Page
 <p align="center">
   <div style="display: flex; overflow-x: scroll; width: 100%;">
-    <img src="./docs/v0.3.0/welcomepage/front.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
-    <img src="./docs/v0.3.0/welcomepage/install.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
-    <img src="./docs/v0.3.0/welcomepage/private.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
-    <img src="./docs/v0.3.0/welcomepage/public.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.3.0/welcome-page/front.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.3.0/welcome-page/install.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.3.0/welcome-page/private.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
+    <img src="./docs/v0.3.0/welcome-page/public.jpg" alt="Phone Screenshot" width="200" style="margin: 5px; flex-shrink: 0;"/>
   </div>
 </p>
 
