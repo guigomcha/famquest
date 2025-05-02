@@ -53,8 +53,8 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
     });
     setMediaStream(stream);
     cameraRef.current = stream;
-    //videoRef.current.srcObject = stream;
-    //videoRef.current.play();
+    videoRef.current.srcObject = stream;
+    videoRef.current.play();
   };
 
   // Capture an image from the camera
@@ -103,26 +103,37 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
   }
   // Handle file selection and show the image on the canvas
   const handleFileChange = (e) => {
-    e.preventDefault();  // Prevent form submission
-    e.stopPropagation(); // Stop event propagation to parent form
+    e.preventDefault();
+    e.stopPropagation();
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = canvasRef.current;
-        const context = canvas.getContext("2d");
-        canvas.width = img.width;  // Set canvas size to image size
-        canvas.height = img.height;
-        context.drawImage(img, 0, 0, canvas.width, canvas.height);  // Draw image on canvas
-        canvas.toBlob((blob) => setImageBlob(blob), "image/jpeg");
+  
+    const fileType = selectedFile.type;
+  
+    if (fileType.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = canvasRef.current;
+          const context = canvas.getContext("2d");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          context.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob((blob) => setImageBlob(blob), "image/jpeg");
+        };
+        img.src = reader.result;
       };
-      img.src = reader.result;  // Set image source as the result of the FileReader
-    };
-    reader.readAsDataURL(selectedFile);
+      reader.readAsDataURL(selectedFile);
+      setVideoBlob(null);
+    } else if (fileType.startsWith("video/")) {
+      setVideoBlob(selectedFile);
+      setImageBlob(null);
+    } else {
+      GlobalMessage(t('unsupportedFileType'), "error");
+    }
   };
+  
 
   const handleSubmit = async (event) => {
     setIsLoading(true);
@@ -138,7 +149,7 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
     
     console.info("submit handled: ", form);
     const formDataObj = new FormData(form);
-    const dataToUpload = formDataObj.file || imageBlob;
+    const dataToUpload = videoBlob || imageBlob || formDataObj.get("file");
     formDataObj.set("datetime", formDataObj.get("datetime")+"T00:00:00Z")
     // Is a put
     if (initialData?.id){
@@ -244,7 +255,7 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
               <Form.Control 
                 type="file" 
                 name="file" 
-                accept="image/*" 
+                accept="image/*,video/*"
                 onChange={handleFileChange}
                 />
             </Col>
@@ -263,13 +274,13 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
             </Dropdown>
             {cameraOpened && (
               <Row className="mb-2">
-                {/* <Col>
+                <Col>
                   <Button trigger="click"
                     type="primary"
                     icon={<VideoCameraAddOutlined />}
                     onClick={toggleVideoRecording}
                     >Start/Stop <br></br>Video Recording</Button>
-                </Col> */}
+                </Col>
                 <Col>
                   <Button trigger="click"
                     color="primary" 

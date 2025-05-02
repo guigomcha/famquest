@@ -5,17 +5,19 @@ import { useTranslation } from "react-i18next";
 
 const isLocal = true;
 
-const OAuth2Login = ({ onUserChange }) => {
+const OAuth2Login = ({ onUserChange, setIsLoading }) => {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState(null); // User information
   
   useEffect(() => {
     console.info("Should get it: ", user)
+    setIsLoading(true)
     // Fetch user info to check if logged in
-    fetch("https://auth.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN/oauth2/userinfo", { credentials: "include" })
+    fetch("https://auth.staging.famquest.guigomcha.dynv6.net/oauth2/userinfo", { credentials: "include" })
       .then((res) => {
         if (res.ok) {
           console.info("was ok at least");
+          setIsLoading(false)
           return res.json();
         }
         console.info("Not logged in");
@@ -37,6 +39,7 @@ const OAuth2Login = ({ onUserChange }) => {
           console.info("Response from registerUser: ", resp)
           setUser(resp);
           onUserChange(resp); // Notify parent component
+          setIsLoading(false)
           return;
         }
         setUser(foundUser);
@@ -46,6 +49,7 @@ const OAuth2Login = ({ onUserChange }) => {
         setUser(null);
         console.info("did not find userinfo");
         onUserChange(null); // Notify parent component
+        setIsLoading(false)
       });
   }, []);
 
