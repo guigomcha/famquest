@@ -252,7 +252,7 @@ info:
     name: Guillermo Gomez GPL V3
   termsOfService: http://swagger.io/terms/
   title: FamQuest DB Manager API
-  version: 0.2.0
+  version: 0.4.0
 paths:
   /attachment:
     get:
@@ -287,20 +287,19 @@ paths:
       - multipart/form-data
       description: Create a new attachment
       parameters:
-      - description: image/* or media/*
+      - description: image/* or audio/* or video/
         in: formData
         name: file
         required: true
         type: file
-      - description: name of the attachment
-        in: formData
-        name: name
-        required: true
+      - in: formData
+        name: datetime
         type: string
-      - description: description of the attachment
-        in: formData
+      - in: formData
         name: description
-        required: true
+        type: string
+      - in: formData
+        name: name
         type: string
       produces:
       - application/json

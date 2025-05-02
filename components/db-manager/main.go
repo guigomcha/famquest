@@ -32,7 +32,7 @@ func init() {
 }
 
 // @title FamQuest DB Manager API
-// @version 0.2.0
+// @version 0.4.0
 // @description Handles the connection to the DBs in DB Manager. PostgreSQL and MINIO
 // @termsOfService http://swagger.io/terms/
 // @contact.name Guillermo Gomez

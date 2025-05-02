@@ -79,24 +79,25 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "file",
-                        "description": "image/* or media/*",
+                        "description": "image/* or audio/* or video/",
                         "name": "file",
                         "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "name of the attachment",
-                        "name": "name",
-                        "in": "formData",
-                        "required": true
+                        "name": "datetime",
+                        "in": "formData"
                     },
                     {
                         "type": "string",
-                        "description": "description of the attachment",
                         "name": "description",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -1746,7 +1747,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0.2.0",
+	Version:          "0.4.0",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},

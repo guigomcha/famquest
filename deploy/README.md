@@ -66,6 +66,8 @@ Install the backends
 kubectl apply -f deploy/k8s/dbs/minio.yaml -n famquest
 kubectl apply -f deploy/k8s/dbs/postgresql.yaml -n famquest
 helm install gateway  OCI://ghcr.io/guigomcha/famquest/gateway --version 1.3.0 -n famquest -f deploy/k8s/dbs/values.yaml
+kubectl apply -f deploy/k8s/components/gateway-cm.yaml -n famquest
+kubectl rollout restart deployment -n famquest gateway-deployment
 ```
 
 - Create the realm, openid connect client with an "audience" mapper in a custom scope

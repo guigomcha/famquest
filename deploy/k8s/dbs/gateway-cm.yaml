@@ -1,0 +1,179 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-cm
+  namespace: famquest
+  labels:
+    app: gateway
+    fullapp: famquest
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: gateway
+    meta.helm.sh/release-namespace: famquest
+
+data:
+  fluent.conf: |
+    <source>
+      @type prometheus_tail_monitor
+    </source>
+
+    <source>
+      @type prometheus
+    </source>
+
+    <source>
+      @type tail
+      <parse>
+        @type regexp
+        expression /^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) \[(?<time>[^\]]*)\] (?<server_name>[^ ]*) \"(?<method>\w+)(?:\s+(?<path>[^\"]*?)(?:\s+\S*)?)?\" (?<status_code>[^ ]*) (?<bytes_sent>[^ ]*)(?:\s"(?<referer>[^\"]*)") "(?<agent>[^\"]*)" (?<elapsed_time>[^ ]*)$/
+        time_format %d/%b/%Y:%H:%M:%S %z
+        keep_time_key true
+        types bytes_sent:integer,reqtime:float,uct:float,uht:float,elapsed_time:float
+      </parse>
+      tag gateway
+      path /var/log/nginx/access.log
+      pos_file /tmp/fluent_nginx.pos
+    </source>
+
+    <filter gateway>
+      @type prometheus
+
+      <metric>
+        name gateway_size_bytes_total
+        type counter
+        desc gateway bytes sent
+        key bytes_sent
+        <labels>
+          method ${method}
+          path ${path}
+          status_code ${status_code}
+          server_name ${server_name}
+        </labels>
+      </metric>
+
+      <metric>
+        name gateway_request_status_code_total
+        type counter
+        desc gateway request status code
+        <labels>
+          method ${method}
+          path ${path}
+          status_code ${status_code}
+          server_name ${server_name}
+        </labels>
+      </metric>
+
+      <metric>
+        name gateway_http_request_elapsed_time_seconds
+        type histogram
+        desc Histogram of the total time spent on receiving the response from the upstream server.
+        key elapsed_time
+        <labels>
+          method ${method}
+          path ${path}
+          status_code ${status_code}
+          server_name ${server_name}
+        </labels>
+      </metric>
+    </filter>
+
+  nginx.conf: |
+    user  nginx;
+    worker_processes  auto;
+
+    error_log  /var/log/nginx/error.log notice;
+    pid        /var/run/nginx.pid;
+
+    events {
+        worker_connections  1024;
+    }
+
+    http {
+        #  open() "/etc/nginx/mime.types" failed (2: No such file or directory)
+        # include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+        
+        client_max_body_size 500M;
+        server_names_hash_bucket_size 128;
+
+        log_format custom_format '$remote_addr - $remote_user [$time_local] '
+              '$host "$request" $status $body_bytes_sent '
+              '"$http_referer" "$http_user_agent" '
+              '$upstream_response_time';
+
+        access_log /var/log/nginx/access.log custom_format;
+        access_log /dev/stdout custom_format;
+
+        sendfile        on;
+        #tcp_nopush     on;
+
+        keepalive_timeout  65;
+
+        #gzip  on;
+
+        include /etc/nginx/conf.d/*.conf;
+
+        server {
+            listen 9000;
+            server_name _;
+
+            location = /stub_status {
+                stub_status;
+                allow 127.0.0.1;
+                deny all;
+            }
+        }
+    }
+
+  services.conf: |
+    #----/etc/nginx/conf.d/services.conf
+    # Subdomain based
+    server {
+      listen 80;
+      server_name minio.famquest.guigomcha.dynv6.net;
+      resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+      fastcgi_buffers 16 16k;
+      fastcgi_buffer_size 32k;
+      proxy_buffer_size   128k;
+      proxy_buffers   4 256k;
+      proxy_busy_buffers_size   256k;
+
+      location / {
+        proxy_pass http://minio-svc.famquest.svc.cluster.local:9001;
+
+        # Valid for both routings
+        proxy_set_header Host $host;
+        #proxy_redirect off;
+        #proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Origin $http_origin;
+      }
+    }
+
+    server {
+      listen 80;
+      server_name minioapi.famquest.guigomcha.dynv6.net;
+      resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+      fastcgi_buffers 16 16k;
+      fastcgi_buffer_size 32k;
+      proxy_buffer_size   128k;
+      proxy_buffers   4 256k;
+      proxy_busy_buffers_size   256k;
+
+      location / {
+        proxy_pass http://minio-svc.famquest.svc.cluster.local:9000;
+
+        # Valid for both routings
+        proxy_set_header Host $host;
+        #proxy_redirect off;
+        #proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Origin $http_origin;
+      }
+    }
