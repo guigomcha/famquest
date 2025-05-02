@@ -12,7 +12,7 @@
         "license": {
             "name": "Guillermo Gomez GPL V3"
         },
-        "version": "0.2.0"
+        "version": "0.4.0"
     },
     "paths": {
         "/attachment": {
@@ -71,24 +71,25 @@
                 "parameters": [
                     {
                         "type": "file",
-                        "description": "image/* or media/*",
+                        "description": "image/* or audio/* or video/",
                         "name": "file",
                         "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "name of the attachment",
-                        "name": "name",
-                        "in": "formData",
-                        "required": true
+                        "name": "datetime",
+                        "in": "formData"
                     },
                     {
                         "type": "string",
-                        "description": "description of the attachment",
                         "name": "description",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "formData"
                     }
                 ],
                 "responses": {

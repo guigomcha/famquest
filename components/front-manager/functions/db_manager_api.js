@@ -1,5 +1,6 @@
+import { GlobalMessage } from './components_helper';
+
 const API_URL = "https://api.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN";
-const isLocal = true;
 
 export const registerUser = async (data) => {
   console.info("URL: "+ API_URL + "user connected " + JSON.stringify(data));
@@ -33,11 +34,14 @@ export const registerUser = async (data) => {
       const finalUser = await response.json();
       return finalUser; // return the URL or data if needed
     } else {
-      console.error('Failed to upload the user:', response.text());
+      const resp = await response.text();
+      console.error('Failed to upload the user:', resp);
+      GlobalMessage(resp, "error")
       return null;
     }
   } catch (error) {
     console.error('Error uploading user:', error);
+    GlobalMessage(error, "error")
     return null;
   }
   
@@ -58,13 +62,15 @@ export const getUserInfo = async (refId) => {
       ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      const resp = await response.text();
+      throw new Error(`HTTP error! Status: ${response.status} `+ resp);
     }
     const user = await response.json();
     // console.info("Fetched user "+ JSON.stringify(user))
     return user;
   } catch (error) {
     console.error("Error fetching user: ", error);
+    GlobalMessage(error, "error")
     return {};
   }
 };
@@ -79,13 +85,15 @@ export const getConfigure = async () => {
       ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      const resp = await response.text();
+      throw new Error(`HTTP error! Status: ${response.status} `+ resp);
     }
     const resp = await response.json();
     console.info("configure response: ", resp);
     return;  // Returning the resp array
   } catch (error) {
     console.error(`Error requesting configure: `, error);
+    GlobalMessage(error, "error")
     return;
   }
 };
@@ -106,12 +114,14 @@ export const getInDB = async (endpoint, refId=0, filter="") => {
       ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      const resp = await response.text();
+      throw new Error(`HTTP error! Status: ${response.status} `+ resp);
     }
     const resp = await response.json();
 
     return resp;  // Returning the resp array or single item
   } catch (error) {
+    GlobalMessage(error, "error")
     console.error(`Error fetching ${endpoint}: `, error);
     return [];
   }
@@ -128,12 +138,14 @@ export const deleteInDB = async (refId, endpoint) => {
       ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      const resp = await response.text();
+      throw new Error(`HTTP error! Status: ${response.status} `+ resp);
     }
     const resp = await response.text();
 
     return "OK";  // Returning the notes array
   } catch (error) {
+    GlobalMessage(error, "error")
     console.error(`Error deleting ${endpoint}: `, error);
     return "";
   }
@@ -164,45 +176,34 @@ export const fetchAndPrepareSpots = async (refId, userInfo) => {
     return spotsData;
   } catch (err) {
     console.error("Error fetching completed spot:", err);
+    GlobalMessage(err, "error")
     return {};
   }
 };
 
-export const addLocationToSpot = async (spot) => {
-  //console.info("Spot: "+spot.id)
-  const response = await fetch(`${API_URL}/location/${spot.location}`, {
-    method: "GET",
-    headers: {
-      'accept': 'application/json',
-    },
-    ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-    // mode: 'cors',
-  });
-  if (!response.ok) {
-    throw new Error(`HTTP error! Status: ${response.status}`);
-  }
-  const location = await response.json();
-  //console.info("Spot: "+spot.id+" "+JSON.stringify(location))
-  spot.location = location
-  //console.info(spot)
-  return spot; // Combine original spot with additional data
-};
-
 export const updateDiscoveredConditionsForUser = async (userInfo) => {
-  const response = await fetch(`${API_URL}/discovered/updateConditions`, {
-    method: "POST",
-    headers: {
-      'accept': 'application/json',
-    },
-    ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
-    // mode: 'cors',
-  });
-  if (!response.ok) {
-    throw new Error(`HTTP error! Status: ${response.status}`);
+  try {
+
+    const response = await fetch(`${API_URL}/discovered/updateConditions`, {
+      method: "POST",
+      headers: {
+        'accept': 'application/json',
+      },
+      ...(isLocal ? {} : { credentials: 'include' }), // Ensures cookies (including OAuth2 session cookie) are sent along with the request
+      // mode: 'cors',
+    });
+    if (!response.ok) {
+      const resp = await response.text();
+      throw new Error(`HTTP error! Status: ${response.status} `+ resp);
+    }
+    const resp = await response.json();
+    console.info("updated discovered: ", resp)
+    return resp; 
+  } catch (error) {
+    console.error(`Error updating discovered for user: `, error);
+    GlobalMessage(error, "error")
+    return;
   }
-  const resp = await response.json();
-  console.info("updated discovered: ", resp)
-  return resp; 
 };
 
 export const createInDB = async (body, endpoint, extra={"headers": {
@@ -228,12 +229,12 @@ export const createInDB = async (body, endpoint, extra={"headers": {
     }
   } catch (error) {
     console.error(`Error posting ${endpoint}:`, error);
+    GlobalMessage(error, "error")
     return null;
   }
 };
 
 export const updateInDB = async (body, endpoint) => {
-
   const updateObject = { ...body };
   delete updateObject.id;
   console.info(`puting ${endpoint} with ${updateObject}`, updateObject);
@@ -258,6 +259,7 @@ export const updateInDB = async (body, endpoint) => {
     }
   } catch (error) {
     console.error(`Error updating ${endpoint}:`, error);
+    GlobalMessage(error, "error")
     return null;
   }
 };
@@ -290,11 +292,13 @@ export const uploadAttachment = async (data, formData) => {
       const data = await response.json();
       return data; // return the URL or data if needed
     } else {
-      console.error('Failed to upload the attachment');
+      const data = await response.text();
+      console.error('Failed to upload the attachment: ', data);
       return null;
     }
   } catch (error) {
     console.error('Error uploading attachment:', error);
+    GlobalMessage(error, "error")
     return null;
   }
 };
@@ -309,11 +313,12 @@ export const addReferenceInDB = async (targetId, refId, refType, endpoint) => {
     });
 
     if (!response.ok) {
-      console.info("response not ok: ", await response.text());
-      throw new Error(`Failed to add ${refType} and id ${refId} reference to ${endpoint}`);
+      const resp = await response.text();
+      console.info("response not ok: ", resp);
+      throw new Error(`Failed to add ${refType} and id ${refId} reference to ${endpoint} `+ resp);
     }
   } catch (error) {
-    console.error(`Error to add ${refType} and id ${refId} reference to ${endpoint}`, error);
+    GlobalMessage(error, "error")
     return;
   }
   return "OK";

@@ -56,13 +56,9 @@ const Images = ( {parentInfo, refType, handleMenuChange, user} ) => {
     setSelectedImages([]); 
     const attachments = await getInDB('attachment', 0, `?refId=${refId}&refType=${refType}`);
     console.info("Filling images for ", refId, attachments);
-    let filteredAttachments = []
-    attachments.forEach(attachment => {
-      attachment.refId = parentInfo.id;
-      if (attachment.contentType.startsWith("image/")) {
-        filteredAttachments = [...filteredAttachments, attachment];
-      }
-    });
+    const filteredAttachments = attachments
+      .filter(att => att.contentType.startsWith("image/") || att.contentType.startsWith("video/"))
+      .map(att => ({ ...att, refId: parentInfo.id }));
     setSelectedImages(filteredAttachments);
     fetchRelatedInfo(attachments[0]);
   };
@@ -98,7 +94,16 @@ const Images = ( {parentInfo, refType, handleMenuChange, user} ) => {
               <Carousel.Item>
                 <Card className="bg-dark text-black">
                   <Card.Header>id: {image.id}</Card.Header>
-                  <Card.Img src={image.url} alt={`Attachment ${index + 1}`} className="center-block" />
+                  {image.contentType.startsWith("image/") ? (
+                      <Card.Img src={image.url} alt={`Attachment ${index + 1}`} className="center-block" />
+                    ) : (
+                      <video
+                        controls
+                        width="100%"
+                        style={{ maxHeight: "400px", objectFit: "contain" }}
+                        src={image.url}
+                      />
+                    )}
                   <Card.Title>{image.datetime}: {image.name}</Card.Title>
                   <Card.Text>{image.description}</Card.Text>
                   <Card.Text>{t('owner')}: {info.name}</Card.Text>

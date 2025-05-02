@@ -25,9 +25,8 @@ import (
 // @Tags attachment
 // @Accept multipart/form-data
 // @Produce json
-// @Param  file formData file true "image/* or media/*"
-// @Param  name formData string true "name of the attachment"
-// @Param  description formData string true "description of the attachment"
+// @Param  file formData file true "image/* or audio/* or video/"
+// @Param  attachment formData models.APIAttachments true "description of attachment"
 // @Success 201 {object} models.Attachments
 // @Router /attachment [post]
 func AttachmentPost(w http.ResponseWriter, r *http.Request) {
@@ -62,17 +61,19 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 		ContentType:     header.Header.Get("Content-Type"),
 		RefUserUploader: info["user"].(int),
 	}
-	if strings.HasPrefix(attachment.ContentType, "image/") && strings.HasPrefix(attachment.ContentType, "audio/") {
-		http.Error(w, "ContentType not supported", http.StatusBadRequest)
+	if !strings.HasPrefix(attachment.ContentType, "image/") && !strings.HasPrefix(attachment.ContentType, "audio/") && !strings.HasPrefix(attachment.ContentType, "video/") {
+		http.Error(w, fmt.Sprintf("ContentType '%s' not supported", attachment.ContentType), http.StatusBadRequest)
 		return
 	}
 	logger.Log.Infof("Metadata received: %+v", attachment)
 	urlId := (uuid.New()).String()
-	_, err = connection.Minio.PutObject(context.Background(), os.Getenv("DB_NAME")+"-"+strings.Split(attachment.ContentType, "/")[0], urlId, data, -1, minio.PutObjectOptions{ContentType: attachment.ContentType})
+	minioInfo, err := connection.Minio.PutObject(context.Background(), os.Getenv("DB_NAME")+"-"+strings.Split(attachment.ContentType, "/")[0], urlId, data, -1, minio.PutObjectOptions{ContentType: attachment.ContentType})
 	if err != nil {
+		logger.Log.Errorf("Minio error: %s", err.Error())
 		http.Error(w, "Failed to upload to minio: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	logger.Log.Infof("Minio feedback: %+v", minioInfo)
 	var dest connection.DbInterface
 	// db stores the uuid but the get and getall returns the actual url pre-authorized
 	attachment.URL = urlId
