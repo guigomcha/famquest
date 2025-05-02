@@ -24,11 +24,13 @@ import { updateDiscoveredConditionsForUser } from './functions/db_manager_api';
 import { useTranslation } from "react-i18next";
 import i18next from "./i18n";
 import { GlobalMessage } from './functions/components_helper';
+import { Spin } from 'antd';
 
 
 const isLocal = true;
 
 export default function App() { 
+  const [isLoading, setIsLoading] = useState(false);
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState({});
   const [key, setKey] = useState('home');
@@ -88,7 +90,7 @@ export default function App() {
   }, []);
   
   return (   
-    <>
+    <div style={{ position: 'relative', width: '100vw', height: '100vh'}}>
       <Navbar className="bg-body-tertiary">
         <Container>
           <Navbar.Brand>FamQuest App</Navbar.Brand>
@@ -111,12 +113,12 @@ export default function App() {
                 (
                   <Navbar.Text>
                     {t('signedAs')}: {user?.name}
-                    <OAuth2 onUserChange={handleUserChange} />
+                    <OAuth2 onUserChange={handleUserChange} setIsLoading={setIsLoading}/>
                   </Navbar.Text>
                 ):
                 (
                   <Navbar.Text>
-                    <OAuth2 onUserChange={handleUserChange} />
+                    <OAuth2 onUserChange={handleUserChange} setIsLoading={setIsLoading}/>
                   </Navbar.Text>
                 )
               }
@@ -125,14 +127,14 @@ export default function App() {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-        <Tabs
+        {(isLoading) ? (<Spin >{t('loading')}</Spin>) :
+        (<Tabs
           id="controlled-tab-example"
           activeKey={key}
           onSelect={(k) => selectTab(k)}
           className="mb-3"
         >
           <Tab eventKey="home" title={t('home')}>
-            <Container fluid>
                 <Card>
                   <Card.Title>{t('welcomeTitle')}</Card.Title>
                     <Row className={`card-row ${isImageAboveText ? 'stacked' : ''}`}>
@@ -152,7 +154,7 @@ export default function App() {
                       <Col md={isImageAboveText ? 12 : 6}>
                         <Card.Body ref={textRef}>
                           <Card.Text>
-                            {renderDescription(t('frontDescription'))}
+                            <p>{renderDescription(t('frontDescription'))}<a href="https://github.com/guigomcha/famquest" target="_blank" className="fa fa-github" ></a>{renderDescription(t('frontDescription2'))}<a href="https://info.famquest.guigomcha.dynv6.net" target="_blank" >https://info.famquest.guigomcha.dynv6.net</a>{renderDescription(t('frontDescription3'))}</p>
                           </Card.Text>
                           <Card.Text>{t('coreObjectivesTitle')}</Card.Text>
                           <ul>
@@ -167,16 +169,13 @@ export default function App() {
                       </Col>
                     </Row>
                 </Card>
-            </Container>
           </Tab>
           <Tab eventKey="map" title={t('map')}>
             { (user?.id) && 
-              <Container fluid>
-                <View >
-                  <MapManager handleMapRef={transferHandleMapRef} user={user}/>
-                </View>
+              <div style={{ position: 'relative', width: '100vw', height: '70vh'}}>
+                <MapManager handleMapRef={transferHandleMapRef} user={user}/>
                 <UserButton user={user} mapRef={mapRef}/>
-              </Container>
+              </div>
             }
           </Tab>
           <Tab eventKey="user" title={t('family')}>
@@ -186,7 +185,8 @@ export default function App() {
             </Container>
           }
           </Tab>
-        </Tabs>
-    </> 
+        </Tabs>)
+        }
+    </div> 
   );
 }
