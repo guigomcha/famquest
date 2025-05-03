@@ -58,7 +58,7 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 		Name:            r.FormValue("name"),
 		Description:     r.FormValue("description"),
 		Datetime:        ts,
-		ContentType:     header.Header.Get("Content-Type"),
+		ContentType:     r.FormValue("contentType"),
 		RefUserUploader: info["user"].(int),
 	}
 	if !strings.HasPrefix(attachment.ContentType, "image/") && !strings.HasPrefix(attachment.ContentType, "audio/") && !strings.HasPrefix(attachment.ContentType, "video/") {

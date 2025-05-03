@@ -265,18 +265,16 @@ export const updateInDB = async (body, endpoint) => {
 };
 
 export const uploadAttachment = async (data, formData) => {
-  console.info("Uploading attachment");
+  console.info("Uploading attachment: ", data, formData);
   if (data instanceof Blob) {
-    // If it's a Blob (image from the camera or audio fromthe mic), append it with a filename of the right type
-    if (name == "audio") {
-      formData.append("file", data, "audio.mpeg");
-    } else {
-      formData.append("file", data, "camera_image.jpg");
-    }
+    console.info("Uploading blob: ", data);
+    formData.append("file", data, data?.name);
   } else {
     // If it's a file selected via the file input
+    console.info("Uploading file: ", data);
     formData.append("file", data);
   }
+  console.info("about to send ", formData);
   try {
     const response = await fetch(`${API_URL}/attachment`, {
       method: 'POST',

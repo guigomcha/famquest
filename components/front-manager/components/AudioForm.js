@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from 'antd';
 import Col from 'react-bootstrap/Col';
+import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import { Spin, Alert } from 'antd';
@@ -14,11 +15,20 @@ const AudioForm = ({ initialData, refType, handledFinished }) => {
   const { t, i18n } = useTranslation();
   const [audioBlob, setAudioBlob] = useState(null);
   const [audioOpened, setAudioOpened] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
   const audioRecorder = useRef(null);
   const [audioStream, setAudioStream] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [localAudioFile, setLocalAudioFile] = useState({});
 
+  const handleFileChange = (event) => {
+    event.preventDefault();  // Prevent form submission
+    event.stopPropagation(); // Stop event propagation to parent form
+    console.info("file selection ", event.target.files)
+    const file = event.target.files[0];
+    setAudioBlob(file);
+    setLocalAudioFile(file);
+  };
+  
   // Start recording audio
   const toggleAudioRecording = async (e) => {
     e.preventDefault();  // Prevent form submission
@@ -49,15 +59,22 @@ const AudioForm = ({ initialData, refType, handledFinished }) => {
     const form = event.currentTarget;
     event.preventDefault();
     event.stopPropagation();
+    console.info("submit handled: ", form);
+    const formDataObj = new FormData(form);
     if (form.checkValidity() === false) {
-      console.info("not valid");
+      console.info("validity failed");
+      formDataObj.forEach((value, key) => {
+        console.info("form key: "+key + "- value: "+value)
+      });
       setIsLoading(false);
       GlobalMessage(t('formNotValid'), "error");
       return;
     }
-    console.info("submit handled: ", form);
-    const formDataObj = new FormData(form);
+    const dataToUpload = audioBlob || formDataObj.get("file");
     formDataObj.set("datetime", formDataObj.get("datetime")+"T00:00:00Z")
+    // for some reason in android it does not receive a type and the name does not have extension....
+    formDataObj.set("contentType", dataToUpload?.type || "audio/ogg")
+
     // Is a put
     if (initialData?.id){
       // Convert FormData to a plain object
@@ -81,21 +98,25 @@ const AudioForm = ({ initialData, refType, handledFinished }) => {
       handledFinished("done");
       return;
     }
-    console.info("new audio to be sent")
-    if (!audioBlob) {
+    console.info("new audio to be sent: "+dataToUpload?.type + ' - '+formDataObj.get("contentType"), dataToUpload)
+    if (!dataToUpload) {
+      console.info("form not valid", formDataObj)
+      formDataObj.forEach((value, key) => {
+        console.info("form key: "+key + "- value: "+value)
+      });
       GlobalMessage(t('formNotValid'), "error");
       setIsLoading(false);
       return;
     }
     // Add default name and description
     if (formDataObj.get("name") == "") {
-      formDataObj.set("name", t("autoName"));
+      formDataObj.set("name", dataToUpload?.name || t("autoName"));
     }
     if (formDataObj.get("description") == "") {
       formDataObj.set("description", t("autoDescription"));
     }
     
-    const attachment = await uploadAttachment(audioBlob, formDataObj);
+    const attachment = await uploadAttachment(dataToUpload, formDataObj);
     
     if (attachment) {
       // Add reference to current spot
@@ -157,36 +178,53 @@ const AudioForm = ({ initialData, refType, handledFinished }) => {
           </Form.Group>
         </Row>
         <Row>
-          { !initialData?.id &&
-          <Button 
-            onClick={toggleAudioRecording}
-            color="primary" 
-            variant="solid"
-            >
-              {t('audioControl')}
-              {audioOpened && (
-                  <div
-                    style={{
-                      backgroundColor: "red",
-                      color: "white",
-                      padding: "5px 10px",
-                      borderRadius: "5px",
-                      fontWeight: "bold",
-                    }}
+          {!initialData?.id && (
+            <>
+              <Form.Group as={Col} controlId="formGridUploadAudio">
+                <Form.Label>{t('selectFromDevice')}</Form.Label>
+                <Form.Control type="file" name="file" accept="audio/*" onChange={handleFileChange} />
+              </Form.Group>
+              <Col className="mb-3">
+                <Button 
+                  onClick={toggleAudioRecording}
+                  color="primary" 
+                  variant="solid"
                   >
-                    {t('recording')}
-                  </div>
-                )}
-              </Button>}          
+                    {t('audioControl')}
+                    {audioOpened && (
+                        <div
+                          style={{
+                            backgroundColor: "red",
+                            color: "white",
+                            padding: "5px 10px",
+                            borderRadius: "5px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {t('recording')}
+                        </div>
+                      )}
+                </Button>
+              </Col>
+            </>
+          )}
+        <Col className="mb-3">
+          <Card>
+            <Card.Title>{t('cameraPreview')}</Card.Title>
+            <Card.Body>
               {audioBlob && (
                 <audio controls src={URL.createObjectURL(audioBlob)}></audio>
               )}
-          </Row>
-          <Button 
-            color="primary" 
-            variant="solid"
-            htmlType="submit"
-          >{initialData?.id ? (t('update')) : (t('upload'))}</Button>
+            </Card.Body>
+          </Card>
+        </Col>
+        </Row>
+        <Button 
+          color="primary" 
+          variant="solid"
+          htmlType="submit"
+        >{initialData?.id ? (t('update')) : (t('upload'))}
+        </Button>
       </Form>
     </>
   );

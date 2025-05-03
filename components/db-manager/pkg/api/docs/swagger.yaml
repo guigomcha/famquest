@@ -1,6 +1,8 @@
 definitions:
   models.APIAttachments:
     properties:
+      contentType:
+        type: string
       datetime:
         type: string
       description:
@@ -292,6 +294,9 @@ paths:
         name: file
         required: true
         type: file
+      - in: formData
+        name: contentType
+        type: string
       - in: formData
         name: datetime
         type: string

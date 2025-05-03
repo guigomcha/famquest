@@ -86,6 +86,11 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "name": "contentType",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
                         "name": "datetime",
                         "in": "formData"
                     },
@@ -1381,6 +1386,9 @@ const docTemplate = `{
         "models.APIAttachments": {
             "type": "object",
             "properties": {
+                "contentType": {
+                    "type": "string"
+                },
                 "datetime": {
                     "type": "string"
                 },

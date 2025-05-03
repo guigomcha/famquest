@@ -154,7 +154,7 @@ export default function App() {
                       <Col md={isImageAboveText ? 12 : 6}>
                         <Card.Body ref={textRef}>
                           <Card.Text>
-                            <p>{renderDescription(t('frontDescription'))}{renderDescription(t('frontDescription2'))}{renderDescription(t('frontDescription3'))}</p>
+                            <p>{renderDescription(t('frontDescription'))}</p>
                           </Card.Text>
                           <Card.Text>{t('coreObjectivesTitle')}</Card.Text>
                           <ul>
