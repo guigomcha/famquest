@@ -154,7 +154,7 @@ export default function App() {
                       <Col md={isImageAboveText ? 12 : 6}>
                         <Card.Body ref={textRef}>
                           <Card.Text>
-                            <p>{renderDescription(t('frontDescription'))}<a href="https://github.com/guigomcha/famquest" target="_blank" className="fa fa-github" ></a>{renderDescription(t('frontDescription2'))}<a href="https://info.famquest.guigomcha.dynv6.net" target="_blank" >https://info.famquest.guigomcha.dynv6.net</a>{renderDescription(t('frontDescription3'))}</p>
+                            <p>{renderDescription(t('frontDescription'))}{renderDescription(t('frontDescription2'))}{renderDescription(t('frontDescription3'))}</p>
                           </Card.Text>
                           <Card.Text>{t('coreObjectivesTitle')}</Card.Text>
                           <ul>
