@@ -151,6 +151,7 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
     const formDataObj = new FormData(form);
     const dataToUpload = videoBlob || imageBlob || formDataObj.get("file");
     formDataObj.set("datetime", formDataObj.get("datetime")+"T00:00:00Z")
+    formDataObj.set("contentType", dataToUpload.type)
     // Is a put
     if (initialData?.id){
       // Convert FormData to a plain object
@@ -180,7 +181,7 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
     }
     // Add default name and description
     if (formDataObj.get("name") == "") {
-      formDataObj.set("name", t("autoName"));
+      formDataObj.set("name", dataToUpload?.name || t("autoName"));
     }
     if (formDataObj.get("description") == "") {
       formDataObj.set("description", t("autoDescription"));

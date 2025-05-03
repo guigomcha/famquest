@@ -12,6 +12,7 @@ type APIAttachments struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Datetime    time.Time `db:"datetime" json:"datetime"`
+	ContentType string    `db:"content_type" json:"contentType"`
 }
 
 // `db:"attachments"` and swagger ouput
