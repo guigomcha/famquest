@@ -42,11 +42,9 @@ It has eventually grown out to **host the story of the whole family around the w
 and journal shared between family members, keeping it very clear that **this is not another social network**.
 It is a way to share memories and pass them down in this new era of technology, lack of family time and globalization.
 
-<p>
-  <div style="display: flex; justify-content: center; width: 100%;">
-    <img src="./components/welcome-page/assets/opensource-version.png" alt="Architecture" width="500" style="margin: 5px; flex-shrink: 0;"/>
-  </div>
-</p>
+<div style="display: flex; justify-content: center; width: 100%;">
+  <img src="./components/welcome-page/assets/opensource-version.png" alt="Architecture" width="500" style="margin: 5px; flex-shrink: 0;"/>
+</div>
 
 Some of the core objectives:  
 
@@ -108,11 +106,9 @@ society, providing external tools, trick and tips etc.
 The app is built in a cloud-native microservice-oriented architecture, leveraging open-source projects trying not to reinvent anything that already exist while ensuring that it can be hosted as cheaply as possible.
 It is consumed as a Progressive Web App that can be used from a mobile or a laptop.
 
-<p>
-  <div style="display: flex; justify-content: center; width: 100%;">
-    <img src="./docs/diagram.png" alt="Diagram" width="500" style="margin: 5px; flex-shrink: 0;"/>
-  </div>
-</p>
+<div style="display: flex; justify-content: center; width: 100%;">
+  <img src="./docs/diagram.png" alt="Diagram" width="500" style="margin: 5px; flex-shrink: 0;"/>
+</div>
 
 ### Tech stack
 

@@ -13,7 +13,7 @@ const OAuth2Login = ({ onUserChange, setIsLoading }) => {
     console.info("Should get it: ", user)
     setIsLoading(true)
     // Fetch user info to check if logged in
-    fetch("https://auth.staging.famquest.guigomcha.dynv6.net/oauth2/userinfo", { credentials: "include" })
+    fetch("https://auth.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN/oauth2/userinfo", { credentials: "include" })
       .then((res) => {
         if (res.ok) {
           console.info("was ok at least");

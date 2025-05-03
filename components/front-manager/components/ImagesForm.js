@@ -110,7 +110,7 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
   
     const fileType = selectedFile.type;
   
-    if (fileType.startsWith("image/")) {
+    if (fileType.startsWith("image/") || fileType == "application/pdf") {
       const reader = new FileReader();
       reader.onloadend = () => {
         const img = new Image();
@@ -120,7 +120,7 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
           canvas.width = img.width;
           canvas.height = img.height;
           context.drawImage(img, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob((blob) => setImageBlob(blob), "image/jpeg");
+          canvas.toBlob((blob) => setImageBlob(blob), fileType);
         };
         img.src = reader.result;
       };
@@ -256,7 +256,7 @@ const ImagesForm = ( {initialData, refType, handledFinished} ) => {
               <Form.Control 
                 type="file" 
                 name="file" 
-                accept="image/*,video/*"
+                accept="image/*,video/*,application/pdf"
                 onChange={handleFileChange}
                 />
             </Col>

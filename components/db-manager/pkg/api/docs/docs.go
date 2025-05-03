@@ -79,7 +79,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "file",
-                        "description": "image/* or audio/* or video/",
+                        "description": "image/* or audio/* or video/ or application/pdf",
                         "name": "file",
                         "in": "formData",
                         "required": true

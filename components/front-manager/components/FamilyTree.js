@@ -257,7 +257,7 @@ const Innerflow = ({ users, selectedUsed }) => {
 const FamilyTree = ({ users, selectedUsed }) => {
   
   return (
-    <div style={{ position: 'relative', width: '100vw', height: '50vh', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+    <div style={{ position: 'relative', width: '100vw', height: '70vh', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
       <div style={{ width: '80vw', margin: '0 auto', height: '100%' }}>
         <ReactFlowProvider>
           <Innerflow users={users} />

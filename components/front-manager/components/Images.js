@@ -57,7 +57,7 @@ const Images = ( {parentInfo, refType, handleMenuChange, user} ) => {
     const attachments = await getInDB('attachment', 0, `?refId=${refId}&refType=${refType}`);
     console.info("Filling images for ", refId, attachments);
     const filteredAttachments = attachments
-      .filter(att => att.contentType.startsWith("image/") || att.contentType.startsWith("video/"))
+      .filter(att => att.contentType.startsWith("image/") || att.contentType.startsWith("video/") || att.contentType == "application/pdf")
       .map(att => ({ ...att, refId: parentInfo.id }));
     setSelectedImages(filteredAttachments);
     fetchRelatedInfo(attachments[0]);
@@ -94,9 +94,16 @@ const Images = ( {parentInfo, refType, handleMenuChange, user} ) => {
               <Carousel.Item>
                 <Card className="bg-dark text-black">
                   <Card.Header>id: {image.id}</Card.Header>
-                  {image.contentType.startsWith("image/") ? (
-                      <Card.Img src={image.url} alt={`Attachment ${index + 1}`} className="center-block" />
-                    ) : (
+                  {(image.contentType.startsWith("image/")) && 
+                    (
+                      <Card.Img src={image.url} alt={`Attachment ${index + 1}`} className="center-block" style={{ maxHeight: "400px", objectFit: "contain" }} />
+                    ) 
+                    || (image.contentType == "application/pdf") && 
+                    (
+                      <object data={image.url} type={image.contentType} className="center-block" style={{ maxHeight: "400px", objectFit: "contain" }}></object>
+                    ) 
+                    || (image.contentType.startsWith("video/")) && 
+                    (
                       <video
                         controls
                         width="100%"
