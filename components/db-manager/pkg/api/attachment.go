@@ -25,7 +25,7 @@ import (
 // @Tags attachment
 // @Accept multipart/form-data
 // @Produce json
-// @Param  file formData file true "image/* or audio/* or video/"
+// @Param  file formData file true "image/* or audio/* or video/ or application/pdf"
 // @Param  attachment formData models.APIAttachments true "description of attachment"
 // @Success 201 {object} models.Attachments
 // @Router /attachment [post]
@@ -61,7 +61,7 @@ func AttachmentPost(w http.ResponseWriter, r *http.Request) {
 		ContentType:     r.FormValue("contentType"),
 		RefUserUploader: info["user"].(int),
 	}
-	if !strings.HasPrefix(attachment.ContentType, "image/") && !strings.HasPrefix(attachment.ContentType, "audio/") && !strings.HasPrefix(attachment.ContentType, "video/") {
+	if !strings.HasPrefix(attachment.ContentType, "image/") && !strings.HasPrefix(attachment.ContentType, "audio/") && !strings.HasPrefix(attachment.ContentType, "video/") && attachment.ContentType != "application/pdf" {
 		http.Error(w, fmt.Sprintf("ContentType '%s' not supported", attachment.ContentType), http.StatusBadRequest)
 		return
 	}
