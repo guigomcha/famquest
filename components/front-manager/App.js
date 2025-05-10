@@ -1,20 +1,6 @@
-
-import { View } from 'react-native';
 import React, { useRef, useState, useEffect } from "react";
-import 'leaflet/dist/leaflet.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './css/App.css';
-import Container from 'react-bootstrap/Container';
-import Navbar from 'react-bootstrap/Navbar';
-import Card from 'react-bootstrap/Card';
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import { Select } from 'antd';
-import { Button } from 'antd';
+import { Layout, Tabs, Select, Row, Col, Typography, Button, Spin, Flex } from 'antd';
 import { ArrowDownOutlined } from '@ant-design/icons';
-
 import MapManager from './components/MapManager';
 import UserButton from './components/UserButton';
 import FamilyTabs from './components/FamilyTabs';
@@ -24,19 +10,24 @@ import { updateDiscoveredConditionsForUser } from './functions/db_manager_api';
 import { useTranslation } from "react-i18next";
 import i18next from "./i18n";
 import { GlobalMessage } from './functions/components_helper';
-import { Spin } from 'antd';
+import './css/App.css';
 
+const { Header, Content } = Layout;
+const { Title, Text } = Typography;
 
-const isLocal = true;
+const HEADER_HEIGHT = 60;
+const TABS_HEIGHT = 40;
 
-export default function App() { 
+const isLocal = false;
+
+export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState({});
   const [key, setKey] = useState('home');
   const mapRef = useRef(null);
-  const [isImageAboveText, setIsImageAboveText] = useState(false); // Track layout change
-  const textRef = useRef(null); // Reference to scroll to the text
+  const [isImageAboveText, setIsImageAboveText] = useState(false);
+  const textRef = useRef(null);
 
   const handleArrowClick = () => {
     if (textRef.current) {
@@ -46,117 +37,81 @@ export default function App() {
 
   const handleUserChange = async (userInfo) => {
     setUser(userInfo);
-    console.info("updating app.js to ", userInfo);
-    // todo: why 82+ locations with new user?
-    if (userInfo?.role == "target"){
-      const resp = await updateDiscoveredConditionsForUser(userInfo);
-      console.info("requested discover update: ", resp);
-      if (resp.length >0) {
-        GlobalMessage(resp.length + "x" +t('discoveredUpdate'), "info");
-      }
+    const resp = await updateDiscoveredConditionsForUser(userInfo);
+    if (resp.length > 0) {
+      GlobalMessage(`${resp.length}x ${t('discoveredUpdate')}`, "info");
     }
   };
 
   const transferHandleMapRef = (map) => {
     mapRef.current = map.current;
   };
-  
+
   const selectTab = (key) => {
-    if (key == "map" || key == "user") {
-      if (user || isLocal) {
-        setKey(key);
-      } else {
-        GlobalMessage(t('privateArea'), "warning");
-      }
-    } else {
-      setKey(key);
+    if ((key === "map" || key === "user") && !user && !isLocal) {
+      GlobalMessage(t('privateArea'), "warning");
+      return;
     }
+    setKey(key);
   };
+
   const changeLanguage = (value) => {
     i18n.changeLanguage(value);
   };
-  
-  useEffect(() => {
-  }, [user]);
 
   useEffect(() => {
     const checkLayout = () => {
-      const isSmallScreen = window.innerWidth < 768; // Adjust based on your needs
-      setIsImageAboveText(isSmallScreen);
+      setIsImageAboveText(window.innerWidth < 768);
     };
     window.addEventListener('resize', checkLayout);
-    checkLayout(); // Run once on mount
+    checkLayout();
     return () => window.removeEventListener('resize', checkLayout);
   }, []);
-  
-  return (   
-    <div style={{ position: 'relative', width: '100vw', height: '100vh'}}>
-      <Navbar className="bg-body-tertiary">
-        <Container>
-          <Navbar.Brand>FamQuest App</Navbar.Brand>
-          <Navbar.Toggle />
-          <Navbar.Collapse className="justify-content-end">
-          <Row className="mb-3">
-            <Col>
-              <Select
-                defaultValue={i18n.language}
-                style={{ width: 80 }}
-                onChange={changeLanguage}
-                options={[
-                  { value: 'en', label: 'EN' },
-                  { value: 'es', label: 'ESP' },
-                ]}
-              />
-            </Col>
-            <Col>
-              {(user || isLocal ) ?
-                (
-                  <Navbar.Text>
-                    {t('signedAs')}: {user?.name}
-                    <OAuth2 onUserChange={handleUserChange} setIsLoading={setIsLoading}/>
-                  </Navbar.Text>
-                ):
-                (
-                  <Navbar.Text>
-                    <OAuth2 onUserChange={handleUserChange} setIsLoading={setIsLoading}/>
-                  </Navbar.Text>
-                )
-              }
-            </Col>
-          </Row>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
-        {(isLoading) ? (<Spin >{t('loading')}</Spin>) :
-        (<Tabs
-          id="controlled-tab-example"
-          activeKey={key}
-          onSelect={(k) => selectTab(k)}
-          className="mb-3"
-        >
-          <Tab eventKey="home" title={t('home')}>
-                <Card>
-                  <Card.Title>{t('welcomeTitle')}</Card.Title>
-                    <Row className={`card-row ${isImageAboveText ? 'stacked' : ''}`}>
-                      <Col md={isImageAboveText ? 12 : 6}>
+
+  return (
+    <Layout style={{ height: '100vh' }}>
+      <Header style={{ height: HEADER_HEIGHT, padding: '0 16px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Title level={5} style={{ margin: 0 }}>FamQuest</Title>
+        <Flex gap="small" align="center">
+          <Select
+            defaultValue={i18n.language}
+            style={{ width: 80 }}
+            onChange={changeLanguage}
+            options={[
+              { value: 'en', label: 'EN' },
+              { value: 'es', label: 'ESP' }
+            ]}
+          />
+          <OAuth2 onUserChange={handleUserChange} setIsLoading={setIsLoading} />
+          {(user || isLocal) && <Text>{t('signedAs')}: {user?.name}</Text>}
+        </Flex>
+      </Header>
+      <Content style={{ height: `calc(100vh - ${HEADER_HEIGHT}px)` }}>
+        {isLoading ? (
+          <Spin tip={t('loading')} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }} />
+        ) : (
+          <Tabs
+            activeKey={key}
+            onChange={selectTab}
+            style={{ height: '100%' }}
+            animated={false}
+            items={[
+              {
+                key: 'home',
+                label: t('home'),
+                children: (
+                  <div style={{ height: `calc(100vh - ${HEADER_HEIGHT + TABS_HEIGHT}px)`, overflow: 'auto', padding: 16 }}>
+                    <Row gutter={[16, 16]} align="middle" justify="center">
+                      <Col xs={24} md={12} style={{ textAlign: 'center' }}>
+                        <img src="assets/famquest-logo.png" alt="FamQuest" style={{ maxWidth: '100%' }} />
                         {isImageAboveText && (
-                          <Card.ImgOverlay bsPrefix="card-row">
-                            <Button trigger="click"
-                              color="primary" 
-                              variant="outlined"
-                              icon={<ArrowDownOutlined />}
-                              onClick={handleArrowClick}
-                              >{t('callToAction')}</Button>
-                          </Card.ImgOverlay>
+                          <Button icon={<ArrowDownOutlined />} onClick={handleArrowClick} style={{ marginTop: 8 }}>{t('callToAction')}</Button>
                         )}
-                        <Card.Img variant="top" src="assets/famquest-logo.png" />
                       </Col>
-                      <Col md={isImageAboveText ? 12 : 6}>
-                        <Card.Body ref={textRef}>
-                          <Card.Text>
-                            <p>{renderDescription(t('frontDescription'))}</p>
-                          </Card.Text>
-                          <Card.Text>{t('coreObjectivesTitle')}</Card.Text>
+                      <Col xs={24} md={12}>
+                        <div ref={textRef}>
+                          <Text>{renderDescription(t('frontDescription'))}</Text>
+                          <Title level={5}>{t('coreObjectivesTitle')}</Title>
                           <ul>
                             <li>{renderDescription(t('coreObjective1'))}</li>
                             <li>{renderDescription(t('coreObjective2'))}</li>
@@ -165,28 +120,35 @@ export default function App() {
                             <li>{renderDescription(t('coreObjective5'))}</li>
                             <li>{renderDescription(t('coreObjective6'))}</li>
                           </ul>
-                        </Card.Body>
+                        </div>
                       </Col>
                     </Row>
-                </Card>
-          </Tab>
-          <Tab eventKey="map" title={t('map')}>
-            { (user?.id) && 
-              <div style={{ position: 'relative', width: '100vw', height: '70vh'}}>
-                <MapManager handleMapRef={transferHandleMapRef} user={user}/>
-                <UserButton user={user} mapRef={mapRef}/>
-              </div>
-            }
-          </Tab>
-          <Tab eventKey="user" title={t('family')}>
-          { (user?.id) &&
-            <Container fluid>
-              <FamilyTabs user={user}></FamilyTabs>
-            </Container>
-          }
-          </Tab>
-        </Tabs>)
-        }
-    </div> 
+                  </div>
+                )
+              },
+              {
+                key: 'map',
+                label: t('map'),
+                children: user?.id ? (
+                  <div style={{ height: `calc(100vh - ${HEADER_HEIGHT + TABS_HEIGHT}px)`, position: 'relative' }}>
+                    <MapManager handleMapRef={transferHandleMapRef} user={user} />
+                    <UserButton user={user} mapRef={mapRef} />
+                  </div>
+                ) : null
+              },
+              {
+                key: 'user',
+                label: t('family'),
+                children: user?.id ? (
+                  <div style={{ padding: 16, height: `calc(100vh - ${HEADER_HEIGHT + TABS_HEIGHT}px)`, overflow: 'auto' }}>
+                    <FamilyTabs user={user} />
+                  </div>
+                ) : null
+              }
+            ]}
+          />
+        )}
+      </Content>
+    </Layout>
   );
 }
