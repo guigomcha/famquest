@@ -32,13 +32,16 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
   const { t, i18n } = useTranslation();
   const mapRef = useRef(null);
   const guilleSpotsGroup = useRef(null);
+  const tripsGroup = useRef(null);
   const featureGroup = useRef(null);
-  const markers = useRef(null);
+  const markers = useRef([]);
   const fogLayer = useRef(null);
   const fogGeoJson = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const allDiscovered = useRef(null);
   const allLocations = useRef(null);
+  const allTrips = useRef(null);
+  const geoLines = useRef([]);
   const [reload, setReload] = useState(true);
   const userRef = useRef();
   const [configuration, setConfiguration] = useState({"mode": "adventure"});
@@ -51,6 +54,10 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
     const tempLocations = await getInDB('location');
     console.info("Fetched initial locations ", tempLocations);
     allLocations.current = tempLocations;
+
+    const tempTrips = await getInDB('trip');
+    console.info("Fetched initial trips ", tempTrips);
+    allTrips.current = tempTrips;
 
     // Gets and creates missing ones
     let tempDiscovered = await getInDB('discovered', 0, `?refUserUploader=${user.id}`);
@@ -70,6 +77,34 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
 
   const prepareMap = () => {
     console.info("prepare with user ", userRef.current, mapRef.current.hasLayer(featureGroup.current));
+    // Add the trips
+    if (mapRef.current && allTrips.current && tripsGroup.current) {
+      // Adding a marker with custom icon
+      let geoLineExists = false;
+      allTrips.current.forEach((trip) => {
+        geoLines.current.forEach((geoLine) => {
+          if (geoLine.tripId == trip.id){
+            console.info("trip already has geoLine ", trip);
+            geoLineExists = true;
+          }
+        })
+        if (geoLineExists){
+          return;
+        }
+        console.info("adding geoLine for trip", trip)
+        const geoLine = L.geoJSON(trip.geometry, {
+            style: {
+              color: 'blue',
+              weight: 5
+            }
+        });
+        geoLine.addTo(mapRef.current)
+        geoLine.data = {...trip}
+        tripsGroup.current.addLayer(geoLine);
+        geoLines.current.push({"tripId": trip.id, "geoLine": geoLine});
+      })
+    }
+    
     // After the map is loaded, reveal the area around each marker
     if (mapRef.current && allLocations.current && fogLayer.current && userRef.current) {
       // First uncover fog and add markers 
@@ -232,8 +267,9 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
       });      
       resizeObserver.observe(mapDiv);
       
-      // Add layer group to host the spots from 1 user
+      // Add layer groups
       guilleSpotsGroup.current = L.layerGroup().addTo(mapRef.current);
+      tripsGroup.current = L.layerGroup().addTo(mapRef.current);
       // Create the fog if it doesn't exist
       if (!fogLayer.current){
         fogGeoJson.current = worldPolygon();
@@ -284,6 +320,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
       // Create overlay controls
       const overlays = {
         "Spots": guilleSpotsGroup.current,
+        "Trips": tripsGroup.current,
       };
       L.control.layers(null, overlays, { collapsed: false }).addTo(mapRef.current);
       markers.current = []
