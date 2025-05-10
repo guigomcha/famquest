@@ -1647,7 +1647,11 @@ const docTemplate = `{
                     "description": "start reference",
                     "type": "integer"
                 },
-                "refType": {
+                "refTypeEnd": {
+                    "description": "\"spot\" or \"note\"",
+                    "type": "string"
+                },
+                "refTypeStart": {
                     "description": "\"spot\" or \"note\"",
                     "type": "string"
                 }

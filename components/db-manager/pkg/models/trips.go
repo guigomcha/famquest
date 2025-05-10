@@ -9,11 +9,12 @@ import (
 
 // For swagger input
 type APITrips struct {
-	Geometry   JSONB  `db:"geometry" json:"geometry"`       // JSONB geometry field
-	Mode       string `db:"mode" json:"mode"`               // "car" or "foot"
-	RefType    string `db:"ref_type" json:"refType"`        // "spot" or "note"
-	RefIdStart int    `db:"ref_id_start" json:"refIdStart"` // start reference
-	RefIdEnd   int    `db:"ref_id_end" json:"refIdEnd"`     // end reference
+	Geometry     JSONB  `db:"geometry" json:"geometry"`           // JSONB geometry field
+	Mode         string `db:"mode" json:"mode"`                   // "car" or "foot"
+	RefTypeStart string `db:"ref_type_start" json:"refTypeStart"` // "spot" or "note"
+	RefTypeEnd   string `db:"ref_type_end" json:"refTypeEnd"`     // "spot" or "note"
+	RefIdStart   int    `db:"ref_id_start" json:"refIdStart"`     // start reference
+	RefIdEnd     int    `db:"ref_id_end" json:"refIdEnd"`         // end reference
 }
 
 // `db:"trips"`
