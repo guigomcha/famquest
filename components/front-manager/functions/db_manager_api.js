@@ -1,6 +1,7 @@
 import { GlobalMessage } from './components_helper';
 
-const API_URL = "https://api.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN";
+const API_URL = "https://api.REPLACE_TARGET_USE.famquest.REPLACE_BASE_DOMAIN";
+const isLocal = false;
 
 export const registerUser = async (data) => {
   console.info("URL: "+ API_URL + "user connected " + JSON.stringify(data));

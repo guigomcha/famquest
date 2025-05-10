@@ -91,6 +91,11 @@ func main() {
 	r.HandleFunc("/familyTree/{id}", api.FamilyTreeGet).Methods("GET", "OPTIONS")
 	r.HandleFunc("/familyTree/{id}", api.FamilyTreePut).Methods("PUT", "OPTIONS")
 
+	r.HandleFunc("/trip", api.TripPost).Methods("POST", "OPTIONS")
+	r.HandleFunc("/trip", api.TripGetAll).Methods("GET", "OPTIONS")
+	r.HandleFunc("/trip/{id}", api.TripGet).Methods("GET", "OPTIONS")
+	r.HandleFunc("/trip/{id}", api.TripPut).Methods("PUT", "OPTIONS")
+
 	// Start the server
 	port := os.Getenv("SWAGGER_PORT")
 	if port == "" {

@@ -56,6 +56,28 @@ definitions:
       name:
         type: string
     type: object
+  models.APITrips:
+    properties:
+      geometry:
+        allOf:
+        - $ref: '#/definitions/models.JSONB'
+        description: JSONB geometry field
+      mode:
+        description: '"car" or "foot"'
+        type: string
+      refIdEnd:
+        description: end reference
+        type: integer
+      refIdStart:
+        description: start reference
+        type: integer
+      refTypeEnd:
+        description: '"spot" or "note"'
+        type: string
+      refTypeStart:
+        description: '"spot" or "note"'
+        type: string
+    type: object
   models.APIUsers:
     properties:
       bio:
@@ -216,6 +238,40 @@ definitions:
         type: integer
       updatedAt:
         description: Automatically managed by trigger
+        type: string
+    type: object
+  models.Trips:
+    properties:
+      createdAt:
+        type: string
+      geometry:
+        allOf:
+        - $ref: '#/definitions/models.JSONB'
+        description: JSONB geometry field
+      id:
+        description: Auto-incremented ID
+        type: integer
+      mode:
+        description: '"car" or "foot"'
+        type: string
+      refIdEnd:
+        description: end reference
+        type: integer
+      refIdStart:
+        description: start reference
+        type: integer
+      refTypeEnd:
+        description: '"spot" or "note"'
+        type: string
+      refTypeStart:
+        description: '"spot" or "note"'
+        type: string
+      refUserUploader:
+        type: integer
+      updatedAt:
+        type: string
+      uuid:
+        description: UUID as primary key
         type: string
     type: object
   models.Users:
@@ -1058,6 +1114,105 @@ paths:
       summary: Update a spot by ID
       tags:
       - spot
+  /trip:
+    get:
+      description: Get a list of all trips
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Trips'
+            type: array
+      summary: Retrieve all trips
+      tags:
+      - trip
+    post:
+      consumes:
+      - application/json
+      description: Create a new trip
+      parameters:
+      - description: Trip data
+        in: body
+        name: trip
+        required: true
+        schema:
+          $ref: '#/definitions/models.APITrips'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Trips'
+      summary: Create a trip
+      tags:
+      - trip
+  /trip/{id}:
+    delete:
+      description: Delete a trip and nullify its references in spots
+      parameters:
+      - description: Trip ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+      summary: Delete a trip by ID
+      tags:
+      - trip
+    get:
+      description: Get trip details by ID
+      parameters:
+      - description: Trip ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Trips'
+      summary: Retrieve a trip by ID
+      tags:
+      - trip
+    put:
+      consumes:
+      - application/json
+      description: Update trip details by ID
+      parameters:
+      - description: Trip ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Trip data
+        in: body
+        name: trip
+        required: true
+        schema:
+          $ref: '#/definitions/models.APITrips'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Trips'
+      summary: Update a trip by ID
+      tags:
+      - trip
   /user:
     get:
       description: Get a list of all users

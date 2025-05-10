@@ -1223,6 +1223,156 @@
                 }
             }
         },
+        "/trip": {
+            "get": {
+                "description": "Get a list of all trips",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trip"
+                ],
+                "summary": "Retrieve all trips",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Trips"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new trip",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trip"
+                ],
+                "summary": "Create a trip",
+                "parameters": [
+                    {
+                        "description": "Trip data",
+                        "name": "trip",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APITrips"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Trips"
+                        }
+                    }
+                }
+            }
+        },
+        "/trip/{id}": {
+            "get": {
+                "description": "Get trip details by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trip"
+                ],
+                "summary": "Retrieve a trip by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Trip ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Trips"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update trip details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trip"
+                ],
+                "summary": "Update a trip by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Trip ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Trip data",
+                        "name": "trip",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.APITrips"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Trips"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a trip and nullify its references in spots",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trip"
+                ],
+                "summary": "Delete a trip by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Trip ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/user": {
             "get": {
                 "description": "Get a list of all users",
@@ -1466,6 +1616,39 @@
                 }
             }
         },
+        "models.APITrips": {
+            "type": "object",
+            "properties": {
+                "geometry": {
+                    "description": "JSONB geometry field",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.JSONB"
+                        }
+                    ]
+                },
+                "mode": {
+                    "description": "\"car\" or \"foot\"",
+                    "type": "string"
+                },
+                "refIdEnd": {
+                    "description": "end reference",
+                    "type": "integer"
+                },
+                "refIdStart": {
+                    "description": "start reference",
+                    "type": "integer"
+                },
+                "refTypeEnd": {
+                    "description": "\"spot\" or \"note\"",
+                    "type": "string"
+                },
+                "refTypeStart": {
+                    "description": "\"spot\" or \"note\"",
+                    "type": "string"
+                }
+            }
+        },
         "models.APIUsers": {
             "type": "object",
             "properties": {
@@ -1700,6 +1883,56 @@
                 },
                 "updatedAt": {
                     "description": "Automatically managed by trigger",
+                    "type": "string"
+                }
+            }
+        },
+        "models.Trips": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "geometry": {
+                    "description": "JSONB geometry field",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.JSONB"
+                        }
+                    ]
+                },
+                "id": {
+                    "description": "Auto-incremented ID",
+                    "type": "integer"
+                },
+                "mode": {
+                    "description": "\"car\" or \"foot\"",
+                    "type": "string"
+                },
+                "refIdEnd": {
+                    "description": "end reference",
+                    "type": "integer"
+                },
+                "refIdStart": {
+                    "description": "start reference",
+                    "type": "integer"
+                },
+                "refTypeEnd": {
+                    "description": "\"spot\" or \"note\"",
+                    "type": "string"
+                },
+                "refTypeStart": {
+                    "description": "\"spot\" or \"note\"",
+                    "type": "string"
+                },
+                "refUserUploader": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "description": "UUID as primary key",
                     "type": "string"
                 }
             }

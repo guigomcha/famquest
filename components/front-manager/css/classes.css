@@ -10,3 +10,7 @@
   align-items: center;
   z-index: 9999;
 }
+
+.hoverable-list-item:hover {
+  background-color: #f5f5f5;
+}

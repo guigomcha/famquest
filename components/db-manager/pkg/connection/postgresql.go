@@ -102,6 +102,11 @@ func Get(db *sqlx.DB, id int, model DbInterface) (DbInterface, error) {
 		err := db.Get(&received, model.GetSelectOneQuery(), id)
 		return &received, err
 
+	case *models.Trips:
+		received := models.Trips{}
+		err := db.Get(&received, model.GetSelectOneQuery(), id)
+		return &received, err
+
 	default:
 		return nil, fmt.Errorf("unsupported struct in GetAll %+v", m)
 	}
@@ -189,6 +194,17 @@ func GetAll(db *sqlx.DB, model DbInterface, filter string) ([]DbInterface, error
 	case *models.Discovered:
 		// todo call the get function instead if there is too much duplicated code in the end
 		received := []models.Discovered{}
+		err := db.Select(&received, m.GetSelectAllQuery()+" "+filter)
+		if err != nil {
+			return dest, err
+		}
+		// Slices need to be reconverted element by element
+		for _, s := range received {
+			dest = append(dest, &s) // Add the struct to the interface slice
+		}
+	case *models.Trips:
+		// todo call the get function instead if there is too much duplicated code in the end
+		received := []models.Trips{}
 		err := db.Select(&received, m.GetSelectAllQuery()+" "+filter)
 		if err != nil {
 			return dest, err

@@ -91,6 +91,21 @@ CREATE TABLE IF NOT EXISTS global (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
 );
 
+-- This table will have a single entry and each column with be handled in its own endpoint 
+CREATE TABLE IF NOT EXISTS trips (
+    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- UUID as primary key
+    id SERIAL UNIQUE NOT NULL,                         -- Auto-incremented integer ID
+    geometry JSONB NOT NULL, -- JSONB to store the family tree json
+    mode TEXT NOT NULL DEFAULT 'car' CHECK (mode IN ('car', 'foot' )), -- Constraint for mode
+    ref_type_start TEXT NOT NULL DEFAULT 'spot' CHECK (ref_type_start IN ('spot', 'note' )), -- Constraint for ref_type
+    ref_type_end TEXT NOT NULL DEFAULT 'spot' CHECK (ref_type_end IN ('spot', 'note' )), -- Constraint for ref_type
+    ref_id_start INT DEFAULT 0, -- Integer field for the ref_id_start
+    ref_id_end INT DEFAULT 0, -- Integer field for the ref_id_end
+    ref_user_uploader INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
+);
+
 -- Trigger functions to update timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
