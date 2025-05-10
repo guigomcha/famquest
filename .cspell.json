@@ -48,6 +48,9 @@
         "bootable",
         "gamified",
         "sobremesa",
+        "routability",
+        "hoverable",
+        "Popconfirm",
         "swaggo"
     ],
     "enableGlobDot": true,
