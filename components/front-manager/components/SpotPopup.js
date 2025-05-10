@@ -1,86 +1,85 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Card from 'react-bootstrap/Card';
-import ListGroup from 'react-bootstrap/ListGroup';
-import Badge from 'react-bootstrap/Badge';
+import React, { useState, useEffect } from 'react';
+import { Card, List, Badge, Button, Spin, Typography, Alert, Table } from 'antd';
 import { EditOutlined, DeleteOutlined, AppstoreAddOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
 import SpotForm from './SpotForm';
 import NoteForm from './NoteForm';
-import { GlobalMessage, SpotFromForm } from '../functions/components_helper';
+import { GlobalMessage } from '../functions/components_helper';
 import { renderDescription, renderEmptyState } from '../functions/render_message';
 import { getUserInfo, deleteInDB, fetchAndPrepareSpots, getInDB } from '../functions/db_manager_api';
 import SlideMenu from './SlideMenu';
 import { useTranslation } from "react-i18next";
-import { Spin, Alert } from 'antd';
 import Note from './Note';
 
+const { Title, Text, Link } = Typography;
+
 const SpotPopup = ({ location, handledFinished, user }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [component, setComponent] = useState(null);
-  const [info, setInfo] = useState({ "id": 0 });
-  const [spotInfo, setSpotInfo] = useState({ "id": location.refId });
+  const [info, setInfo] = useState({ id: 0 });
+  const [spotInfo, setSpotInfo] = useState({ id: location.refId });
   const [reload, setReload] = useState(true);
   const [notes, setNotes] = useState([]);
-  
-  const handleRequestEdit = (e) => {
+
+  const handleRequestEdit = () => {
     setComponent(<SpotForm initialData={spotInfo} handledFinished={handleNestedRequestEdit} />);
   };
 
-  const handleRequestNewNote = (e) => {
-    setComponent(<NoteForm handledFinished={handleNestedRequestEdit} userId={info.id} parentInfo={spotInfo} refType={'spot'}/>);
-  }; 
+  const handleRequestNewNote = () => {
+    setComponent(
+      <NoteForm
+        handledFinished={handleNestedRequestEdit}
+        userId={info.id}
+        parentInfo={spotInfo}
+        refType="spot"
+      />
+    );
+  };
 
-  const handleRequestDelete = async (e) => {
+  const handleRequestDelete = async () => {
     setIsLoading(true);
     const deleteResponse = await deleteInDB(spotInfo.id, 'spot');
-    console.info("delete response: ", deleteResponse);
-    if (deleteResponse == "OK") {
-      GlobalMessage(t("actionCompleted"), "info");
-      handledFinished({"msg": "done", "id": spotInfo.id});
+    if (deleteResponse === 'OK') {
+      GlobalMessage(t('actionCompleted'), 'info');
+      handledFinished({ msg: 'done', id: spotInfo.id });
       setComponent(null);
     } else {
-      GlobalMessage(t("actionInvalid"), "warning");
+      GlobalMessage(t('actionInvalid'), 'warning');
     }
     setIsLoading(false);
-  }; 
+  };
 
   const handleNestedRequestEdit = async (comp) => {
-    console.info("handleNested ", comp);
-    if (comp == "done" || !comp) {
-      const resp = await fetchRelatedInfo(spotInfo);
-      console.info("response from fetch", resp);
+    if (comp === 'done' || !comp) {
+      await fetchRelatedInfo(spotInfo);
       setComponent(null);
       setReload(!reload);
     } else {
-      console.info("should open the secondary slide ");
-      setComponent(comp); // Trigger show slideMenu
+      setComponent(comp);
     }
   };
 
-  // fetch the additional info for this spot
   const fetchRelatedInfo = async (model) => {
     setIsLoading(true);
-    let tempSpot = await fetchAndPrepareSpots(model.refId, user);
-    console.info("Fetched initial spots ", tempSpot);
+    const tempSpot = await fetchAndPrepareSpots(model.refId, user);
     tempSpot.location = location;
     setSpotInfo(tempSpot);
-    console.info("fetching info for spot ", tempSpot);
-    if (!tempSpot){
+
+    if (!tempSpot) {
       setIsLoading(false);
       return;
     }
-    let tempNotes = await getInDB('note', 0, `?refId=${tempSpot.id}&refType=spot`);
+
+    const tempNotes = await getInDB('note', 0, `?refId=${tempSpot.id}&refType=spot`);
     const updatedNotes = await Promise.all(
       tempNotes.map(async (note) => {
         const userInfo = await getUserInfo(note.refUserUploader);
-        return { ...note, "userInfo": userInfo };
+        return { ...note, userInfo };
       })
     );
     setNotes(updatedNotes);
-    console.info("obtained tempNotes ", updatedNotes);
+
     const userInfo = await getUserInfo(tempSpot.refUserUploader);
-    console.info("obtained userInfo ", userInfo);
     setInfo(userInfo);
     setIsLoading(false);
   };
@@ -90,74 +89,96 @@ const SpotPopup = ({ location, handledFinished, user }) => {
   }, [component, reload]);
 
   return (
-    <>    
-      {(isLoading) &&<Spin>{t('loading')}</Spin>}
-      <Card>
-        <Card.Header>id: {spotInfo.id}</Card.Header>
-        <Card.Title>{t('spot')}: {spotInfo.name}</Card.Title>
-        <Card>
-          <Card.Body>
-            {!spotInfo.id && <Card.Text>{t('invalidSpot')}{JSON.stringify(location)}</Card.Text>}
-            <Card.Text>{renderDescription(spotInfo.description)}</Card.Text>
-          </Card.Body>
-            <Card.Footer>
-              <Card.Text>{t('owner')}: {info.name}</Card.Text>
-              {(user.id == spotInfo.refUserUploader) &&
-                <>
-                  <Button
-                    trigger="click"
-                    color="primary" 
-                    variant="outlined"
-                    icon={<EditOutlined />}
-                    onClick={handleRequestEdit}
-                  >{t('edit')}
-                  </Button>
-                  <Button trigger="click"
-                    color="danger" 
-                    variant="outlined"
-                    icon={<DeleteOutlined />}
-                    onClick={handleRequestDelete}
-                  >{t('delete')}
-                  </Button>
-                </>
-              }
-          </Card.Footer>
-          </Card>
-          <Card>
-            <Card.Title>{t('notesInSpot')}</Card.Title>
-              {notes.length > 0 ? ( 
-              <ListGroup as="ol" numbered>
-                {notes
-                  .map((note, index) => (
-                    <ListGroup.Item  as="li" action onClick={() => handleNestedRequestEdit(<Note initialData={note} user={user} parentInfo={spotInfo} refType={'spot'} handledFinished={handleNestedRequestEdit} />)} key={index} variant="light">
-                      {note.name}
-                      <Badge bg="primary" pill>
-                      {t('category')}: {note.category}
-                      </Badge>
-                      <Badge bg="info" pill>
-                      {t('owner')}: {note.userInfo.name}
-                      </Badge>
-                      <Badge bg="secondary" pill>
-                      {t('datetimeRef')}: {note.datetime}
-                      </Badge>
-                    </ListGroup.Item>
-                  ))}
-              </ListGroup>
-              ) : (                  
-                renderEmptyState(t('empty'))
-              )}
-              <Card.Footer> 
-                  <Button trigger="click"
-                    color="primary" 
-                    variant="outlined"
-                    icon={<AppstoreAddOutlined />}
-                    onClick={handleRequestNewNote}
-                  >{t('new')}
-                  </Button>
-              </Card.Footer>
-          </Card>
+    <>
+      {isLoading && <Spin>{t('loading')}</Spin>}
+      <Card title={`${t('spot')}: ${spotInfo.name}`} extra={`ID: ${spotInfo.id}`}>
+        {!spotInfo.id && <Alert message={`${t('invalidSpot')} ${JSON.stringify(location)}`} type="error" showIcon />}
+
+        <Text>{renderDescription(spotInfo.description)}</Text>
+
+        <div style={{ marginTop: '1rem' }}>
+          <Text strong>{t('owner')}: </Text>
+          <Text>{info.name}</Text>
+        </div>
+
+        {user.id === spotInfo.refUserUploader && (
+          <div style={{ marginTop: '1rem', display: 'flex', gap: 8 }}>
+            <Button icon={<EditOutlined />} onClick={handleRequestEdit} type="primary">
+              {t('edit')}
+            </Button>
+            <Button icon={<DeleteOutlined />} onClick={handleRequestDelete} danger>
+              {t('delete')}
+            </Button>
+          </div>
+        )}
+
+        <Card style={{ marginTop: '1rem', marginBottom: '3rem' }} title={t('notesInSpot')}>
+          {notes.length > 0 ? (
+            <Table
+              dataSource={notes}
+              rowKey="id"
+              pagination={false}
+              size="small"
+              columns={[
+                {
+                  title: t('name'),
+                  dataIndex: 'name',
+                  key: 'name',
+                  render: (text, record) => (
+                    <Link
+                      onClick={() =>
+                        handleNestedRequestEdit(
+                          <Note
+                            initialData={record}
+                            user={user}
+                            parentInfo={spotInfo}
+                            refType="spot"
+                            handledFinished={handleNestedRequestEdit}
+                          />
+                        )
+                      }
+                    >
+                      {text}
+                    </Link>
+                  ),
+                },
+                {
+                  title: t('category'),
+                  dataIndex: 'category',
+                  key: 'category',
+                  render: (category) => (
+                    <Badge color="blue" text={category} />
+                  ),
+                },
+                {
+                  title: t('owner'),
+                  key: 'owner',
+                  render: (_, record) => (
+                    <Badge color="purple" text={record.userInfo?.name || '—'} />
+                  ),
+                },
+                {
+                  title: t('datetimeRef'),
+                  dataIndex: 'datetime',
+                  key: 'datetime',
+                  render: (datetime) => (
+                    <Text type="secondary">{datetime}</Text>
+                  ),
+                },
+              ]}
+            />
+          ) : (
+            renderEmptyState(t('empty'))
+          )}
+          <div style={{ marginTop: '1rem' }}>
+            <Button icon={<AppstoreAddOutlined />} type="primary" onClick={handleRequestNewNote}>
+              {t('new')}
+            </Button>
+          </div>
+        </Card>
       </Card>
-      <SlideMenu component={component} handledFinished={handleNestedRequestEdit}/>
+
+      <SlideMenu component={component} handledFinished={handleNestedRequestEdit} />
     </>
   );
 };

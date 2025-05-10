@@ -1,19 +1,22 @@
-
-import { View } from 'react-native';
 import React, { useRef, useState, useEffect } from "react";
 import 'leaflet/dist/leaflet.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './css/App.css';
-import Container from 'react-bootstrap/Container';
-import Navbar from 'react-bootstrap/Navbar';
-import Card from 'react-bootstrap/Card';
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import { Select } from 'antd';
-import { Button } from 'antd';
-import { ArrowDownOutlined } from '@ant-design/icons';
+import {
+  Layout,
+  Card,
+  Row,
+  Col,
+  Select,
+  Button,
+  Spin,
+  Typography,
+  Tooltip,
+} from 'antd';
+import {
+  HomeOutlined,
+  EnvironmentOutlined,
+  TeamOutlined,
+  ArrowDownOutlined,
+} from '@ant-design/icons';
 
 import MapManager from './components/MapManager';
 import UserButton from './components/UserButton';
@@ -24,19 +27,18 @@ import { updateDiscoveredConditionsForUser } from './functions/db_manager_api';
 import { useTranslation } from "react-i18next";
 import i18next from "./i18n";
 import { GlobalMessage } from './functions/components_helper';
-import { Spin } from 'antd';
 
+const { Header, Content, Footer } = Layout;
+const { Title } = Typography;
 
-const isLocal = true;
-
-export default function App() { 
+export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState({});
-  const [key, setKey] = useState('home');
+  const [activeTab, setActiveTab] = useState('home');
   const mapRef = useRef(null);
-  const [isImageAboveText, setIsImageAboveText] = useState(false); // Track layout change
-  const textRef = useRef(null); // Reference to scroll to the text
+  const textRef = useRef(null);
+  const [isImageAboveText, setIsImageAboveText] = useState(false);
 
   const handleArrowClick = () => {
     if (textRef.current) {
@@ -46,13 +48,10 @@ export default function App() {
 
   const handleUserChange = async (userInfo) => {
     setUser(userInfo);
-    console.info("updating app.js to ", userInfo);
-    // todo: why 82+ locations with new user?
-    if (userInfo?.role == "target"){
+    if (userInfo?.role === "target") {
       const resp = await updateDiscoveredConditionsForUser(userInfo);
-      console.info("requested discover update: ", resp);
-      if (resp.length >0) {
-        GlobalMessage(resp.length + "x" +t('discoveredUpdate'), "info");
+      if (resp.length > 0) {
+        GlobalMessage(`${resp.length}x ${t('discoveredUpdate')}`, "info");
       }
     }
   };
@@ -60,133 +59,145 @@ export default function App() {
   const transferHandleMapRef = (map) => {
     mapRef.current = map.current;
   };
-  
-  const selectTab = (key) => {
-    if (key == "map" || key == "user") {
-      if (user || isLocal) {
-        setKey(key);
-      } else {
-        GlobalMessage(t('privateArea'), "warning");
-      }
-    } else {
-      setKey(key);
-    }
-  };
+
   const changeLanguage = (value) => {
     i18n.changeLanguage(value);
   };
-  
-  useEffect(() => {
-  }, [user]);
 
   useEffect(() => {
     const checkLayout = () => {
-      const isSmallScreen = window.innerWidth < 768; // Adjust based on your needs
+      const isSmallScreen = window.innerWidth < 768;
       setIsImageAboveText(isSmallScreen);
     };
     window.addEventListener('resize', checkLayout);
-    checkLayout(); // Run once on mount
+    checkLayout();
     return () => window.removeEventListener('resize', checkLayout);
   }, []);
-  
-  return (   
-    <div style={{ position: 'relative', width: '100vw', height: '100vh'}}>
-      <Navbar className="bg-body-tertiary">
-        <Container>
-          <Navbar.Brand>FamQuest App</Navbar.Brand>
-          <Navbar.Toggle />
-          <Navbar.Collapse className="justify-content-end">
-          <Row className="mb-3">
-            <Col>
-              <Select
-                defaultValue={i18n.language}
-                style={{ width: 80 }}
-                onChange={changeLanguage}
-                options={[
-                  { value: 'en', label: 'EN' },
-                  { value: 'es', label: 'ESP' },
-                ]}
-              />
-            </Col>
-            <Col>
-              {(user || isLocal ) ?
-                (
-                  <Navbar.Text>
-                    {t('signedAs')}: {user?.name}
-                    <OAuth2 onUserChange={handleUserChange} setIsLoading={setIsLoading}/>
-                  </Navbar.Text>
-                ):
-                (
-                  <Navbar.Text>
-                    <OAuth2 onUserChange={handleUserChange} setIsLoading={setIsLoading}/>
-                  </Navbar.Text>
-                )
-              }
-            </Col>
-          </Row>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
-        {(isLoading) ? (<Spin >{t('loading')}</Spin>) :
-        (<Tabs
-          id="controlled-tab-example"
-          activeKey={key}
-          onSelect={(k) => selectTab(k)}
-          className="mb-3"
-        >
-          <Tab eventKey="home" title={t('home')}>
-                <Card>
-                  <Card.Title>{t('welcomeTitle')}</Card.Title>
-                    <Row className={`card-row ${isImageAboveText ? 'stacked' : ''}`}>
-                      <Col md={isImageAboveText ? 12 : 6}>
-                        {isImageAboveText && (
-                          <Card.ImgOverlay bsPrefix="card-row">
-                            <Button trigger="click"
-                              color="primary" 
-                              variant="outlined"
-                              icon={<ArrowDownOutlined />}
-                              onClick={handleArrowClick}
-                              >{t('callToAction')}</Button>
-                          </Card.ImgOverlay>
-                        )}
-                        <Card.Img variant="top" src="assets/famquest-logo.png" />
-                      </Col>
-                      <Col md={isImageAboveText ? 12 : 6}>
-                        <Card.Body ref={textRef}>
-                          <Card.Text>
-                            <p>{renderDescription(t('frontDescription'))}</p>
-                          </Card.Text>
-                          <Card.Text>{t('coreObjectivesTitle')}</Card.Text>
-                          <ul>
-                            <li>{renderDescription(t('coreObjective1'))}</li>
-                            <li>{renderDescription(t('coreObjective2'))}</li>
-                            <li>{renderDescription(t('coreObjective3'))}</li>
-                            <li>{renderDescription(t('coreObjective4'))}</li>
-                            <li>{renderDescription(t('coreObjective5'))}</li>
-                            <li>{renderDescription(t('coreObjective6'))}</li>
-                          </ul>
-                        </Card.Body>
-                      </Col>
-                    </Row>
-                </Card>
-          </Tab>
-          <Tab eventKey="map" title={t('map')}>
-            { (user?.id) && 
-              <div style={{ position: 'relative', width: '100vw', height: '70vh'}}>
-                <MapManager handleMapRef={transferHandleMapRef} user={user}/>
-                <UserButton user={user} mapRef={mapRef}/>
-              </div>
-            }
-          </Tab>
-          <Tab eventKey="user" title={t('family')}>
-          { (user?.id) &&
-            <Container fluid>
-              <FamilyTabs user={user}></FamilyTabs>
-            </Container>
+
+  const renderContent = () => {
+    if (activeTab === 'home') {
+      return (
+        <div style={
+          { 
+            padding: '0 0.5rem',
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            overflow: 'auto',
           }
-          </Tab>
-        </Tabs>)
-        }
-    </div> 
+        }>
+          <Card variant={"outlined"}  bodyPadding={0}>
+            <Title level={4} style={{ padding: '0.5rem 0' }}>{t('welcomeTitle')}</Title>
+            <Row gutter={16}>
+              <Col xs={24} md={12}>
+                <img alt="logo" src="assets/famquest-logo.png" style={{ width: '100%', height: 'auto' }} />
+              </Col>
+              <Col xs={24} md={12} >
+                <div ref={textRef}>
+                  <p>{renderDescription(t('frontDescription'))}</p>
+                  <Title level={5}>{t('coreObjectivesTitle')}</Title>
+                  <ul>
+                    {[1, 2, 3, 4, 5, 6].map(i => (
+                      <li key={i}>{renderDescription(t(`coreObjective${i}`))}</li>
+                    ))}
+                  </ul>
+                </div>
+              </Col>
+            </Row>
+          </Card>
+        </div>
+      );
+    } else if (activeTab === 'map') {
+      return (user?.id &&
+        <div style={
+          { 
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            overflowY: 'hidden',
+            overflowX: 'hidden',
+          }
+        }>
+          <MapManager handleMapRef={transferHandleMapRef} user={user} />
+          <UserButton user={user} mapRef={mapRef} />
+        </div>
+      );
+    } else if (activeTab === 'user') {
+      return (user?.id &&
+        <div style={
+          { 
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            overflowY: 'hidden',
+            overflowX: 'hidden',
+          }}
+        >
+          <FamilyTabs user={user} />
+        </div>
+      );
+    }
+  };
+
+  return (
+    <Layout style={{ minHeight: '100vh' }}>
+      <Header style={{ height: '10vh', background: 'rgba(240, 240, 240, 1)', padding: '0 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div><strong>FamQuest</strong></div>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <Select
+            defaultValue={i18n.language}
+            style={{ width: 80 }}
+            onChange={changeLanguage}
+            options={[
+              { value: 'en', label: 'EN' },
+              { value: 'es', label: 'ESP' },
+            ]}
+          />
+          <OAuth2 onUserChange={handleUserChange} setIsLoading={setIsLoading} />
+        </div>
+      </Header>
+
+      <Content style={{
+        height: '80vh',
+        padding: '0.5rem 0',
+      }}>
+        {isLoading ? <Spin>{t('loading')}</Spin> : renderContent()}
+      </Content>
+
+      <Footer style={{ zIndex: 99999999, bottom: 0, height: '10vh', width: '100%', padding: '0.5rem 0', background: 'rgb(240, 240, 240)'}}>
+        <Row justify="space-around">
+          <Col>
+            <Tooltip title="Home">
+              <Button
+                type="text"
+                icon={<HomeOutlined style={{ fontSize: '6vh' }}/>}
+                onClick={() => setActiveTab("home")}
+                style={{ color: activeTab === 'home' ? 'rgb(24, 144, 255)' : 'rgb(100, 100, 100)', height: '100%' }}
+              />
+            </Tooltip>
+          </Col>
+          <Col>
+            <Tooltip title="Map">    
+              <Button
+                type="text"
+                icon={<EnvironmentOutlined style={{ fontSize: '6vh' }}/>}
+                onClick={() => setActiveTab("map")}
+                style={{ color: activeTab === 'map' ? 'rgb(24, 144, 255)' : 'rgb(100, 100, 100)', height: '100%', }}
+              />
+            </Tooltip>
+          </Col>
+          <Col>
+            <Tooltip title="Family">    
+              <Button
+                type="text"
+                icon={<TeamOutlined style={{ fontSize: '6vh' }}/>}
+                onClick={() => setActiveTab("user")}
+                style={{ color: activeTab === 'user' ? 'rgb(24, 144, 255)' : 'rgb(100, 100, 100)', height: '100%', }}
+              />
+            </Tooltip>
+          </Col>
+        </Row>
+      </Footer>
+    </Layout>
   );
 }
