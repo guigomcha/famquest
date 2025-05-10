@@ -19,12 +19,10 @@ const MapManager = ( {handleMapRef, user} ) => {
   };
 
   return (
-    <>
-      <div>
-        <MapContainer handleMenuChange={handleMenuChange} handleMapRef={transferHandleMapRef} user={user}/>
-        {component && <SlideMenu component={component} handledFinished={handleMenuChange}></SlideMenu>}
-      </div>
-    </>
+    <div style={{ height: '100%', width: '100%' }}>
+      <MapContainer handleMenuChange={handleMenuChange} handleMapRef={transferHandleMapRef} user={user}/>
+      {component && <SlideMenu component={component} handledFinished={handleMenuChange}></SlideMenu>}
+    </div>
   );
 };
 

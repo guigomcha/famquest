@@ -73,7 +73,15 @@ const FamilyTabs = ({ user }) => {
   }, [component, reload]);
 
   return (
-    <>
+    <div style={
+      { 
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+      }}
+    >
     <Row>
       <Card>
         <Card.Title>{t("familyTitle")}</Card.Title>
@@ -158,7 +166,7 @@ const FamilyTabs = ({ user }) => {
       </Tabs>     
     </Row>
     <SlideMenu component={component} handledFinished={handleNestedRequestEdit}/>
-    </>
+    </div>
   );
 };
 

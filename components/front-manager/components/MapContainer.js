@@ -261,12 +261,6 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
       }).addTo(mapRef.current);
       L.control.scale().addTo(mapRef.current);
       handleMapRef(mapRef);
-      // To support map inside of tab
-      const resizeObserver = new ResizeObserver(() => {
-        mapRef.current.invalidateSize();
-      });      
-      resizeObserver.observe(mapDiv);
-      
       // Add layer groups
       guilleSpotsGroup.current = L.layerGroup().addTo(mapRef.current);
       tripsGroup.current = L.layerGroup().addTo(mapRef.current);
@@ -279,7 +273,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
           },
         });
         console.info("initial geojson ", fogGeoJson.current)
-        fogLayer.current.bringToFront();
+        //fogLayer.current.bringToFront();
         featureGroup.current = L.featureGroup();
         featureGroup.current.addLayer(fogLayer.current);
         featureGroup.current.on('remove', async (e) => {
@@ -358,8 +352,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
   };
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%"}}>
-      <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
+      <div style={{ width: "100%", height: "100%"}}>
         <Modal
           title="Create Component"
           open={isModalVisible}
@@ -378,7 +371,7 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
           <Select
             prefix={t("mode")}
             defaultValue="adventure"
-            style={{ width: 200 }}
+            style={{ width: 200, padding: '0.5rem 0'}}
             onChange={handleChangeMode}
             options={[
               { value: 'adventure', label: t("adventure") },
@@ -386,13 +379,12 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
             ]}
           />
         </Row>
-        <Row>
-          <div id="mapId" style={{ height: '100vh', width: '100vw' }}>
-            {(isLoading) &&<Spin >{t('loading')}</Spin>}
+        <Row style={{ width: "100%", height: "100%"}}>
+          <div id="mapId" style={{ height: '100%', width: '100%' }}>
+            {(isLoading) && <Spin >{t('loading')}</Spin>}
           </div>
         </Row>
-      </Space>
-    </div>
+      </div>
   );
 };
   

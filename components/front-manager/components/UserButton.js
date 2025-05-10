@@ -111,16 +111,21 @@ const UserButton = ({ user,  mapRef }) => {
         type="primary"
         icon={<UserOutlined />}
         tooltip={<div>{t('userInfo')}</div>}
+        style={{
+          position: "fixed",
+          bottom: "calc(10vh + 1rem)",
+          right: "1rem",
+        }}
       >
       <>
-        <Card style={{
-          position: "fixed",
-          bottom: "80px",
-          right: "70px",
-          border: "1px solid #ddd",
-          padding: "15px",
-          width: "250px",
-        }}>
+      <Card style={{
+        position: "fixed",
+        bottom: "calc(10vh + 1rem)",
+        right: "70px",
+        border: "1px solid #ddd",
+        padding: "15px",
+        width: "250px",
+      }}>
           <Card.Title>{t('userInfo')}</Card.Title>
           <Card.Body>
             <Card.Text>{t('welcome')}: {user?.name}!</Card.Text>
