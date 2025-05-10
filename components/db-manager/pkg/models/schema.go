@@ -97,7 +97,8 @@ CREATE TABLE IF NOT EXISTS trips (
     id SERIAL UNIQUE NOT NULL,                         -- Auto-incremented integer ID
     geometry JSONB NOT NULL, -- JSONB to store the family tree json
     mode TEXT NOT NULL DEFAULT 'car' CHECK (mode IN ('car', 'foot' )), -- Constraint for mode
-    ref_type TEXT NOT NULL DEFAULT 'spot' CHECK (ref_type IN ('spot', 'note' )), -- Constraint for ref_type
+    ref_type_start TEXT NOT NULL DEFAULT 'spot' CHECK (ref_type_start IN ('spot', 'note' )), -- Constraint for ref_type
+    ref_type_end TEXT NOT NULL DEFAULT 'spot' CHECK (ref_type_end IN ('spot', 'note' )), -- Constraint for ref_type
     ref_id_start INT DEFAULT 0, -- Integer field for the ref_id_start
     ref_id_end INT DEFAULT 0, -- Integer field for the ref_id_end
     ref_user_uploader INT DEFAULT 0,

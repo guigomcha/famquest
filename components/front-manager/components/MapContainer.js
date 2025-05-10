@@ -6,6 +6,8 @@ import * as L from 'leaflet';
 import React, { useEffect, useRef, useState } from "react";
 import SpotForm from './SpotForm';
 import SpotPopup from './SpotPopup';
+import TripsForm from './TripForm';
+import { Modal, Radio, message } from 'antd';
 import { GlobalMessage, SpotFromForm } from '../functions/components_helper';
 import { worldPolygon, uncoverFog, locationVisible } from '../functions/fog_functions';
 import { getInDB, updateDiscoveredConditionsForUser } from "../functions/db_manager_api";
@@ -40,7 +42,9 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
   const [reload, setReload] = useState(true);
   const userRef = useRef();
   const [configuration, setConfiguration] = useState({"mode": "adventure"});
-
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [componentType, setComponentType] = useState('SpotForm'); 
+  const [clickPosition, setClickPosition] = useState(null);
   
   const fetchData = async () => {
     setIsLoading(true);
@@ -164,12 +168,12 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
       handleMenuChange(null);
       setReload(!reload);
     } else if (e?.target.data.componentType == "SpotPopup") {
-      console.info("opening a spot from map ", e);
       handleMenuChange(<SpotPopup location={e.target.data} handledFinished={sendBackComponent} user={userRef.current}/>);
-    } else {
-      console.info("opening a new form from map ", e);
+    } else if (e?.target.data.componentType == "SpotForm") {
       handleMenuChange(<SpotForm initialData={e.target.data} handledFinished={sendBackComponent}/>);
-    }
+    } else if (e?.target.data.componentType == "TripForm") {
+      handleMenuChange(<TripsForm locations={allLocations.current} mapRef={mapRef.current}/>);
+      }
   };
 
   const isVisibleWithFog = (location, rightClick=true) => {
@@ -271,12 +275,10 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
         if (!isVisibleWithFog({"longitude": e.latlng.lng, "latitude": e.latlng.lat})){
           return;
         }
-        data = {
-          "target": {
-            "data": {"lat": e.latlng.lat, "lng": e.latlng.lng,  "componentType": "SpotForm"}
-          }
-        }
-        sendBackComponent(data);
+        const { latlng } = e;
+        setClickPosition(latlng);
+        setIsModalVisible(true);
+
       }); 
       
       // Create overlay controls
@@ -294,28 +296,58 @@ const MapContainer = ( { handleMenuChange, handleMapRef, user } ) => {
         featureGroup.current.clearLayers();
         featureGroup.current.addLayer(fogLayer.current);
       }
-    }, 5000);
-
+    }, 10000);
+    
     // Cleanup on unmount
     return () => clearInterval(interval);
   
   }, [reload, user]);
 
+  const handleOk = () => {
+    if (!clickPosition) return;
+
+    sendBackComponent({
+      target: {
+        data: {
+          lat: clickPosition.lat,
+          lng: clickPosition.lng,
+          componentType: componentType,
+        },
+      },
+    });
+
+    setIsModalVisible(false);
+    setClickPosition(null);
+  };
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%"}}>
       <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
+        <Modal
+          title="Create Component"
+          open={isModalVisible}
+          onOk={handleOk}
+          onCancel={() => setIsModalVisible(false)}
+        >
+          <Radio.Group
+            onChange={(e) => setComponentType(e.target.value)}
+            value={componentType}
+          >
+            <Radio value="SpotForm">Spot</Radio>
+            <Radio value="TripForm">Trip</Radio>
+          </Radio.Group>
+        </Modal>
         <Row>
           <Select
-          prefix={t("mode")}
-          defaultValue="adventure"
-          style={{ width: 200 }}
-          onChange={handleChangeMode}
-          options={[
-            { value: 'adventure', label: t("adventure") },
-            { value: 'visualization', label: t("visualization") },
-          ]}
-        />
+            prefix={t("mode")}
+            defaultValue="adventure"
+            style={{ width: 200 }}
+            onChange={handleChangeMode}
+            options={[
+              { value: 'adventure', label: t("adventure") },
+              { value: 'visualization', label: t("visualization") },
+            ]}
+          />
         </Row>
         <Row>
           <div id="mapId" style={{ height: '100vh', width: '100vw' }}>
