@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from 'antd';
-import Col from 'react-bootstrap/Col';
-import Form from 'react-bootstrap/Form';
-import Row from 'react-bootstrap/Row';
+import GenericForm from './GenericForm';
 import { Spin } from 'antd';
 import '../css/classes.css';
 import { createInDB, updateInDB } from '../functions/db_manager_api';
@@ -15,33 +13,14 @@ const UserForm = ({ initialData, handledFinished }) => {
   const { t, i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (values) => {
     setIsLoading(true);
-    const form = event.currentTarget;
-    event.preventDefault();
-    event.stopPropagation();
-    if (form.checkValidity() === false) {
-      setIsLoading(false);
-      GlobalMessage(t('formNotValid'), "error");
-      return;
-    }
-    const formDataObj = new FormData(form);
-    // Convert FormData to a plain object
-    const formValues = {
-      "email": initialData?.email || "",
-      "extRef": initialData?.extRef || "",
-      "role": initialData?.role || "contributor",
-    };
-    formDataObj.forEach((value, key) => {
-      formValues[key] = value;
-    });
     let newUser = null;
     if (initialData?.id){
-      newUser = await updateInDB(formValues, 'user');
+      newUser = await updateInDB(values, 'user');
     } else {
-      newUser = await createInDB(formValues, 'user');      
+      newUser = await createInDB(values, 'user');
     }
-    console.info("Received user", newUser);
     if (!newUser){
       GlobalMessage(t('internalError'), "error");
     } else {
@@ -51,88 +30,21 @@ const UserForm = ({ initialData, handledFinished }) => {
     handledFinished("done");
   };
 
+  const fields = [
+    { name: 'id', label: `${t('id')} (${t('readOnly')})`, type: 'text', required: false, readOnly: true, initialValue: initialData?.id },
+    { name: 'name', label: initialData?.extRef ? `${t('name')} (${t('readOnly')})` : t('name'), type: 'text', required: true, readOnly: !!initialData?.extRef, initialValue: initialData?.name },
+    { name: 'birthday', label: t('birthday'), type: 'date', required: true, initialValue: initialData?.birthday?.split('T')[0] },
+    { name: 'passing', label: t('passing'), type: 'date', required: false, initialValue: initialData?.passing?.split('T')[0] },
+    { name: 'bio', label: t('biography'), type: 'textarea', required: true, placeholder: t('editBiography'), initialValue: initialData?.bio, rows: 10 },
+  ];
   return (
-    <>
-      {isLoading && (
-        <div className="spin-overlay">
-          <Spin tip={t('loading')} />
-        </div>
-      )}
-      <Form noValidate onSubmit={handleSubmit}>
-        {initialData?.id && (
-          <Row className="mb-3">
-            <Form.Group as={Col} controlId="formGridId">
-              <Form.Label>Id ({t('readOnly')})</Form.Label>
-              <Form.Control type="text" name="id" defaultValue={initialData?.id} readOnly />
-            </Form.Group>
-          </Row>
-        )}
-        <Row className="mb-3">
-        {initialData?.extRef != "" ? (
-          <Form.Group as={Col} controlId="formGridName">
-            <Form.Label>{t('name')} ({t('readOnly')})</Form.Label>
-            <Form.Control
-              readOnly
-              type="text"
-              name="name"
-              defaultValue={initialData?.name}
-            />
-          </Form.Group>) : (
-          <Form.Group as={Col} controlId="formGridName">
-            <Form.Label>{t('name')} </Form.Label>
-            <Form.Control
-              type="text"
-              required
-              name="name"
-              defaultValue={initialData?.name}
-            />
-          </Form.Group>) }
-          </Row>
-          <Row className="mb-3">
-          <Form.Group as={Col} controlId="formGridBirthday">
-            <Form.Label>{t('birthday')}</Form.Label>
-            <Form.Control
-              required
-              type="date"
-              name="birthday"
-              defaultValue={initialData?.birthday?.split("T")[0]}
-            />
-          </Form.Group>
-          <Form.Group as={Col} controlId="formGridPassing">
-            <Form.Label>{t('passing')}</Form.Label>
-            <Form.Control
-              type="date"
-              name="passing"
-              defaultValue={initialData?.passing?.split("T")[0]}
-            />
-          </Form.Group>
-          </Row>
-          <Row className="mb-3">
-          <Form.Group as={Col} controlId="formGridBio">
-            <Form.Label>{t('biography')}</Form.Label>
-            <Form.Control
-              required
-              as="textarea"
-              rows={10}
-              name="bio"
-              placeholder={t('editBiography')}
-              defaultValue={initialData?.bio}
-              style={{
-                resize: 'none',
-                overflowY: 'scroll',
-                maxHeight: '200px',
-              }}
-            />
-          </Form.Group>
-        </Row>
-        <Button 
-          color="primary" 
-          variant="solid"
-          htmlType="submit"
-        >{t('submit')}
-        </Button>
-      </Form>
-    </>
+    <GenericForm
+      fields={fields.filter(f => initialData?.id ? true : f.name !== 'id')}
+      onFinish={handleSubmit}
+      loading={isLoading}
+      submitText={t('submit')}
+      initialValues={fields.reduce((acc, f) => { if (f.initialValue !== undefined) acc[f.name] = f.initialValue; return acc; }, {})}
+    />
   );
 };
 
