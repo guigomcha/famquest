@@ -1,0 +1,176 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  position: relative;
+}
+
+.login-content {
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+}
+
+.language-selector {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  z-index: 10;
+}
+
+.language-select {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+}
+
+.login-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.logo-section {
+  margin-bottom: 24px;
+}
+
+.logo-section h2 {
+  margin-bottom: 8px;
+}
+
+.oauth-section {
+  margin-bottom: 32px;
+}
+
+.oauth-section h4 {
+  text-align: center;
+  margin-bottom: 16px;
+  color: #666;
+}
+
+.oauth-button {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.oauth-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.oauth-button.keycloak {
+  background: #1e40af;
+  border-color: #1e40af;
+  color: white;
+}
+
+.oauth-button.keycloak:hover {
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+}
+
+.oauth-button.google {
+  background: #4285f4;
+  border-color: #4285f4;
+  color: white;
+}
+
+.oauth-button.google:hover {
+  background: #3367d6;
+  border-color: #3367d6;
+}
+
+.oauth-button.microsoft {
+  background: #0078d4;
+  border-color: #0078d4;
+  color: white;
+}
+
+.oauth-button.microsoft:hover {
+  background: #106ebe;
+  border-color: #106ebe;
+}
+
+.demo-section {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.workspace-info {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.oauth-loading {
+  text-align: center;
+  padding: 40px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.oauth-loading .ant-spin {
+  margin-bottom: 24px;
+}
+
+.loading-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 10px;
+  }
+  
+  .login-card {
+    padding: 24px;
+    margin: 10px;
+  }
+  
+  .language-selector {
+    position: static;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .oauth-button {
+    font-size: 14px;
+    height: 44px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .login-card {
+    background: #1e293b;
+    border-color: #334155;
+  }
+  
+  .workspace-info {
+    background: #334155;
+  }
+}

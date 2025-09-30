@@ -1,0 +1,72 @@
+{
+  "name": "front-manager",
+  "version": "0.3.0",
+  "private": true,
+  "homepage": "https://portal.staging.famquest.guigomcha.dynv6.net",
+  "bugs": {
+    "url": "https://github.com/guigomcha/famquest/issues"
+  },
+  "license": "GPL-3.0-only",
+  "author": {
+    "name": "Guillermo Gomez Chavez",
+    "email": "guillermo.gc1994@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guigomcha/famquest.git"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.2.6",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "antd": "^5.12.2",
+    "axios": "^1.6.5",
+    "date-fns": "^3.2.0",
+    "echarts": "^5.4.3",
+    "echarts-for-react": "^3.0.2",
+    "i18next": "^24.2.2",
+    "i18next-browser-languagedetector": "^8.0.2",
+    "i18next-http-backend": "^3.0.2",
+    "leaflet": "~1.9.4",
+    "leaflet-defaulticon-compatibility": "~0.1.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-i18next": "^14.0.0",
+    "react-leaflet": "^4.2.1",
+    "react-organizational-chart": "^2.2.1",
+    "react-query": "^3.39.3",
+    "react-quill": "^2.0.0",
+    "react-router-dom": "^6.8.0",
+    "react-scripts": "^5.0.1",
+    "uuid": "^9.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "style-loader": "^4.0.0"
+  }
+}

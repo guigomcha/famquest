@@ -1,0 +1,245 @@
+.trips-page {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  flex: 1;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.trips-tabs {
+  .ant-tabs-nav {
+    margin-bottom: 24px;
+  }
+}
+
+.trips-list,
+.trip-detail {
+  padding: 24px;
+}
+
+.trip-card {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.trip-map-preview {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+}
+
+.trip-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trip-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  color: white;
+  padding: 16px;
+}
+
+.trip-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  .ant-space-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.trip-content {
+  padding: 16px;
+}
+
+.trip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.trip-title {
+  margin: 0;
+  flex: 1;
+  margin-right: 12px;
+}
+
+.trip-status {
+  flex-shrink: 0;
+}
+
+.trip-description {
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.trip-details {
+  margin-bottom: 16px;
+}
+
+.trip-locations,
+.trip-transportation,
+.trip-dates,
+.trip-waypoints {
+  margin-bottom: 8px;
+}
+
+.trip-detail {
+  .detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+}
+
+.trip-info-grid {
+  .info-item {
+    margin-bottom: 16px;
+  }
+}
+
+.trip-timeline {
+  margin-top: 24px;
+}
+
+.trip-map {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.waypoints-card {
+  .waypoint-item {
+    margin-bottom: 16px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  .waypoint-events {
+    margin-top: 8px;
+  }
+}
+
+/* Modal styles */
+.modal-trip-form {
+  .ant-form-item {
+    margin-bottom: 16px;
+  }
+}
+
+/* Timeline styles */
+.ant-timeline {
+  .ant-timeline-item {
+    .ant-timeline-item-content {
+      margin-left: 24px;
+    }
+  }
+}
+
+/* Empty state */
+.empty-trips {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  
+  .anticon {
+    font-size: 48px;
+    color: #ccc;
+    margin-bottom: 16px;
+  }
+  
+  h4 {
+    color: #666;
+    margin-bottom: 8px;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .trips-page {
+    padding: 16px;
+  }
+  
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .header-actions {
+    justify-content: center;
+  }
+  
+  .trips-list,
+  .trip-detail {
+    padding: 16px;
+  }
+  
+  .trip-detail {
+    .detail-header {
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start;
+    }
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .page-header {
+    background: #1e293b;
+    border-color: #334155;
+  }
+  
+  .trip-card {
+    background: #1e293b;
+    border-color: #334155;
+    
+    &:hover {
+      background: #334155;
+    }
+  }
+  
+  .trip-description {
+    color: #d1d5db;
+  }
+  
+  .trip-overlay {
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+  }
+}
