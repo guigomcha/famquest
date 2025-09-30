@@ -8,6 +8,7 @@
     "trips": "Trips"
   },
   "common": {
+    "results": "Results",
     "homeMessage": "Explore family memories while discovering the world.", 
     "homeSubMessage": "The new way to share important events.",
     "loading": "Loading…",

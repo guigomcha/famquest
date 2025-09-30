@@ -8,6 +8,7 @@
     "trips": "Viajes"
   },
   "common": {
+    "results": "Resultados",
     "empty": "¡Sube algo!",
     "confirm": "¿Estás seguro?",
     "filterEmpty": "Sin resultados, ajusta los filtros",

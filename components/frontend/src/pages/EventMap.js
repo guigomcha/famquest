@@ -29,6 +29,7 @@ import 'leaflet/dist/leaflet.css';
 import { mockEvents } from '../utils/mockData';
 import { getCategoryColor, getCategoryIcon } from '../utils/helpers';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { t } from 'i18next';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -123,7 +124,7 @@ const EventMap = () => {
       iconAnchor: [20, 20],
     });
   };
-
+  // TODO: Move something like this to a helper function
   const getColorHex = (color) => {
     const colorMap = {
       purple: '#8b5cf6',
@@ -144,23 +145,6 @@ const EventMap = () => {
     setSelectedEvent(event);
     setMapCenter([event.location.lat, event.location.lng]);
     setMapZoom(15);
-  };
-
-  const handleLike = (event) => {
-    message.success('Event liked! ❤️');
-  };
-
-  const handleShare = (event) => {
-    if (navigator.share) {
-      navigator.share({
-        title: event.title,
-        text: event.description,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      message.success('Link copied to clipboard!');
-    }
   };
 
   const MapController = ({ center, zoom }) => {
@@ -188,13 +172,13 @@ const EventMap = () => {
               onClick={getCurrentLocation}
               size="small"
             >
-              My Location
+              {t('event.location')}
             </Button>
           </div>
 
           <div className="search-section">
             <Input
-              placeholder="Search events or locations..."
+              placeholder={t('common.search')}
               prefix={<SearchOutlined />}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -205,7 +189,7 @@ const EventMap = () => {
 
           <div className="filter-section">
             <Text strong className="filter-label">
-              <FilterOutlined /> Categories:
+              <FilterOutlined /> {t('event.selectCategory')}:
             </Text>
             <Select
               value={selectedCategory}
@@ -231,7 +215,7 @@ const EventMap = () => {
                 showZero
                 style={{ backgroundColor: '#8b5cf6' }}
               />
-              <Text>events found</Text>
+              <Text>{t('common.results')}</Text>
             </Space>
           </div>
         </Card>
@@ -290,9 +274,8 @@ const EventMap = () => {
                   
                   <div className="popup-stats">
                     <Space>
-                      <HeartOutlined /> {event.likes}
                       <span>•</span>
-                      {event.participants?.length || 0} going
+                      {event.participants?.length || 0} X
                     </Space>
                   </div>
                   
@@ -303,20 +286,8 @@ const EventMap = () => {
                         icon={<EyeOutlined />}
                         onClick={() => navigate(`/event/${event.id}`)}
                       >
-                        View
+                        {t('common.view')}
                       </Button>
-                      <Button
-                        size="small"
-                        icon={<HeartOutlined />}
-                        onClick={() => handleLike(event)}
-                      >
-                        Like
-                      </Button>
-                      <Button
-                        size="small"
-                        icon={<ShareAltOutlined />}
-                        onClick={() => handleShare(event)}
-                      />
                     </Space>
                   </div>
                 </div>
@@ -335,7 +306,7 @@ const EventMap = () => {
                 iconAnchor: [10, 10]
               })}
             >
-              <Popup>Your Location</Popup>
+              <Popup>{t('myLocation')}</Popup>
             </Marker>
           )}
         </MapContainer>
@@ -377,31 +348,11 @@ const EventMap = () => {
                   <Text>
                     👥 {selectedEvent.participants?.length || 0} / {selectedEvent.capacity || '∞'} participants
                   </Text>
-                  <Text>
-                    💰 ${selectedEvent.price || 0}
-                  </Text>
                 </Space>
               </div>
               
               <Divider />
               
-              <div className="event-actions">
-                <Space>
-                  <Button
-                    type="primary"
-                    icon={<HeartOutlined />}
-                    onClick={() => handleLike(selectedEvent)}
-                  >
-                    {selectedEvent.likes}
-                  </Button>
-                  <Button
-                    icon={<ShareAltOutlined />}
-                    onClick={() => handleShare(selectedEvent)}
-                  >
-                    Share
-                  </Button>
-                </Space>
-              </div>
             </div>
           </Card>
         </div>
