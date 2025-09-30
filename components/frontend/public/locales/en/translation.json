@@ -8,7 +8,10 @@
     "trips": "Trips"
   },
   "common": {
+    "homeMessage": "Explore family memories while discovering the world.", 
+    "homeSubMessage": "The new way to share important events.",
     "loading": "Loading…",
+    "confirm": "Are you sure?",
     "error": "Error",
     "success": "Success",
     "cancel": "Cancel",
@@ -31,9 +34,13 @@
     "or": "or",
     "workspace": "Workspace",
     "view": "View",
-    "connectingCommunities": "Connecting communities through shared experiences"
+    "empty": "Add something!",
+    "filterEmpty": "No results, adjust the filters",
+    "footer": "A new way of sharing with those that matter the most"
   },
   "event": {
+    "statTotal": "Events Loaded",
+    "statDiscovered": "Discovered",
     "title": "Event Title",
     "description": "Description",
     "category": "Category",
@@ -92,6 +99,7 @@
     "phone": "Phone"
   },
   "comment": {
+    "comments": "Comments",
     "addComment": "Add a comment…",
     "postComment": "Post Comment",
     "audioComment": "Audio Comment",
@@ -112,6 +120,7 @@
     "directions": "Directions"
   },
   "family": {
+    "stat": "Users",
     "familyTree": "Family Tree",
     "addMember": "Add Family Member",
     "addFriend": "Add Friend",

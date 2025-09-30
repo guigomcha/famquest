@@ -72,11 +72,6 @@ const AntCustomLayout = ({ children }) => {
     <AntLayout className="layout">
       <div className="header-container">
         <div className="header-content">
-          <div className="logo-section">
-            <div className="gradient-text text-xl font-bold">EventFeed</div>
-            <div className="text-xs text-gray-500">{t('common.discoverEvents')}</div>
-          </div>
-
           <Menu
             mode="horizontal"
             selectedKeys={[location.pathname]}
@@ -96,17 +91,11 @@ const AntCustomLayout = ({ children }) => {
           </Dropdown>
         </div>
       </div>
+      {/* TODO: Add some space */}
 
       <Content className="main-content">
         <div className="content-wrapper">{children}</div>
       </Content>
-
-      <FloatButton.Group shape="circle" style={{ right: 24, bottom: 100 }}>
-        <FloatButton icon={<HeartOutlined />} tooltip={t('common.like')} onClick={handleLike} />
-        <FloatButton icon={<ShareAltOutlined />} tooltip={t('common.share')} onClick={handleShare} />
-        <FloatButton icon={<CommentOutlined />} tooltip={t('common.comment')} onClick={openComments} />
-        <FloatButton icon={<PlusOutlined />} tooltip={t('nav.create')} onClick={() => navigate('/upload')} type="primary" />
-      </FloatButton.Group>
 
       <CommentSystem
         visible={commentModalVisible}
@@ -116,8 +105,8 @@ const AntCustomLayout = ({ children }) => {
 
       <Footer className="footer">
         <div className="footer-content">
-          <div className="gradient-text font-semibold">EventFeed</div>
-          <div className="text-gray-500 text-sm">© 2025 EventFeed. {t('common.connectingCommunities')}</div>
+          <div className="gradient-text font-semibold">FamQuest</div>
+          <div className="text-gray-500 text-sm">© 2025 FamQuest GuiGomCha. {t('common.footer')}</div>
         </div>
       </Footer>
     </AntLayout>

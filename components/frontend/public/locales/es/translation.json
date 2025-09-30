@@ -8,6 +8,11 @@
     "trips": "Viajes"
   },
   "common": {
+    "empty": "¡Sube algo!",
+    "confirm": "¿Estás seguro?",
+    "filterEmpty": "Sin resultados, ajusta los filtros",
+    "homeMessage": "Explora los recuerdos familiares mientras descubres el mundo.", 
+    "homeSubMessage": "La Mesa Camilla del siglo XXI,", 
     "loading": "Cargando…",
     "error": "Error",
     "success": "Éxito",
@@ -25,15 +30,17 @@
     "following": "Siguiendo",
     "followers": "Seguidores",
     "events": "Eventos",
-    "discoverEvents": "Explora los recuerdos familiares",
+    "discoverEvents": "Explora",
     "users": "Usuarios",
     "locations": "Ubicaciones",
     "or": "o",
     "workspace": "Espacio de trabajo",
     "view": "Ver",
-    "connectingCommunities": "Conectando comunidades a través de experiencias compartidas"
+    "footer": "Una nueva forma de compartir con los que importan"
   },
   "event": {
+    "statTotal": "Eventos Disponibles",
+    "statDiscovered": "Conocido",
     "title": "Título del Evento",
     "description": "Descripción",
     "category": "Categoría",
@@ -92,6 +99,7 @@
     "phone": "Teléfono"
   },
   "comment": {
+    "comments": "Comentarios",
     "addComment": "Agregar un comentario…",
     "postComment": "Publicar Comentario",
     "audioComment": "Comentario de Audio",
@@ -112,6 +120,7 @@
     "directions": "Direcciones"
   },
   "family": {
+    "stat": "Usuarios",
     "familyTree": "Árbol Genealógico",
     "addMember": "Agregar Miembro",
     "addFriend": "Agregar Amigo",

@@ -12,15 +12,15 @@ i18next
     fallbackLng: 'en',
     debug: process.env.NODE_ENV === 'development',
     backend: {
-      loadPath: '/public/locales/{{lng}}/{{ns}}.json?v=2'
+      loadPath: '/locales/{{lng}}/{{ns}}.json?v='
     },
     interpolation: {
       escapeValue: false, // React already escapes values
-      // format: (value, format, lng) => {
-      //   if (format === 'uppercase') return value.toUpperCase();
-      //   if (format === 'lowercase') return value.toLowerCase();
-      //   return value;
-      // }
+      format: (value, format, lng) => {
+        if (format === 'uppercase') return value.toUpperCase();
+        if (format === 'lowercase') return value.toLowerCase();
+        return value;
+      }
     }
   });
 

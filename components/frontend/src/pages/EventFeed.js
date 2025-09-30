@@ -15,6 +15,7 @@ import {
   List,
   Badge,
   Tooltip,
+  Select,
   message
 } from 'antd';
 import { 
@@ -26,19 +27,21 @@ import {
   ClockCircleOutlined,
   UserOutlined,
   PlayCircleOutlined,
-  PauseCircleOutlined
+  PauseCircleOutlined,
+  FilterOutlined
 } from '@ant-design/icons';
 import CommentSystem from '../components/CommentSystem';
 import EventCard from '../components/EventCard';
 import { mockEvents } from '../utils/mockData';
 import { useNavigate, useLocation } from 'react-router-dom';
-  
+import { useTranslation } from 'react-i18next';
 const { Title, Text, Paragraph } = Typography;
 const { Search } = Input;
+const { Option } = Select;
 
 const EventFeed = () => {
+  const { t, i18n } = useTranslation();
   const [events, setEvents] = useState(mockEvents);
-  const [likedEvents, setLikedEvents] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [commentModalVisible, setCommentModalVisible] = useState(false);
@@ -55,44 +58,7 @@ const EventFeed = () => {
     { key: 'education', label: 'Education', icon: '📚' },
   ];
 
-  const handleLike = (eventId) => {
-    const newLikedEvents = new Set(likedEvents);
-    if (likedEvents.has(eventId)) {
-      newLikedEvents.delete(eventId);
-    } else {
-      newLikedEvents.add(eventId);
-    }
-    setLikedEvents(newLikedEvents);
-    
-    // Update event likes
-    setEvents(events.map(event => {
-      if (event.id === eventId) {
-        return {
-          ...event,
-          likes: likedEvents.has(eventId) ? event.likes - 1 : event.likes + 1
-        };
-      }
-      return event;
-    }));
-
-    if (!likedEvents.has(eventId)) {
-      message.success('Event liked! ❤️');
-    }
-  };
-
-  const handleShare = (event) => {
-    if (navigator.share) {
-      navigator.share({
-        title: event.title,
-        text: event.description,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      message.success('Link copied to clipboard!');
-    }
-  };
-
+  
   const openComments = (event) => {
     setCurrentEvent(event);
     setCommentModalVisible(true);
@@ -135,30 +101,30 @@ const EventFeed = () => {
       <div className="hero-section mb-6">
         <div className="hero-content">
           <Title level={1} className="gradient-text mb-4">
-            Discover Amazing Events
+            {t('common.homeMessage')}
           </Title>
           <Text className="text-lg text-gray-600 mb-6 block">
-            Connect with your community through shared experiences
+            {t('common.homeSubMessage')}
           </Text>
           
           {/* Quick Stats */}
-          <Row gutter={16} className="mb-6">
+          <Row gutter={8} className="mb-6">
             <Col span={8}>
               <Card className="stats-card">
                 <div className="text-2xl font-bold gradient-text">{events.length}</div>
-                <div className="text-xs text-gray-600">Events Today</div>
+                <div className="text-xs text-gray-600">{t('event.statTotal')}</div>
               </Card>
             </Col>
             <Col span={8}>
               <Card className="stats-card">
-                <div className="text-2xl font-bold gradient-text">2.4k</div>
-                <div className="text-xs text-gray-600">Active Users</div>
+                <div className="text-2xl font-bold gradient-text">x</div>
+                <div className="text-xs text-gray-600">{t('family.stat')}</div>
               </Card>
             </Col>
             <Col span={8}>
               <Card className="stats-card">
-                <div className="text-2xl font-bold gradient-text">89</div>
-                <div className="text-xs text-gray-600">Nearby</div>
+                <div className="text-2xl font-bold gradient-text">x%</div>
+                <div className="text-xs text-gray-600">{t('event.statDiscovered')}</div>
               </Card>
             </Col>
           </Row>
@@ -166,43 +132,50 @@ const EventFeed = () => {
       </div>
 
       {/* Search and Filter */}
-      <div className="mb-6">
-        <Search
-          placeholder="Search events..."
-          allowClear
-          enterButton
-          size="large"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="mb-4"
-        />
-        
-        <div className="category-filters">
-          <Space wrap>
-            {categories.map(category => (
-              <Button
-                key={category.key}
-                type={selectedCategory === category.key ? 'primary' : 'default'}
-                onClick={() => setSelectedCategory(category.key)}
-                className="category-button"
+      {/* TODO: Make it more responsiveand use the full row */}
+      <Row gutter={8} className="mb-6">
+        <Col span={16}>
+          <Search
+            placeholder={t('common.search')}
+            allowClear
+            enterButton
+            size="large"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="mb-4"
+          />
+        </Col>
+        <Col span={8}>
+          <div className="filter-section">
+            <Text strong className="filter-label">
+              <FilterOutlined /> {t('event.selectCategory')}:
+            </Text>
+            <Select
+              value={selectedCategory}
+              onChange={setSelectedCategory}
+              className="category-select"
+              size="small"
               >
-                <span className="mr-2">{category.icon}</span>
-                {category.label}
-              </Button>
-            ))}
-          </Space>
-        </div>
-      </div>
+              {categories.map(cat => (
+                <Option key={cat.key} value={cat.key}>
+                  <Space>
+                    <span>{cat.icon}</span>
+                    <span>{cat.label}</span>
+                  </Space>
+                </Option>
+              ))}
+            </Select>
+          </div>
+        </Col>
+      </Row>
 
       {/* Event Feed */}
+      {/* TODO: Improve alignment of event cards */}
       <Row gutter={[16, 16]}>
         {filteredEvents.map(event => (
           <Col key={event.id} xs={24} sm={24} md={12} lg={8}>
             <EventCard
               event={event}
-              isLiked={likedEvents.has(event.id)}
-              onLike={() => handleLike(event.id)}
-              onShare={() => handleShare(event)}
               onComment={() => openComments(event)}
               onEdit={() => navigate(`/edit/${event.id}`)}
             />
@@ -214,9 +187,9 @@ const EventFeed = () => {
       {filteredEvents.length === 0 && (
         <div className="empty-state">
           <div className="text-6xl mb-4">🔍</div>
-          <Title level={3}>No events found</Title>
+          <Title level={3}>{t('common.empty')}</Title>
           <Text className="text-gray-600">
-            Try adjusting your search terms or filters
+            {t('common.filterEmpty')}
           </Text>
         </div>
       )}
@@ -228,7 +201,8 @@ const EventFeed = () => {
         event={currentEvent}
         onCommentAdded={(comment) => {
           // Handle new comment
-          message.success('Comment added successfully!');
+          // TODO G: render outside 
+          message.success(t('comment.commentAdded'));
         }}
       />
     </div>

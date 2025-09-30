@@ -29,6 +29,7 @@ import {
   DeleteOutlined
 } from '@ant-design/icons';
 import CommentSystem from './CommentSystem';
+import { useTranslation } from 'react-i18next';
 import { getTimeAgo, getCategoryColor } from '../utils/helpers';
 
 const { Title, Text, Paragraph } = Typography;
@@ -49,7 +50,7 @@ const EventCard = ({
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const videoRefs = useRef({});
-
+  const { t, i18n } = useTranslation();
   const toggleVideoPlayback = (mediaId) => {
     const newPlayingVideos = new Set(playingVideos);
     if (playingVideos.has(mediaId)) {
@@ -86,9 +87,9 @@ const EventCard = ({
       case 'delete':
         if (onDelete) {
           Modal.confirm({
-            title: 'Delete Event',
-            content: 'Are you sure you want to delete this event?',
-            okText: 'Delete',
+            title: t('common.delete'),
+            content: t('common.confirm'),
+            okText: t('common.delete'),
             okType: 'danger',
             onOk: onDelete,
           });
@@ -104,21 +105,17 @@ const EventCard = ({
     {
       key: 'edit',
       icon: <EditOutlined />,
-      label: 'Edit Event',
+      label: t('common.edit'),
     },
     {
       key: 'delete',
       icon: <DeleteOutlined />,
-      label: 'Delete Event',
+      label: t('common.delete'),
       danger: true,
     },
     {
       type: 'divider',
-    },
-    {
-      key: 'report',
-      label: 'Report Event',
-    },
+    }
   ];
 
   const cardSize = size === 'small' ? { width: 300 } : {};
@@ -188,18 +185,6 @@ const EventCard = ({
           showActions
             ? [
                 <Button
-                  key="like"
-                  type="text"
-                  icon={isLiked ? <HeartFilled style={{ color: '#ef4444' }} /> : <HeartOutlined />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onLike();
-                  }}
-                  className={isLiked ? 'liked' : ''}
-                >
-                  {event.likes}
-                </Button>,
-                <Button
                   key="comment"
                   type="text"
                   icon={<CommentOutlined />}
@@ -210,15 +195,6 @@ const EventCard = ({
                 >
                   {event.comments?.length || 0}
                 </Button>,
-                <Button
-                  key="share"
-                  type="text"
-                  icon={<ShareAltOutlined />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onShare();
-                  }}
-                />,
                 <Dropdown
                   key="more"
                   menu={{ items: menuItems, onClick: ({ key }) => handleMenuClick(key) }}

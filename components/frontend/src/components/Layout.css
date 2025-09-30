@@ -1,3 +1,8 @@
+/* TODO: 
+  - .header-*: Ensure language selector and menu colapse correctly 
+  - keep the color 8b5cf6 in a variable and use that instead of the hardcoded value
+  - .stats-card: create and keep number and text horizontally and reduce the vertical space that they use
+*/
 .header-container {
   background: white;
   border-bottom: 1px solid #e2e8f0;
