@@ -8,6 +8,8 @@
     "trips": "Viajes"
   },
   "common": {
+    "more": "Expandir",
+    "less": "Collapsar",
     "results": "Resultados",
     "empty": "¡Sube algo!",
     "confirm": "¿Estás seguro?",

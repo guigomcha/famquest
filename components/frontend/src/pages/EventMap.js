@@ -352,7 +352,7 @@ const EventMap = () => {
               </div>
               
               <Divider />
-              
+              5
             </div>
           </Card>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Card,
   Avatar,
@@ -6,7 +6,6 @@ import {
   Space,
   Button,
   Image,
-  Carousel,
   Tag,
   Tooltip,
   Dropdown,
@@ -29,55 +28,42 @@ import {
   DeleteOutlined
 } from '@ant-design/icons';
 import CommentSystem from './CommentSystem';
+import EventMediaCarousel from './EventMediaCarousel';
 import { useTranslation } from 'react-i18next';
 import { getTimeAgo, getCategoryColor } from '../utils/helpers';
+import { mockLocations, mockUsers, mockMedia } from '../utils/mockData';
 
 const { Title, Text, Paragraph } = Typography;
 
-const EventCard = ({ 
-  event, 
-  isLiked, 
-  onLike, 
-  onShare, 
-  onComment, 
-  onEdit, 
+
+export const EventCard = ({
+  event,
+  onComment,
+  onEdit,
   onDelete,
   showActions = true,
   size = 'default'
 }) => {
-  const [playingVideos, setPlayingVideos] = useState(new Set());
+  const { t } = useTranslation();
   const [commentModalVisible, setCommentModalVisible] = useState(false);
-  const [imageModalVisible, setImageModalVisible] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(0);
-  const videoRefs = useRef({});
-  const { t, i18n } = useTranslation();
-  const toggleVideoPlayback = (mediaId) => {
-    const newPlayingVideos = new Set(playingVideos);
-    if (playingVideos.has(mediaId)) {
-      newPlayingVideos.delete(mediaId);
-      if (videoRefs.current[mediaId]) {
-        videoRefs.current[mediaId].pause();
-      }
-    } else {
-      newPlayingVideos.add(mediaId);
-      if (videoRefs.current[mediaId]) {
-        videoRefs.current[mediaId].play();
-      }
-    }
-    setPlayingVideos(newPlayingVideos);
-  };
 
-  const handleDoubleClick = (e) => {
-    // Double tap to like
-    if (e.detail === 2 && onLike) {
-      onLike();
-    }
-  };
+  const [location, setLocation] = useState(null);
+  const [owner, setOwner] = useState(null);
+  const [ownerAvatar, setOwnerAvatar] = useState(null);
 
-  const openImageModal = (index) => {
-    setSelectedImage(index);
-    setImageModalVisible(true);
-  };
+  useEffect(() => {
+    (async () => {
+      await new Promise(r => setTimeout(r, 0));
+
+      const loc = mockLocations.find(l => l.id === event.location) || null;
+      const usr = mockUsers.find(u => u.id === event.owner) || null;
+      const av  = usr?.avatar ? mockMedia.find(m => m.id === usr.avatar) || null : null;
+
+      setLocation(loc);
+      setOwner(usr);
+      setOwnerAvatar(av);
+    })();
+  }, [event.location, event.owner]);
 
   const handleMenuClick = (key) => {
     switch (key) {
@@ -91,7 +77,7 @@ const EventCard = ({
             content: t('common.confirm'),
             okText: t('common.delete'),
             okType: 'danger',
-            onOk: onDelete,
+            onOk: onDelete(),
           });
         }
         break;
@@ -119,6 +105,9 @@ const EventCard = ({
   ];
 
   const cardSize = size === 'small' ? { width: 300 } : {};
+  if (!event || !location || !owner) {
+    return (<></>)
+  };
 
   return (
     <>
@@ -126,58 +115,9 @@ const EventCard = ({
         className={`event-card card-hover`}
         style={cardSize}
         cover={
-          <div className="media-container" onClick={handleDoubleClick}>
+          <div className="media-container">
             {event.media && (
-              <Carousel
-                arrows 
-                dots={true}
-                infinite={false}
-                className="event-media-carousel"
-              >
-                {event.media.map((media, index) => (
-                  <div key={index} className="media-item">
-                    {media.type === 'image' ? (
-                      <Image
-                        src={media.url}
-                        alt={`${event.title} - ${index + 1}`}
-                        className="event-image"
-                        preview={{
-                          visible: imageModalVisible,
-                          onVisibleChange: setImageModalVisible,
-                          current: selectedImage,
-                        }}
-                        onClick={() => openImageModal(index)}
-                      />
-                    ) : (
-                      <div className="video-container">
-                        <video
-                          ref={(el) => (videoRefs.current[media.id] = el)}
-                          src={media.url}
-                          className="event-video"
-                          muted
-                          loop
-                        />
-                        <Button
-                          type="primary"
-                          shape="circle"
-                          icon={
-                            playingVideos.has(media.id) ? (
-                              <PauseCircleOutlined />
-                            ) : (
-                              <PlayCircleOutlined />
-                            )
-                          }
-                          className="video-play-button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleVideoPlayback(media.id);
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </Carousel>
+              <EventMediaCarousel mediaIds={event.media} title={event.title} eventId={event.id} />
             )}
           </div>
         }
@@ -195,6 +135,7 @@ const EventCard = ({
                 >
                   {event.comments?.length || 0}
                 </Button>,
+                // TODO G: Could implement a full screen tab with a new button to show everything better.
                 <Dropdown
                   key="more"
                   menu={{ items: menuItems, onClick: ({ key }) => handleMenuClick(key) }}
@@ -211,25 +152,25 @@ const EventCard = ({
         }
       >
         <Card.Meta
-          avatar={<Avatar src={event.owner.avatar} icon={<UserOutlined />} />}
+          avatar={<Avatar src={ownerAvatar} icon={<UserOutlined />} />}
           title={
             <div className="event-header">
               <Text strong className="owner-name">
-                {event.owner.name}
+                {owner.name}
               </Text>
               <Space className="event-meta">
-                <Tooltip title={event.location.name}>
+                <Tooltip title={location.address}>
                   <Space size={4}>
                     <EnvironmentOutlined className="location-icon" />
                     <Text type="secondary" className="location-text">
-                      {event.location.name.split(',')[0]}
+                      {location.address.split(',')[0]}
                     </Text>
                   </Space>
                 </Tooltip>
                 <Space size={4}>
                   <ClockCircleOutlined className="time-icon" />
                   <Text type="secondary" className="time-text">
-                    {getTimeAgo(event.timestamp)}
+                    {getTimeAgo(event.createdDate)}
                   </Text>
                 </Space>
               </Space>
@@ -240,47 +181,21 @@ const EventCard = ({
               <Title level={4} className="event-title">
                 {event.title}
               </Title>
-              
+              {/* TODO: this should enable collapse as well */}
               <Paragraph
                 className="event-description"
-                ellipsis={{ rows: 3, expandable: true, symbol: 'more' }}
+                ellipsis={{ rows: 3, expandable: true, symbol: t('common.more') }}
               >
                 {event.description}
               </Paragraph>
 
               <div className="event-tags">
-                <Tag color={getCategoryColor(event.category)} className="category-tag">
-                  {event.category}
-                </Tag>
                 {event.tags?.map((tag, index) => (
                   <Tag key={index} className="event-tag">
                     #{tag}
                   </Tag>
                 ))}
               </div>
-
-              {event.participants && event.participants.length > 0 && (
-                <div className="event-participants">
-                  <Space size={8}>
-                    <Avatar.Group
-                      maxCount={3}
-                      maxStyle={{ color: '#f56a00', backgroundColor: '#fde3cf' }}
-                    >
-                      {event.participants.slice(0, 3).map((participant, index) => (
-                        <Avatar
-                          key={index}
-                          src={participant.avatar}
-                          icon={<UserOutlined />}
-                          size="small"
-                        />
-                      ))}
-                    </Avatar.Group>
-                    <Text type="secondary" className="participants-text">
-                      {event.participants.length} going
-                    </Text>
-                  </Space>
-                </div>
-              )}
             </div>
           }
         />

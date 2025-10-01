@@ -39,14 +39,8 @@ const AntCustomLayout = ({ children }) => {
 
   const handleLanguageChange = (lang) => i18n.changeLanguage(lang);
 
-  const handleLike = () => message.success('Liked!');
-  const handleShare = () => message.success('Shared!');
-  const openComments = () => {
-    setCurrentEvent({ id: 'current-event' });
-    setCommentModalVisible(true);
-  };
-
   /* ---------- menus ---------- */
+  // TODO: This should be transfered to App.js to align the routers with the static menu that we always see
   const menuItems = [
     { key: '/', icon: <HomeOutlined />, label: t('nav.feed') },
     { key: '/map', icon: <CompassOutlined />, label: t('nav.map') },
@@ -80,7 +74,7 @@ const AntCustomLayout = ({ children }) => {
             className="navigation-menu"
           />
 
-          <Dropdown overlay={languageMenu} placement="bottomRight">
+          <Dropdown menu={languageMenu} placement="bottomRight">
             <Button
               type="text"
               icon={<TranslationOutlined />}
@@ -100,7 +94,7 @@ const AntCustomLayout = ({ children }) => {
       <CommentSystem
         visible={commentModalVisible}
         onClose={() => setCommentModalVisible(false)}
-        event={{ id: 'current-event' }}
+        event={{ id: 'dummyModalNotLoaded' }}
       />
 
       <Footer className="footer">

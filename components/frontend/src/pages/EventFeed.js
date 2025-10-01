@@ -43,21 +43,10 @@ const EventFeed = () => {
   const { t, i18n } = useTranslation();
   const [events, setEvents] = useState(mockEvents);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const [commentModalVisible, setCommentModalVisible] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
   const [playingVideos, setPlayingVideos] = useState(new Set());
   const navigate = useNavigate();
-  
-  const categories = [
-    { key: 'all', label: 'All Events', icon: '🌟' },
-    { key: 'wellness', label: 'Wellness', icon: '🧘‍♀️' },
-    { key: 'technology', label: 'Technology', icon: '💻' },
-    { key: 'arts', label: 'Arts', icon: '🎨' },
-    { key: 'celebration', label: 'Celebration', icon: '🎉' },
-    { key: 'education', label: 'Education', icon: '📚' },
-  ];
-
   
   const openComments = (event) => {
     setCurrentEvent(event);
@@ -67,8 +56,8 @@ const EventFeed = () => {
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          event.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || event.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesTag = (event.tags || []).some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesSearch || matchesTag;
   });
 
   const getTimeAgo = (timestamp) => {
@@ -132,7 +121,7 @@ const EventFeed = () => {
       </div>
 
       {/* Search and Filter */}
-      {/* TODO: Make it more responsiveand use the full row */}
+      {/* TODO: Make it more responsive and use the full row */}
       <Row gutter={8} className="mb-6">
         <Col span={16}>
           <Search
@@ -145,28 +134,6 @@ const EventFeed = () => {
             className="mb-4"
           />
         </Col>
-        <Col span={8}>
-          <div className="filter-section">
-            <Text strong className="filter-label">
-              <FilterOutlined /> {t('event.selectCategory')}:
-            </Text>
-            <Select
-              value={selectedCategory}
-              onChange={setSelectedCategory}
-              className="category-select"
-              size="small"
-              >
-              {categories.map(cat => (
-                <Option key={cat.key} value={cat.key}>
-                  <Space>
-                    <span>{cat.icon}</span>
-                    <span>{cat.label}</span>
-                  </Space>
-                </Option>
-              ))}
-            </Select>
-          </div>
-        </Col>
       </Row>
 
       {/* Event Feed */}
@@ -177,6 +144,8 @@ const EventFeed = () => {
             <EventCard
               event={event}
               onComment={() => openComments(event)}
+              // TODO G: recover functionality
+              // onDelete={() => onDelete(event)} 
               onEdit={() => navigate(`/edit/${event.id}`)}
             />
           </Col>
@@ -201,7 +170,7 @@ const EventFeed = () => {
         event={currentEvent}
         onCommentAdded={(comment) => {
           // Handle new comment
-          // TODO G: render outside 
+          // TODO G: render outside or won't work
           message.success(t('comment.commentAdded'));
         }}
       />

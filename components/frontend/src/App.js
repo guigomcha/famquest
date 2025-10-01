@@ -17,6 +17,7 @@ import Login from './pages/Login';
 import './App.css';
 
 // Ant Design theme customization
+// TODO: align with CSS files and put somewhere importable by everyone
 const theme = {
   token: {
     colorPrimary: '#8b5cf6',
@@ -31,6 +32,7 @@ const theme = {
 };
 
 // Protected Route Component
+// TODO G: disable with a flag for dev purposes
 const ProtectedRoute = ({ children }) => {
   // const { isAuthenticated } = useAuth();
   // return isAuthenticated ? children : <Navigate to="/login" />;
@@ -41,10 +43,12 @@ const ProtectedRoute = ({ children }) => {
 const AppContent = () => {
   // const { isAuthenticated, isLoading } = useAuth();
   const isLoading = false;
+  // TODO G: learn how to get the workspace to select the right backend endpoint
   const { workspace } = useWorkspace();
   const { t } = useTranslation();
 
   if (isLoading) {
+    // TODO: Do the loading keeping the logo in the background
     return (
       <div className="loading-container">
         <div className="loading-spinner">
@@ -118,6 +122,7 @@ const AppContent = () => {
           
           {/* Redirect unknown routes */}
           <Route path="*" element={<Navigate to="/" />} />
+           {/* TODO: show a message of where you could not be routed to */}
         </Routes>
       </div>
     </Router>
