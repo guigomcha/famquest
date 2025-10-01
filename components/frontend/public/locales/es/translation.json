@@ -116,6 +116,7 @@
     "beFirstToComment": "¡Sé el primero en comentar!"
   },
   "map": {
+    "home": "Explora para descubrir mas eventos y lugares familiares",
     "searchLocation": "Buscar ubicaciones o eventos…",
     "myLocation": "Mi Ubicación",
     "eventsFound": "eventos encontrados",

@@ -11,6 +11,8 @@ body {
   line-height: 1.6;
 }
 
+body, html, #root { margin:0; padding:0; height:100%; overflow:hidden; }
+
 .App {
   min-height: 100vh;
   background: #f8fafc;
