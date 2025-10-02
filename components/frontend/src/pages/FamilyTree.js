@@ -1,563 +1,398 @@
-import React, { useState, useEffect } from 'react';
+/* FamilyTree.jsx  –  purple index table + 3-tab view + virtual creator  */
+import React, { useState, useMemo } from 'react';
+import { Table, Card, Avatar, Button, Space, Tag, Modal, Form, Input, Select, Typography, Tabs, message, Row, Col } from 'antd';
 import {
-  Card,
-  Button,
-  Modal,
-  Form,
-  Input,
-  Select,
-  Space,
-  Typography,
-  Row,
-  Col,
-  Avatar,
-  Badge,
-  Tooltip,
-  message,
-  Tabs,
-  Tag,
-  Divider
-} from 'antd';
-import {
-  PlusOutlined,
-  UserOutlined,
-  HeartOutlined,
-  ShareAltOutlined,
-  EyeOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  TeamOutlined,
-  UserAddOutlined,
-  CrownOutlined,
-  StarOutlined
+  PlusOutlined, TeamOutlined, UserOutlined, UserAddOutlined, EditOutlined, EyeOutlined, DeleteOutlined, CloseOutlined,
 } from '@ant-design/icons';
-import { Tree, TreeNode } from 'react-organizational-chart';
 import { v4 as uuidv4 } from 'uuid';
 import { useTranslation } from 'react-i18next';
-import { mockUsers, mockEvents } from '../utils/mockData';
+import { mockUsers, mockMedia, mockRelations, mockEvents } from '../utils/mockData';
 import EventCard from '../components/EventCard';
-import './FamilyTree.css';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 const { TabPane } = Tabs;
 
-const FamilyTree = () => {
-  const { t } = useTranslation();
-  // const [events, setEvents] = useState(mockEvents);
-  const [familyMembers, setFamilyMembers] = useState([]);
-  const [virtualUsers, setVirtualUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalMode, setModalMode] = useState('add');
-  const [form] = Form.useForm();
-  const [activeTab, setActiveTab] = useState('tree');
-  const [userEvents, setUserEvents] = useState([]);
+/* ----------  colours  ---------- */
+const PURPLE_LIGHT = '#f0f5ff'; // header background
+const PURPLE_LIGHTER = '#fafafa'; // first-column background
+const PURPLE_MAIN = '#8b5cf6'; // borders / badges
 
-  const relationships = [
-    { key: 'parent', label: t('family.parent'), icon: '👨‍👩‍👧‍👦' },
-    { key: 'child', label: t('family.child'), icon: '👶' },
-    { key: 'spouse', label: t('family.spouse'), icon: '💑' },
-    { key: 'sibling', label: t('family.sibling'), icon: '👫' },
-    { key: 'friend', label: t('family.friend'), icon: '👬' },
-    { key: 'grandparent', label: t('family.grandparent'), icon: '👴' },
-    { key: 'grandchild', label: t('family.grandchild'), icon: '👶' },
-    { key: 'aunt', label: t('family.aunt'), icon: '👩' },
-    { key: 'cousin', label: t('family.cousin'), icon: '👨‍👩‍👧‍👦' },
-    { key: 'other', label: t('family.other'), icon: '❓' }
+/* ----------  helper components  ---------- */
+const UserBadge = ({ user, onEdit, onView, isFirstCol = false }) => {
+
+  const avatar = user?.avatar ? mockMedia.find(m => m.id === user.avatar) : null;
+  const canEdit = user?.isVirtual || user.id === 'user-1';
+
+  return (
+    <Card
+      size="small"
+      hoverable
+      onClick={() => onView(user)}
+      style={{
+        display: 'inline-block',
+        margin: 4,
+        width: 140,
+        textAlign: 'center',
+        border: `2px ${user.isVirtual ? PURPLE_MAIN : '#d9d9d9'}`,
+        borderRadius: 8,
+        background: user.isVirtual ? '#fff' : '#fff',
+        boxShadow: user.id === 'user-1' ? '0 0 0 2px #8b5cf6, 0 0 8px 4px #8b5cf640' : undefined,
+        animation: user.id === 'user-1' ? 'pulse 2s infinite' : undefined,
+      }}
+      bodyStyle={{ padding: 8 }}
+    >
+      <style>{`
+        @keyframes pulse {
+          0% { box-shadow: 0 0 0 2px #8b5cf6, 0 0 8px 4px #8b5cf640; }
+          50% { box-shadow: 0 0 0 2px #8b5cf6, 0 0 12px 6px #8b5cf680; }
+          100% { box-shadow: 0 0 0 2px #8b5cf6, 0 0 8px 4px #8b5cf640; }
+        }
+      `}</style>
+
+      <Avatar size={32} src={avatar?.url} icon="👤" />
+      <div style={{ fontSize: 11, marginTop: 2 }}>{user.name}</div>
+      {user.isVirtual && <Tag color={PURPLE_MAIN} style={{ fontSize: 10, marginTop: 2 }}>Virtual</Tag>}
+      <Space size={2} style={{ marginTop: 4 }}>
+        {canEdit && <Button size="small" icon={<EditOutlined />} onClick={(e) => { e.stopPropagation(); onEdit(user); }} />}
+        <Button size="small" icon={<EyeOutlined />} onClick={(e) => { e.stopPropagation(); onView(user); }} />
+      </Space>
+    </Card>
+  );
+};
+
+/* ----------  relationship builder for virtual user  ---------- */
+const RelationBuilder = ({ open, onClose, onSave }) => {
+  const [relations, setRelations] = useState([]);
+  const [relType, setRelType] = useState('spouse');
+  const [target, setTarget] = useState('');
+  const [name, setName] = useState('');
+
+  const addRelation = () => {
+    if (!target) return message.warning('Pick a target user');
+    if (relations.some(r => r.target === target && r.type === relType)) return message.warning('Relation already added');
+    setRelations([...relations, { type: relType, target }]);
+    setTarget('');
+  };
+  const removeRelation = (idx) => setRelations(relations.filter((_, i) => i !== idx));
+
+  const handleSave = () => {
+    if (relations.length === 0) return message.error('At least one relationship is required');
+    onSave(relations);
+    setRelations([]);
+    onClose();
+  };
+
+  return (
+    <Modal
+      open={open}
+      onCancel={onClose}
+      onOk={handleSave}
+      title="Create Virtual User & Relations"
+      okText="Create"
+      cancelText="Cancel"
+      width={520}
+    >
+      <Form layout="vertical">
+        <Form.Item label="Name" required>
+          <Input placeholder="Virtual name" value={name} onChange={(e) => setName(e.target.value)} />
+        </Form.Item>
+
+        <Form.Item label="Add Relation" required>
+          <Space.Compact style={{ width: '100%' }}>
+            <Select value={relType} onChange={setRelType} style={{ width: 120 }}>
+              {['spouse', 'parent', 'child', 'friend', 'pet', 'sibling'].map(r => (
+                <Option key={r} value={r}>{r}</Option>
+              ))}
+            </Select>
+            <Select
+              value={target}
+              onChange={setTarget}
+              placeholder="Select user"
+              style={{ width: '100%' }}
+              showSearch
+              optionFilterProp="children"
+            >
+              {mockUsers.map(u => (
+                <Option key={u.id} value={u.id}>{u.name}</Option>
+              ))}
+            </Select>
+            <Button icon={<PlusOutlined />} onClick={addRelation} />
+          </Space.Compact>
+        </Form.Item>
+
+        <Form.Item label="Relations (at least one)" required>
+          <div style={{ maxHeight: 160, overflowY: 'auto', border: `1px solid ${PURPLE_MAIN}`, borderRadius: 6, padding: 8 }}>
+            {relations.length === 0 && <Text type="secondary">No relations added yet</Text>}
+            {relations.map((r, idx) => (
+              <Card key={idx} size="small" style={{ marginBottom: 4 }}>
+                <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                  <Text>{r.type}</Text>
+                  <Text type="secondary">{mockUsers.find(x => x.id === r.target)?.name}</Text>
+                  <Button size="small" icon={<CloseOutlined />} onClick={() => removeRelation(idx)} />
+                </Space>
+              </Card>
+            ))}
+          </div>
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
+
+/* ----------  ultra-simple table  ---------- */
+const RelationTable = ({ onEdit, onView }) => {
+  /* ---- one row per user (only REAL users in first column)  ---- */
+  const realUsers = mockUsers.filter(u => !u.isVirtual);
+  const data = realUsers.map(u => {
+    const spouse = [], children = [], siblings = [], friends = [], pets = [];
+
+    /* spouse + friend (bidirectional) */
+    for (const r of mockRelations) {
+      if (r.label === 'spouse' && (r.source === u.id || r.target === u.id)) spouse.push(r.source === u.id ? r.target : r.source);
+      if (r.label === 'friend' && (r.source === u.id || r.target === u.id)) friends.push(r.source === u.id ? r.target : r.source);
+      if (r.label === 'pet' && r.source === u.id) pets.push(r.target);
+      if (r.label === 'parent' && r.source === u.id) children.push(r.target);
+    }
+
+    /* siblings = users who share a parent */
+    const myParents = mockRelations.filter(r => r.label === 'parent' && r.target === u.id).map(r => r.source);
+    for (const p of myParents) {
+      for (const r of mockRelations) {
+        if (r.label === 'parent' && r.source === p && r.target !== u.id) siblings.push(r.target);
+      }
+    }
+
+    return {
+      key: u.id,
+      user: u,
+      spouse: [...new Set(spouse)],
+      children: [...new Set(children)],
+      siblings: [...new Set(siblings)],
+      friends: [...new Set(friends)],
+      pets: [...new Set(pets)],
+    };
+  });
+
+  /* ---- columns  ---------- */
+  const columns = [
+    {
+      title: 'User',
+      dataIndex: 'user',
+      key: 'user',
+      render: (u) => <UserBadge user={u} onEdit={onEdit} onView={onView} isFirstCol />,
+      onHeaderCell: () => ({ style: { backgroundColor: PURPLE_LIGHT } }),
+      onCell: () => ({ style: { backgroundColor: PURPLE_LIGHTER } }),
+    },
+    ...['spouse', 'children', 'siblings', 'friends', 'pets'].map(rel => ({
+      title: rel.charAt(0).toUpperCase() + rel.slice(1),
+      dataIndex: rel,
+      key: rel,
+      render: (list) => list.map(id => <UserBadge key={id} user={mockUsers.find(x => x.id === id)} onEdit={onEdit} onView={onView} />),
+      onHeaderCell: () => ({ style: { backgroundColor: PURPLE_LIGHT } }),
+    })),
   ];
 
-  useEffect(() => {
-    loadFamilyData();
-  }, []);
+  return <Table columns={columns} dataSource={data} rowKey="key" pagination={false} bordered />;
+};
 
-  const loadFamilyData = () => {
-    setFamilyMembers(mockUsers);
-    setVirtualUsers(mockUsers.filter(user => user.isVirtual));
-  };
+/* ---------------------------------------------------------- */
+/*  page shell – single tab + virtual creator               */
+/* ---------------------------------------------------------- */
+const FamilyTree = () => {
+  const { t } = useTranslation();
+  const [familyMembers, setFamilyMembers] = useState(mockUsers);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [modalMode, setModalMode] = useState('add');
+  const [form] = Form.useForm();
+  const [eventModal, setEventModal] = useState(null);
+  const [builderOpen, setBuilderOpen] = useState(false);
 
-  const showAddModal = () => {
+  const virtualUsers = familyMembers.filter(u => u.isVirtual);
+
+  /* ---- crud ---- */
+  const showAdd = () => {
     setModalMode('add');
-    setModalVisible(true);
+    setSelectedUser(null);
     form.resetFields();
-  };
-
-  const showEditModal = (member) => {
-    setModalMode('edit');
-    setSelectedUser(member);
     setModalVisible(true);
-    form.setFieldsValue({
-      name: member.name,
-      relationship: member.relationship,
-      isVirtual: member.isVirtual,
-      email: member.email || '',
-      phone: member.phone || '',
-      bio: member.bio || ''
-    });
   };
-
-  const handleSubmit = async (values) => {
-    try {
-      if (modalMode === 'add') {
-        // Add new family member
-        const newMember = {
-          id: uuidv4(),
-          name: values.name,
-          avatar: values.avatar || 'resources/user-avatars/user1.png',
-          relationship: values.relationship,
-          role: values.relationship,
-          generation: getGenerationForRelationship(values.relationship),
-          events: [],
-          isVirtual: values.isVirtual || false,
-          email: values.email,
-          phone: values.phone,
-          bio: values.bio,
-          createdAt: new Date().toISOString()
-        };
-
-        setFamilyMembers([...familyMembers, newMember]);
-        
-        if (newMember.isVirtual) {
-          setVirtualUsers([...virtualUsers, newMember]);
-        }
-        
-        message.success('Family member added successfully!');
-      } else {
-        // Edit existing member
-        const updatedMembers = familyMembers.map(member => 
-          member.id === selectedUser.id 
-            ? { 
-                ...member, 
-                name: values.name,
-                relationship: values.relationship,
-                role: values.relationship,
-                generation: getGenerationForRelationship(values.relationship),
-                isVirtual: values.isVirtual || false,
-                email: values.email,
-                phone: values.phone,
-                bio: values.bio,
-                updatedAt: new Date().toISOString()
-              }
-            : member
-        );
-
-        setFamilyMembers(updatedMembers);
-        setVirtualUsers(updatedMembers.filter(user => user.isVirtual));
-        
-        message.success('Family member updated successfully!');
-      }
-
-      setModalVisible(false);
-      form.resetFields();
-    } catch (error) {
-      message.error('Failed to save family member');
-    }
-  };
-
-  const handleDelete = (memberId) => {
-    Modal.confirm({
-      title: 'Delete Family Member',
-      content: 'Are you sure you want to remove this family member?',
-      okText: 'Delete',
-      okType: 'danger',
-      onOk: () => {
-        setFamilyMembers(familyMembers.filter(member => member.id !== memberId));
-        setVirtualUsers(virtualUsers.filter(user => user.id !== memberId));
-        message.success('Family member deleted successfully!');
-      }
-    });
-  };
-
-  const getGenerationForRelationship = (relationship) => {
-    const generationMap = {
-      parent: -1,
-      grandparent: -2,
-      child: 1,
-      grandchild: 2,
-      sibling: 0,
-      spouse: 0,
-      friend: 0,
-      aunt: -1,
-      cousin: 0,
-      other: 0
-    };
-    return generationMap[relationship] || 0;
-  };
-
-  const buildFamilyTree = () => {
-    const generations = {};
-    
-    // Group by generation
-    familyMembers.forEach(member => {
-      if (!generations[member.generation]) {
-        generations[member.generation] = [];
-      }
-      generations[member.generation].push(member);
-    });
-
-    // Sort generations
-    const sortedGenerations = Object.keys(generations)
-      .sort((a, b) => parseInt(b) - parseInt(a))
-      .map(gen => ({
-        generation: parseInt(gen),
-        members: generations[gen]
-      }));
-
-    return sortedGenerations;
-  };
-
-  const renderFamilyMember = (member) => {
-    const relationshipConfig = relationships.find(r => r.key === member.relationship);
-    
-    return (
-      <Card
-        key={member.id}
-        className={`member-card ${member.isVirtual ? 'virtual' : ''}`}
-        hoverable
-        onClick={() => setSelectedUser(member)}
-      >
-        <div className="member-content">
-          <Avatar
-            src={member.avatar}
-            size={64}
-            icon={!member.avatar && <UserOutlined />}
-            className="member-avatar"
-          />
-          
-          <div className="member-info">
-            <Title level={5} className="member-name">
-              {member.name}
-              {member.isVirtual && (
-                <Tag size="small" className="virtual-tag">
-                  {t('user.virtualUser')}
-                </Tag>
-              )}
-            </Title>
-            
-            <div className="member-relationship">
-              <Space>
-                <span>{relationshipConfig?.icon}</span>
-                <Text>{relationshipConfig?.label}</Text>
-              </Space>
-            </div>
-            
-            {member.events && member.events.length > 0 && (
-              <div className="member-events">
-                <Text type="secondary">
-                  {member.events.length} {t('event.events')}
-                </Text>
-              </div>
-            )}
-          </div>
-          
-          <div className="member-actions">
-            <Space>
-              <Tooltip title={t('common.view')}>
-                <Button
-                  type="text"
-                  icon={<EyeOutlined />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    showUserEvents(member);
-                  }}
-                />
-              </Tooltip>
-              <Tooltip title={t('common.edit')}>
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    showEditModal(member);
-                  }}
-                />
-              </Tooltip>
-              {!member.isVirtual && (
-                <Tooltip title={t('user.createVirtualUser')}>
-                  <Button
-                    type="text"
-                    icon={<UserAddOutlined />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      createVirtualVersion(member);
-                    }}
-                  />
-                </Tooltip>
-              )}
-              <Tooltip title={t('common.delete')}>
-                <Button
-                  type="text"
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(member.id);
-                  }}
-                />
-              </Tooltip>
-            </Space>
-          </div>
-        </div>
-      </Card>
-    );
-  };
-
-  const createVirtualVersion = (member) => {
-    const virtualMember = {
-      ...member,
-      id: uuidv4(),
-      name: member.name + ' (Virtual)',
-      isVirtual: true,
-      events: [],
-      createdAt: new Date().toISOString()
-    };
-    
-    setFamilyMembers([...familyMembers, virtualMember]);
-    setVirtualUsers([...virtualUsers, virtualMember]);
-    
-    message.success('Virtual user created successfully!');
-  };
-
-  const showUserEvents = (user) => {
+  const showEdit = (user) => {
+    setModalMode('edit');
     setSelectedUser(user);
-    setUserEvents(user.events || []);
-    setActiveTab('events');
+    form.setFieldsValue(user);
+    setModalVisible(true);
+  };
+  // TODO G: this does not work
+  const handleSubmit = (vals) => {
+    if (modalMode === 'add') {
+      const nu = { ...vals, id: uuidv4(), avatar: vals.avatar || '', isVirtual: vals.isVirtual || false };
+      setFamilyMembers([...familyMembers, nu]);
+      message.success('Added');
+    } else {
+      setFamilyMembers(m => m.map(x => (x.id === selectedUser.id ? { ...x, ...vals } : x)));
+      message.success('Updated');
+    }
+    setModalVisible(false);
+  };
+  const handleDelete = (id) => {
+    Modal.confirm({
+      title: t('common.delete'),
+      onOk: () => {
+        setFamilyMembers(m => m.filter(x => x.id !== id));
+        message.success('Deleted');
+      },
+    });
   };
 
-  const familyTreeData = buildFamilyTree();
+  /* ---- create virtual user + relations ---- */
+  const createVirtualWithRelations = (rels) => {
+    const name = rels.name || 'Virtual ' + uuidv4().slice(0, 4);
+    const newUser = { id: uuidv4(), name, avatar: '', bio: '', isVirtual: true, events: [] };
+    setFamilyMembers([...familyMembers, newUser]);
+
+    /* add relations */
+    const newRels = rels.map(r => ({ id: uuidv4(), source: newUser.id, target: r.target, label: r.type }));
+    mockRelations.push(...newRels);
+
+    message.success('Virtual user & relations created');
+  };
+
+  /* ---- view user (3-tab modal) ---- */
+  const viewUser = (user) => {
+    const linkedEvents = user.events?.length
+      ? user.events.map(eid => mockEvents.find(ev => ev.id === eid)).filter(Boolean)
+      : [];
+
+    const linkedIds = new Set(user.events || []);
+    const ownedEvents = mockEvents.filter(ev =>
+      ev.owner === user.id && !linkedIds.has(ev.id)
+    );
+
+    setEventModal({ user, linkedEvents, ownedEvents });
+  };
 
   return (
     <div className="family-tree-page">
-      <div className="page-header">
-        <div className="header-content">
-          <Title level={2} className="gradient-text">
+      <Card size="small" className="page-header">
+        <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
+          <Title level={3} style={{ margin: 0 }}>
             <TeamOutlined /> {t('family.familyTree')}
           </Title>
-          <Text type="secondary">
-            {t('family.manageFamily')}
-          </Text>
-        </div>
-        
-        <div className="header-actions">
           <Space>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={showAddModal}
-            >
-              {t('family.addMember')}
-            </Button>
-            <Button
-              icon={<UserAddOutlined />}
-              onClick={() => {
-                setModalMode('add');
-                form.setFieldsValue({ isVirtual: true });
-                setModalVisible(true);
-              }}
-            >
-              {t('user.createVirtualUser')}
+            <Button icon={<UserAddOutlined />} onClick={() => setBuilderOpen(true)}>
+              {t('user.addMember')}
             </Button>
           </Space>
-        </div>
-      </div>
+        </Space>
+      </Card>
 
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        className="family-tabs"
-      >
-        <TabPane
-          tab={
-            <span>
-              <TeamOutlined />
-              {t('family.familyTree')} ({familyMembers.length})
-            </span>
-          }
-          key="tree"
-        >
-          <div className="tree-section">
-            <Row gutter={[16, 16]}>
-              {familyTreeData.map(({ generation, members }) => (
-                <Col key={generation} xs={24}>
-                  <Card
-                    title={
-                      <div className="generation-header">
-                        <CrownOutlined />
-                        <span>
-                          {generation === 0 ? 'Current Generation' : 
-                           generation > 0 ? `Generation +${generation}` : 
-                           `Generation ${generation}`}
-                        </span>
-                        <Badge count={members.length} />
-                      </div>
-                    }
-                    className="generation-card"
-                  >
-                    <Row gutter={[16, 16]}>
-                      {members.map(renderFamilyMember)}
-                    </Row>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          </div>
-        </TabPane>
+      <RelationTable onEdit={showEdit} onView={viewUser} />
 
-        <TabPane
-          tab={
-            <span>
-              <UserOutlined />
-              {t('user.virtualUser')} ({virtualUsers.length})
-            </span>
-          }
-          key="virtual"
-        >
-          <div className="virtual-users-section">
-            <Row gutter={[16, 16]}>
-              {virtualUsers.map(renderFamilyMember)}
-            </Row>
-          </div>
-        </TabPane>
-
-        <TabPane
-          tab={
-            <span>
-              <StarOutlined />
-              {selectedUser?.name || 'User Events'} ({userEvents.length})
-            </span>
-          }
-          key="events"
-        >
-          <div className="user-events-section">
-            {selectedUser ? (
-              <Row gutter={[16, 16]}>
-                {userEvents.map(event => (
-                  <Col key={event.id} xs={24} sm={12} lg={8}>
-                    <EventCard
-                      event={event}
-                      showActions={true}
-                      onLike={() => message.success('Event liked!')}
-                      onShare={() => message.success('Shared!')}
-                      onComment={() => message.info('Comments coming soon!')}
-                    />
-                  </Col>
-                ))}
-              </Row>
-            ) : (
-              <div className="empty-state">
-                <UserOutlined style={{ fontSize: 48, color: '#ccc' }} />
-                <Title level={4}>Select a user to view their events</Title>
-                <Text type="secondary">
-                  Click on a family member to see their events
-                </Text>
-              </div>
-            )}
-          </div>
-        </TabPane>
-      </Tabs>
-
-      {/* Add/Edit Modal */}
+      {/* ======  ADD / EDIT REAL USER  ====== */}
       <Modal
         title={modalMode === 'add' ? t('family.addMember') : t('family.editMember')}
-        visible={modalVisible}
-        onCancel={() => {
-          setModalVisible(false);
-          form.resetFields();
-        }}
+        open={modalVisible}
+        onCancel={() => setModalVisible(false)}
         footer={null}
-        width={600}
+        width={480}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-        >
-          <Form.Item
-            name="name"
-            label={t('user.name')}
-            rules={[{ required: true, message: 'Please enter name' }]}
-          >
-            <Input placeholder="Enter full name" />
+        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+          <Form.Item name="name" label={t('user.name')} rules={[{ required: true }]}>
+            <Input />
           </Form.Item>
-
-          <Form.Item
-            name="relationship"
-            label={t('family.relationship')}
-            rules={[{ required: true, message: 'Please select relationship' }]}
-          >
-            <Select placeholder="Select relationship">
-              {relationships.map(rel => (
-                <Option key={rel.key} value={rel.key}>
-                  <Space>
-                    <span>{rel.icon}</span>
-                    <span>{rel.label}</span>
-                  </Space>
+          <Form.Item name="relationship" label={t('family.relationship')} rules={[{ required: true }]}>
+            <Select placeholder="Pick relationship">
+              {['spouse', 'parent', 'child', 'friend', 'pet', 'sibling'].map(r => (
+                <Option key={r} value={r}>
+                  {r}
                 </Option>
               ))}
             </Select>
           </Form.Item>
-
-          <Row gutter={16}>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                name="email"
-                label={t('user.email')}
-              >
-                <Input placeholder="Enter email" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                name="phone"
-                label={t('user.phone')}
-              >
-                <Input placeholder="Enter phone" />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Form.Item
-            name="bio"
-            label={t('user.bio')}
-          >
-            <Input.TextArea
-              rows={3}
-              placeholder="Enter bio or description"
-            />
+          <Form.Item name="email" label={t('user.email')}>
+            <Input />
           </Form.Item>
-
-          <Form.Item
-            name="isVirtual"
-            label={t('user.virtualUser')}
-            valuePropName="checked"
-          >
-            <Select placeholder="Select user type">
+          <Form.Item name="phone" label={t('user.phone')}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="bio" label={t('user.bio')}>
+            <Input.TextArea rows={3} />
+          </Form.Item>
+          <Form.Item name="isVirtual" label={t('user.virtualUser')} valuePropName="checked">
+            <Select>
               <Option value={false}>Real User</Option>
               <Option value={true}>Virtual User</Option>
             </Select>
           </Form.Item>
-
-          <Form.Item>
-            <Space>
-              <Button
-                type="primary"
-                htmlType="submit"
-                icon={<UserAddOutlined />}
-              >
-                {modalMode === 'add' ? t('family.addMember') : t('common.save')}
-              </Button>
-              <Button
-                onClick={() => {
-                  setModalVisible(false);
-                  form.resetFields();
-                }}
-              >
-                {t('common.cancel')}
-              </Button>
-            </Space>
-          </Form.Item>
+          <Space>
+            <Button type="primary" htmlType="submit">
+              {modalMode === 'add' ? t('common.add') : t('common.save')}
+            </Button>
+            <Button onClick={() => setModalVisible(false)}>{t('common.cancel')}</Button>
+          </Space>
         </Form>
       </Modal>
+
+      {/* ======  VIRTUAL USER BUILDER  ====== */}
+      <RelationBuilder
+        open={builderOpen}
+        onClose={() => setBuilderOpen(false)}
+        onSave={createVirtualWithRelations}
+      />
+
+      {/* ======  3-TAB VIEW MODAL  ====== */}
+      {eventModal && (
+        <Modal
+          open
+          onCancel={() => setEventModal(null)}
+          footer={null}
+          width={800}
+          centered
+          bodyStyle={{ padding: 0 }}
+          title={`${eventModal.user.name} – Details & Events`}
+        >
+          <Tabs>
+            <TabPane tab="Details" key="details">
+              <Card bordered={false}>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  <Avatar size={64} src={eventModal.user.avatar ? mockMedia.find(m => m.id === eventModal.user.avatar)?.url : ''} icon="👤" />
+                  <Title level={4}>{eventModal.user.name}</Title>
+                  <Text>Email: {eventModal.user.email || '–'}</Text>
+                  <Text>Phone: {eventModal.user.phone || '–'}</Text>
+                  <Text>Bio: {eventModal.user.bio || '–'}</Text>
+                  <Tag color={eventModal.user.isVirtual ? PURPLE_MAIN : 'default'}>{eventModal.user.isVirtual ? 'Virtual' : 'Real'}</Tag>
+                </Space>
+              </Card>
+            </TabPane>
+
+            <TabPane tab={`Linked Events (${eventModal.linkedEvents.length})`} key="linked">
+              {eventModal.linkedEvents.length === 0 ? (
+                <Card bordered={false}><Text type="secondary">No linked events</Text></Card>
+              ) : (
+                eventModal.linkedEvents.map(ev => (
+                  <Card key={ev.id} size="small" style={{ marginBottom: 8 }}>
+                    <EventCard event={ev} showActions={false} />
+                  </Card>
+                ))
+              )}
+            </TabPane>
+
+            <TabPane tab={`Owned Events (${eventModal.ownedEvents.length})`} key="owned">
+              {eventModal.ownedEvents.length === 0 ? (
+                <Card bordered={false}><Text type="secondary">No owned events</Text></Card>
+              ) : (
+                eventModal.ownedEvents.map(ev => (
+                  <Card key={ev.id} size="small" style={{ marginBottom: 8 }}>
+                    <EventCard event={ev} showActions={false} />
+                  </Card>
+                ))
+              )}
+            </TabPane>
+          </Tabs>
+        </Modal>
+      )}
     </div>
   );
 };

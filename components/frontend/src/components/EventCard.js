@@ -63,7 +63,7 @@ export const EventCard = ({
       setOwner(usr);
       setOwnerAvatar(av);
     })();
-  }, [event.location, event.owner]);
+  }, [event]);
 
   const handleMenuClick = (key) => {
     switch (key) {
@@ -105,7 +105,7 @@ export const EventCard = ({
   ];
 
   const cardSize = size === 'small' ? { width: 300 } : {};
-  if (!event || !location || !owner) {
+  if (!event || !owner) {
     return (<></>)
   };
 
@@ -159,14 +159,16 @@ export const EventCard = ({
                 {owner.name}
               </Text>
               <Space className="event-meta">
-                <Tooltip title={location.address}>
-                  <Space size={4}>
-                    <EnvironmentOutlined className="location-icon" />
-                    <Text type="secondary" className="location-text">
-                      {location.address.split(',')[0]}
-                    </Text>
-                  </Space>
-                </Tooltip>
+                {location && (
+                  <Tooltip title={location.address}>
+                    <Space size={4}>
+                      <EnvironmentOutlined className="location-icon" />
+                      <Text type="secondary" className="location-text">
+                        {location.address.split(',')[0]}
+                      </Text>
+                    </Space>
+                  </Tooltip>
+                )}
                 <Space size={4}>
                   <ClockCircleOutlined className="time-icon" />
                   <Text type="secondary" className="time-text">

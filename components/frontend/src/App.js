@@ -9,7 +9,6 @@ import AntCustomLayout from './components/Layout';
 import EventFeed from './pages/EventFeed';
 import EventMap from './pages/EventMap';
 import EventUpload from './pages/EventUpload';
-import Profile from './pages/Profile';
 import EventEdit from './pages/EventEdit';
 import FamilyTree from './pages/FamilyTree';
 import Trips from './pages/Trips';
@@ -88,13 +87,6 @@ const AppContent = () => {
             <ProtectedRoute>
               <AntCustomLayout>
                 <EventUpload />
-              </AntCustomLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <AntCustomLayout>
-                <Profile />
               </AntCustomLayout>
             </ProtectedRoute>
           } />

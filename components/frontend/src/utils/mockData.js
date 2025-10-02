@@ -119,50 +119,22 @@ export const mockEvents = [
     endTime: new Date(Date.now() - 3 * 7 * 24 * 60 * 60 * 1000).toISOString(),
     comments: ['comment-4']
   },
+  {
+    id: 'event-3',
+    title: 'User event',
+    description: 'some description',
+    location: '',
+    media: ['media-6','media-2'],
+    owner: 'user-1',
+    tags: ['pet', 'info', 'bla'],
+    updatedDate: new Date(Date.now()).toISOString(),
+    createdDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    startTime: new Date(Date.now() - 4 * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    endTime: new Date(Date.now() - 3 * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    comments: ['comment-4']
+  },
 ];
 
-export const mockUsers = [
-  {
-    id: 'user-1',
-    name: 'Sarah Chen',
-    email: 'sarah@example.com',
-    avatar: 'media-5',
-    bio: 'comment-6',
-    updatedDate: new Date(Date.now()).toISOString(),
-    createdDate: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-    birthTime: new Date(Date.now() - 19 * 7 * 24 * 60 * 60 * 1000).toISOString(),
-    deathTime: new Date(Date.now() - 15 * 7 * 24 * 60 * 60 * 1000).toISOString(),
-    comments: ['comment-1'],
-    isVirtual: true
-  },
-  {
-    id: 'user-2',
-    name: 'Marcus Johnson',
-    email: 'marcus@example.com',
-    avatar: 'media-6',
-    bio: 'comment-7',
-    updatedDate: new Date(Date.now()).toISOString(),
-    createdDate: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-    birthTime: new Date(Date.now() - 19 * 7 * 24 * 60 * 60 * 1000).toISOString(),
-    deathTime: "",
-    comments: [],
-    isVirtual: false
-  },
-  
-  {
-    id: 'user-3',
-    name: 'Elena Rodriguez',
-    email: 'elena@example.com',
-    avatar: '',
-    bio: '',
-    updatedDate: new Date(Date.now()).toISOString(),
-    createdDate: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-    birthTime: new Date(Date.now() - 19 * 7 * 24 * 60 * 60 * 1000).toISOString(),
-    deathTime: "",
-    comments: [],
-    isVirtual: false
-  }
-];
 
 export const mockLocations = [
   {
@@ -183,4 +155,77 @@ export const mockLocations = [
     lat: 40.7128,
     lng: -74.0060
   }
+];
+
+/* mockUsers.js  –  works with the relationship-table above */
+export const mockUsers = [
+  {
+    id: 'user-1',
+    name: 'Sarah Chen',
+    email: 'sarah@example.com',
+    avatar: 'media-5',
+    bio: 'Yoga instructor, loves sunsets',
+    updatedDate: new Date(Date.now()).toISOString(),
+    createdDate: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+    birthTime: new Date(Date.now() - 19 * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    deathTime: new Date(Date.now() - 15 * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    events: ['event-3'],
+    isVirtual: false,
+  },
+  {
+    id: 'user-2',
+    name: 'Marcus Johnson',
+    email: 'marcus@example.com',
+    avatar: 'media-6',
+    bio: 'Tech entrepreneur',
+    updatedDate: new Date(Date.now()).toISOString(),
+    createdDate: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+    birthTime: new Date(Date.now() - 19 * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    deathTime: '',
+    events: [],
+    isVirtual: false,
+  },
+  {
+    id: 'user-3',
+    name: 'Elena Rodriguez',
+    email: 'elena@example.com',
+    avatar: '',
+    bio: '',
+    updatedDate: new Date(Date.now()).toISOString(),
+    createdDate: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+    birthTime: new Date(Date.now() - 19 * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    deathTime: '',
+    events: [],
+    isVirtual: true,
+  },
+  {
+    id: 'user-4',
+    name: 'Leo Virtual',
+    email: 'leo@virtual.com',
+    avatar: '',
+    bio: 'Virtual member',
+    updatedDate: new Date(Date.now()).toISOString(),
+    createdDate: new Date(Date.now()).toISOString(),
+    birthTime: '',
+    deathTime: '',
+    events: [],
+    isVirtual: true,
+  },
+];
+
+/* mockRelations.js  –  links for the table  */
+export const mockRelations = [
+  /* ----------  horizontal  ---------- */
+  { id: 'rel-1', source: 'user-1', target: 'user-2', label: 'spouse' },
+  { id: 'rel-2', source: 'user-2', target: 'user-1', label: 'spouse' }, // bidirectional
+
+  { id: 'rel-3', source: 'user-1', target: 'user-3', label: 'friend' },
+  { id: 'rel-4', source: 'user-3', target: 'user-1', label: 'friend' },
+
+  /* ----------  vertical (parent → child)  ---------- */
+  { id: 'rel-5', source: 'user-1', target: 'user-3', label: 'parent' },
+  { id: 'rel-6', source: 'user-2', target: 'user-3', label: 'parent' },
+
+  /* ----------  pet  ---------- */
+  { id: 'rel-7', source: 'user-1', target: 'user-4', label: 'pet' },
 ];
