@@ -278,6 +278,7 @@ export const mockTrips = [
     endTime: '2024-04-15T22:00:00Z',
     stops: [
       { eventId: 'event-2', order: 0 },   // User event
+      { eventId: 'event-4', order: 1 },   // User event
     ],
     createdAt: new Date().toISOString(),
   },

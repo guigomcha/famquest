@@ -1,10 +1,10 @@
-/* Trips.jsx  –  full location objects + lazy load + mobile responsive */
+/* Trips.jsx  –  independent OSM map per card + lazy location load  */
 import React, { useState, useMemo } from 'react';
 import {
-  Card, Button, Space, Typography, Row, Col, Modal, Form, Input, InputNumber, Select, message, Tabs, Tag, Timeline,
+  Card, Button, Space, Typography, Row, Col, Modal, Form, Input, InputNumber, Select, message, Tabs, Tag,
 } from 'antd';
 import {
-  PlusOutlined, EditOutlined, CloseOutlined, EyeOutlined, DeleteOutlined, GlobalOutlined, CalendarOutlined, DollarOutlined, SaveOutlined, EnvironmentOutlined, ClockCircleOutlined,
+  PlusOutlined, EditOutlined, EyeOutlined, DeleteOutlined, GlobalOutlined, CalendarOutlined, CloseOutlined, SaveOutlined,
 } from '@ant-design/icons';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -136,12 +136,12 @@ const StopEditor = ({ value = [], onChange }) => {
   );
 };
 
-/* ---- trip card with real map + stop list  ---- */
-const TripCard = ({ trip, onEdit, onDelete, onStopClick }) => {
-  // TODO G: bring here the fetch
+/* ---- trip card with independent OSM map  ---- */
+const TripCard = ({ trip, onEdit, onView, onDelete, onStopClick }) => {
   const mode = transportationModes.find(m => m.key === trip.transportation);
 
-  const stops = useMemo(() => {
+  /* ---- build stops with fullLocation ONCE  ---- */
+  const stopsWithMetrics = useMemo(() => {
     return trip.stops
       .map(s => mockEvents.find(e => e.id === s.eventId))
       .filter(Boolean)
@@ -151,18 +151,20 @@ const TripCard = ({ trip, onEdit, onDelete, onStopClick }) => {
 
   /* open stop event card  */
   const openStop = (stop) => {
-    if (stop.event) onStopClick(stop.event);
+    if (stop) onStopClick(stop);
   };
+
+  /* ---- map with polyline through stops only  ---- */
+  const mapPositions = useMemo(() => {
+    return stopsWithMetrics.map(s => [s.fullLocation.lat, s.fullLocation.lng]);
+  }, [stopsWithMetrics]);
 
   return (
     <Card
+      scope="trip-card"
       hoverable
-      style={{
-            zIndex: 1000,
-            height: "100vh", 
-            width: "100vw"
-          }}
       actions={[
+        <Button type="text" icon={<EyeOutlined />} onClick={() => onView(trip)} />,
         <Button type="text" icon={<EditOutlined />} onClick={() => onEdit(trip)} />,
         <Button type="text" danger icon={<DeleteOutlined />} onClick={() => onDelete(trip)} />,
       ]}
@@ -174,31 +176,34 @@ const TripCard = ({ trip, onEdit, onDelete, onStopClick }) => {
         <Tag>{trip.startTime.slice(0, 10)} → {trip.endTime.slice(0, 10)}</Tag>
         <Tag>{trip.stops.length} stops</Tag>
       </Space>
-      <Space>
-          <MapContainer center={[stops[0].fullLocation.lat, stops[0].fullLocation.lng]} zoom={6} style={{ height: 200, width: '100%' }}>
+
+      {/* ---- independent map per card  ---- */}
+      {stopsWithMetrics.length > 0 && (
+        <div className="trip-cover" style={{ marginTop: 12, borderRadius: 8, overflow: 'hidden' }}>
+          <MapContainer
+            center={[stopsWithMetrics[0].fullLocation.lat, stopsWithMetrics[0].fullLocation.lng]}
+            zoom={6}
+            style={{ height: 200, width: '100%' }}
+            scrollWheelZoom={false}
+          >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            <Polyline positions={stops.map(s => [s.fullLocation.lat, s.fullLocation.lng])} color={PURPLE_MAIN} weight={4} />
-            {stops.map((s, idx) => (
+            <Polyline
+              positions={stopsWithMetrics.map(s => [s.fullLocation.lat, s.fullLocation.lng])}
+              color={PURPLE_MAIN}
+              weight={4}
+            />
+            {stopsWithMetrics.map((s, idx) => (
               <Marker
                 key={s.fullLocation.id}
                 position={[s.fullLocation.lat, s.fullLocation.lng]}
                 eventHandlers={{ click: () => openStop(s) }}
                 color={idx % 2 ? 'blue' : 'orange'}
               >
-                <Popup>
-                  <strong>Stop {idx + 1}</strong><br />
-                  {s.fullLocation.name}<br />
-                  <Space>
-                    <Text type="secondary">+XX km</Text>
-                    <Text type="secondary">XX time spent</Text>
-                  </Space>
-                  <Button size="small" onClick={() => openStop(s)}>Open Stop</Button>
-                </Popup>
               </Marker>
-            // TODO G: draw line from one to the next
             ))}
           </MapContainer>
-      </Space>
+        </div>
+      )}
     </Card>
   );
 };
@@ -250,9 +255,17 @@ const Trips = () => {
     Modal.confirm({ title: 'Delete trip?', onOk: () => setTrips(trips.filter(t => t.id !== trip.id)) });
   };
 
+  /* ---- view trip  ---- */
+  const viewTrip = (trip) => {
+    const linkedIds = new Set(trip.stops.map(s => s.eventId));
+    const linkedEvents = trip.stops.map(s => mockEvents.find(e => e.id === s.eventId)).filter(Boolean);
+    const ownedEvents = mockEvents.filter(ev => ev.owner === trip.owner && !linkedIds.has(ev.id));
+    setViewModal({ trip, linkedEvents, ownedEvents });
+  };
+
   /* ---- open stop event card  ---- */
   const handleStopClick = (stop) => {
-    setViewModal({ stop });
+    setViewModal({ linkedEvents: [stop], ownedEvents: [], user: null });
   };
 
   /* ---- render  ---- */
@@ -272,7 +285,7 @@ const Trips = () => {
       <Row gutter={[16, 16]}>
         {trips.map(t => (
           <Col key={t.id} xs={24} sm={12} lg={8}>
-            <TripCard trip={t} onEdit={showEdit} onDelete={handleDelete} onStopClick={handleStopClick} />
+            <TripCard trip={t} onEdit={showEdit} onView={viewTrip} onDelete={handleDelete} onStopClick={handleStopClick} />
           </Col>
         ))}
       </Row>
@@ -321,9 +334,40 @@ const Trips = () => {
           footer={null}
           width={800}
           centered
-          title={viewModal.event.name}
+          title={viewModal.trip?.name || 'Event'}
         >
-          <EventCard event={viewModal.stop} showActions={false} />
+          {viewModal.trip ? (
+            <Tabs>
+              <TabPane tab="Details" key="details">
+                <Card bordered={false}>
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    <Text><strong>Transport:</strong> {viewModal.trip.transportation}</Text>
+                    <Text><strong>Budget:</strong> ${viewModal.trip.budget}</Text>
+                    <Text><strong>Dates:</strong> {viewModal.trip.startTime.slice(0, 10)} → {viewModal.trip.endTime.slice(0, 10)}</Text>
+                    <Text><strong>Involved:</strong> {viewModal.trip.involvedUsers.map(id => mockUsers.find(u => u.id === id)?.name).join(', ')}</Text>
+                  </Space>
+                </Card>
+              </TabPane>
+
+              <TabPane tab={`Linked Events (${viewModal.linkedEvents.length})`} key="linked">
+                {viewModal.linkedEvents.map(ev => (
+                  <Card key={ev.id} size="small" style={{ marginBottom: 8 }} onClick={() => setViewModal(null)}>
+                    <EventCard event={ev} showActions={false} />
+                  </Card>
+                ))}
+              </TabPane>
+
+              <TabPane tab={`Owned Events (${viewModal.ownedEvents.length})`} key="owned">
+                {viewModal.ownedEvents.map(ev => (
+                  <Card key={ev.id} size="small" style={{ marginBottom: 8 }} onClick={() => setViewModal(null)}>
+                    <EventCard event={ev} showActions={false} />
+                  </Card>
+                ))}
+              </TabPane>
+            </Tabs>
+          ) : (
+            <EventCard event={viewModal.linkedEvents[0]} showActions={false} />
+          )}
         </Modal>
       )}
     </div>
