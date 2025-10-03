@@ -1,5 +1,5 @@
 /* Trips.jsx  –  independent OSM map per card + lazy location load  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Card, Button, Space, Typography, Row, Col, Modal, Form, Input, InputNumber, Select, message, Tabs, Tag,
 } from 'antd';
@@ -217,6 +217,20 @@ const Trips = () => {
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [viewModal, setViewModal] = useState(null);
   const [form] = Form.useForm();
+  /* ---- ADD / EDIT MODAL  ---- */
+  const [mapCenter, setMapCenter] = useState([37.77, -122.4]);
+  const [mapStops, setMapStops] = useState([]); // [{location, date, lat, lng}]
+  const [name, setName] = useState('');
+  /* ---- sync map with form stops  ---- */
+  useEffect(() => {
+    const stops = form.getFieldValue('stops') || [];
+    const mapped = stops.map(name => {
+      const loc = mockLocations.find(l => l.address === name);
+      return loc ? { name: loc.address, lat: loc.lat, lng: loc.lng } : null;
+    }).filter(Boolean);
+    setMapStops(mapped);
+    if (mapped.length) setMapCenter([mapped[0].lat, mapped[0].lng]);
+  }, [form]);
 
   /* ---- CRUD  ---- */
   const showAdd = () => {
@@ -289,43 +303,135 @@ const Trips = () => {
           </Col>
         ))}
       </Row>
-
-      {/* ---- Add / Edit Modal ---- */}
       <Modal
         title={modalMode === 'add' ? t('trip.createTrip') : t('trip.editTrip')}
         open={modalVisible}
-        onCancel={() => setModalVisible(false)}
+        onCancel={() => { setModalVisible(false); setMapStops([]); setName(''); }}
         footer={null}
-        width={800}
+        width={900}
+        centered
       >
-        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={(vals) => {
+            if (vals.stops.length < 2) return message.error('At least 2 stops are required');
+            const dto = prepareTripForBackend({ ...vals, name: vals.name || 'Untitled' }, modalMode, selectedTrip?.id);
+            setTrips(modalMode === 'add' ? [...trips, dto] : trips.map(t => (t.id === selectedTrip.id ? dto : t)));
+            message.success('Trip saved');
+            setModalVisible(false);
+            setMapStops([]);
+            setName('');
+          }}
+        >
+          {/* ---- basic fields  ---- */}
           <Row gutter={16}>
-            <Col xs={24} sm={12}><Form.Item name="name" label="Name" rules={[{ required: true }]}><Input /></Form.Item></Col>
+            <Col xs={24} sm={12}><Form.Item name="name" label="Name" rules={[{ required: true }]}><Input placeholder="My Road Trip" /></Form.Item></Col>
             <Col xs={24} sm={12}><Form.Item name="transportation" label="Transport" rules={[{ required: true }]}><Select>{transportationModes.map(m => <Option key={m.key} value={m.key}>{m.label}</Option>)}</Select></Form.Item></Col>
           </Row>
           <Form.Item name="description" label="Description" rules={[{ required: true }]}><Input.TextArea rows={3} /></Form.Item>
           <Row gutter={16}>
-            <Col xs={24} sm={12}><Form.Item name="startDate" label="Start" rules={[{ required: true }]}><Input type="date" /></Form.Item></Col>
-            <Col xs={24} sm={12}><Form.Item name="endDate" label="End" rules={[{ required: true }]}><Input type="date" /></Form.Item></Col>
-          </Row>
-          <Row gutter={16}>
             <Col xs={24} sm={12}><Form.Item name="budget" label="Budget"><InputNumber min={0} prefix="$" style={{ width: '100%' }} /></Form.Item></Col>
-            <Col xs={24} sm={12}><Form.Item name="involvedUsers" label="Who's coming?"><Select mode="multiple" placeholder="Pick users">{mockUsers.map(u => <Option key={u.id} value={u.id}>{u.name}</Option>)}</Select></Form.Item></Col>
-          </Row>
-          <Row gutter={16}>
-            <Col xs={24} sm={12}><Form.Item name="startLocation" label="Start Location" rules={[{ required: true, message: 'Pick or type a location' }]}><Input placeholder="2800 E Observatory Rd, Los Angeles, CA 90027" /></Form.Item></Col>
-            <Col xs={24} sm={12}><Form.Item name="endLocation" label="End Location" rules={[{ required: true, message: 'Pick or type a location' }]}><Input placeholder="123 Market St, San Francisco, CA 94105" /></Form.Item></Col>
+            <Col xs={24} sm={12}><Form.Item name="involvedUsers" label="Who's coming?"><Select mode="multiple" placeholder="Pick users">{mockUsers.filter(u => !u.isVirtual).map(u => <Option key={u.id} value={u.id}>{u.name}</Option>)}</Select></Form.Item></Col>
           </Row>
 
-          <Form.Item label="Stops (events)"><StopEditor /></Form.Item>
+          {/* ---- map + stop picker  ---- */}
+                  {/* // TODO: This whole thing should look a lot more than the relationship's selector. With an empty inbox etc */}
+          <Form.Item label="Stops (location + date)">
+            <Row gutter={16}>
+              <Col xs={24} lg={12}>
+                <Form.List name="stops" rules={[{ validator: (_, v) => (v && v.length >= 2 ? Promise.resolve() : Promise.reject(new Error('At least 2 stops'))) }]}>
+                  {(fields, { add, remove }, { errors }) => (
+                    <>
+                      {fields.map(({ key, name, ...restField }) => (
+                        <Card key={key} size="small" style={{ marginBottom: 8 }}>
+                          <Space align="center" style={{ width: '100%' }}>
+                            <Form.Item {...restField} name={[name, 'location']} noStyle>
+                              <Select
+                                placeholder="Pick a location"
+                                showSearch
+                                style={{ flex: 1 }}
+                                onChange={(locId) => {
+                                  const loc = mockLocations.find(l => l.id === locId);
+                                  if (loc) setMapCenter([loc.lat, loc.lng]);
+                                  const current = form.getFieldValue('stops') || [];
+                                  const idx = current.findIndex(st => st.location === locId);
+                                  if (idx === -1) return;
+                                  const newStops = [...mapStops];
+                                  newStops[idx] = { location: loc, date: current[idx].date, lat: loc.lat, lng: loc.lng };
+                                  setMapStops(newStops);
+                                }}
+                              >
+                                {mockLocations.map(l => <Option key={l.id} value={l.id}>{l.address}</Option>)}
+                              </Select>
+                            </Form.Item>
+                            <Form.Item {...restField} name={[name, 'date']} noStyle initialValue={new Date().toISOString().slice(0, 10)}>
+                              <Input type="date" style={{ width: 140 }} />
+                            </Form.Item>
+                            <Button size="small" icon={<CloseOutlined />} onClick={() => { remove(name); const current = form.getFieldValue('stops') || []; const idx = current.findIndex(st => st.location === form.getFieldValue(['stops', name, 'location'])); setMapStops(mapStops.filter((_, i) => i !== idx)); }} />
+                          </Space>
+                        </Card>
+                      ))}
+                      <Form.Item>
+                        <Button type="dashed" onClick={() => { add({ location: '', date: new Date().toISOString().slice(0, 10) }); }} icon={<PlusOutlined />} block>Add Stop</Button>
+                      </Form.Item>
+                      <Form.Item>
+                        <Text type="danger">{errors}</Text>
+                      </Form.Item>
+                    </>
+                  )}
+                </Form.List>
+              </Col>
+              <Col xs={24} lg={12}>
+                <div className="modal-map" style={{ height: 300, width: '100%', borderRadius: 8, overflow: 'hidden' }}>
+                  <MapContainer
+                    center={mapCenter}
+                    zoom={6}
+                    style={{ height: '100%', width: '100%' }}
+                    scrollWheelZoom={false}
+                    whenCreated={(map) => {
+                      map.on('click', (e) => {
+                        const name = prompt('Name for this location?');
+                        if (!name) return;
+                        const newLoc = { id: uuidv4(), address: name, lat: e.latlng.lat, lng: e.latlng.lng };
+                        mockLocations.push(newLoc); // keep in memory
+                        const current = form.getFieldValue('stops') || [];
+                        const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+                        form.setFieldsValue({ stops: [...current, { location: newLoc.id, date: tomorrow.toISOString().slice(0, 10) }] });
+                        setMapCenter([e.latlng.lat, e.latlng.lng]);
+                      });
+                    }}
+                  >
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                    <Polyline positions={mapStops.map(s => [s.lat, s.lng])} color={PURPLE_MAIN} weight={4} />
+                    {mapStops.map((s, idx) => (
+                      <Marker key={idx} position={[s.lat, s.lng]} color={idx % 2 ? 'blue' : 'orange'}>
+                        <Popup>
+                          <strong>Stop {idx + 1}</strong><br />
+                          {s.location.address}<br />
+                          <Button size="small" onClick={() => {
+                            const current = form.getFieldValue('stops') || [];
+                            const idx2 = current.findIndex(st => st.location === s.location.id);
+                            if (idx2 === -1) return;
+                            const newStops = [...current]; newStops.splice(idx2, 1);
+                            form.setFieldsValue({ stops: newStops });
+                            setMapStops(mapStops.filter((_, i) => i !== idx2));
+                          }}>Remove</Button>
+                        </Popup>
+                      </Marker>
+                    ))}
+                  </MapContainer>
+                </div>
+              </Col>
+            </Row>
 
-          <Space>
-            <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>{modalMode === 'add' ? 'Create' : 'Save'}</Button>
-            <Button onClick={() => setModalVisible(false)}>Cancel</Button>
-          </Space>
-        </Form>
-      </Modal>
-
+            <Space>
+              <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>{modalMode === 'add' ? 'Create' : 'Save'}</Button>
+              <Button onClick={() => { setModalVisible(false); setMapStops([]); }}>Cancel</Button>
+            </Space>
+          </Form.Item>
+          </Form>
+        </Modal>
       {/* ---- View Modal (3 tabs) ---- */}
       {viewModal && (
         <Modal
