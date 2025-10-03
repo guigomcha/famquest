@@ -133,8 +133,21 @@ export const mockEvents = [
     endTime: new Date(Date.now() - 3 * 7 * 24 * 60 * 60 * 1000).toISOString(),
     comments: ['comment-4']
   },
+  {
+    id: 'event-4',
+    title: 'Usaaaaaaaaaaer event',
+    description: 'some description',
+    location: 'location-3',
+    media: ['media-6','media-2'],
+    owner: 'user-2',
+    tags: ['pet', 'info', 'bla'],
+    updatedDate: new Date(Date.now()).toISOString(),
+    createdDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    startTime: new Date(Date.now() - 4 * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    endTime: new Date(Date.now() - 3 * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    comments: ['comment-4']
+  },
 ];
-
 
 export const mockLocations = [
   {
@@ -228,4 +241,44 @@ export const mockRelations = [
 
   /* ----------  pet  ---------- */
   { id: 'rel-7', source: 'user-1', target: 'user-4', label: 'pet' },
+];
+
+
+/* mockTrips  –  backend-ready shape  ------------------------------------ */
+export const mockTrips = [
+  {
+    id: 'trip-1',
+    name: 'California Coast Adventure',
+    description: 'Scenic road-trip down the coast',
+    owner: 'user-1',                       // who created
+    involvedUsers: ['user-1', 'user-2'],   // who participates
+    transportation: 'car',
+    budget: 1200,
+    isPublic: true,
+    status: 'planned',                     // planned | active | completed
+    startTime: '2024-03-15T08:00:00Z',
+    endTime: '2024-03-20T20:00:00Z',
+    stops: [                               // each stop = existing event
+      { eventId: 'event-1', order: 0 },   // Yoga retreat
+      { eventId: 'event-2', order: 1 },   // Tech pitch night
+    ],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'trip-2',
+    name: 'Tech Conference Tour',
+    description: 'Multi-city tech events',
+    owner: 'user-3',
+    involvedUsers: ['user-3'],
+    transportation: 'plane',
+    budget: 2500,
+    isPublic: false,
+    status: 'active',
+    startTime: '2024-04-10T07:00:00Z',
+    endTime: '2024-04-15T22:00:00Z',
+    stops: [
+      { eventId: 'event-2', order: 0 },   // User event
+    ],
+    createdAt: new Date().toISOString(),
+  },
 ];
