@@ -50,6 +50,7 @@ const AntCustomLayout = ({ children }) => {
     { key: '/profile', icon: <UserOutlined />, label: t('nav.profile') },
   ];
 
+  // TODO G: This is triggering a react child process error
   const languageMenu = (
     <Menu>
       <Menu.Item key="en" onClick={() => handleLanguageChange('en')}>

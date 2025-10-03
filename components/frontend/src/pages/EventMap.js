@@ -13,6 +13,8 @@ import CommentSystem from '../components/CommentSystem';
 const { Title, Text } = Typography;
 const { Search } = Input;
 
+// TODO: when zoom out makes the markers overlap, better to show a group with a number
+
 /* ----------  fix default leaflet icons  ---------- */
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -172,6 +174,7 @@ const FeedMap = () => {
                 click: () => loadEventsForLoc(loc.id),
               }}
             >
+              {/* Show the number of events in the location  */}
               <Popup maxWidth={280}>
                 <Title level={5} style={{ margin: 0, marginBottom: 8 }}>
                   {loc.address}

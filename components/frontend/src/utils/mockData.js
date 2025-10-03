@@ -147,6 +147,20 @@ export const mockEvents = [
     endTime: new Date(Date.now() - 3 * 7 * 24 * 60 * 60 * 1000).toISOString(),
     comments: ['comment-4']
   },
+  {
+    id: 'event-5',
+    title: 'asdasfasfasf',
+    description: 'some description new',
+    location: 'location-1',
+    media: ['media-6','media-2'],
+    owner: 'user-2',
+    tags: ['pet', 'info', 'bla'],
+    updatedDate: new Date(Date.now()).toISOString(),
+    createdDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    startTime: new Date(Date.now() - 4 * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    endTime: new Date(Date.now() - 3 * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    comments: ['comment-4']
+  },
 ];
 
 export const mockLocations = [

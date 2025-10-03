@@ -52,7 +52,7 @@ const EventFeed = () => {
     setCurrentEvent(event);
     setCommentModalVisible(true);
   };
-
+  // TODO: order by updateTime
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          event.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -137,7 +137,8 @@ const EventFeed = () => {
       </Row>
 
       {/* Event Feed */}
-      {/* TODO: Improve alignment of event cards */}
+      {/* TODO: Improve alignment of event cards in large view*/}
+      {/* TODO: During small view, make each card fit the window display and scroll/arrow should move you directly the next/previous one*/}
       <Row gutter={[16, 16]}>
         {filteredEvents.map(event => (
           <Col key={event.id} xs={24} sm={24} md={12} lg={8}>
