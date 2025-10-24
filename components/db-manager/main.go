@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -19,6 +20,9 @@ import (
 	"famquest/components/db-manager/pkg/api"
 	"famquest/components/db-manager/pkg/api/docs"
 	"famquest/components/db-manager/pkg/connection"
+	"famquest/components/db-manager/pkg/connection/memory"
+	"famquest/components/db-manager/pkg/connection/postgresql"
+	"famquest/components/db-manager/pkg/models"
 	"famquest/components/go-common/logger"
 )
 
@@ -31,6 +35,118 @@ func init() {
 	docs.SwaggerInfo.BasePath = os.Getenv("SWAGGER_BASE_PATH")
 }
 
+// userID, _ := ctx.Value("userID").(string)
+func withUserID(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userID := r.Header.Get("X-User")
+		// if values, ok := r.Header["X-User"]; ok && len(values) > 0 {
+		// 	logger.Log.Debugf("User info in header: %+v\n", values)
+		// 	userRef := values[0] // The value of the X-User header
+		// 	dest, _, _ := crudGetAll(&models.Users{}, fmt.Sprintf("WHERE ext_ref = '%s'", userRef))
+		// 	// Check if a user was found
+		// 	if len(dest) == 0 {
+		// 		logger.Log.Debugf("Should have found the user: %+v\n", dest)
+		// 	} else {
+		// 		if usr, ok := dest[0].(*models.Users); ok {
+		// 			logger.Log.Debugf("User found: %+v\n", usr)
+		// 			info["user"] = usr.ID
+		// 		} else {
+		// 			logger.Log.Debug("User not casted correctly")
+		// 		}
+		// 	}
+		// }
+		ctx := context.WithValue(r.Context(), "userID", userID)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// repo -> backend
+// dto -> Data Transfer Object: adaptation between data systems with different data models (CRUD's create and update -> data model)
+
+func getRouter() *mux.Router {
+
+	var uh api.UserHandler
+	var mh api.MediaHandler
+	var ch api.CommentHandler
+	var lh api.LocationHandler
+	var th api.TripHandler
+	var rh api.RelationHandler
+	if usePostgres := os.Getenv("POSTGRES_DB_HOST") != ""; usePostgres {
+		err := connection.ConnectToPostgreSQL()
+		if err != nil {
+			log.Fatalf("Unable to connect to DB %s", err.Error())
+		}
+		userRepo := postgresql.NewPostgresUser()
+		uh = api.NewUserHandler(userRepo)
+		mediaRepo := postgresql.NewPostgresMedia()
+		mh = api.NewMediaHandler(mediaRepo)
+		commentRepo := postgresql.NewPostgresComment()
+		ch = api.NewCommentHandler(commentRepo)
+		tripRepo := postgresql.NewPostgresTrip()
+		th = api.NewTripHandler(tripRepo)
+		locationRepo := postgresql.NewPostgresLocation()
+		lh = api.NewLocationHandler(locationRepo)
+		relationRepo := postgresql.NewPostgresRelation()
+		rh = api.NewRelationHandler(relationRepo)
+	} else {
+		userRepo := memory.NewMemoryCRUD[models.User]()
+		uh = api.NewUserHandler(userRepo)
+		mediaRepo := memory.NewMemoryCRUD[models.Media]()
+		mh = api.NewMediaHandler(mediaRepo)
+		commentRepo := memory.NewMemoryCRUD[models.Comment]()
+		ch = api.NewCommentHandler(commentRepo)
+		tripRepo := memory.NewMemoryCRUD[models.Trip]()
+		th = api.NewTripHandler(tripRepo)
+		locationRepo := memory.NewMemoryCRUD[models.Location]()
+		lh = api.NewLocationHandler(locationRepo)
+		relationRepo := memory.NewMemoryCRUD[models.Relation]()
+		rh = api.NewRelationHandler(relationRepo)
+	}
+
+	r := mux.NewRouter()
+	r.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
+	r.HandleFunc("/health", api.Health).Methods("GET", "OPTIONS")
+	r.HandleFunc("/configure", api.Configure).Methods("GET", "OPTIONS")
+
+	r.HandleFunc("/users", uh.ListUsers).Methods("GET")
+	r.HandleFunc("/users", uh.CreateUser).Methods("POST")
+	r.HandleFunc("/users/{id}", uh.GetUser).Methods("GET")
+	r.HandleFunc("/users/{id}", uh.UpdateUser).Methods("PUT")
+	r.HandleFunc("/users/{id}", uh.DeleteUser).Methods("DELETE")
+
+	r.HandleFunc("/media", mh.UploadMedia).Methods("POST")
+	r.HandleFunc("/media", mh.ListMedia).Methods("GET")
+	r.HandleFunc("/media/{id}", mh.GetMedia).Methods("GET")
+	r.HandleFunc("/media/{id}", mh.UpdateMedia).Methods("PUT")
+	r.HandleFunc("/media/{id}", mh.DeleteMedia).Methods("DELETE")
+
+	r.HandleFunc("/comments", ch.CreateComment).Methods("POST")
+	r.HandleFunc("/comments", ch.ListComments).Methods("GET")
+	r.HandleFunc("/comments/{id}", ch.GetComment).Methods("GET")
+	r.HandleFunc("/comments/{id}", ch.UpdateComment).Methods("PUT")
+	r.HandleFunc("/comments/{id}", ch.DeleteComment).Methods("DELETE")
+
+	r.HandleFunc("/trips", th.ListTrips).Methods("GET")
+	r.HandleFunc("/trips", th.CreateTrip).Methods("POST")
+	r.HandleFunc("/trips/{id}", th.GetTrip).Methods("GET")
+	r.HandleFunc("/trips/{id}", th.UpdateTrip).Methods("PUT")
+	r.HandleFunc("/trips/{id}", th.DeleteTrip).Methods("DELETE")
+
+	r.HandleFunc("/locations", lh.ListLocations).Methods("GET")
+	r.HandleFunc("/locations", lh.CreateLocation).Methods("POST")
+	r.HandleFunc("/locations/{id}", lh.GetLocation).Methods("GET")
+	r.HandleFunc("/locations/{id}", lh.UpdateLocation).Methods("PUT")
+	r.HandleFunc("/locations/{id}", lh.DeleteLocation).Methods("DELETE")
+
+	r.HandleFunc("/relations", rh.ListRelations).Methods("GET")
+	r.HandleFunc("/relations", rh.CreateRelation).Methods("POST")
+	r.HandleFunc("/relations/{id}", rh.GetRelation).Methods("GET")
+	r.HandleFunc("/relations/{id}", rh.UpdateRelation).Methods("PUT")
+	r.HandleFunc("/relations/{id}", rh.DeleteRelation).Methods("DELETE")
+	return r
+
+}
+
 // @title FamQuest DB Manager API
 // @version 0.4.0
 // @description Handles the connection to the DBs in DB Manager. PostgreSQL and MINIO
@@ -40,61 +156,7 @@ func init() {
 // @contact.email guillermo.gc1994@gmail.com
 // @license.name Guillermo Gomez GPL V3
 func main() {
-	r := mux.NewRouter()
-	r.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
-	r.HandleFunc("/health", api.Health).Methods("GET", "OPTIONS")
-	r.HandleFunc("/configure", api.Configure).Methods("GET", "OPTIONS")
-
-	r.HandleFunc("/attachment", api.AttachmentPost).Methods("POST", "OPTIONS")
-	r.HandleFunc("/attachment", api.AttachmentGetAll).Methods("GET", "OPTIONS")
-	r.HandleFunc("/attachment/{id}", api.AttachmentGet).Methods("GET", "OPTIONS")
-	r.HandleFunc("/attachment/{id}", api.AttachmentPut).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/attachment/{id}/ref", api.AttachmentPutRef).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/attachment/{id}", api.AttachmentDelete).Methods("DELETE", "OPTIONS")
-
-	r.HandleFunc("/spot", api.SpotPost).Methods("POST", "OPTIONS")
-	r.HandleFunc("/spot", api.SpotGetAll).Methods("GET", "OPTIONS")
-	r.HandleFunc("/spot/{id}", api.SpotGet).Methods("GET", "OPTIONS")
-	r.HandleFunc("/spot/{id}", api.SpotPut).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/spot/{id}", api.SpotDelete).Methods("DELETE", "OPTIONS")
-
-	r.HandleFunc("/note", api.NotePost).Methods("POST", "OPTIONS")
-	r.HandleFunc("/note", api.NoteGetAll).Methods("GET", "OPTIONS")
-	r.HandleFunc("/note/{id}", api.NoteGet).Methods("GET", "OPTIONS")
-	r.HandleFunc("/note/{id}", api.NotePut).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/note/{id}/ref", api.NotePutRef).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/note/{id}", api.NoteDelete).Methods("DELETE", "OPTIONS")
-
-	r.HandleFunc("/user", api.UserPost).Methods("POST", "OPTIONS")
-	r.HandleFunc("/user", api.UserGetAll).Methods("GET", "OPTIONS")
-	r.HandleFunc("/user/{id}", api.UserGet).Methods("GET", "OPTIONS")
-	r.HandleFunc("/user/{id}", api.UserPut).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/user/{id}", api.UserDelete).Methods("DELETE", "OPTIONS")
-
-	r.HandleFunc("/location", api.LocationPost).Methods("POST", "OPTIONS")
-	r.HandleFunc("/location", api.LocationGetAll).Methods("GET", "OPTIONS")
-	r.HandleFunc("/location/{id}", api.LocationGet).Methods("GET", "OPTIONS")
-	r.HandleFunc("/location/{id}", api.LocationPut).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/location/{id}/ref", api.LocationPutRef).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/location/{id}", api.LocationDelete).Methods("DELETE", "OPTIONS")
-
-	r.HandleFunc("/discovered", api.DiscoveredPost).Methods("POST", "OPTIONS")
-	r.HandleFunc("/discovered", api.DiscoveredGetAll).Methods("GET", "OPTIONS")
-	r.HandleFunc("/discovered/updateConditions", api.DiscoveredUpdateAll).Methods("POST", "OPTIONS")
-	r.HandleFunc("/discovered/{id}", api.DiscoveredGet).Methods("GET", "OPTIONS")
-	r.HandleFunc("/discovered/{id}", api.DiscoveredPut).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/discovered/{id}/ref", api.DiscoveredPutRef).Methods("PUT", "OPTIONS")
-	r.HandleFunc("/discovered/{id}", api.DiscoveredDelete).Methods("DELETE", "OPTIONS")
-
-	r.HandleFunc("/familyTree", api.FamilyTreePost).Methods("POST", "OPTIONS")
-	r.HandleFunc("/familyTree", api.FamilyTreeGetAll).Methods("GET", "OPTIONS")
-	r.HandleFunc("/familyTree/{id}", api.FamilyTreeGet).Methods("GET", "OPTIONS")
-	r.HandleFunc("/familyTree/{id}", api.FamilyTreePut).Methods("PUT", "OPTIONS")
-
-	r.HandleFunc("/trip", api.TripPost).Methods("POST", "OPTIONS")
-	r.HandleFunc("/trip", api.TripGetAll).Methods("GET", "OPTIONS")
-	r.HandleFunc("/trip/{id}", api.TripGet).Methods("GET", "OPTIONS")
-	r.HandleFunc("/trip/{id}", api.TripPut).Methods("PUT", "OPTIONS")
+	r := getRouter()
 
 	// Start the server
 	port := os.Getenv("SWAGGER_PORT")
@@ -107,15 +169,16 @@ func main() {
 		"http://localhost:3000",
 		"http://localhost:8081",
 		"http://localhost:8080",
-		"https://portal.REPLACE_TARGET_USER.famquest.REPLACE_BASE_DOMAIN",
+		"https://portal.staging.famquest.guigomcha.dynv6.net",
 	}
 	allowedMethods := []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	allowedHeaders := []string{"Content-Type", "Accept"}
 	logger.Log.Debugf("CORS: %+v, %+v, %+v", allowedOrigins, allowedHeaders, allowedMethods)
-	// Wrap your router with the CORS middleware
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), handlers.CORS(handlers.AllowedOrigins(allowedOrigins), handlers.AllowedMethods(allowedMethods), handlers.AllowedHeaders(allowedHeaders))(r)); err != nil {
-		connection.DB.Close()
+		if usePostgres := os.Getenv("POSTGRES_DB_HOST") != ""; usePostgres {
+			connection.DB.Close()
+		}
 		log.Fatal(err.Error())
 	}
 }

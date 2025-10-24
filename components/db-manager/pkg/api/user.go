@@ -2,141 +2,189 @@ package api
 
 import (
 	"encoding/json"
-	"famquest/components/db-manager/pkg/connection"
-	"famquest/components/db-manager/pkg/models"
-	"famquest/components/go-common/logger"
-	"fmt"
+	"errors"
 	"net/http"
+	"time"
 
+	"famquest/components/db-manager/pkg/connection"
+	"famquest/components/db-manager/pkg/connection/postgresql"
+	"famquest/components/db-manager/pkg/models"
+	"famquest/components/db-manager/pkg/utils"
+	"famquest/components/go-common/logger"
+
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
-// UserPost creates a new user
-// @Summary Create a user
-// @Description Create a new user
-// @Tags user
-// @Accept json
-// @Produce json
-// @Param user body models.APIUsers true "User data"
-// @Success 201 {object} models.Users
-// @Router /user [post]
-func UserPost(w http.ResponseWriter, r *http.Request) {
-	logger.Log.Info("Called to func UserPost")
-	var user models.Users
-	var dest connection.DbInterface
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	logger.Log.Debug("object decoded")
-	dest, httpStatus, err := crudPost(&user)
-	if err != nil {
-		http.Error(w, err.Error(), httpStatus)
-		return
-	}
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(dest)
+type UserHandler struct {
+	*CRUDHandler[models.User, models.UserInputAPI, models.UserInputAPI]
 }
 
-// UserGetAll retrieves all users
-// @Summary Retrieve all users
-// @Description Get a list of all users
-// @Tags user
-// @Produce json
-// @Success 200 {array} models.Users
-// @Router /user [get]
-func UserGetAll(w http.ResponseWriter, r *http.Request) {
-	logger.Log.Info("Called to func UserGetAll")
-	dest, httpStatus, err := crudGetAll(&models.Users{}, "")
-	logger.Log.Debugf("objects obtained '%d'", len(dest))
-	if err != nil {
-		http.Error(w, err.Error(), httpStatus)
+func NewUserHandler(repo connection.CRUD[models.User]) UserHandler {
+	h := &CRUDHandler[models.User, models.UserInputAPI, models.UserInputAPI]{
+		repo: repo,
+		name: "user",
+	}
+	return UserHandler{h}
+}
+
+/* ---------- tiny mappers ---------- */
+
+func (h UserHandler) buildEntityFromCreate(dto models.UserInputAPI) models.User {
+	usr := models.User{
+		Name:      dto.Name,
+		Email:     dto.Email,
+		ExtRef:    dto.ExtRef,
+		IsVirtual: dto.IsVirtual,
+		Memories:  models.UUIDArray{},
+		StartAt:   time.UnixMilli(dto.StartAt),
+	}
+	if dto.Avatar != nil {
+		val := uuid.MustParse(*dto.Avatar)
+		usr.Avatar = &val
+	}
+	if dto.Bio != nil {
+		val := uuid.MustParse(*dto.Bio)
+		usr.Bio = &val
+	}
+	if dto.EndAt != nil {
+		val := time.UnixMilli(*dto.EndAt)
+		usr.EndAt = &val
+	}
+	return usr
+}
+
+/* ---------- swagger-visible handlers ---------- */
+
+// CreateUser godoc
+// @Summary     Create user
+// @Description Creates a new user
+// @Tags        users
+// @Accept      json
+// @Produce     json
+// @Param       body body models.UserInputAPI true "payload"
+// @Success     201  {object} models.User
+// @Failure     400  {object} models.ErrorResp
+// @Failure     500  {object} models.ErrorResp
+// @Router      /users [post]
+func (h UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
+	var dto models.UserInputAPI
+	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, models.ErrorResp{Error: "invalid json"})
 		return
 	}
-	if len(dest) == 0 {
-		empty := make([]string, 0)
-		json.NewEncoder(w).Encode(empty)
-	} else {
-		json.NewEncoder(w).Encode(dest)
+	entity := h.buildEntityFromCreate(dto)
+	out, err := h.repo.Create(r.Context(), entity)
+	if err != nil {
+		utils.WriteJSON(w, http.StatusInternalServerError, models.ErrorResp{Error: err.Error()})
+		return
+	}
+	utils.WriteJSON(w, http.StatusCreated, out)
+}
+
+// GetUser godoc
+// @Summary     Get user by id
+// @Description Return a single user
+// @Tags        users
+// @Produce     json
+// @Param       id  path string true "user id"
+// @Success     200 {object} models.User
+// @Failure     404 {object} models.ErrorResp
+// @Router      /users/{id} [get]
+func (h UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	out, err := h.repo.Get(r.Context(), id)
+	if err != nil {
+		utils.WriteJSON(w, http.StatusNotFound, models.ErrorResp{Error: "not found"})
+		return
+	}
+	utils.WriteJSON(w, http.StatusOK, out)
+}
+
+// UpdateUser godoc
+// @Summary     Update user
+// @Description Update an existing user
+// @Tags        users
+// @Accept      json
+// @Produce     json
+// @Param       id   path string         true "user id"
+// @Param       body body models.UserInputAPI true "payload"
+// @Success     200 {object} models.User
+// @Failure     400  {object} models.ErrorResp
+// @Failure     404 {object} models.ErrorResp
+// @Router      /users/{id} [put]
+func (h UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	usr, err := h.repo.Get(r.Context(), id)
+	if err != nil {
+		utils.WriteJSON(w, http.StatusNotFound, models.ErrorResp{Error: "not found"})
+		return
+	}
+	var dto models.UserInputAPI
+	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, models.ErrorResp{Error: "invalid json"})
+		return
+	}
+	usr.Name = dto.Name
+	usr.Email = dto.Email
+	usr.ExtRef = dto.ExtRef
+	usr.IsVirtual = dto.IsVirtual
+	usr.Memories = dto.Memories
+	usr.StartAt = time.UnixMilli(dto.StartAt)
+	if dto.EndAt != nil {
+		val := time.UnixMilli(*dto.EndAt)
+		usr.EndAt = &val
+	}
+	out, err := h.repo.Update(r.Context(), id, usr)
+	if err != nil {
+		utils.WriteJSON(w, http.StatusNotFound, models.ErrorResp{Error: "not found"})
+		return
+	}
+	utils.WriteJSON(w, http.StatusOK, out)
+}
+
+// DeleteUser godoc
+// @Summary     Delete user
+// @Description Remove a user (blocked if still referenced)
+// @Tags        users
+// @Param       id  path string true "user id"
+// @Success     204
+// @Failure     400 {object} models.ErrorResp
+// @Failure     404 {object} models.ErrorResp
+// @Router      /users/{id} [delete]
+func (h UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	err := h.repo.Delete(r.Context(), id)
+	switch {
+	case errors.Is(err, postgresql.ErrUserStillReferenced):
+		utils.WriteJSON(w, http.StatusBadRequest,
+			models.ErrorResp{Error: "user still owns media, comments, memories or trips"})
+	case err != nil:
+		utils.WriteJSON(w, http.StatusNotFound, models.ErrorResp{Error: "not found"})
+	default:
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
-// UserGet retrieves a specific user by ID
-// @Summary Retrieve a user by ID
-// @Description Get user details by ID
-// @Tags user
-// @Produce json
-// @Param id path int true "User ID"
-// @Success 200 {object} models.Users
-// @Router /user/{id} [get]
-func UserGet(w http.ResponseWriter, r *http.Request) {
-	logger.Log.Info("Called to func UserGet")
-	var dest connection.DbInterface
-	dest, httpStatus, err := crudGet(&models.Users{}, mux.Vars(r))
+// ListUsers godoc
+// @Summary     List users
+// @Description Return paginated user list
+// @Tags        users
+// @Produce     json
+// @Param       limit  query int false "page size"
+// @Param       offset query int false "offset"
+// @Success     200 {object} models.ListResp[models.User]
+// @Router      /users [get]
+func (h UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
+	limit, offset := utils.GetLimitOffset(r)
+	logger.Log.Debugf("Requesting users")
+	items, total, err := h.repo.List(r.Context(), limit, offset)
 	if err != nil {
-		http.Error(w, err.Error(), httpStatus)
+		utils.WriteJSON(w, http.StatusInternalServerError, models.ErrorResp{Error: err.Error()})
 		return
 	}
-	json.NewEncoder(w).Encode(dest)
-}
-
-// UserDelete deletes a user by ID
-// @Summary Delete a user by ID
-// @Description Delete a user and nullify its references in users
-// @Tags user
-// @Produce json
-// @Param id path int true "User ID"
-// @Success 204 {string} string "No Content"
-// @Router /user/{id} [delete]
-func UserDelete(w http.ResponseWriter, r *http.Request) {
-	logger.Log.Info("Called to func UserDelete")
-	// First delete the user
-	var user models.Users
-	httpStatus, err := crudDelete(&user, mux.Vars(r))
-	if err != nil {
-		http.Error(w, err.Error(), httpStatus)
-		return
-	}
-	w.WriteHeader(http.StatusNoContent)
-}
-
-// UserPut updates a user by ID
-// @Summary Update a user by ID
-// @Description Update user details by ID
-// @Tags user
-// @Accept json
-// @Produce json
-// @Param id path int true "User ID"
-// @Param user body models.APIUsers true "User data"
-// @Success 200 {object} models.Users
-// @Router /user/{id} [put]
-func UserPut(w http.ResponseWriter, r *http.Request) {
-	logger.Log.Info("Called to func UserPut")
-	var user models.Users
-	var dest connection.DbInterface
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	logger.Log.Info("received payload %+v", user)
-	intId, err := parseId(mux.Vars(r)["id"])
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if user.ID > 0 && user.ID != intId {
-		http.Error(w, fmt.Sprintf("user id in payload '%d' and path '%d' do not match", user.ID, intId), http.StatusBadRequest)
-		return
-	}
-	user.ID = intId
-	// Update the user
-	logger.Log.Debug("Decoded object")
-	dest, httpStatus, err := crudPut(&user, mux.Vars(r))
-	if err != nil {
-		http.Error(w, err.Error(), httpStatus)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(dest)
+	utils.WriteJSON(w, http.StatusOK, models.ListResp[models.User]{
+		Items: items,
+		Total: total,
+	})
 }

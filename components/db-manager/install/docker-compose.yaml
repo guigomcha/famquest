@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    command: server /data --console-address ":9001"
+    ports:
+      - "8090:9000"   # S3 API
+      - "8091:9001"   # Web console
+    volumes:
+      - minio_data:/data
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@pgadmin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+      # Pre-register the postgres server
+    #   PGADMIN_CONFIG_SERVER_MODE: "True"
+    #   PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    # entrypoint: >
+    #   /bin/sh -c "
+    #   echo 'POSTGRES_HOST=postgres' > /pgadmin4/servers.json &&
+    #   echo 'POSTGRES_PORT=5432' >> /pgadmin4/servers.json &&
+    #   echo 'POSTGRES_USER=${POSTGRES_USER}' >> /pgadmin4/servers.json &&
+    #   echo 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD}' >> /pgadmin4/servers.json &&
+    #   /entrypoint.sh
+    #   "
+    ports:
+      - "8081:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
+volumes:
+  minio_data:
+  postgres_data:
+  pgadmin_data:

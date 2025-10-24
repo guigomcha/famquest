@@ -1,87 +1,38 @@
 package models
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-// TODO: bday should be a date
+// *Type ↔ NULL allowed
+// Type   ↔ NOT NULL (or empty slice for arrays)
 
-// For swagger input
-type APIUsers struct {
-	ExtRef   string `db:"ext_ref" json:"extRef"`
-	Email    string `db:"email" json:"email"`
-	Role     string `db:"role" json:"role"`
-	Name     string `db:"name" json:"name"`
-	Bio      string `db:"bio" json:"bio"`
-	Birthday string `db:"birthday" json:"birthday"`
-	Passing  string `db:"passing" json:"passing"`
+type User struct {
+	ID        uuid.UUID  `json:"id" db:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Name      string     `json:"name" db:"name" example:"Sarah Chen"`
+	Email     string     `json:"email" db:"email" example:"sarah@example.com"`
+	Avatar    *uuid.UUID `json:"avatar" db:"avatar" format:"uuid"`
+	Bio       *uuid.UUID `json:"bio" db:"bio" format:"uuid"`
+	ExtRef    string     `json:"extRef" db:"ext_ref"`
+	IsVirtual bool       `json:"isVirtual" db:"is_virtual" example:"false"`
+	Memories  UUIDArray  `json:"memories" db:"memories"`
+	StartAt   time.Time  `json:"startAt" db:"start_at" example:"2025-09-01T15:04:05Z"`
+	EndAt     *time.Time `json:"endAt" db:"end_at" example:"2025-09-07T15:04:05Z"`
+	UpdatedAt time.Time  `json:"updatedAt" db:"updated_at" example:"2025-10-05T08:30:00Z"`
+	CreatedAt time.Time  `json:"createdAt" db:"created_at" example:"2025-10-04T08:30:00Z"`
 }
 
-// `db:"users"`
-type Users struct {
-	// Only DB
-	UUID uuid.UUID `db:"uuid" json:"-"` // UUID as primary key
-	// db + json
-	ID        int       `db:"id" json:"id"` // Auto-incremented integer ID
-	ExtRef    string    `db:"ext_ref" json:"extRef"`
-	Name      string    `db:"name" json:"name"`
-	Email     string    `db:"email" json:"email"`
-	Role      string    `db:"role" json:"role"`
-	Bio       string    `db:"bio" json:"bio"`
-	Birthday  string    `db:"birthday" json:"birthday"`
-	Passing   string    `db:"passing" json:"passing"`
-	CreatedAt time.Time `db:"created_at" json:"createdAt,omitempty"` // Automatically generated
-	UpdatedAt time.Time `db:"updated_at" json:"updatedAt,omitempty"` // Automatically managed by trigger
-}
-
-func (m *Users) GetTableName() string {
-	return "users"
-}
-
-func (m *Users) GetSelectOneQuery() string {
-	return fmt.Sprintf(`SELECT * FROM %s  WHERE id = $1`, m.GetTableName())
-}
-
-func (m *Users) GetSelectAllQuery() string {
-	return fmt.Sprintf(`SELECT * FROM %s`, m.GetTableName())
-}
-
-func (m *Users) GetInsertQuery() string {
-	return fmt.Sprintf(`
-		INSERT INTO %s (name, ext_ref, email, role, bio, birthday, passing)
-		VALUES (:name, :ext_ref, :email, :role, :bio, :birthday, :passing) RETURNING id`, m.GetTableName())
-}
-
-func (m *Users) GetQuery() string {
-	return fmt.Sprintf(`
-		INSERT INTO %s (name, ext_ref, email, role, bio, birthday, passing)
-		VALUES (:name, :ext_ref, :email, :role, :bio, :birthday, :passing) RETURNING id`, m.GetTableName())
-}
-
-func (m *Users) GetUpdateQuery() string {
-	return fmt.Sprintf(`
-			UPDATE %s
-			SET name = :name, email = :email, ext_ref = :ext_ref, role = :role, bio = :bio, birthday = :birthday, passing = :passing
-			WHERE id = :id`, m.GetTableName())
-}
-
-func (m *Users) GetDeleteExtraQueries() []string {
-	return []string{
-		`UPDATE attachments
-		 SET ref_user_uploader = 0 
-		 WHERE ref_user_uploader = :id`,
-		`UPDATE known_locations
-		 SET ref_user_uploader = 0 
-		 WHERE ref_user_uploader = :id`,
-		`UPDATE spots
-		 SET ref_user_uploader = 0 
-		 WHERE ref_user_uploader = :id`,
-	}
-}
-
-func (m *Users) GetInsertExtraQueries() []string {
-	return []string{}
+// UserInputAPI is what the client POSTs and PUTs
+type UserInputAPI struct {
+	Name      string    `json:"name" example:"Sarah Chen"`
+	Email     string    `json:"email" example:"sarah@example.com"`
+	Avatar    *string   `json:"avatar,omitempty" format:"uuid"`
+	Bio       *string   `json:"bio,omitempty" format:"uuid"`
+	ExtRef    string    `json:"extRef,omitempty"`
+	IsVirtual bool      `json:"isVirtual" example:"false"`
+	Memories  UUIDArray `json:"memories"`
+	StartAt   int64     `json:"startAt" description:"unix ms"`
+	EndAt     *int64    `json:"endAt,omitempty" description:"unix ms"`
 }

@@ -23,32 +23,27 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/attachment": {
+        "/comments": {
             "get": {
-                "description": "Get a list of all attachments",
+                "description": "Return paginated comment list",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "attachment"
+                    "comments"
                 ],
-                "summary": "Retrieve all attachments",
+                "summary": "List comments",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Reference ID (optional)",
-                        "name": "refId",
+                        "description": "page size",
+                        "name": "limit",
                         "in": "query"
                     },
                     {
-                        "enum": [
-                            "spot",
-                            "attachment",
-                            "note"
-                        ],
-                        "type": "string",
-                        "description": "Reference Type (optional)",
-                        "name": "refType",
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
                         "in": "query"
                     }
                 ],
@@ -56,79 +51,70 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Attachments"
-                            }
+                            "$ref": "#/definitions/models.ListResp-models_Comment"
                         }
                     }
                 }
             },
             "post": {
-                "description": "Create a new attachment",
+                "description": "Creates a new comment",
                 "consumes": [
-                    "multipart/form-data"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "attachment"
+                    "comments"
                 ],
-                "summary": "Create a attachment",
+                "summary": "Create comment",
                 "parameters": [
                     {
-                        "type": "file",
-                        "description": "image/* or audio/* or video/ or application/pdf",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "name": "contentType",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "name": "datetime",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "name": "description",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "name": "name",
-                        "in": "formData"
+                        "description": "payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CommentInputAPI"
+                        }
                     }
                 ],
                 "responses": {
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Attachments"
+                            "$ref": "#/definitions/models.Comment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             }
         },
-        "/attachment/{id}": {
+        "/comments/{id}": {
             "get": {
-                "description": "Get attachment details by ID",
+                "description": "Return a single comment",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "attachment"
+                    "comments"
                 ],
-                "summary": "Retrieve a attachment by ID",
+                "summary": "Get comment by id",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Attachment ID",
+                        "type": "string",
+                        "description": "comment id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -138,13 +124,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Attachments"
+                            "$ref": "#/definitions/models.Comment"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             },
             "put": {
-                "description": "Update attachment details by ID",
+                "description": "Update an existing comment",
                 "consumes": [
                     "application/json"
                 ],
@@ -152,24 +144,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "attachment"
+                    "comments"
                 ],
-                "summary": "Update a attachment by ID",
+                "summary": "Update comment",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Attachment ID",
+                        "type": "string",
+                        "description": "comment id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Attachment data",
-                        "name": "attachment",
+                        "description": "payload",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.APIAttachments"
+                            "$ref": "#/definitions/models.CommentInputAPI"
                         }
                     }
                 ],
@@ -177,24 +169,33 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Attachments"
+                            "$ref": "#/definitions/models.Comment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             },
             "delete": {
-                "description": "Delete a attachment and nullify its references in spots",
-                "produces": [
-                    "application/json"
-                ],
+                "description": "Remove a comment",
                 "tags": [
-                    "attachment"
+                    "comments"
                 ],
-                "summary": "Delete a attachment by ID",
+                "summary": "Delete comment",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Attachment ID",
+                        "type": "string",
+                        "description": "comment id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -202,57 +203,12 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/attachment/{id}/ref": {
-            "put": {
-                "description": "Update the ref in a attachment details by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "attachment"
-                ],
-                "summary": "Update the ref",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Attachment ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "No Content"
                     },
-                    {
-                        "type": "integer",
-                        "description": "Reference ID (optional)",
-                        "name": "refId",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "enum": [
-                            "spot",
-                            "attachment",
-                            "note"
-                        ],
-                        "type": "string",
-                        "description": "Reference Type",
-                        "name": "refType",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/models.Attachments"
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
@@ -279,375 +235,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/discovered": {
-            "get": {
-                "description": "Get a list of all discovereds",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "discovered"
-                ],
-                "summary": "Retrieve all discovereds",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Reference ID (optional)",
-                        "name": "refId",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "spot",
-                            "attachment",
-                            "note"
-                        ],
-                        "type": "string",
-                        "description": "Reference Type (optional)",
-                        "name": "refType",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "filter for the specific user (optional)",
-                        "name": "refUserUploader",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Discovered"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new discovered",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "discovered"
-                ],
-                "summary": "Create a discovered",
-                "parameters": [
-                    {
-                        "description": "Discovered data",
-                        "name": "discovered",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.APIDiscovered"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.Discovered"
-                        }
-                    }
-                }
-            }
-        },
-        "/discovered/updateConditions": {
-            "post": {
-                "description": "Updates discovered based on the user locations, age, etc.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "discovered"
-                ],
-                "summary": "Updates all discovered entries for a user",
-                "responses": {
-                    "200": {
-                        "description": "The Ids of the discovered that were updated",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "integer"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/discovered/{id}": {
-            "get": {
-                "description": "Get discovered details by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "discovered"
-                ],
-                "summary": "Retrieve a discovered by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Discovered ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Discovered"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update discovered details by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "discovered"
-                ],
-                "summary": "Update a discovered by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Discovered ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Discovered data",
-                        "name": "discovered",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.APIDiscovered"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Discovered"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a discovered entry",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "discovered"
-                ],
-                "summary": "Delete a discovered by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Discovered ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/discovered/{id}/ref": {
-            "put": {
-                "description": "Update the ref in a discovered details by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "discovered"
-                ],
-                "summary": "Update the ref",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Discovered ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Reference ID (optional)",
-                        "name": "refId",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "enum": [
-                            "spot",
-                            "note",
-                            "attachment"
-                        ],
-                        "type": "string",
-                        "description": "Reference Type",
-                        "name": "refType",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Discovered"
-                        }
-                    }
-                }
-            }
-        },
-        "/familyTree": {
-            "get": {
-                "description": "Get a list of all familyTrees",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "familyTree"
-                ],
-                "summary": "Retrieve all familyTrees",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.FamilyTree"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new familyTree",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "familyTree"
-                ],
-                "summary": "Create a familyTree",
-                "parameters": [
-                    {
-                        "description": "FamilyTree data",
-                        "name": "familyTree",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.APIFamilyTree"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.FamilyTree"
-                        }
-                    }
-                }
-            }
-        },
-        "/familyTree/{id}": {
-            "get": {
-                "description": "Get familyTree details by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "familyTree"
-                ],
-                "summary": "Retrieve a familyTree by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "FamilyTree ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.FamilyTree"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update familyTree details by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "familyTree"
-                ],
-                "summary": "Update a familyTree by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "FamilyTree ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "FamilyTree data",
-                        "name": "familyTree",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.APIFamilyTree"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.FamilyTree"
-                        }
-                    }
-                }
-            }
-        },
         "/health": {
             "get": {
                 "description": "Check the health of the service",
@@ -669,228 +256,27 @@ const docTemplate = `{
                 }
             }
         },
-        "/location": {
+        "/locations": {
             "get": {
-                "description": "Get a list of all locations",
+                "description": "Return paginated location list",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "location"
+                    "locations"
                 ],
-                "summary": "Retrieve all locations",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.KnownLocations"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new location",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "location"
-                ],
-                "summary": "Create a location",
-                "parameters": [
-                    {
-                        "description": "Location data",
-                        "name": "location",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.APIKnownLocations"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.KnownLocations"
-                        }
-                    }
-                }
-            }
-        },
-        "/location/{id}": {
-            "get": {
-                "description": "Get location details by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "location"
-                ],
-                "summary": "Retrieve a location by ID",
+                "summary": "List locations",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Location ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.KnownLocations"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update location details by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "location"
-                ],
-                "summary": "Update a location by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Location ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Location data",
-                        "name": "location",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.APIKnownLocations"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.KnownLocations"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a location and nullify its references in spots",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "location"
-                ],
-                "summary": "Delete a location by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Location ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/location/{id}/ref": {
-            "put": {
-                "description": "Update the ref in a location details by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "location"
-                ],
-                "summary": "Update the ref",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Location ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Reference ID (optional)",
-                        "name": "refId",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "enum": [
-                            "spot",
-                            "user"
-                        ],
-                        "type": "string",
-                        "description": "Reference Type",
-                        "name": "refType",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.KnownLocations"
-                        }
-                    }
-                }
-            }
-        },
-        "/note": {
-            "get": {
-                "description": "Get a list of all notes",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "note"
-                ],
-                "summary": "Retrieve all notes",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Reference ID (optional)",
-                        "name": "refId",
+                        "description": "page size",
+                        "name": "limit",
                         "in": "query"
                     },
                     {
-                        "enum": [
-                            "spot",
-                            "note"
-                        ],
-                        "type": "string",
-                        "description": "Reference Type (optional)",
-                        "name": "refType",
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
                         "in": "query"
                     }
                 ],
@@ -898,16 +284,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Notes"
-                            }
+                            "$ref": "#/definitions/models.ListResp-models_Location"
                         }
                     }
                 }
             },
             "post": {
-                "description": "Create a new note",
+                "description": "Creates a new location",
                 "consumes": [
                     "application/json"
                 ],
@@ -915,17 +298,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "note"
+                    "locations"
                 ],
-                "summary": "Create a note",
+                "summary": "Create location",
                 "parameters": [
                     {
-                        "description": "Note data",
-                        "name": "note",
+                        "description": "payload",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.APINotes"
+                            "$ref": "#/definitions/models.LocationInputAPI"
                         }
                     }
                 ],
@@ -933,223 +316,38 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Notes"
+                            "$ref": "#/definitions/models.Location"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             }
         },
-        "/note/{id}": {
+        "/locations/{id}": {
             "get": {
-                "description": "Get note details by ID",
+                "description": "Return a single location",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "note"
+                    "locations"
                 ],
-                "summary": "Retrieve a note by ID",
+                "summary": "Get location by id",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Note ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Notes"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update note details by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "note"
-                ],
-                "summary": "Update a note by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Note ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Note data",
-                        "name": "note",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.APINotes"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Notes"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a note and nullify its references in notes",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "note"
-                ],
-                "summary": "Delete a note by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Note ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/note/{id}/ref": {
-            "put": {
-                "description": "Update the ref in a note details by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "note"
-                ],
-                "summary": "Update the ref",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Note ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Reference ID (optional)",
-                        "name": "refId",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "enum": [
-                            "spot",
-                            "user"
-                        ],
                         "type": "string",
-                        "description": "Reference Type",
-                        "name": "refType",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Notes"
-                        }
-                    }
-                }
-            }
-        },
-        "/spot": {
-            "get": {
-                "description": "Get a list of all spots",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "spot"
-                ],
-                "summary": "Retrieve all spots",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Spots"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new spot",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "spot"
-                ],
-                "summary": "Create a spot",
-                "parameters": [
-                    {
-                        "description": "Spot data",
-                        "name": "spot",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.APISpots"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.Spots"
-                        }
-                    }
-                }
-            }
-        },
-        "/spot/{id}": {
-            "get": {
-                "description": "Get spot details by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "spot"
-                ],
-                "summary": "Retrieve a spot by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Spot ID",
+                        "description": "location id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1159,13 +357,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Spots"
+                            "$ref": "#/definitions/models.Location"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             },
             "put": {
-                "description": "Update spot details by ID",
+                "description": "Update an existing location",
                 "consumes": [
                     "application/json"
                 ],
@@ -1173,24 +377,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "spot"
+                    "locations"
                 ],
-                "summary": "Update a spot by ID",
+                "summary": "Update location",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Spot ID",
+                        "type": "string",
+                        "description": "location id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Spot data",
-                        "name": "spot",
+                        "description": "payload",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.APISpots"
+                            "$ref": "#/definitions/models.LocationInputAPI"
                         }
                     }
                 ],
@@ -1198,24 +402,33 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Spots"
+                            "$ref": "#/definitions/models.Location"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             },
             "delete": {
-                "description": "Delete a spot and nullify its references in spots",
-                "produces": [
-                    "application/json"
-                ],
+                "description": "Remove a location",
                 "tags": [
-                    "spot"
+                    "locations"
                 ],
-                "summary": "Delete a spot by ID",
+                "summary": "Delete location",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Spot ID",
+                        "type": "string",
+                        "description": "location id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1223,83 +436,122 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             }
         },
-        "/trip": {
+        "/media": {
             "get": {
-                "description": "Get a list of all trips",
+                "description": "Return paginated media list",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "trip"
+                    "media"
                 ],
-                "summary": "Retrieve all trips",
+                "summary": "List media",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Trips"
-                            }
+                            "$ref": "#/definitions/models.ListResp-models_Media"
                         }
                     }
                 }
             },
             "post": {
-                "description": "Create a new trip",
+                "description": "Multipart upload",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "trip"
+                    "media"
                 ],
-                "summary": "Create a trip",
+                "summary": "Upload media file",
                 "parameters": [
                     {
-                        "description": "Trip data",
-                        "name": "trip",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.APITrips"
-                        }
+                        "type": "file",
+                        "description": "image/* or audio/* or video/ or application/pdf",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "unix ms",
+                        "name": "isAt",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "name": "tags",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Trips"
+                            "$ref": "#/definitions/models.Media"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             }
         },
-        "/trip/{id}": {
+        "/media/{id}": {
             "get": {
-                "description": "Get trip details by ID",
+                "description": "Return a single media",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "trip"
+                    "media"
                 ],
-                "summary": "Retrieve a trip by ID",
+                "summary": "Get media by id",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Trip ID",
+                        "type": "string",
+                        "description": "media id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1309,63 +561,112 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Trips"
+                            "$ref": "#/definitions/models.Media"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             },
             "put": {
-                "description": "Update trip details by ID",
+                "description": "Multipart update",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "trip"
+                    "media"
                 ],
-                "summary": "Update a trip by ID",
+                "summary": "Update media file",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Trip ID",
+                        "type": "string",
+                        "description": "user id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Trip data",
-                        "name": "trip",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.APITrips"
-                        }
+                        "type": "file",
+                        "description": "image/* or audio/* or video/ or application/pdf",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "name": "comments",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "unix ms",
+                        "name": "isAt",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "name": "participants",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "name": "tags",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Trips"
+                            "$ref": "#/definitions/models.Media"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             },
             "delete": {
-                "description": "Delete a trip and nullify its references in spots",
+                "description": "Return a single media",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "trip"
+                    "media"
                 ],
-                "summary": "Delete a trip by ID",
+                "summary": "Delete media by id",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Trip ID",
+                        "type": "string",
+                        "description": "media id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1373,38 +674,58 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             }
         },
-        "/user": {
+        "/relations": {
             "get": {
-                "description": "Get a list of all users",
+                "description": "Return paginated relation list",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "relations"
                 ],
-                "summary": "Retrieve all users",
+                "summary": "List relations",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Users"
-                            }
+                            "$ref": "#/definitions/models.ListResp-models_Relation"
                         }
                     }
                 }
             },
             "post": {
-                "description": "Create a new user",
+                "description": "Creates a new relation between two users",
                 "consumes": [
                     "application/json"
                 ],
@@ -1412,17 +733,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "relations"
                 ],
-                "summary": "Create a user",
+                "summary": "Create relation",
                 "parameters": [
                     {
-                        "description": "User data",
-                        "name": "user",
+                        "description": "payload",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.APIUsers"
+                            "$ref": "#/definitions/models.RelationInputAPI"
                         }
                     }
                 ],
@@ -1430,26 +751,38 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Users"
+                            "$ref": "#/definitions/models.Relation"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             }
         },
-        "/user/{id}": {
+        "/relations/{id}": {
             "get": {
-                "description": "Get user details by ID",
+                "description": "Return a single relation",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "relations"
                 ],
-                "summary": "Retrieve a user by ID",
+                "summary": "Get relation by id",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "User ID",
+                        "type": "string",
+                        "description": "relation id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1459,13 +792,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Users"
+                            "$ref": "#/definitions/models.Relation"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             },
             "put": {
-                "description": "Update user details by ID",
+                "description": "Update an existing relation",
                 "consumes": [
                     "application/json"
                 ],
@@ -1473,24 +812,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "relations"
                 ],
-                "summary": "Update a user by ID",
+                "summary": "Update relation",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "User ID",
+                        "type": "string",
+                        "description": "relation id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "User data",
-                        "name": "user",
+                        "description": "payload",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.APIUsers"
+                            "$ref": "#/definitions/models.RelationInputAPI"
                         }
                     }
                 ],
@@ -1498,24 +837,33 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Users"
+                            "$ref": "#/definitions/models.Relation"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
             },
             "delete": {
-                "description": "Delete a user and nullify its references in users",
-                "produces": [
-                    "application/json"
-                ],
+                "description": "Remove a relation",
                 "tags": [
-                    "user"
+                    "relations"
                 ],
-                "summary": "Delete a user by ID",
+                "summary": "Delete relation",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "User ID",
+                        "type": "string",
+                        "description": "relation id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1523,9 +871,400 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "No Content",
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/trips": {
+            "get": {
+                "description": "Return paginated trip list",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trips"
+                ],
+                "summary": "List trips",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ListResp-models_Trip"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new trip",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trips"
+                ],
+                "summary": "Create trip",
+                "parameters": [
+                    {
+                        "description": "payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.TripInputAPI"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Trip"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/trips/{id}": {
+            "get": {
+                "description": "Return a single trip",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trips"
+                ],
+                "summary": "Get trip by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "trip id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Trip"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing trip",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "trips"
+                ],
+                "summary": "Update trip",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "trip id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.TripInputAPI"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Trip"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove a trip",
+                "tags": [
+                    "trips"
+                ],
+                "summary": "Delete trip",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "trip id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "description": "Return paginated user list",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "List users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ListResp-models_User"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create user",
+                "parameters": [
+                    {
+                        "description": "payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserInputAPI"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "description": "Return a single user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get user by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserInputAPI"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove a user (blocked if still referenced)",
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
                         }
                     }
                 }
@@ -1533,453 +1272,510 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.APIAttachments": {
+        "models.Comment": {
             "type": "object",
             "properties": {
-                "contentType": {
-                    "type": "string"
-                },
-                "datetime": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.APIDiscovered": {
-            "type": "object",
-            "properties": {
-                "condition": {
-                    "description": "this will hold a JSONB in postgresql with the condition",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.JSONB"
-                        }
-                    ]
-                },
-                "show": {
-                    "description": "condition was met",
-                    "type": "boolean"
-                }
-            }
-        },
-        "models.APIFamilyTree": {
-            "type": "object",
-            "properties": {
-                "familyTree": {
-                    "description": "this will hold a JSONB in postgresql with the family_tree",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.JSONB"
-                        }
-                    ]
-                }
-            }
-        },
-        "models.APIKnownLocations": {
-            "type": "object",
-            "properties": {
-                "latitude": {
-                    "description": "Latitude as signed float",
-                    "type": "number"
-                },
-                "longitude": {
-                    "description": "Longitude as signed float",
-                    "type": "number"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.APINotes": {
-            "type": "object",
-            "properties": {
-                "category": {
-                    "type": "string"
-                },
-                "datetime": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.APISpots": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.APITrips": {
-            "type": "object",
-            "properties": {
-                "geometry": {
-                    "description": "JSONB geometry field",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.JSONB"
-                        }
-                    ]
-                },
-                "mode": {
-                    "description": "\"car\" or \"foot\"",
-                    "type": "string"
-                },
-                "refIdEnd": {
-                    "description": "end reference",
-                    "type": "integer"
-                },
-                "refIdStart": {
-                    "description": "start reference",
-                    "type": "integer"
-                },
-                "refTypeEnd": {
-                    "description": "\"spot\" or \"note\"",
-                    "type": "string"
-                },
-                "refTypeStart": {
-                    "description": "\"spot\" or \"note\"",
-                    "type": "string"
-                }
-            }
-        },
-        "models.APIUsers": {
-            "type": "object",
-            "properties": {
-                "bio": {
-                    "type": "string"
-                },
-                "birthday": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "extRef": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "passing": {
-                    "type": "string"
-                },
-                "role": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Attachments": {
-            "type": "object",
-            "properties": {
-                "contentType": {
+                "audioId": {
+                    "description": "nullable media id",
                     "type": "string"
                 },
                 "createdAt": {
-                    "description": "Automatically generated",
-                    "type": "string"
-                },
-                "datetime": {
-                    "type": "string"
-                },
-                "description": {
                     "type": "string"
                 },
                 "id": {
-                    "description": "Auto-incremented integer ID",
+                    "type": "string"
+                },
+                "ownerId": {
+                    "type": "string"
+                },
+                "replies": {
+                    "description": "comment ids",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "text": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CommentInputAPI": {
+            "type": "object",
+            "properties": {
+                "audioId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "replies": {
+                    "description": "UUID strings",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "text": {
+                    "type": "string",
+                    "example": "Great picture!"
+                }
+            }
+        },
+        "models.ErrorResp": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ListResp-models_Comment": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Comment"
+                    }
+                },
+                "total": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.ListResp-models_Location": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Location"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ListResp-models_Media": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Media"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ListResp-models_Relation": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Relation"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ListResp-models_Trip": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Trip"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ListResp-models_User": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.User"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Location": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "description": "-\u003e comment id",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lat": {
+                    "type": "number"
+                },
+                "lng": {
+                    "type": "number"
                 },
                 "name": {
                     "type": "string"
                 },
-                "refId": {
-                    "type": "integer"
-                },
-                "refType": {
-                    "description": "DB + JSON",
+                "ownerId": {
                     "type": "string"
                 },
-                "refUserUploader": {
-                    "type": "integer"
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.LocationInputAPI": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "221B Baker St, London"
+                },
+                "description": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "lat": {
+                    "type": "number",
+                    "example": 51.523767
+                },
+                "lng": {
+                    "type": "number",
+                    "example": -0.158555
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Grandma’s house"
+                }
+            }
+        },
+        "models.Media": {
+            "type": "object",
+            "properties": {
+                "ContentType": {
+                    "description": "ENUM checked at API level",
+                    "type": "string"
+                },
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isAt": {
+                    "type": "string"
+                },
+                "name": {
+                    "description": "original file name",
+                    "type": "string"
+                },
+                "ownerId": {
+                    "type": "string"
+                },
+                "participants": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "updatedAt": {
-                    "description": "Automatically managed by trigger",
                     "type": "string"
                 },
                 "url": {
+                    "description": "served path",
                     "type": "string"
                 }
             }
         },
-        "models.Discovered": {
+        "models.Relation": {
             "type": "object",
             "properties": {
-                "condition": {
-                    "description": "db + json",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.JSONB"
-                        }
-                    ]
-                },
                 "createdAt": {
-                    "description": "Automatically generated",
                     "type": "string"
                 },
                 "id": {
-                    "description": "Auto-incremented integer ID",
-                    "type": "integer"
-                },
-                "refId": {
-                    "type": "integer"
-                },
-                "refType": {
                     "type": "string"
                 },
-                "refUserUploader": {
-                    "type": "integer"
-                },
-                "show": {
-                    "description": "condition was met",
+                "isEx": {
                     "type": "boolean"
                 },
+                "label": {
+                    "description": "enum",
+                    "type": "string"
+                },
+                "source": {
+                    "description": "user id",
+                    "type": "string"
+                },
+                "target": {
+                    "description": "user id",
+                    "type": "string"
+                },
                 "updatedAt": {
-                    "description": "Automatically managed by trigger",
                     "type": "string"
                 }
             }
         },
-        "models.FamilyTree": {
+        "models.RelationInputAPI": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "description": "Automatically generated",
-                    "type": "string"
+                "isEx": {
+                    "type": "boolean",
+                    "example": false
                 },
-                "familyTree": {
-                    "description": "db + json",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.JSONB"
-                        }
-                    ]
+                "label": {
+                    "type": "string",
+                    "enum": [
+                        "spouse",
+                        "friend",
+                        "parent",
+                        "pet"
+                    ],
+                    "example": "friend"
                 },
-                "id": {
-                    "description": "db + json",
-                    "type": "integer"
+                "source": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
-                "updatedAt": {
-                    "description": "Automatically managed by trigger",
-                    "type": "string"
+                "target": {
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "660e8400-e29b-41d4-a716-446655440000"
                 }
             }
         },
-        "models.JSONB": {
-            "type": "object",
-            "additionalProperties": true
-        },
-        "models.KnownLocations": {
+        "models.Trip": {
             "type": "object",
             "properties": {
                 "createdAt": {
-                    "description": "Automatically generated",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "Auto-incremented integer ID",
-                    "type": "integer"
-                },
-                "latitude": {
-                    "description": "Latitude as signed float",
-                    "type": "number"
-                },
-                "longitude": {
-                    "description": "Longitude as signed float",
-                    "type": "number"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "refId": {
-                    "type": "integer"
-                },
-                "refType": {
-                    "description": "Db + json",
-                    "type": "string"
-                },
-                "refUserUploader": {
-                    "type": "integer"
-                },
-                "updatedAt": {
-                    "description": "Automatically managed by trigger",
-                    "type": "string"
-                }
-            }
-        },
-        "models.Notes": {
-            "type": "object",
-            "properties": {
-                "category": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "description": "Automatically generated",
-                    "type": "string"
-                },
-                "datetime": {
                     "type": "string"
                 },
                 "description": {
+                    "description": "-\u003e comment id",
+                    "type": "string"
+                },
+                "endAt": {
                     "type": "string"
                 },
                 "id": {
-                    "description": "Auto-incremented integer ID",
-                    "type": "integer"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "refId": {
-                    "type": "integer"
-                },
-                "refType": {
-                    "description": "db + json",
+                "ownerId": {
                     "type": "string"
                 },
-                "refUserUploader": {
-                    "type": "integer"
+                "participants": {
+                    "description": "user ids",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "startAt": {
+                    "type": "string"
+                },
+                "stops": {
+                    "description": "jsonb",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TripStop"
+                    }
+                },
+                "transportation": {
+                    "description": "enum string",
+                    "type": "string"
                 },
                 "updatedAt": {
-                    "description": "Automatically managed by trigger",
                     "type": "string"
                 }
             }
         },
-        "models.Spots": {
+        "models.TripInputAPI": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "description": "Automatically generated",
-                    "type": "string"
-                },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "uuid"
                 },
-                "id": {
-                    "description": "db + json",
+                "endAt": {
                     "type": "integer"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Euro trip"
                 },
-                "refUserUploader": {
+                "participants": {
+                    "description": "UUID strings",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "startAt": {
                     "type": "integer"
                 },
-                "updatedAt": {
-                    "description": "Automatically managed by trigger",
-                    "type": "string"
+                "stops": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TripStop"
+                    }
+                },
+                "transportation": {
+                    "type": "string",
+                    "enum": [
+                        "car",
+                        "plane",
+                        "train",
+                        "bus",
+                        "foot"
+                    ],
+                    "example": "car"
                 }
             }
         },
-        "models.Trips": {
+        "models.TripStop": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "memoryId": {
                     "type": "string"
                 },
-                "geometry": {
-                    "description": "JSONB geometry field",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.JSONB"
-                        }
-                    ]
-                },
-                "id": {
-                    "description": "Auto-incremented ID",
+                "order": {
                     "type": "integer"
-                },
-                "mode": {
-                    "description": "\"car\" or \"foot\"",
-                    "type": "string"
-                },
-                "refIdEnd": {
-                    "description": "end reference",
-                    "type": "integer"
-                },
-                "refIdStart": {
-                    "description": "start reference",
-                    "type": "integer"
-                },
-                "refTypeEnd": {
-                    "description": "\"spot\" or \"note\"",
-                    "type": "string"
-                },
-                "refTypeStart": {
-                    "description": "\"spot\" or \"note\"",
-                    "type": "string"
-                },
-                "refUserUploader": {
-                    "type": "integer"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "uuid": {
-                    "description": "UUID as primary key",
-                    "type": "string"
                 }
             }
         },
-        "models.Users": {
+        "models.User": {
             "type": "object",
             "properties": {
+                "avatar": {
+                    "type": "string",
+                    "format": "uuid"
+                },
                 "bio": {
-                    "type": "string"
-                },
-                "birthday": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "uuid"
                 },
                 "createdAt": {
-                    "description": "Automatically generated",
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025-10-04T08:30:00Z"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "sarah@example.com"
+                },
+                "endAt": {
+                    "type": "string",
+                    "example": "2025-09-07T15:04:05Z"
                 },
                 "extRef": {
                     "type": "string"
                 },
                 "id": {
-                    "description": "db + json",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "isVirtual": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "memories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Sarah Chen"
                 },
-                "passing": {
-                    "type": "string"
-                },
-                "role": {
-                    "type": "string"
+                "startAt": {
+                    "type": "string",
+                    "example": "2025-09-01T15:04:05Z"
                 },
                 "updatedAt": {
-                    "description": "Automatically managed by trigger",
+                    "type": "string",
+                    "example": "2025-10-05T08:30:00Z"
+                }
+            }
+        },
+        "models.UserInputAPI": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "bio": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "sarah@example.com"
+                },
+                "endAt": {
+                    "type": "integer"
+                },
+                "extRef": {
                     "type": "string"
+                },
+                "isVirtual": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "memories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Sarah Chen"
+                },
+                "startAt": {
+                    "type": "integer"
                 }
             }
         }

@@ -1,142 +1,168 @@
 package models
 
 const Schema = `
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; -- Enable UUID generation
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
-CREATE TABLE IF NOT EXISTS known_locations (
-    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
-    id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
-    name TEXT NOT NULL,
-    longitude FLOAT NOT NULL, -- Longitude as signed float
-    latitude FLOAT NOT NULL, -- Latitude as signed float
-    ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot', 'user')), -- Constraint for ref_type
-    ref_id INT DEFAULT 0,
-    ref_user_uploader INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
+/* 
+    #################################################################
+                        Base Content Types
+    #################################################################
+*/
+
+/* ----------  Media  ---------- */
+CREATE TABLE IF NOT EXISTS media  (
+    id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    owner_id      UUID, -- nullable user id
+    name          TEXT,
+    url           TEXT NOT NULL,
+    content_type  TEXT NOT NULL, -- Enum complaince checked at the API level
+    participants  UUID[] NOT NULL DEFAULT '{}',  -- user ids
+    tags          TEXT[] NOT NULL DEFAULT '{}',  -- tag names (or tag ids if you prefer)
+    comments      UUID[] NOT NULL DEFAULT '{}',  -- comment ids
+    is_at         TIMESTAMPTZ,
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS spots (
-    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
-    id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
-    name TEXT NOT NULL,
-    description TEXT,
-    ref_user_uploader INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
+/* ----------  COMMENTS  ---------- */
+CREATE TABLE IF NOT EXISTS comments  (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    owner_id    UUID, -- nullable user id
+    text        TEXT,
+    audio_id    UUID, -- nullable media id
+    replies     UUID[] NOT NULL DEFAULT '{}',  -- comment ids
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS notes (
-    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
-    id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
-    name TEXT NOT NULL,
-    description TEXT,
-    category TEXT,
-    ref_user_uploader INT DEFAULT 0,
-    ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot', 'user' )), -- Constraint for ref_type
-    ref_id INT DEFAULT 0,
-    datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- When was this
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
+/* ----------  LOCATIONS  ---------- */
+CREATE TABLE IF NOT EXISTS locations  (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    owner_id    UUID, -- nullable user id
+    name        TEXT,
+    description UUID, -- nullable comment id
+    address     TEXT,
+    lat         NUMERIC(9,6),
+    lng         NUMERIC(9,6),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS attachments (
-    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(), -- UUID as primary key
-    id SERIAL UNIQUE NOT NULL, -- Auto-incremented integer ID
-    ref_type TEXT DEFAULT 'spot' CHECK (ref_type IN ('spot', 'note', 'attachment' )), -- Constraint for ref_type
-    ref_id INT DEFAULT 0,
-    name TEXT NOT NULL,
-    description TEXT,
-    content_type TEXT DEFAULT 'image/jpeg', -- Constraint for ref_type
-    url TEXT NOT NULL,
-    ref_user_uploader INT DEFAULT 0,
-    datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- When was this
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
+/* 
+    #################################################################
+    Complementary Data Models that build on top of base content types
+    #################################################################  
+*/
+
+/* ----------  USERS  ---------- */
+CREATE TABLE IF NOT EXISTS users  (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name        TEXT NOT NULL,
+    ext_ref     TEXT,
+    email       TEXT,
+    avatar      UUID,                -- nullable media id
+    bio         UUID,       -- nullable comment id
+    is_virtual  BOOLEAN NOT NULL DEFAULT FALSE,
+    memories    UUID[] NOT NULL DEFAULT '{}',  -- list of memory ids
+    start_at    TIMESTAMPTZ NOT NULL,
+    end_at      TIMESTAMPTZ,
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS users (
-    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- UUID as primary key
-    id SERIAL UNIQUE NOT NULL,                         -- Auto-incremented integer ID
-    ext_ref TEXT NOT NULL,                                -- User UUID from keycloak
-    email TEXT NOT NULL,                               -- Email of the user
-    role TEXT CHECK (role IN ('owner', 'contributor', 'admin', 'target', 'hybrid')),  -- Role with constraints
-    name TEXT NOT NULL,                  -- Preferred Username in keycloak
-    bio TEXT,                  -- Bio for the user
-    birthday TEXT NOT NULL,                  -- birthday of the user
-    passing TEXT ,                  -- date of passing of the user
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
+
+/* ----------  TRIPS  ---------- */
+CREATE TABLE IF NOT EXISTS trips  (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    owner_id        UUID, -- nullable user id
+    name            TEXT NOT NULL,
+    description     UUID, -- nullable comment id
+    transportation  TEXT, -- Enum checked at the API level
+    participants    UUID[] DEFAULT '{}',  -- user ids
+    stops           JSONB NOT NULL DEFAULT '[]',   -- array of {memoryId, order}
+    start_at        TIMESTAMPTZ,
+    end_at          TIMESTAMPTZ,
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    
+/* ----------  RELATIONS  ---------- */
+DO $$
+BEGIN
+    CREATE TYPE relation_label AS ENUM ('spouse','friend','parent','pet');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
+CREATE TABLE IF NOT EXISTS relations  (
+    id     UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    source UUID NOT NULL REFERENCES users(id),
+    target UUID NOT NULL REFERENCES users(id),
+    label  relation_label NOT NULL,
+    is_ex  BOOLEAN NOT NULL DEFAULT FALSE,
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (source, target, label, is_ex)
 );
 
-CREATE TABLE IF NOT EXISTS discovered (
-    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- UUID as primary key
-    id SERIAL UNIQUE NOT NULL,                         -- Auto-incremented integer ID
-    condition JSONB NOT NULL, -- JSONB to store the condition map
-    show BOOLEAN NOT NULL, -- Boolean field for the "show" value
-    ref_type TEXT NOT NULL DEFAULT 'spot' CHECK (ref_type IN ('spot', 'note', 'attachment' )), -- Constraint for ref_type
-    ref_id INT DEFAULT 0, -- Integer field for the ref_id
-    ref_user_uploader INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
+/* ----------  MEMORIES  ---------- */
+CREATE TABLE IF NOT EXISTS memories  (
+    id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    owner_id     UUID, -- nullable user id
+    location_id  UUID, -- nullable location id
+    name         TEXT NOT NULL,
+    description  UUID, -- nullable comment id
+    media        UUID[] NOT NULL DEFAULT '{}',  -- media ids
+    tags         TEXT[] NOT NULL DEFAULT '{}',  -- tag names
+    comments     UUID[] NOT NULL DEFAULT '{}',  -- comment ids
+    start_at     TIMESTAMPTZ,
+    end_at       TIMESTAMPTZ,
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- This table will have a single entry and each column with be handled in its own endpoint 
-CREATE TABLE IF NOT EXISTS global (
-    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- UUID as primary key
-    id SERIAL UNIQUE NOT NULL,                         -- Auto-incremented integer ID
-    family_tree JSONB NOT NULL, -- JSONB to store the family tree json
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
-);
 
--- This table will have a single entry and each column with be handled in its own endpoint 
-CREATE TABLE IF NOT EXISTS trips (
-    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),  -- UUID as primary key
-    id SERIAL UNIQUE NOT NULL,                         -- Auto-incremented integer ID
-    geometry JSONB NOT NULL, -- JSONB to store the family tree json
-    mode TEXT NOT NULL DEFAULT 'car' CHECK (mode IN ('car', 'foot' )), -- Constraint for mode
-    ref_type_start TEXT NOT NULL DEFAULT 'spot' CHECK (ref_type_start IN ('spot', 'note' )), -- Constraint for ref_type
-    ref_type_end TEXT NOT NULL DEFAULT 'spot' CHECK (ref_type_end IN ('spot', 'note' )), -- Constraint for ref_type
-    ref_id_start INT DEFAULT 0, -- Integer field for the ref_id_start
-    ref_id_end INT DEFAULT 0, -- Integer field for the ref_id_end
-    ref_user_uploader INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Automatically generated
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Automatically managed by trigger
-);
+/* ----------  useful GIN indexes for array lookups  ---------- */
+CREATE INDEX IF NOT EXISTS idx_users_memories    ON users    USING GIN (memories);
+CREATE INDEX IF NOT EXISTS idx_media_participants ON media   USING GIN (participants);
+CREATE INDEX IF NOT EXISTS idx_media_comments     ON media   USING GIN (comments);
+CREATE INDEX IF NOT EXISTS idx_memories_media     ON memories USING GIN (media);
+CREATE INDEX IF NOT EXISTS idx_memories_comments  ON memories USING GIN (comments);
+CREATE INDEX IF NOT EXISTS idx_trips_participants ON trips   USING GIN (participants);
+
 
 -- Trigger functions to update timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS
+$$
 BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
+    NEW.updated_at := CURRENT_TIMESTAMP;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
--- Create triggers for each table (base_table not working)
-CREATE OR REPLACE TRIGGER update_spots_updated_at
-BEFORE UPDATE ON spots
-FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- 2.  install trigger on every table that has updated_at
+DO
+$$
+DECLARE
+    t  text;
+    trg text;
+BEGIN
+    FOR t IN
+        SELECT table_schema||'.'||table_name
+        FROM   information_schema.columns
+        WHERE  column_name = 'updated_at'
+          AND  table_schema NOT IN ('pg_catalog','information_schema')
+    LOOP
+        trg := 'trg_' || regexp_replace(t, '\W', '_', 'g') || '_updated_at';
+        EXECUTE format(
+            'CREATE OR REPLACE TRIGGER %I '
+            'BEFORE UPDATE ON %s '
+            'FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();',
+            trg, t
+        );
+    END LOOP;
+END;
+$$;
 
-CREATE OR REPLACE TRIGGER update_known_locations_updated_at
-BEFORE UPDATE ON known_locations
-FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE OR REPLACE TRIGGER update_attachments_updated_at
-BEFORE UPDATE ON attachments
-FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE OR REPLACE TRIGGER update_users_updated_at
-BEFORE UPDATE ON users
-FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE OR REPLACE TRIGGER update_notes_updated_at
-BEFORE UPDATE ON notes
-FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE OR REPLACE TRIGGER update_discovered_updated_at
-BEFORE UPDATE ON discovered
-FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 `

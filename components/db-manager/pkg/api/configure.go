@@ -2,10 +2,11 @@ package api
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"famquest/components/db-manager/pkg/connection"
 	"famquest/components/db-manager/pkg/models"
 	"famquest/components/go-common/logger"
-	"net/http"
 )
 
 // Configure godoc
