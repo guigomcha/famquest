@@ -28,6 +28,7 @@ func (h TripHandler) buildEntityFromInput(dto models.TripInputAPI) models.Trip {
 		Name:           dto.Name,
 		Transportation: dto.Transportation,
 		Stops:          dto.Stops,
+		DescriptionId:  dto.DescriptionId,
 	}
 	if dto.StartAt != nil {
 		t.StartAt = utils.UnixPtrToTime(dto.StartAt)

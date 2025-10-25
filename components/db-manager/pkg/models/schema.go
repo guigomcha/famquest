@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS locations  (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     owner_id    UUID, -- nullable user id
     name        TEXT,
-    description UUID, -- nullable comment id
+    description_id UUID, -- nullable comment id
     address     TEXT,
     lat         NUMERIC(9,6),
     lng         NUMERIC(9,6),
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS users  (
     avatar      UUID,                -- nullable media id
     bio         UUID,       -- nullable comment id
     is_virtual  BOOLEAN NOT NULL DEFAULT FALSE,
-    memories    UUID[] NOT NULL DEFAULT '{}',  -- list of memory ids
+    posts    UUID[] NOT NULL DEFAULT '{}',  -- list of memory ids
     start_at    TIMESTAMPTZ NOT NULL,
     end_at      TIMESTAMPTZ,
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -105,14 +105,14 @@ CREATE TABLE IF NOT EXISTS relations  (
     UNIQUE (source, target, label, is_ex)
 );
 
-/* ----------  MEMORIES  ---------- */
-CREATE TABLE IF NOT EXISTS memories  (
+/* ----------  posts  ---------- */
+CREATE TABLE IF NOT EXISTS posts  (
     id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     owner_id     UUID, -- nullable user id
     location_id  UUID, -- nullable location id
     name         TEXT NOT NULL,
-    description  UUID, -- nullable comment id
-    media        UUID[] NOT NULL DEFAULT '{}',  -- media ids
+    description_id  UUID, -- nullable comment id
+    medias        UUID[] NOT NULL DEFAULT '{}',  -- media ids
     tags         TEXT[] NOT NULL DEFAULT '{}',  -- tag names
     comments     UUID[] NOT NULL DEFAULT '{}',  -- comment ids
     start_at     TIMESTAMPTZ,
@@ -123,11 +123,11 @@ CREATE TABLE IF NOT EXISTS memories  (
 
 
 /* ----------  useful GIN indexes for array lookups  ---------- */
-CREATE INDEX IF NOT EXISTS idx_users_memories    ON users    USING GIN (memories);
+CREATE INDEX IF NOT EXISTS posts    ON users    USING GIN (posts);
 CREATE INDEX IF NOT EXISTS idx_media_participants ON media   USING GIN (participants);
 CREATE INDEX IF NOT EXISTS idx_media_comments     ON media   USING GIN (comments);
-CREATE INDEX IF NOT EXISTS idx_memories_media     ON memories USING GIN (media);
-CREATE INDEX IF NOT EXISTS idx_memories_comments  ON memories USING GIN (comments);
+CREATE INDEX IF NOT EXISTS posts_media     ON posts USING GIN (media);
+CREATE INDEX IF NOT EXISTS posts_comments  ON posts USING GIN (comments);
 CREATE INDEX IF NOT EXISTS idx_trips_participants ON trips   USING GIN (participants);
 
 

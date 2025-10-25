@@ -15,10 +15,10 @@ type PostgresLocation struct{ db *sqlx.DB }
 func NewPostgresLocation() *PostgresLocation { return &PostgresLocation{db: connection.DB} }
 
 func (r *PostgresLocation) Create(ctx context.Context, l models.Location) (models.Location, error) {
-	const q = `INSERT INTO locations (owner_id,name,description,address,lat,lng)
+	const q = `INSERT INTO locations (owner_id,name,description_id,address,lat,lng)
 	           VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`
 	row := r.db.QueryRowxContext(ctx, q,
-		l.OwnerID, l.Name, l.Description, l.Address, l.Lat, l.Lng)
+		l.OwnerID, l.Name, l.DescriptionId, l.Address, l.Lat, l.Lng)
 	if err := row.StructScan(&l); err != nil {
 		return l, fmt.Errorf("create location: %w", err)
 	}
@@ -33,10 +33,10 @@ func (r *PostgresLocation) Get(ctx context.Context, id string) (models.Location,
 
 func (r *PostgresLocation) Update(ctx context.Context, id string, l models.Location) (models.Location, error) {
 	const q = `UPDATE locations
-	           SET name=$1,description=$2,address=$3,lat=$4,lng=$5
+	           SET name=$1,description_id=$2,address=$3,lat=$4,lng=$5
 	           WHERE id=$6 RETURNING *`
 	row := r.db.QueryRowxContext(ctx, q,
-		l.Name, l.Description, l.Address, l.Lat, l.Lng, id)
+		l.Name, l.DescriptionId, l.Address, l.Lat, l.Lng, id)
 	if err := row.StructScan(&l); err != nil {
 		return l, fmt.Errorf("update location: %w", err)
 	}

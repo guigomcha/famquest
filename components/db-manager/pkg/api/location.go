@@ -41,11 +41,11 @@ func (h LocationHandler) CreateLocation(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	entity := models.Location{
-		Lat:         dto.Lat,
-		Lng:         dto.Lng,
-		Description: dto.Description,
-		Address:     *dto.Address,
-		Name:        *dto.Name,
+		Lat:           dto.Lat,
+		Lng:           dto.Lng,
+		DescriptionId: dto.DescriptionId,
+		Address:       *dto.Address,
+		Name:          *dto.Name,
 	}
 	entity.OwnerID = utils.MustGetUserID(r.Context())
 	out, err := h.repo.Create(r.Context(), entity)
@@ -95,11 +95,11 @@ func (h LocationHandler) UpdateLocation(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	entity := models.Location{
-		Lat:         dto.Lat,
-		Lng:         dto.Lng,
-		Description: dto.Description,
-		Address:     *dto.Address,
-		Name:        *dto.Name,
+		Lat:           dto.Lat,
+		Lng:           dto.Lng,
+		DescriptionId: dto.DescriptionId,
+		Address:       *dto.Address,
+		Name:          *dto.Name,
 	}
 	out, err := h.repo.Update(r.Context(), id, entity)
 	if err != nil {

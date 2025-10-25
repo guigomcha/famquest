@@ -67,6 +67,15 @@ definitions:
       total:
         type: integer
     type: object
+  models.ListResp-models_Post:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.Post'
+        type: array
+      total:
+        type: integer
+    type: object
   models.ListResp-models_Relation:
     properties:
       items:
@@ -100,7 +109,7 @@ definitions:
         type: string
       createdAt:
         type: string
-      description:
+      descriptionId:
         description: -> comment id
         type: string
       id:
@@ -121,7 +130,7 @@ definitions:
       address:
         example: 221B Baker St, London
         type: string
-      description:
+      descriptionId:
         example: 550e8400-e29b-41d4-a716-446655440000
         format: uuid
         type: string
@@ -169,6 +178,75 @@ definitions:
         description: served path
         type: string
     type: object
+  models.Post:
+    properties:
+      comments:
+        description: comment ids
+        items:
+          type: string
+        type: array
+      createdAt:
+        type: string
+      descriptionId:
+        description: -> comment id
+        type: string
+      endAt:
+        type: string
+      id:
+        type: string
+      locationId:
+        description: nullable
+        type: string
+      medias:
+        description: media ids
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      ownerId:
+        type: string
+      startAt:
+        type: string
+      tags:
+        description: tag names
+        items:
+          type: string
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  models.PostInputAPI:
+    properties:
+      comments:
+        description: UUID strings
+        items:
+          type: string
+        type: array
+      descriptionId:
+        format: uuid
+        type: string
+      endAt:
+        type: integer
+      locationId:
+        format: uuid
+        type: string
+      medias:
+        description: UUID strings
+        items:
+          type: string
+        type: array
+      name:
+        example: Summer vacation
+        type: string
+      startAt:
+        type: integer
+      tags:
+        description: tag names
+        items:
+          type: string
+        type: array
+    type: object
   models.Relation:
     properties:
       createdAt:
@@ -215,7 +293,7 @@ definitions:
     properties:
       createdAt:
         type: string
-      description:
+      descriptionId:
         description: -> comment id
         type: string
       endAt:
@@ -246,7 +324,7 @@ definitions:
     type: object
   models.TripInputAPI:
     properties:
-      description:
+      descriptionId:
         format: uuid
         type: string
       endAt:
@@ -277,17 +355,17 @@ definitions:
     type: object
   models.TripStop:
     properties:
-      memoryId:
+      id:
         type: string
       order:
         type: integer
     type: object
   models.User:
     properties:
-      avatar:
+      avatarId:
         format: uuid
         type: string
-      bio:
+      bioId:
         format: uuid
         type: string
       createdAt:
@@ -307,13 +385,13 @@ definitions:
       isVirtual:
         example: false
         type: boolean
-      memories:
-        items:
-          type: string
-        type: array
       name:
         example: Sarah Chen
         type: string
+      posts:
+        items:
+          type: string
+        type: array
       startAt:
         example: "2025-09-01T15:04:05Z"
         type: string
@@ -323,10 +401,10 @@ definitions:
     type: object
   models.UserInputAPI:
     properties:
-      avatar:
+      avatarId:
         format: uuid
         type: string
-      bio:
+      bioId:
         format: uuid
         type: string
       email:
@@ -339,13 +417,13 @@ definitions:
       isVirtual:
         example: false
         type: boolean
-      memories:
-        items:
-          type: string
-        type: array
       name:
         example: Sarah Chen
         type: string
+      posts:
+        items:
+          type: string
+        type: array
       startAt:
         type: integer
     type: object
@@ -803,6 +881,132 @@ paths:
       summary: Update media file
       tags:
       - media
+  /posts:
+    get:
+      description: Return paginated post list
+      parameters:
+      - description: page size
+        in: query
+        name: limit
+        type: integer
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ListResp-models_Post'
+      summary: List posts
+      tags:
+      - posts
+    post:
+      consumes:
+      - application/json
+      description: Creates a new post
+      parameters:
+      - description: payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.PostInputAPI'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Create post
+      tags:
+      - posts
+  /posts/{id}:
+    delete:
+      description: Remove a post
+      parameters:
+      - description: post id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Delete post
+      tags:
+      - posts
+    get:
+      description: Return a single post
+      parameters:
+      - description: post id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Post'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Get post by id
+      tags:
+      - posts
+    put:
+      consumes:
+      - application/json
+      description: Update an existing post
+      parameters:
+      - description: post id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.PostInputAPI'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Update post
+      tags:
+      - posts
   /relations:
     get:
       description: Return paginated relation list

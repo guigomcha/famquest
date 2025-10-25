@@ -12,7 +12,6 @@ import (
 	"famquest/components/db-manager/pkg/utils"
 	"famquest/components/go-common/logger"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -36,16 +35,16 @@ func (h UserHandler) buildEntityFromCreate(dto models.UserInputAPI) models.User 
 		Email:     dto.Email,
 		ExtRef:    dto.ExtRef,
 		IsVirtual: dto.IsVirtual,
-		Memories:  models.UUIDArray{},
+		Posts:     models.UUIDArray{},
 		StartAt:   time.UnixMilli(dto.StartAt),
 	}
-	if dto.Avatar != nil {
-		val := uuid.MustParse(*dto.Avatar)
-		usr.Avatar = &val
+	if dto.AvatarId != nil {
+		val := *dto.AvatarId
+		usr.AvatarId = &val
 	}
-	if dto.Bio != nil {
-		val := uuid.MustParse(*dto.Bio)
-		usr.Bio = &val
+	if dto.BioId != nil {
+		val := *dto.BioId
+		usr.BioId = &val
 	}
 	if dto.EndAt != nil {
 		val := time.UnixMilli(*dto.EndAt)
@@ -129,7 +128,7 @@ func (h UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	usr.Email = dto.Email
 	usr.ExtRef = dto.ExtRef
 	usr.IsVirtual = dto.IsVirtual
-	usr.Memories = dto.Memories
+	usr.Posts = dto.Posts
 	usr.StartAt = time.UnixMilli(dto.StartAt)
 	if dto.EndAt != nil {
 		val := time.UnixMilli(*dto.EndAt)

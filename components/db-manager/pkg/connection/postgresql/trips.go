@@ -17,10 +17,10 @@ func NewPostgresTrip() *PostgresTrip { return &PostgresTrip{db: connection.DB} }
 
 func (r *PostgresTrip) Create(ctx context.Context, t models.Trip) (models.Trip, error) {
 	stopsJSON, _ := json.Marshal(t.Stops)
-	const q = `INSERT INTO trips (owner_id,name,description,transportation,participants,stops,start_at,end_at)
+	const q = `INSERT INTO trips (owner_id,name,description_id,transportation,participants,stops,start_at,end_at)
 	           VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`
 	row := r.db.QueryRowxContext(ctx, q,
-		t.OwnerID, t.Name, t.Description, t.Transportation, t.Participants, stopsJSON, t.StartAt, t.EndAt)
+		t.OwnerID, t.Name, t.DescriptionId, t.Transportation, t.Participants, stopsJSON, t.StartAt, t.EndAt)
 	if err := row.StructScan(&t); err != nil {
 		return t, fmt.Errorf("create trip: %w", err)
 	}
@@ -31,7 +31,7 @@ func (r *PostgresTrip) Get(ctx context.Context, id string) (models.Trip, error) 
 	var t models.Trip
 	var stopsJSON []byte
 	err := r.db.QueryRowxContext(ctx, `SELECT * FROM trips WHERE id=$1`, id).
-		Scan(&t.ID, &t.OwnerID, &t.Name, &t.Description, &t.Transportation,
+		Scan(&t.ID, &t.OwnerID, &t.Name, &t.DescriptionId, &t.Transportation,
 			&t.Participants, &stopsJSON, &t.StartAt, &t.EndAt, &t.UpdatedAt, &t.CreatedAt)
 	if err != nil {
 		return t, err
@@ -43,10 +43,10 @@ func (r *PostgresTrip) Get(ctx context.Context, id string) (models.Trip, error) 
 func (r *PostgresTrip) Update(ctx context.Context, id string, t models.Trip) (models.Trip, error) {
 	stopsJSON, _ := json.Marshal(t.Stops)
 	const q = `UPDATE trips
-	           SET name=$1,description=$2,transportation=$3,participants=$4,stops=$5,start_at=$6,end_at=$7
+	           SET name=$1,description_id=$2,transportation=$3,participants=$4,stops=$5,start_at=$6,end_at=$7
 	           WHERE id=$8 RETURNING *`
 	row := r.db.QueryRowxContext(ctx, q,
-		t.Name, t.Description, t.Transportation, t.Participants, stopsJSON, t.StartAt, t.EndAt, id)
+		t.Name, t.DescriptionId, t.Transportation, t.Participants, stopsJSON, t.StartAt, t.EndAt, id)
 	if err := row.StructScan(&t); err != nil {
 		return t, fmt.Errorf("update trip: %w", err)
 	}
@@ -74,7 +74,7 @@ func (r *PostgresTrip) List(ctx context.Context, limit, offset int) ([]models.Tr
 	for rows.Next() {
 		var t models.Trip
 		var stopsJSON []byte
-		if err := rows.Scan(&t.ID, &t.OwnerID, &t.Name, &t.Description, &t.Transportation,
+		if err := rows.Scan(&t.ID, &t.OwnerID, &t.Name, &t.DescriptionId, &t.Transportation,
 			&t.Participants, &stopsJSON, &t.StartAt, &t.EndAt, &t.UpdatedAt, &t.CreatedAt); err != nil {
 			continue
 		}

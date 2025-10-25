@@ -691,6 +691,197 @@ const docTemplate = `{
                 }
             }
         },
+        "/posts": {
+            "get": {
+                "description": "Return paginated post list",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "List posts",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ListResp-models_Post"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Create post",
+                "parameters": [
+                    {
+                        "description": "payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.PostInputAPI"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Post"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/posts/{id}": {
+            "get": {
+                "description": "Return a single post",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Get post by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "post id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Post"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Update post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "post id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.PostInputAPI"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Post"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove a post",
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Delete post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "post id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResp"
+                        }
+                    }
+                }
+            }
+        },
         "/relations": {
             "get": {
                 "description": "Return paginated relation list",
@@ -1374,6 +1565,20 @@ const docTemplate = `{
                 }
             }
         },
+        "models.ListResp-models_Post": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Post"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.ListResp-models_Relation": {
             "type": "object",
             "properties": {
@@ -1425,7 +1630,7 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
-                "description": {
+                "descriptionId": {
                     "description": "-\u003e comment id",
                     "type": "string"
                 },
@@ -1456,7 +1661,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "221B Baker St, London"
                 },
-                "description": {
+                "descriptionId": {
                     "type": "string",
                     "format": "uuid",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
@@ -1525,6 +1730,105 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Post": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "description": "comment ids",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "descriptionId": {
+                    "description": "-\u003e comment id",
+                    "type": "string"
+                },
+                "endAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "locationId": {
+                    "description": "nullable",
+                    "type": "string"
+                },
+                "medias": {
+                    "description": "media ids",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ownerId": {
+                    "type": "string"
+                },
+                "startAt": {
+                    "type": "string"
+                },
+                "tags": {
+                    "description": "tag names",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.PostInputAPI": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "description": "UUID strings",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "descriptionId": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "endAt": {
+                    "type": "integer"
+                },
+                "locationId": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "medias": {
+                    "description": "UUID strings",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Summer vacation"
+                },
+                "startAt": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "description": "tag names",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "models.Relation": {
             "type": "object",
             "properties": {
@@ -1589,7 +1893,7 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
-                "description": {
+                "descriptionId": {
                     "description": "-\u003e comment id",
                     "type": "string"
                 },
@@ -1634,7 +1938,7 @@ const docTemplate = `{
         "models.TripInputAPI": {
             "type": "object",
             "properties": {
-                "description": {
+                "descriptionId": {
                     "type": "string",
                     "format": "uuid"
                 },
@@ -1677,7 +1981,7 @@ const docTemplate = `{
         "models.TripStop": {
             "type": "object",
             "properties": {
-                "memoryId": {
+                "id": {
                     "type": "string"
                 },
                 "order": {
@@ -1688,11 +1992,11 @@ const docTemplate = `{
         "models.User": {
             "type": "object",
             "properties": {
-                "avatar": {
+                "avatarId": {
                     "type": "string",
                     "format": "uuid"
                 },
-                "bio": {
+                "bioId": {
                     "type": "string",
                     "format": "uuid"
                 },
@@ -1719,15 +2023,15 @@ const docTemplate = `{
                     "type": "boolean",
                     "example": false
                 },
-                "memories": {
+                "name": {
+                    "type": "string",
+                    "example": "Sarah Chen"
+                },
+                "posts": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Sarah Chen"
                 },
                 "startAt": {
                     "type": "string",
@@ -1742,11 +2046,11 @@ const docTemplate = `{
         "models.UserInputAPI": {
             "type": "object",
             "properties": {
-                "avatar": {
+                "avatarId": {
                     "type": "string",
                     "format": "uuid"
                 },
-                "bio": {
+                "bioId": {
                     "type": "string",
                     "format": "uuid"
                 },
@@ -1764,15 +2068,15 @@ const docTemplate = `{
                     "type": "boolean",
                     "example": false
                 },
-                "memories": {
+                "name": {
+                    "type": "string",
+                    "example": "Sarah Chen"
+                },
+                "posts": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Sarah Chen"
                 },
                 "startAt": {
                     "type": "integer"

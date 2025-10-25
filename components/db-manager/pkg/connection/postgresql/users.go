@@ -19,10 +19,10 @@ func NewPostgresUser() *PostgresUser { return &PostgresUser{db: connection.DB} }
 /* ---------- standard CRUD ---------- */
 
 func (r *PostgresUser) Create(ctx context.Context, u models.User) (models.User, error) {
-	const q = `INSERT INTO users (name,email,avatar,bio,ext_ref,is_virtual,memories,start_at,end_at)
+	const q = `INSERT INTO users (name,email,avatar,bio,ext_ref,is_virtual,posts,start_at,end_at)
 	           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`
 	row := r.db.QueryRowxContext(ctx, q,
-		u.Name, u.Email, u.Avatar, u.Bio, u.ExtRef, u.IsVirtual, pq.Array(u.Memories), u.StartAt, u.EndAt)
+		u.Name, u.Email, u.AvatarId, u.BioId, u.ExtRef, u.IsVirtual, pq.Array(u.Posts), u.StartAt, u.EndAt)
 	if err := row.StructScan(&u); err != nil {
 		return u, fmt.Errorf("create user: %w", err)
 	}
@@ -37,10 +37,10 @@ func (r *PostgresUser) Get(ctx context.Context, id string) (models.User, error) 
 
 func (r *PostgresUser) Update(ctx context.Context, id string, u models.User) (models.User, error) {
 	const q = `UPDATE users
-	           SET name=$1,email=$2,avatar=$3,bio=$4,ext_ref=$5,is_virtual=$6,memories=$7,start_at=$8,end_at=$9
+	           SET name=$1,email=$2,avatar=$3,bio=$4,ext_ref=$5,is_virtual=$6,posts=$7,start_at=$8,end_at=$9
 	           WHERE id=$10 RETURNING *`
 	row := r.db.QueryRowxContext(ctx, q,
-		u.Name, u.Email, u.Avatar, u.Bio, u.ExtRef, u.IsVirtual, pq.Array(u.Memories), u.StartAt, u.EndAt, id)
+		u.Name, u.Email, u.AvatarId, u.BioId, u.ExtRef, u.IsVirtual, pq.Array(u.Posts), u.StartAt, u.EndAt, id)
 	if err := row.StructScan(&u); err != nil {
 		return u, fmt.Errorf("update user: %w", err)
 	}
@@ -49,7 +49,7 @@ func (r *PostgresUser) Update(ctx context.Context, id string, u models.User) (mo
 
 /* ---------- DELETE with referential guard ---------- */
 
-var ErrUserStillReferenced = errors.New("user is still referenced in media, comments, memories or trips")
+var ErrUserStillReferenced = errors.New("user is still referenced in media, comments, posts or trips")
 
 func (r *PostgresUser) Delete(ctx context.Context, id string) error {
 	tx, err := r.db.BeginTxx(ctx, nil)
@@ -63,7 +63,7 @@ func (r *PostgresUser) Delete(ctx context.Context, id string) error {
 	err = tx.GetContext(ctx, &n,
 		`SELECT 1 FROM media     WHERE owner_id = $1 UNION
 		 SELECT 1 FROM comments  WHERE owner_id = $1 UNION
-		 SELECT 1 FROM memories  WHERE owner_id = $1 UNION
+		 SELECT 1 FROM posts  WHERE owner_id = $1 UNION
 		 SELECT 1 FROM trips     WHERE owner_id = $1 LIMIT 1`, id)
 	if err == nil { // found at least one row
 		return ErrUserStillReferenced

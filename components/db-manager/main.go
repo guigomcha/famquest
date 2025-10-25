@@ -71,6 +71,7 @@ func getRouter() *mux.Router {
 	var lh api.LocationHandler
 	var th api.TripHandler
 	var rh api.RelationHandler
+	var ph api.PostHandler
 	if usePostgres := os.Getenv("POSTGRES_DB_HOST") != ""; usePostgres {
 		err := connection.ConnectToPostgreSQL()
 		if err != nil {
@@ -88,6 +89,8 @@ func getRouter() *mux.Router {
 		lh = api.NewLocationHandler(locationRepo)
 		relationRepo := postgresql.NewPostgresRelation()
 		rh = api.NewRelationHandler(relationRepo)
+		postRepo := postgresql.NewPostgresPost()
+		ph = api.NewPostHandler(postRepo)
 	} else {
 		userRepo := memory.NewMemoryCRUD[models.User]()
 		uh = api.NewUserHandler(userRepo)
@@ -101,6 +104,8 @@ func getRouter() *mux.Router {
 		lh = api.NewLocationHandler(locationRepo)
 		relationRepo := memory.NewMemoryCRUD[models.Relation]()
 		rh = api.NewRelationHandler(relationRepo)
+		postRepo := memory.NewMemoryCRUD[models.Post]()
+		ph = api.NewPostHandler(postRepo)
 	}
 
 	r := mux.NewRouter()
@@ -143,6 +148,12 @@ func getRouter() *mux.Router {
 	r.HandleFunc("/relations/{id}", rh.GetRelation).Methods("GET")
 	r.HandleFunc("/relations/{id}", rh.UpdateRelation).Methods("PUT")
 	r.HandleFunc("/relations/{id}", rh.DeleteRelation).Methods("DELETE")
+
+	r.HandleFunc("/posts", ph.ListPosts).Methods("GET")
+	r.HandleFunc("/posts", ph.CreatePost).Methods("POST")
+	r.HandleFunc("/posts/{id}", ph.GetPost).Methods("GET")
+	r.HandleFunc("/posts/{id}", ph.UpdatePost).Methods("PUT")
+	r.HandleFunc("/posts/{id}", ph.DeletePost).Methods("DELETE")
 	return r
 
 }
