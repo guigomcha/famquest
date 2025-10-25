@@ -2,158 +2,152 @@ package api
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"famquest/components/db-manager/pkg/connection"
 	"famquest/components/db-manager/pkg/models"
-	"famquest/components/go-common/logger"
-	"fmt"
-	"net/http"
+	"famquest/components/db-manager/pkg/utils"
 
 	"github.com/gorilla/mux"
 )
 
-// TripPost creates a new trip
-// @Summary Create a trip
-// @Description Create a new trip
-// @Tags trip
-// @Accept json
-// @Produce json
-// @Param trip body models.APITrips true "Trip data"
-// @Success 201 {object} models.Trips
-// @Router /trip [post]
-func TripPost(w http.ResponseWriter, r *http.Request) {
-	logger.Log.Info("Called to func TripPost")
-	info := handleHeaders(w, r)
-	var trip models.Trips
-	var dest connection.DbInterface
-	if err := json.NewDecoder(r.Body).Decode(&trip); err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	logger.Log.Debug("object decoded")
-
-	trip.RefUserUploader = info["user"].(int)
-	dest, httpStatus, err := crudPost(&trip)
-	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, err.Error(), httpStatus)
-		return
-	}
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(dest)
+type TripHandler struct {
+	*CRUDHandler[models.Trip, models.TripInputAPI, models.TripInputAPI]
 }
 
-// TripGetAll retrieves all trips
-// @Summary Retrieve all trips
-// @Description Get a list of all trips
-// @Tags trip
-// @Produce json
-// @Success 200 {array} models.Trips
-// @Router /trip [get]
-func TripGetAll(w http.ResponseWriter, r *http.Request) {
-	logger.Log.Info("Called to func TripGetAll")
-	handleHeaders(w, r)
-	dest, httpStatus, err := crudGetAll(&models.Trips{}, "")
-	logger.Log.Debugf("objects obtained '%d'", len(dest))
-	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, err.Error(), httpStatus)
-		return
+func NewTripHandler(repo connection.CRUD[models.Trip]) TripHandler {
+	h := &CRUDHandler[models.Trip, models.TripInputAPI, models.TripInputAPI]{
+		repo: repo,
+		name: "trip",
 	}
-	if len(dest) == 0 {
-		empty := make([]string, 0)
-		json.NewEncoder(w).Encode(empty)
-	} else {
-		json.NewEncoder(w).Encode(dest)
-	}
+	return TripHandler{h}
 }
 
-// TripGet retrieves a specific trip by ID
-// @Summary Retrieve a trip by ID
-// @Description Get trip details by ID
-// @Tags trip
-// @Produce json
-// @Param id path int true "Trip ID"
-// @Success 200 {object} models.Trips
-// @Router /trip/{id} [get]
-func TripGet(w http.ResponseWriter, r *http.Request) {
-	logger.Log.Info("Called to func TripGet")
-	handleHeaders(w, r)
-	var dest connection.DbInterface
-	dest, httpStatus, err := crudGet(&models.Trips{}, mux.Vars(r))
-	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, err.Error(), httpStatus)
-		return
+func (h TripHandler) buildEntityFromInput(dto models.TripInputAPI) models.Trip {
+	t := models.Trip{
+		Name:           dto.Name,
+		Transportation: dto.Transportation,
+		Stops:          dto.Stops,
+		DescriptionId:  dto.DescriptionId,
 	}
-	json.NewEncoder(w).Encode(dest)
+	if dto.StartAt != nil {
+		t.StartAt = utils.UnixPtrToTime(dto.StartAt)
+	}
+	if dto.EndAt != nil {
+		t.EndAt = utils.UnixPtrToTime(dto.EndAt)
+	}
+	return t
 }
 
-// TripDelete deletes a trip by ID
-// @Summary Delete a trip by ID
-// @Description Delete a trip and nullify its references in spots
-// @Tags trip
-// @Produce json
-// @Param id path int true "Trip ID"
-// @Success 204 {string} string "No Content"
-// @Router /trip/{id} [delete]
-func TripDelete(w http.ResponseWriter, r *http.Request) {
-	logger.Log.Info("Called to func TripDelete")
-	handleHeaders(w, r)
-	// First delete the trip
-	var trip models.Trips
-	httpStatus, err := crudDelete(&trip, mux.Vars(r))
+// CreateTrip godoc
+// @Summary     Create trip
+// @Description Creates a new trip
+// @Tags        trips
+// @Accept      json
+// @Produce     json
+// @Param       body body models.TripInputAPI true "payload"
+// @Success     201  {object} models.Trip
+// @Failure     400  {object} models.ErrorResp
+// @Failure     500  {object} models.ErrorResp
+// @Router      /trips [post]
+func (h TripHandler) CreateTrip(w http.ResponseWriter, r *http.Request) {
+	var dto models.TripInputAPI
+	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, models.ErrorResp{Error: "invalid json"})
+		return
+	}
+	entity := h.buildEntityFromInput(dto)
+	entity.OwnerID = utils.MustGetUserID(r.Context())
+	out, err := h.repo.Create(r.Context(), entity)
 	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, err.Error(), httpStatus)
+		utils.WriteJSON(w, http.StatusInternalServerError, models.ErrorResp{Error: err.Error()})
+		return
+	}
+	utils.WriteJSON(w, http.StatusCreated, out)
+}
+
+// GetTrip godoc
+// @Summary     Get trip by id
+// @Description Return a single trip
+// @Tags        trips
+// @Produce     json
+// @Param       id  path string true "trip id"
+// @Success     200 {object} models.Trip
+// @Failure     404 {object} models.ErrorResp
+// @Router      /trips/{id} [get]
+func (h TripHandler) GetTrip(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	out, err := h.repo.Get(r.Context(), id)
+	if err != nil {
+		utils.WriteJSON(w, http.StatusNotFound, models.ErrorResp{Error: "not found"})
+		return
+	}
+	utils.WriteJSON(w, http.StatusOK, out)
+}
+
+// UpdateTrip godoc
+// @Summary     Update trip
+// @Description Update an existing trip
+// @Tags        trips
+// @Accept      json
+// @Produce     json
+// @Param       id   path string true "trip id"
+// @Param       body body models.TripInputAPI true "payload"
+// @Success     200 {object} models.Trip
+// @Failure     400  {object} models.ErrorResp
+// @Failure     404 {object} models.ErrorResp
+// @Router      /trips/{id} [put]
+func (h TripHandler) UpdateTrip(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	var dto models.TripInputAPI
+	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, models.ErrorResp{Error: "invalid json"})
+		return
+	}
+	entity := h.buildEntityFromInput(dto)
+	out, err := h.repo.Update(r.Context(), id, entity)
+	if err != nil {
+		utils.WriteJSON(w, http.StatusNotFound, models.ErrorResp{Error: "not found"})
+		return
+	}
+	utils.WriteJSON(w, http.StatusOK, out)
+}
+
+// DeleteTrip godoc
+// @Summary     Delete trip
+// @Description Remove a trip
+// @Tags        trips
+// @Param       id  path string true "trip id"
+// @Success     204
+// @Failure     404 {object} models.ErrorResp
+// @Router      /trips/{id} [delete]
+func (h TripHandler) DeleteTrip(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	if err := h.repo.Delete(r.Context(), id); err != nil {
+		utils.WriteJSON(w, http.StatusNotFound, models.ErrorResp{Error: "not found"})
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// TripPut updates a trip by ID
-// @Summary Update a trip by ID
-// @Description Update trip details by ID
-// @Tags trip
-// @Accept json
-// @Produce json
-// @Param id path int true "Trip ID"
-// @Param trip body models.APITrips true "Trip data"
-// @Success 200 {object} models.Trips
-// @Router /trip/{id} [put]
-func TripPut(w http.ResponseWriter, r *http.Request) {
-	logger.Log.Info("Called to func TripPut")
-	info := handleHeaders(w, r)
-	var trip models.Trips
-	var dest connection.DbInterface
-	err := json.NewDecoder(r.Body).Decode(&trip)
+// ListTrips godoc
+// @Summary     List trips
+// @Description Return paginated trip list
+// @Tags        trips
+// @Produce     json
+// @Param       limit  query int false "page size"
+// @Param       offset query int false "offset"
+// @Success     200 {object} models.ListResp[models.Trip]
+// @Router      /trips [get]
+func (h TripHandler) ListTrips(w http.ResponseWriter, r *http.Request) {
+	limit, offset := utils.GetLimitOffset(r)
+	items, total, err := h.repo.List(r.Context(), limit, offset)
 	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		utils.WriteJSON(w, http.StatusInternalServerError, models.ErrorResp{Error: err.Error()})
 		return
 	}
-	intId, err := parseId(mux.Vars(r)["id"])
-	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if trip.ID > 0 && trip.ID != intId {
-		msg := fmt.Sprintf("trip id in payload '%d' and path '%d' do not match", trip.ID, intId)
-		logger.Log.Error(msg)
-		http.Error(w, fmt.Sprintf("trip id in payload '%d' and path '%d' do not match", trip.ID, intId), http.StatusBadRequest)
-		return
-	}
-	trip.ID = intId
-	trip.RefUserUploader = info["user"].(int)
-	// Update the trip
-	logger.Log.Debug("Decoded object")
-	dest, httpStatus, err := crudPut(&trip, mux.Vars(r))
-	if err != nil {
-		logger.Log.Error(err.Error())
-		http.Error(w, err.Error(), httpStatus)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(dest)
+	utils.WriteJSON(w, http.StatusOK, models.ListResp[models.Trip]{
+		Items: items,
+		Total: total,
+	})
 }

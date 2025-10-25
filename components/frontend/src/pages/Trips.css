@@ -1,0 +1,7 @@
+.trip-cover { position: relative; }
+.trip-stops-list { padding: 8px; background: #fafafa; }
+.trip-stops-list .ant-card { cursor: pointer; }
+@media (max-width: 768px) {
+  .trip-cover .leaflet-container { height: 150px; }
+  .trip-stops-list .ant-space { font-size: 12px; }
+}

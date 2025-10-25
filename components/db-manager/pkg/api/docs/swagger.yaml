@@ -1,304 +1,431 @@
 definitions:
-  models.APIAttachments:
+  models.Comment:
     properties:
-      contentType:
-        type: string
-      datetime:
-        type: string
-      description:
-        type: string
-      name:
-        type: string
-    type: object
-  models.APIDiscovered:
-    properties:
-      condition:
-        allOf:
-        - $ref: '#/definitions/models.JSONB'
-        description: this will hold a JSONB in postgresql with the condition
-      show:
-        description: condition was met
-        type: boolean
-    type: object
-  models.APIFamilyTree:
-    properties:
-      familyTree:
-        allOf:
-        - $ref: '#/definitions/models.JSONB'
-        description: this will hold a JSONB in postgresql with the family_tree
-    type: object
-  models.APIKnownLocations:
-    properties:
-      latitude:
-        description: Latitude as signed float
-        type: number
-      longitude:
-        description: Longitude as signed float
-        type: number
-      name:
-        type: string
-    type: object
-  models.APINotes:
-    properties:
-      category:
-        type: string
-      datetime:
-        type: string
-      description:
-        type: string
-      name:
-        type: string
-    type: object
-  models.APISpots:
-    properties:
-      description:
-        type: string
-      name:
-        type: string
-    type: object
-  models.APITrips:
-    properties:
-      geometry:
-        allOf:
-        - $ref: '#/definitions/models.JSONB'
-        description: JSONB geometry field
-      mode:
-        description: '"car" or "foot"'
-        type: string
-      refIdEnd:
-        description: end reference
-        type: integer
-      refIdStart:
-        description: start reference
-        type: integer
-      refTypeEnd:
-        description: '"spot" or "note"'
-        type: string
-      refTypeStart:
-        description: '"spot" or "note"'
-        type: string
-    type: object
-  models.APIUsers:
-    properties:
-      bio:
-        type: string
-      birthday:
-        type: string
-      email:
-        type: string
-      extRef:
-        type: string
-      name:
-        type: string
-      passing:
-        type: string
-      role:
-        type: string
-    type: object
-  models.Attachments:
-    properties:
-      contentType:
+      audioId:
+        description: nullable media id
         type: string
       createdAt:
-        description: Automatically generated
-        type: string
-      datetime:
-        type: string
-      description:
         type: string
       id:
-        description: Auto-incremented integer ID
+        type: string
+      ownerId:
+        type: string
+      replies:
+        description: comment ids
+        items:
+          type: string
+        type: array
+      text:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.CommentInputAPI:
+    properties:
+      audioId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        format: uuid
+        type: string
+      replies:
+        description: UUID strings
+        items:
+          type: string
+        type: array
+      text:
+        example: Great picture!
+        type: string
+    type: object
+  models.ErrorResp:
+    properties:
+      error:
+        type: string
+    type: object
+  models.ListResp-models_Comment:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.Comment'
+        type: array
+      total:
         type: integer
+    type: object
+  models.ListResp-models_Location:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.Location'
+        type: array
+      total:
+        type: integer
+    type: object
+  models.ListResp-models_Media:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.Media'
+        type: array
+      total:
+        type: integer
+    type: object
+  models.ListResp-models_Post:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.Post'
+        type: array
+      total:
+        type: integer
+    type: object
+  models.ListResp-models_Relation:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.Relation'
+        type: array
+      total:
+        type: integer
+    type: object
+  models.ListResp-models_Trip:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.Trip'
+        type: array
+      total:
+        type: integer
+    type: object
+  models.ListResp-models_User:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+      total:
+        type: integer
+    type: object
+  models.Location:
+    properties:
+      address:
+        type: string
+      createdAt:
+        type: string
+      descriptionId:
+        description: -> comment id
+        type: string
+      id:
+        type: string
+      lat:
+        type: number
+      lng:
+        type: number
       name:
         type: string
-      refId:
-        type: integer
-      refType:
-        description: DB + JSON
+      ownerId:
         type: string
-      refUserUploader:
-        type: integer
       updatedAt:
-        description: Automatically managed by trigger
+        type: string
+    type: object
+  models.LocationInputAPI:
+    properties:
+      address:
+        example: 221B Baker St, London
+        type: string
+      descriptionId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        format: uuid
+        type: string
+      lat:
+        example: 51.523767
+        type: number
+      lng:
+        example: -0.158555
+        type: number
+      name:
+        example: Grandma’s house
+        type: string
+    type: object
+  models.Media:
+    properties:
+      ContentType:
+        description: ENUM checked at API level
+        type: string
+      comments:
+        items:
+          type: string
+        type: array
+      createdAt:
+        type: string
+      id:
+        type: string
+      isAt:
+        type: string
+      name:
+        description: original file name
+        type: string
+      ownerId:
+        type: string
+      participants:
+        items:
+          type: string
+        type: array
+      tags:
+        items:
+          type: string
+        type: array
+      updatedAt:
         type: string
       url:
+        description: served path
         type: string
     type: object
-  models.Discovered:
+  models.Post:
     properties:
-      condition:
-        allOf:
-        - $ref: '#/definitions/models.JSONB'
-        description: db + json
+      comments:
+        description: comment ids
+        items:
+          type: string
+        type: array
       createdAt:
-        description: Automatically generated
+        type: string
+      descriptionId:
+        description: -> comment id
+        type: string
+      endAt:
         type: string
       id:
-        description: Auto-incremented integer ID
-        type: integer
-      refId:
-        type: integer
-      refType:
         type: string
-      refUserUploader:
+      locationId:
+        description: nullable
+        type: string
+      medias:
+        description: media ids
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      ownerId:
+        type: string
+      startAt:
+        type: string
+      tags:
+        description: tag names
+        items:
+          type: string
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  models.PostInputAPI:
+    properties:
+      comments:
+        description: UUID strings
+        items:
+          type: string
+        type: array
+      descriptionId:
+        format: uuid
+        type: string
+      endAt:
         type: integer
-      show:
-        description: condition was met
+      locationId:
+        format: uuid
+        type: string
+      medias:
+        description: UUID strings
+        items:
+          type: string
+        type: array
+      name:
+        example: Summer vacation
+        type: string
+      startAt:
+        type: integer
+      tags:
+        description: tag names
+        items:
+          type: string
+        type: array
+    type: object
+  models.Relation:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      isEx:
         type: boolean
+      label:
+        description: enum
+        type: string
+      source:
+        description: user id
+        type: string
+      target:
+        description: user id
+        type: string
       updatedAt:
-        description: Automatically managed by trigger
         type: string
     type: object
-  models.FamilyTree:
+  models.RelationInputAPI:
+    properties:
+      isEx:
+        example: false
+        type: boolean
+      label:
+        enum:
+        - spouse
+        - friend
+        - parent
+        - pet
+        example: friend
+        type: string
+      source:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        format: uuid
+        type: string
+      target:
+        example: 660e8400-e29b-41d4-a716-446655440000
+        format: uuid
+        type: string
+    type: object
+  models.Trip:
     properties:
       createdAt:
-        description: Automatically generated
         type: string
-      familyTree:
-        allOf:
-        - $ref: '#/definitions/models.JSONB'
-        description: db + json
-      id:
-        description: db + json
-        type: integer
-      updatedAt:
-        description: Automatically managed by trigger
+      descriptionId:
+        description: -> comment id
         type: string
-    type: object
-  models.JSONB:
-    additionalProperties: true
-    type: object
-  models.KnownLocations:
-    properties:
-      createdAt:
-        description: Automatically generated
+      endAt:
         type: string
       id:
-        description: Auto-incremented integer ID
-        type: integer
-      latitude:
-        description: Latitude as signed float
-        type: number
-      longitude:
-        description: Longitude as signed float
-        type: number
+        type: string
       name:
         type: string
-      refId:
-        type: integer
-      refType:
-        description: Db + json
+      ownerId:
         type: string
-      refUserUploader:
-        type: integer
+      participants:
+        description: user ids
+        items:
+          type: string
+        type: array
+      startAt:
+        type: string
+      stops:
+        description: jsonb
+        items:
+          $ref: '#/definitions/models.TripStop'
+        type: array
+      transportation:
+        description: enum string
+        type: string
       updatedAt:
-        description: Automatically managed by trigger
         type: string
     type: object
-  models.Notes:
+  models.TripInputAPI:
     properties:
-      category:
+      descriptionId:
+        format: uuid
         type: string
-      createdAt:
-        description: Automatically generated
-        type: string
-      datetime:
-        type: string
-      description:
-        type: string
-      id:
-        description: Auto-incremented integer ID
+      endAt:
         type: integer
       name:
+        example: Euro trip
         type: string
-      refId:
+      participants:
+        description: UUID strings
+        items:
+          type: string
+        type: array
+      startAt:
         type: integer
-      refType:
-        description: db + json
-        type: string
-      refUserUploader:
-        type: integer
-      updatedAt:
-        description: Automatically managed by trigger
+      stops:
+        items:
+          $ref: '#/definitions/models.TripStop'
+        type: array
+      transportation:
+        enum:
+        - car
+        - plane
+        - train
+        - bus
+        - foot
+        example: car
         type: string
     type: object
-  models.Spots:
+  models.TripStop:
     properties:
-      createdAt:
-        description: Automatically generated
-        type: string
-      description:
-        type: string
       id:
-        description: db + json
-        type: integer
-      name:
         type: string
-      refUserUploader:
+      order:
         type: integer
-      updatedAt:
-        description: Automatically managed by trigger
-        type: string
     type: object
-  models.Trips:
+  models.User:
     properties:
-      createdAt:
+      avatarId:
+        format: uuid
         type: string
-      geometry:
-        allOf:
-        - $ref: '#/definitions/models.JSONB'
-        description: JSONB geometry field
-      id:
-        description: Auto-incremented ID
-        type: integer
-      mode:
-        description: '"car" or "foot"'
-        type: string
-      refIdEnd:
-        description: end reference
-        type: integer
-      refIdStart:
-        description: start reference
-        type: integer
-      refTypeEnd:
-        description: '"spot" or "note"'
-        type: string
-      refTypeStart:
-        description: '"spot" or "note"'
-        type: string
-      refUserUploader:
-        type: integer
-      updatedAt:
-        type: string
-      uuid:
-        description: UUID as primary key
-        type: string
-    type: object
-  models.Users:
-    properties:
-      bio:
-        type: string
-      birthday:
+      bioId:
+        format: uuid
         type: string
       createdAt:
-        description: Automatically generated
+        example: "2025-10-04T08:30:00Z"
         type: string
       email:
+        example: sarah@example.com
+        type: string
+      endAt:
+        example: "2025-09-07T15:04:05Z"
         type: string
       extRef:
         type: string
       id:
-        description: db + json
-        type: integer
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      isVirtual:
+        example: false
+        type: boolean
       name:
+        example: Sarah Chen
         type: string
-      passing:
-        type: string
-      role:
+      posts:
+        items:
+          type: string
+        type: array
+      startAt:
+        example: "2025-09-01T15:04:05Z"
         type: string
       updatedAt:
-        description: Automatically managed by trigger
+        example: "2025-10-05T08:30:00Z"
         type: string
+    type: object
+  models.UserInputAPI:
+    properties:
+      avatarId:
+        format: uuid
+        type: string
+      bioId:
+        format: uuid
+        type: string
+      email:
+        example: sarah@example.com
+        type: string
+      endAt:
+        type: integer
+      extRef:
+        type: string
+      isVirtual:
+        example: false
+        type: boolean
+      name:
+        example: Sarah Chen
+        type: string
+      posts:
+        items:
+          type: string
+        type: array
+      startAt:
+        type: integer
     type: object
 info:
   contact:
@@ -312,150 +439,82 @@ info:
   title: FamQuest DB Manager API
   version: 0.4.0
 paths:
-  /attachment:
+  /comments:
     get:
-      description: Get a list of all attachments
+      description: Return paginated comment list
       parameters:
-      - description: Reference ID (optional)
+      - description: page size
         in: query
-        name: refId
+        name: limit
         type: integer
-      - description: Reference Type (optional)
-        enum:
-        - spot
-        - attachment
-        - note
+      - description: offset
         in: query
-        name: refType
-        type: string
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.Attachments'
-            type: array
-      summary: Retrieve all attachments
+            $ref: '#/definitions/models.ListResp-models_Comment'
+      summary: List comments
       tags:
-      - attachment
+      - comments
     post:
       consumes:
-      - multipart/form-data
-      description: Create a new attachment
+      - application/json
+      description: Creates a new comment
       parameters:
-      - description: image/* or audio/* or video/ or application/pdf
-        in: formData
-        name: file
+      - description: payload
+        in: body
+        name: body
         required: true
-        type: file
-      - in: formData
-        name: contentType
-        type: string
-      - in: formData
-        name: datetime
-        type: string
-      - in: formData
-        name: description
-        type: string
-      - in: formData
-        name: name
-        type: string
+        schema:
+          $ref: '#/definitions/models.CommentInputAPI'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Attachments'
-      summary: Create a attachment
+            $ref: '#/definitions/models.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Create comment
       tags:
-      - attachment
-  /attachment/{id}:
+      - comments
+  /comments/{id}:
     delete:
-      description: Delete a attachment and nullify its references in spots
+      description: Remove a comment
       parameters:
-      - description: Attachment ID
+      - description: comment id
         in: path
         name: id
         required: true
-        type: integer
-      produces:
-      - application/json
+        type: string
       responses:
         "204":
           description: No Content
+        "404":
+          description: Not Found
           schema:
-            type: string
-      summary: Delete a attachment by ID
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Delete comment
       tags:
-      - attachment
+      - comments
     get:
-      description: Get attachment details by ID
+      description: Return a single comment
       parameters:
-      - description: Attachment ID
+      - description: comment id
         in: path
         name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Attachments'
-      summary: Retrieve a attachment by ID
-      tags:
-      - attachment
-    put:
-      consumes:
-      - application/json
-      description: Update attachment details by ID
-      parameters:
-      - description: Attachment ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Attachment data
-        in: body
-        name: attachment
-        required: true
-        schema:
-          $ref: '#/definitions/models.APIAttachments'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Attachments'
-      summary: Update a attachment by ID
-      tags:
-      - attachment
-  /attachment/{id}/ref:
-    put:
-      description: Update the ref in a attachment details by ID
-      parameters:
-      - description: Attachment ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Reference ID (optional)
-        in: query
-        name: refId
-        required: true
-        type: integer
-      - description: Reference Type
-        enum:
-        - spot
-        - attachment
-        - note
-        in: query
-        name: refType
         required: true
         type: string
       produces:
@@ -464,10 +523,48 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Attachments'
-      summary: Update the ref
+            $ref: '#/definitions/models.Comment'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Get comment by id
       tags:
-      - attachment
+      - comments
+    put:
+      consumes:
+      - application/json
+      description: Update an existing comment
+      parameters:
+      - description: comment id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommentInputAPI'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Update comment
+      tags:
+      - comments
   /configure:
     get:
       description: Connect and check dependencies
@@ -482,251 +579,6 @@ paths:
       summary: Configure
       tags:
       - Configure
-  /discovered:
-    get:
-      description: Get a list of all discovereds
-      parameters:
-      - description: Reference ID (optional)
-        in: query
-        name: refId
-        type: integer
-      - description: Reference Type (optional)
-        enum:
-        - spot
-        - attachment
-        - note
-        in: query
-        name: refType
-        type: string
-      - description: filter for the specific user (optional)
-        in: query
-        name: refUserUploader
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Discovered'
-            type: array
-      summary: Retrieve all discovereds
-      tags:
-      - discovered
-    post:
-      consumes:
-      - application/json
-      description: Create a new discovered
-      parameters:
-      - description: Discovered data
-        in: body
-        name: discovered
-        required: true
-        schema:
-          $ref: '#/definitions/models.APIDiscovered'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.Discovered'
-      summary: Create a discovered
-      tags:
-      - discovered
-  /discovered/{id}:
-    delete:
-      description: Delete a discovered entry
-      parameters:
-      - description: Discovered ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-          schema:
-            type: string
-      summary: Delete a discovered by ID
-      tags:
-      - discovered
-    get:
-      description: Get discovered details by ID
-      parameters:
-      - description: Discovered ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Discovered'
-      summary: Retrieve a discovered by ID
-      tags:
-      - discovered
-    put:
-      consumes:
-      - application/json
-      description: Update discovered details by ID
-      parameters:
-      - description: Discovered ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Discovered data
-        in: body
-        name: discovered
-        required: true
-        schema:
-          $ref: '#/definitions/models.APIDiscovered'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Discovered'
-      summary: Update a discovered by ID
-      tags:
-      - discovered
-  /discovered/{id}/ref:
-    put:
-      description: Update the ref in a discovered details by ID
-      parameters:
-      - description: Discovered ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Reference ID (optional)
-        in: query
-        name: refId
-        required: true
-        type: integer
-      - description: Reference Type
-        enum:
-        - spot
-        - note
-        - attachment
-        in: query
-        name: refType
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Discovered'
-      summary: Update the ref
-      tags:
-      - discovered
-  /discovered/updateConditions:
-    post:
-      description: Updates discovered based on the user locations, age, etc.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: The Ids of the discovered that were updated
-          schema:
-            items:
-              type: integer
-            type: array
-      summary: Updates all discovered entries for a user
-      tags:
-      - discovered
-  /familyTree:
-    get:
-      description: Get a list of all familyTrees
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.FamilyTree'
-            type: array
-      summary: Retrieve all familyTrees
-      tags:
-      - familyTree
-    post:
-      consumes:
-      - application/json
-      description: Create a new familyTree
-      parameters:
-      - description: FamilyTree data
-        in: body
-        name: familyTree
-        required: true
-        schema:
-          $ref: '#/definitions/models.APIFamilyTree'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.FamilyTree'
-      summary: Create a familyTree
-      tags:
-      - familyTree
-  /familyTree/{id}:
-    get:
-      description: Get familyTree details by ID
-      parameters:
-      - description: FamilyTree ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.FamilyTree'
-      summary: Retrieve a familyTree by ID
-      tags:
-      - familyTree
-    put:
-      consumes:
-      - application/json
-      description: Update familyTree details by ID
-      parameters:
-      - description: FamilyTree ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: FamilyTree data
-        in: body
-        name: familyTree
-        required: true
-        schema:
-          $ref: '#/definitions/models.APIFamilyTree'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.FamilyTree'
-      summary: Update a familyTree by ID
-      tags:
-      - familyTree
   /health:
     get:
       description: Check the health of the service
@@ -741,125 +593,82 @@ paths:
       summary: Health check
       tags:
       - health
-  /location:
+  /locations:
     get:
-      description: Get a list of all locations
+      description: Return paginated location list
+      parameters:
+      - description: page size
+        in: query
+        name: limit
+        type: integer
+      - description: offset
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.KnownLocations'
-            type: array
-      summary: Retrieve all locations
+            $ref: '#/definitions/models.ListResp-models_Location'
+      summary: List locations
       tags:
-      - location
+      - locations
     post:
       consumes:
       - application/json
-      description: Create a new location
+      description: Creates a new location
       parameters:
-      - description: Location data
+      - description: payload
         in: body
-        name: location
+        name: body
         required: true
         schema:
-          $ref: '#/definitions/models.APIKnownLocations'
+          $ref: '#/definitions/models.LocationInputAPI'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.KnownLocations'
-      summary: Create a location
+            $ref: '#/definitions/models.Location'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Create location
       tags:
-      - location
-  /location/{id}:
+      - locations
+  /locations/{id}:
     delete:
-      description: Delete a location and nullify its references in spots
+      description: Remove a location
       parameters:
-      - description: Location ID
+      - description: location id
         in: path
         name: id
         required: true
-        type: integer
-      produces:
-      - application/json
+        type: string
       responses:
         "204":
           description: No Content
+        "404":
+          description: Not Found
           schema:
-            type: string
-      summary: Delete a location by ID
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Delete location
       tags:
-      - location
+      - locations
     get:
-      description: Get location details by ID
+      description: Return a single location
       parameters:
-      - description: Location ID
+      - description: location id
         in: path
         name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.KnownLocations'
-      summary: Retrieve a location by ID
-      tags:
-      - location
-    put:
-      consumes:
-      - application/json
-      description: Update location details by ID
-      parameters:
-      - description: Location ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Location data
-        in: body
-        name: location
-        required: true
-        schema:
-          $ref: '#/definitions/models.APIKnownLocations'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.KnownLocations'
-      summary: Update a location by ID
-      tags:
-      - location
-  /location/{id}/ref:
-    put:
-      description: Update the ref in a location details by ID
-      parameters:
-      - description: Location ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Reference ID (optional)
-        in: query
-        name: refId
-        required: true
-        type: integer
-      - description: Reference Type
-        enum:
-        - spot
-        - user
-        in: query
-        name: refType
         required: true
         type: string
       produces:
@@ -868,24 +677,140 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.KnownLocations'
-      summary: Update the ref
+            $ref: '#/definitions/models.Location'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Get location by id
       tags:
-      - location
-  /note:
-    get:
-      description: Get a list of all notes
+      - locations
+    put:
+      consumes:
+      - application/json
+      description: Update an existing location
       parameters:
-      - description: Reference ID (optional)
+      - description: location id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.LocationInputAPI'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Location'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Update location
+      tags:
+      - locations
+  /media:
+    get:
+      description: Return paginated media list
+      parameters:
+      - description: page size
         in: query
-        name: refId
+        name: limit
         type: integer
-      - description: Reference Type (optional)
-        enum:
-        - spot
-        - note
+      - description: offset
         in: query
-        name: refType
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ListResp-models_Media'
+      summary: List media
+      tags:
+      - media
+    post:
+      consumes:
+      - multipart/form-data
+      description: Multipart upload
+      parameters:
+      - description: image/* or audio/* or video/ or application/pdf
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: unix ms
+        in: formData
+        name: isAt
+        type: integer
+      - collectionFormat: csv
+        in: formData
+        items:
+          type: string
+        name: tags
+        type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Media'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Upload media file
+      tags:
+      - media
+  /media/{id}:
+    delete:
+      description: Return a single media
+      parameters:
+      - description: media id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Delete media by id
+      tags:
+      - media
+    get:
+      description: Return a single media
+      parameters:
+      - description: media id
+        in: path
+        name: id
+        required: true
         type: string
       produces:
       - application/json
@@ -893,116 +818,145 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.Notes'
-            type: array
-      summary: Retrieve all notes
+            $ref: '#/definitions/models.Media'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Get media by id
       tags:
-      - note
-    post:
+      - media
+    put:
       consumes:
-      - application/json
-      description: Create a new note
+      - multipart/form-data
+      description: Multipart update
       parameters:
-      - description: Note data
-        in: body
-        name: note
+      - description: user id
+        in: path
+        name: id
         required: true
-        schema:
-          $ref: '#/definitions/models.APINotes'
+        type: string
+      - description: image/* or audio/* or video/ or application/pdf
+        in: formData
+        name: file
+        required: true
+        type: file
+      - collectionFormat: csv
+        in: formData
+        items:
+          type: string
+        name: comments
+        type: array
+      - description: unix ms
+        in: formData
+        name: isAt
+        type: integer
+      - collectionFormat: csv
+        in: formData
+        items:
+          type: string
+        name: participants
+        type: array
+      - collectionFormat: csv
+        in: formData
+        items:
+          type: string
+        name: tags
+        type: array
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Notes'
-      summary: Create a note
+            $ref: '#/definitions/models.Media'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Update media file
       tags:
-      - note
-  /note/{id}:
-    delete:
-      description: Delete a note and nullify its references in notes
+      - media
+  /posts:
+    get:
+      description: Return paginated post list
       parameters:
-      - description: Note ID
-        in: path
-        name: id
-        required: true
+      - description: page size
+        in: query
+        name: limit
+        type: integer
+      - description: offset
+        in: query
+        name: offset
         type: integer
       produces:
       - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ListResp-models_Post'
+      summary: List posts
+      tags:
+      - posts
+    post:
+      consumes:
+      - application/json
+      description: Creates a new post
+      parameters:
+      - description: payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.PostInputAPI'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Create post
+      tags:
+      - posts
+  /posts/{id}:
+    delete:
+      description: Remove a post
+      parameters:
+      - description: post id
+        in: path
+        name: id
+        required: true
+        type: string
       responses:
         "204":
           description: No Content
+        "404":
+          description: Not Found
           schema:
-            type: string
-      summary: Delete a note by ID
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Delete post
       tags:
-      - note
+      - posts
     get:
-      description: Get note details by ID
+      description: Return a single post
       parameters:
-      - description: Note ID
+      - description: post id
         in: path
         name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Notes'
-      summary: Retrieve a note by ID
-      tags:
-      - note
-    put:
-      consumes:
-      - application/json
-      description: Update note details by ID
-      parameters:
-      - description: Note ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Note data
-        in: body
-        name: note
-        required: true
-        schema:
-          $ref: '#/definitions/models.APINotes'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Notes'
-      summary: Update a note by ID
-      tags:
-      - note
-  /note/{id}/ref:
-    put:
-      description: Update the ref in a note details by ID
-      parameters:
-      - description: Note ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Reference ID (optional)
-        in: query
-        name: refId
-        required: true
-        type: integer
-      - description: Reference Type
-        enum:
-        - spot
-        - user
-        in: query
-        name: refType
         required: true
         type: string
       produces:
@@ -1011,305 +965,428 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Notes'
-      summary: Update the ref
+            $ref: '#/definitions/models.Post'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Get post by id
       tags:
-      - note
-  /spot:
-    get:
-      description: Get a list of all spots
+      - posts
+    put:
+      consumes:
+      - application/json
+      description: Update an existing post
+      parameters:
+      - description: post id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.PostInputAPI'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.Spots'
-            type: array
-      summary: Retrieve all spots
+            $ref: '#/definitions/models.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Update post
       tags:
-      - spot
+      - posts
+  /relations:
+    get:
+      description: Return paginated relation list
+      parameters:
+      - description: page size
+        in: query
+        name: limit
+        type: integer
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ListResp-models_Relation'
+      summary: List relations
+      tags:
+      - relations
     post:
       consumes:
       - application/json
-      description: Create a new spot
+      description: Creates a new relation between two users
       parameters:
-      - description: Spot data
+      - description: payload
         in: body
-        name: spot
+        name: body
         required: true
         schema:
-          $ref: '#/definitions/models.APISpots'
+          $ref: '#/definitions/models.RelationInputAPI'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Spots'
-      summary: Create a spot
+            $ref: '#/definitions/models.Relation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Create relation
       tags:
-      - spot
-  /spot/{id}:
+      - relations
+  /relations/{id}:
     delete:
-      description: Delete a spot and nullify its references in spots
+      description: Remove a relation
       parameters:
-      - description: Spot ID
+      - description: relation id
         in: path
         name: id
         required: true
-        type: integer
-      produces:
-      - application/json
+        type: string
       responses:
         "204":
           description: No Content
+        "404":
+          description: Not Found
           schema:
-            type: string
-      summary: Delete a spot by ID
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Delete relation
       tags:
-      - spot
+      - relations
     get:
-      description: Get spot details by ID
+      description: Return a single relation
       parameters:
-      - description: Spot ID
+      - description: relation id
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Spots'
-      summary: Retrieve a spot by ID
+            $ref: '#/definitions/models.Relation'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Get relation by id
       tags:
-      - spot
+      - relations
     put:
       consumes:
       - application/json
-      description: Update spot details by ID
+      description: Update an existing relation
       parameters:
-      - description: Spot ID
+      - description: relation id
         in: path
         name: id
         required: true
-        type: integer
-      - description: Spot data
+        type: string
+      - description: payload
         in: body
-        name: spot
+        name: body
         required: true
         schema:
-          $ref: '#/definitions/models.APISpots'
+          $ref: '#/definitions/models.RelationInputAPI'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Spots'
-      summary: Update a spot by ID
+            $ref: '#/definitions/models.Relation'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Update relation
       tags:
-      - spot
-  /trip:
+      - relations
+  /trips:
     get:
-      description: Get a list of all trips
+      description: Return paginated trip list
+      parameters:
+      - description: page size
+        in: query
+        name: limit
+        type: integer
+      - description: offset
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.Trips'
-            type: array
-      summary: Retrieve all trips
+            $ref: '#/definitions/models.ListResp-models_Trip'
+      summary: List trips
       tags:
-      - trip
+      - trips
     post:
       consumes:
       - application/json
-      description: Create a new trip
+      description: Creates a new trip
       parameters:
-      - description: Trip data
+      - description: payload
         in: body
-        name: trip
+        name: body
         required: true
         schema:
-          $ref: '#/definitions/models.APITrips'
+          $ref: '#/definitions/models.TripInputAPI'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Trips'
-      summary: Create a trip
+            $ref: '#/definitions/models.Trip'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Create trip
       tags:
-      - trip
-  /trip/{id}:
+      - trips
+  /trips/{id}:
     delete:
-      description: Delete a trip and nullify its references in spots
+      description: Remove a trip
       parameters:
-      - description: Trip ID
+      - description: trip id
         in: path
         name: id
         required: true
-        type: integer
-      produces:
-      - application/json
+        type: string
       responses:
         "204":
           description: No Content
+        "404":
+          description: Not Found
           schema:
-            type: string
-      summary: Delete a trip by ID
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Delete trip
       tags:
-      - trip
+      - trips
     get:
-      description: Get trip details by ID
+      description: Return a single trip
       parameters:
-      - description: Trip ID
+      - description: trip id
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Trips'
-      summary: Retrieve a trip by ID
+            $ref: '#/definitions/models.Trip'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Get trip by id
       tags:
-      - trip
+      - trips
     put:
       consumes:
       - application/json
-      description: Update trip details by ID
+      description: Update an existing trip
       parameters:
-      - description: Trip ID
+      - description: trip id
         in: path
         name: id
         required: true
-        type: integer
-      - description: Trip data
+        type: string
+      - description: payload
         in: body
-        name: trip
+        name: body
         required: true
         schema:
-          $ref: '#/definitions/models.APITrips'
+          $ref: '#/definitions/models.TripInputAPI'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Trips'
-      summary: Update a trip by ID
+            $ref: '#/definitions/models.Trip'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Update trip
       tags:
-      - trip
-  /user:
+      - trips
+  /users:
     get:
-      description: Get a list of all users
+      description: Return paginated user list
+      parameters:
+      - description: page size
+        in: query
+        name: limit
+        type: integer
+      - description: offset
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.Users'
-            type: array
-      summary: Retrieve all users
+            $ref: '#/definitions/models.ListResp-models_User'
+      summary: List users
       tags:
-      - user
+      - users
     post:
       consumes:
       - application/json
-      description: Create a new user
+      description: Creates a new user
       parameters:
-      - description: User data
+      - description: payload
         in: body
-        name: user
+        name: body
         required: true
         schema:
-          $ref: '#/definitions/models.APIUsers'
+          $ref: '#/definitions/models.UserInputAPI'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Users'
-      summary: Create a user
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Create user
       tags:
-      - user
-  /user/{id}:
+      - users
+  /users/{id}:
     delete:
-      description: Delete a user and nullify its references in users
+      description: Remove a user (blocked if still referenced)
       parameters:
-      - description: User ID
+      - description: user id
         in: path
         name: id
         required: true
-        type: integer
-      produces:
-      - application/json
+        type: string
       responses:
         "204":
           description: No Content
+        "400":
+          description: Bad Request
           schema:
-            type: string
-      summary: Delete a user by ID
+            $ref: '#/definitions/models.ErrorResp'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Delete user
       tags:
-      - user
+      - users
     get:
-      description: Get user details by ID
+      description: Return a single user
       parameters:
-      - description: User ID
+      - description: user id
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Users'
-      summary: Retrieve a user by ID
+            $ref: '#/definitions/models.User'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Get user by id
       tags:
-      - user
+      - users
     put:
       consumes:
       - application/json
-      description: Update user details by ID
+      description: Update an existing user
       parameters:
-      - description: User ID
+      - description: user id
         in: path
         name: id
         required: true
-        type: integer
-      - description: User data
+        type: string
+      - description: payload
         in: body
-        name: user
+        name: body
         required: true
         schema:
-          $ref: '#/definitions/models.APIUsers'
+          $ref: '#/definitions/models.UserInputAPI'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Users'
-      summary: Update a user by ID
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResp'
+      summary: Update user
       tags:
-      - user
+      - users
 swagger: "2.0"

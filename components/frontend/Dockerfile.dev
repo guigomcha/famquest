@@ -1,0 +1,19 @@
+# Development Dockerfile
+FROM ghcr.io/guigomcha/proxy/node:18.20.4 as builder
+
+# Set working directory
+WORKDIR /app
+
+# # Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev dependencies)
+#RUN npm install expo
+RUN npm install
+
+
+# Copy application code
+COPY . .
+
+# Start development server
+CMD ["npm", "start"]
